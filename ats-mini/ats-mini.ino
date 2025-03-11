@@ -92,6 +92,9 @@
 #define DEFAULT_VOLUME          35  // change it for your favorite sound volume
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
+#define CLICK_TIME             100
+#define SHORT_PRESS_TIME       500
+#define LONG_PRESS_TIME        2000
 
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
 #define TUNE_HOLDOFF_TIME         90    // Timer to hold off display whilst tuning
@@ -118,12 +121,10 @@
 #define MENU_AGC_ATT      6
 #define MENU_SOFTMUTE     7
 #define MENU_AVC          8
-#define MENU_SEEKUP       9
-#define MENU_SEEKDOWN    10
-#define MENU_CALIBRATION 11
-#define MENU_SETTINGS    12
+#define MENU_CALIBRATION  9
+#define MENU_SETTINGS    10
 #if BFO_MENU_EN
-#define MENU_BFO         13
+#define MENU_BFO         11
 #endif
 
 // Settings Options
@@ -172,6 +173,7 @@ uint8_t countClick = 0;
 
 uint8_t seekDirection = 1;
 bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary encoder detection
+bool seekModePress = false;   // Seek happened during long press
 
 bool cmdBand = false;
 bool cmdVolume = false;
@@ -228,12 +230,18 @@ int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
 unsigned long pb1_time = 0;             // Push button timer
 unsigned long pb1_edge_time = 0;        // Push button edge time
 unsigned long pb1_pressed_time = 0;     // Push button pressed time
+unsigned long pb1_short_pressed_time = 0; // Push button short pressed time
+unsigned long pb1_long_pressed_time = 0;// Push button long pressed time
 unsigned long pb1_released_time = 0;    // Push button released time
 int pb1_current = HIGH;                 // Push button current state
 int pb1_stable = HIGH;                  // Push button stable state
 int pb1_last = HIGH;                    // Push button last state (after debounce)
 bool pb1_pressed = false;               // Push button pressed
+bool pb1_short_pressed = false;         // Push button short pressed
 bool pb1_long_pressed = false;          // Push button long pressed
+bool pb1_released = false;              // Push button released
+bool pb1_short_released = false;        // Push button short released
+bool pb1_long_released = false;         // Push button long released
 
 bool display_on = true;                 // Display state
 
@@ -291,8 +299,6 @@ const char *menu[] = {
   "AGC/ATTN",
   "SoftMute",
   "AVC",
-  "Seek Up",
-  "Seek Dn",
   "Calibration",
   "Settings",
   "BFO"
@@ -309,8 +315,6 @@ const char *menu[] = {
   "AGC/ATTN",
   "SoftMute",
   "AVC",
-  "Seek Up",
-  "Seek Dn",
   "Calibration",
   "Settings",
 };
@@ -1681,7 +1685,7 @@ void doCurrentMenuCmd() {
       }
       showSoftMute();
       break;
-    case MENU_SEEKUP:
+      /* case MENU_SEEKUP:
       seekStop = false; // G8PTN: Flag is set by rotary encoder and cleared on seek entry
       seekDirection = 1;
       doSeek();
@@ -1690,7 +1694,7 @@ void doCurrentMenuCmd() {
       seekStop = false; // G8PTN: Flag is set by rotary encoder and cleared on seek entry
       seekDirection = 0;
       doSeek();
-      break;
+      break; */
     case MENU_BAND:
       cmdBand = true;
       drawSprite();
@@ -2575,37 +2579,65 @@ void button_check() {
   // Only execute every 10 ms
   if ((millis() - pb1_time) > 10) {
     pb1_time = millis();
-    pb1_current = digitalRead(ENCODER_PUSH_BUTTON);     // Read pin value
-    if (pb1_last != pb1_current) {
+    pb1_current = digitalRead(ENCODER_PUSH_BUTTON);        // Read pin value
+    if (pb1_last != pb1_current) {                         // Start debounce timer
       pb1_edge_time = millis();
       pb1_last = pb1_current;
     }
 
-    if ((millis() - pb1_edge_time) > 100) {
-      if (pb1_stable == HIGH && pb1_last == LOW) {       // button is pressed
+    if ((millis() - pb1_edge_time) > CLICK_TIME) {         // Debounced
+      if (pb1_stable == HIGH && pb1_last == LOW) {         // button is pressed
         // Debug
         #if DEBUG2_PRINT
         Serial.println("Info: button_check() >>> Button Pressed");
         #endif
         pb1_pressed_time = pb1_edge_time;
-        pb1_stable = pb1_current;
-      } else if (pb1_stable == LOW && pb1_last == HIGH) {       // button is released
+        pb1_short_pressed_time = pb1_long_pressed_time = 0;
+        pb1_stable = pb1_last;
+        pb1_pressed = true;                                // Set flags
+        pb1_short_pressed = false;
+        pb1_long_pressed = false;
+        pb1_released = false;
+        pb1_short_released = false;
+        pb1_long_released = false;
+      } else if (pb1_stable == LOW && pb1_last == LOW) {   // button is still pressed
+        long pb1_press_duration = millis() - pb1_pressed_time;
+        if (pb1_press_duration > SHORT_PRESS_TIME && (pb1_short_pressed_time - pb1_pressed_time) != SHORT_PRESS_TIME) {
+          pb1_short_pressed = true;
+          pb1_short_pressed_time = pb1_pressed_time + SHORT_PRESS_TIME;
+          #if DEBUG2_PRINT
+          Serial.println("Info: button_check() >>> Short Press triggered");
+          #endif
+        }
+        if (pb1_press_duration > LONG_PRESS_TIME && (pb1_long_pressed_time - pb1_pressed_time) != LONG_PRESS_TIME) {
+          pb1_short_pressed = false;
+          pb1_long_pressed = true;
+          pb1_long_pressed_time = pb1_pressed_time + LONG_PRESS_TIME;
+          #if DEBUG2_PRINT
+          Serial.println("Info: button_check() >>> Long Press triggered");
+          #endif
+        }
+      } else if (pb1_stable == LOW && pb1_last == HIGH) {  // button is released
         // Debug
         #if DEBUG2_PRINT
         Serial.println("Info: button_check() >>> Button Released");
         #endif
         pb1_released_time = pb1_edge_time;
-        pb1_stable = pb1_current;
+        pb1_stable = pb1_last;
+        pb1_released = true;
+        pb1_pressed = pb1_short_pressed = pb1_long_pressed = false;
         long pb1_press_duration = pb1_released_time - pb1_pressed_time;
-        if (pb1_press_duration < 500) {
-          pb1_pressed = true;
+        if (pb1_press_duration > LONG_PRESS_TIME) {
+          pb1_short_released = false;
+          pb1_long_released = true;
           #if DEBUG2_PRINT
-          Serial.println("Info: button_check() >>> Short Press triggered");
+          Serial.println("Info: button_check() >>> Long Release triggered");
           #endif
-        } else {
-          pb1_long_pressed = true;
+        } else if (pb1_press_duration > SHORT_PRESS_TIME) {
+          pb1_short_released = true;
+          pb1_long_released = false;
           #if DEBUG2_PRINT
-          Serial.println("Info: button_check() >>> Long Press triggered");
+          Serial.println("Info: button_check() >>> Short Release triggered");
           #endif
         }
       }
@@ -2662,10 +2694,20 @@ void loop()
 
   // Check if the encoder has moved.
   if (encoderCount != 0 && currentSleep && !display_on) {
-    elapsedSleep = millis();
     displayOn();
     encoderCount = 0;
     delay(MIN_ELAPSED_TIME);
+    elapsedSleep = millis();
+  } else if (encoderCount != 0 && pb1_pressed) {
+    seekDirection = (encoderCount == 1) ? 1 : 0;
+    seekModePress = true;
+    seekStop = false; // G8PTN: Flag is set by rotary encoder and cleared on seek entry
+    doSeek();
+    encoderCount = 0;
+    band[bandIdx].currentFreq = currentFrequency;            // G8PTN: Added to ensure update of currentFreq in table for AM/FM
+    resetEepromDelay();
+    delay(MIN_ELAPSED_TIME);
+    elapsedSleep = millis();
   } else if (encoderCount != 0) {
     // G8PTN: The manual BFO adjusment is not required with the doFrequencyTuneSSB method, but leave for debug
     if (bfoOn & isSSB())
@@ -2812,19 +2854,32 @@ void loop()
     encoderCount = 0;
     resetEepromDelay();
     delay(MIN_ELAPSED_TIME);
-    elapsedCommand = millis();
-    elapsedSleep = millis();
+    elapsedSleep = elapsedCommand = millis();
   }
   else
   {
     // G8PTN: Modified to use new button detection. Disable band menu on single push. Default to volume option
     //if (digitalRead(ENCODER_PUSH_BUTTON) == LOW)
-    if (pb1_pressed)
-    {
-      pb1_pressed = false;
+    if (pb1_long_pressed && !seekModePress) {
+      pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
+      if (display_on) {
+        displayOff();
+      } else {
+        displayOn();
+      }
+      elapsedSleep = millis();
+      delay(MIN_ELAPSED_TIME);
+    } else if (pb1_short_released && !seekModePress) {
+      pb1_released = pb1_short_released = pb1_long_released = false;
+      cmdVolume = true;
+      menuIdx = MENU_VOLUME;
+      showVolume();
+      delay(MIN_ELAPSED_TIME);
+      elapsedSleep = elapsedCommand = millis();
+   } else if (pb1_released && !pb1_long_released && !seekModePress) {
+      pb1_released = pb1_short_released = pb1_long_released = false;
       //while (digitalRead(ENCODER_PUSH_BUTTON) == LOW) { }
       countClick++;
-      elapsedSleep = millis();
       if (currentSleep && !display_on) {
         displayOn();
       } else if (cmdMenu) {
@@ -2865,14 +2920,7 @@ void loop()
           showMenu();
       }
       delay(MIN_ELAPSED_TIME);
-      elapsedCommand = millis();
-    } else if (pb1_long_pressed) {
-      pb1_long_pressed = false;
-      if (display_on) {
-        displayOff();
-      } else {
-        displayOn();
-      }
+      elapsedSleep = elapsedCommand = millis();
     }
   }
 
@@ -2961,6 +3009,10 @@ void loop()
   // Check for button activity
   // In this case used for falling edge detection
   button_check();
+  if (!pb1_pressed && seekModePress) {
+    seekModePress = false;
+    pb1_released = pb1_short_released = pb1_long_released = false;
+  }
 
   // Periodically refresh the main screen
   // This covers the case where there is nothing else triggering a refresh
