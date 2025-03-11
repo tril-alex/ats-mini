@@ -12,7 +12,7 @@
 
 // =================================
 // PIN DEFINITIONS
-// ================================= 
+// =================================
 
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
@@ -28,7 +28,7 @@
 #define PIN_LCD_BL    38            // GPIO38   LCD backlight (PWM brightness control)
 
 // Rotary Enconder PINs
-#define ENCODER_PIN_A  2            // GPIO02   
+#define ENCODER_PIN_A  2            // GPIO02
 #define ENCODER_PIN_B  1            // GPIO01
 #define ENCODER_PUSH_BUTTON 21      // GPIO21
 
@@ -45,7 +45,7 @@
 #define BFO_MENU_EN 0         // Allows BFO menu option for debug
 
 // Serial.print control
-#define DEBUG1_PRINT 0        // Highest level - Primary information 
+#define DEBUG1_PRINT 0        // Highest level - Primary information
 #define DEBUG2_PRINT 0        //               - Function call results
 #define DEBUG3_PRINT 0        //               - Misc
 #define DEBUG4_PRINT 0        // Lowest level  - EEPROM
@@ -68,7 +68,7 @@
 #define funit_offset_x 265    // Frequency Unit horizontal offset
 #define funit_offset_y  55    // Frequency Unitvertical offset
 #define mode_offset_x   95    // Mode horizontal offset
-#define mode_offset_y  114    // Mode vertical offset  
+#define mode_offset_y  114    // Mode vertical offset
 #define vol_offset_x   120    // Volume horizontal offset
 #define vol_offset_y   150    // Volume vertical offset
 #define rds_offset_x    10    // RDS horizontal offset
@@ -141,7 +141,7 @@
 const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 
 
-// EEPROM 
+// EEPROM
 // ====================================================================================================================================================
 // Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
 // ====================================================================================================================================================
@@ -205,7 +205,7 @@ const int BFOMax = 14000;               // Maximum range for currentBFO = +/- BF
 const int CALMax =  2000;               // Maximum range for currentCAL = +/- CALMax
 
 // AGC/ATTN index per mode (FM/AM/SSB)
-int8_t FmAgcIdx = 0;                    // Default FM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 27 = ATTN 0 to 26 
+int8_t FmAgcIdx = 0;                    // Default FM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 27 = ATTN 0 to 26
 int8_t AmAgcIdx = 0;                    // Default AM  AGCON  : Range = 0 to 37, 0 = AGCON, 1 - 37 = ATTN 0 to 36
 int8_t SsbAgcIdx = 0;                   // Default SSB AGCON  : Range = 0 to 1,  0 = AGCON,      1 = ATTN 0
 
@@ -374,7 +374,7 @@ uint8_t AmTotalStepsSsb = 4;                       // G8PTN: Original : AM(LW/MW
 //uint8_t AmTotalStepsSsb = 5;                     // G8PTN: Option 1 : AM(LW/MW) 1k, 5k, 9k, 10k, 100k       : SSB 1k, 5k, 9k, 10k, 50k
 //uint8_t AmTotalStepsSsb = 6;                     // G8PTN: Option 2 : AM(LW/MW) 1k, 5k, 9k, 10k, 100k , 1M  : SSB 1k, 5k, 9k, 10k, 50k, 100k
 //uint8_t AmTotalStepsSsb = 7;                     // G8PTN: Invalid option (Do not use)
-uint8_t SsbTotalSteps = 5;                         // SSB sub 1kHz steps 
+uint8_t SsbTotalSteps = 5;                         // SSB sub 1kHz steps
 volatile int8_t idxAmStep = 3;
 
 
@@ -414,10 +414,10 @@ typedef struct
    Band table
    YOU CAN CONFIGURE YOUR OWN BAND PLAN. Be guided by the comments.
    To add a new band, all you have to do is insert a new line in the table below. No extra code will be needed.
-   You can remove a band by deleting a line if you do not want a given band. 
+   You can remove a band by deleting a line if you do not want a given band.
    Also, you can change the parameters of the band.
-   ATTENTION: You have to RESET the eeprom after adding or removing a line of this table. 
-              Turn your receiver on with the encoder push button pressed at first time to RESET the eeprom content.  
+   ATTENTION: You have to RESET the eeprom after adding or removing a line of this table.
+              Turn your receiver on with the encoder push button pressed at first time to RESET the eeprom content.
 */
 Band band[] = {
     {"VHF", FM_BAND_TYPE, 6400, 10800, 10390, 1, 0},
@@ -440,7 +440,7 @@ Band band[] = {
     {"CB ", SW_BAND_TYPE, 26000, 28000, 27500, 0, 4},
     {"10M", SW_BAND_TYPE, 28000, 30000, 28400, 0, 4},
     {"ALL", SW_BAND_TYPE, 150, 30000, 15000, 0, 4} // All band. LW, MW and SW (from 150kHz to 30MHz)
-};                                             
+};
 
 const int lastBand = (sizeof band / sizeof(Band)) - 1;
 int bandIdx = 0;
@@ -488,7 +488,7 @@ int getSteps()
         return tabAmStep[idxAmStep] * 1000;         // SSB: Return in Hz used for VFO + BFO tuning
     }
 
-    if (idxAmStep >= AmTotalSteps)                  // AM: Set to 0kHz if step is from the SSB Hz values 
+    if (idxAmStep >= AmTotalSteps)                  // AM: Set to 0kHz if step is from the SSB Hz values
         idxAmStep = 0;
 
     return tabAmStep[idxAmStep];                    // AM: Return value in KHz for SI4732 step
@@ -507,7 +507,7 @@ int getLastStep()
   Serial.print(", isSSB = ");
   Serial.println(isSSB());
   #endif
-  
+
   if (isSSB())
     return AmTotalSteps + SsbTotalSteps - 1;
   else if (bandIdx == LW_BAND_TYPE || bandIdx == MW_BAND_TYPE)    // G8PTN; Added in place of check in doStep() for LW/MW step limit
@@ -541,7 +541,7 @@ void setup()
   digitalWrite(PIN_POWER_ON, HIGH);
 
   // Encoder pins. Enable internal pull-ups
-  pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP); 
+  pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
   pinMode(ENCODER_PIN_A, INPUT_PULLUP);
   pinMode(ENCODER_PIN_B, INPUT_PULLUP);
 
@@ -576,7 +576,7 @@ void setup()
   tft.println();
   tft.println("To reset EEPROM");
   tft.println("Press+Hold ENC Button");
-  tft.println();     
+  tft.println();
   delay(3000);
 
   // EEPROM
@@ -607,7 +607,7 @@ void setup()
   // Check for SI4732 connected on I2C interface
   // If the SI4732 is not detected, then halt with no further processing
   rx.setI2CFastModeCustom(100000);
-  
+
   int16_t si4735Addr = rx.getDeviceI2CAddress(RESET_PIN); // Looks for the I2C bus address and set it.  Returns 0 if error
 
   if ( si4735Addr == 0 ) {
@@ -615,26 +615,26 @@ void setup()
     tft.setTextColor(TFT_RED, TFT_BLACK);
     tft.println("Si4735 not detected");
     while (1);
-  }  
-  
+  }
+
   rx.setup(RESET_PIN, MW_BAND_TYPE);
   // Comment the line above and uncomment the three lines below if you are using external ref clock (active crystal or signal generator)
   // rx.setRefClock(32768);
-  // rx.setRefClockPrescaler(1);   // will work with 32768  
+  // rx.setRefClockPrescaler(1);   // will work with 32768
   // rx.setup(RESET_PIN, 0, MW_BAND_TYPE, SI473X_ANALOG_AUDIO, XOSCEN_RCLK);
 
   // Attached pin to allows SI4732 library to mute audio as required to minimise loud clicks
-  rx.setAudioMuteMcuPin(AUDIO_MUTE);  
-  
+  rx.setAudioMuteMcuPin(AUDIO_MUTE);
+
   cleanBfoRdsInfo();
-  
+
   delay(300);
-  
+
   // Audio Amplifier Enable. G8PTN: Added
   // After the SI4732 has been setup, enable the audio amplifier
   digitalWrite(PIN_AMP_EN, HIGH);
 
-  
+
   // Checking the EEPROM content
   // Checks app_id (which covers manual reset) and app_ver which allows for automatic reset
   // The app_ver is equivalent to a F/W version.
@@ -689,9 +689,9 @@ void setup()
   #endif
 
   // ** SI4732 STARTUP **
-  // Uses values from EEPROM (Last stored or defaults after EEPROM reset) 
+  // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
   useBand();
-  
+
   showStatus();
   drawSprite();
 
@@ -704,7 +704,7 @@ void setup()
 
 
 /**
- * Prints a given content on display 
+ * Prints a given content on display
  */
 void print(uint8_t col, uint8_t lin, const GFXfont *font, uint8_t textSize, const char *msg) {
   tft.setCursor(col,lin);
@@ -777,9 +777,9 @@ void saveAllReceiverInformation()
     EEPROM.write(addr_offset++, (bandCAL[i] & 0XFF));   // Stores the current Calibration value (LOW byte) for the band
     EEPROM.write(addr_offset++,  bandMODE[i]);          // Stores the current Mode value for the band
     EEPROM.commit();
-  }  
+  }
 
-  addr_offset = eeprom_ver_address;  
+  addr_offset = eeprom_ver_address;
   EEPROM.write(addr_offset++, app_ver >> 8);            // Stores app_ver (HIGH byte)
   EEPROM.write(addr_offset++, app_ver & 0XFF);          // Stores app_ver (LOW byte)
   EEPROM.commit();
@@ -788,7 +788,7 @@ void saveAllReceiverInformation()
 }
 
 /**
- * reads the last receiver status from eeprom. 
+ * reads the last receiver status from eeprom.
  */
 void readAllReceiverInformation()
 {
@@ -840,7 +840,7 @@ void readAllReceiverInformation()
 
   currentFrequency = band[bandIdx].currentFreq;
   currentMode = bandMODE[bandIdx];                       // G8PTN: Added to support mode per band
-  
+
   if (band[bandIdx].bandType == FM_BAND_TYPE)
   {
     currentStepIdx = idxFmStep = band[bandIdx].currentStepIdx;
@@ -914,14 +914,14 @@ void disableCommands()
   // showCommandStatus((char *) "VFO ");
   cmdCal = false;
   cmdBrt = false;
-  cmdAvc = false;  
-  
+  cmdAvc = false;
+
 }
 
 /**
  * Reads encoder via interrupt
  * Use Rotary.h and  Rotary.cpp implementation to process encoder via interrupt
- * if you do not add ICACHE_RAM_ATTR declaration, the system will reboot during attachInterrupt call. 
+ * if you do not add ICACHE_RAM_ATTR declaration, the system will reboot during attachInterrupt call.
  * With ICACHE_RAM_ATTR macro you put the function on the RAM.
  */
 ICACHE_RAM_ATTR void  rotaryEncoder()
@@ -948,7 +948,7 @@ void showFrequency()
  * Shows the current mode
  */
 void showMode() {
-  drawSprite();    
+  drawSprite();
 }
 
 /**
@@ -1007,7 +1007,7 @@ void showStep()
  */
 void showBFO()
 {
-  
+
   if (currentBFO > 0)
     sprintf(bfo, "+%4.4d", currentBFO);
   else
@@ -1025,7 +1025,7 @@ drawSprite();
 }
 
 /**
- * Show Soft Mute 
+ * Show Soft Mute
  */
 void showSoftMute()
 {
@@ -1038,7 +1038,7 @@ void showSoftMute()
 void setBand(int8_t up_down)
 {
   // G8PTN: Reset BFO when changing band and store frequency
-  band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);  
+  band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);
   currentBFO = 0;
 
   band[bandIdx].currentStepIdx = currentStepIdx;
@@ -1062,15 +1062,15 @@ void setBand(int8_t up_down)
       }
 
       loadSSB();
-      ssbLoaded = true;  
+      ssbLoaded = true;
     }
-  } 
+  }
   else {
     // If not SSB
-    ssbLoaded = false;    
+    ssbLoaded = false;
   }
 
-  
+
   useBand();
   delay(MIN_ELAPSED_TIME); // waits a little more for releasing the button.
   elapsedCommand = millis();
@@ -1108,9 +1108,9 @@ void useBand()
         band[bandIdx].minimumFreq,
         band[bandIdx].maximumFreq,
         band[bandIdx].currentFreq,
-        0,                                                  // SI4732 step is not used for SSB! 
+        0,                                                  // SI4732 step is not used for SSB!
         currentMode);
-     
+
       rx.setSSBAutomaticVolumeControl(1);                   // G8PTN: Always enabled
       //rx.setSsbSoftMuteMaxAttenuation(softMuteMaxAttIdx); // G8PTN: Commented out
       if   (band[bandIdx].bandwidthIdx > 5) bwIdxSSB = 5;   // G8PTN: Limit value
@@ -1126,7 +1126,7 @@ void useBand()
         band[bandIdx].maximumFreq,
         band[bandIdx].currentFreq,
         band[bandIdx].currentStepIdx >= AmTotalSteps ? 1 : tabAmStep[band[bandIdx].currentStepIdx]);   // Set to 1kHz
-      
+
       bfoOn = false;
       bwIdxAM = band[bandIdx].bandwidthIdx;
       rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
@@ -1138,20 +1138,20 @@ void useBand()
     rx.setSeekAmSpacing(5); // Max 10kHz for spacing
 
   }
-  
+
   // G8PTN: Added
   // Call doSoftMute(0), 0 = No incr/decr action (eqivalent to getSoftMute)
-  // This gets softMuteMaxAttIdx based on mode (AM, SSB)  
+  // This gets softMuteMaxAttIdx based on mode (AM, SSB)
   doSoftMute(0);
-  
+
   // Call doAgc(0), 0 = No incr/decr action (eqivalent to getAgc)
-  // This gets disableAgc and agcNdx values based on mode (FM, AM , SSB)  
+  // This gets disableAgc and agcNdx values based on mode (FM, AM , SSB)
   doAgc(0);
 
   // Call doAvc(0), 0 = No incr/decr action (eqivalent to getAvc)
   // This gets currentAVC values based on mode (AM, SSB)
   doAvc(0);
-  
+
   delay(100);
 
   // Default
@@ -1166,14 +1166,14 @@ void useBand()
     // Default for AM/SSB
     idxAmStep = band[bandIdx].currentStepIdx;
 
-    
+
     // Update depending on currentMode and currentStepIdx
     // If outside SSB step ranges
     if (isSSB() && currentStepIdx >= AmTotalStepsSsb && currentStepIdx <AmTotalSteps)
     {
       currentStepIdx = 0;;
       idxAmStep = 0;
-      band[bandIdx].currentStepIdx = 0;      
+      band[bandIdx].currentStepIdx = 0;
     }
 
     // If outside AM step ranges
@@ -1181,9 +1181,9 @@ void useBand()
     {
       currentStepIdx = 0;;
       idxAmStep = 0;
-      band[bandIdx].currentStepIdx = 0;      
+      band[bandIdx].currentStepIdx = 0;
     }
-   
+
   }
 
   /*
@@ -1207,7 +1207,7 @@ void useBand()
 
   // Store mode
   bandMODE[bandIdx] = currentMode;               // G8PTN: Added to support mode per band
-  
+
   rssi = 0;
   snr = 0;
   cleanBfoRdsInfo();
@@ -1219,7 +1219,7 @@ void loadSSB() {
   rx.setI2CFastModeCustom(400000); // You can try rx.setI2CFastModeCustom(700000); or greater value
   rx.loadPatch(ssb_patch_content, size_content, bandwidthSSB[bwIdxSSB].idx);
   rx.setI2CFastModeCustom(100000);
-  ssbLoaded = true; 
+  ssbLoaded = true;
 }
 
 /**
@@ -1256,7 +1256,7 @@ void doBandwidth(int8_t v)
 
       rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
       band[bandIdx].bandwidthIdx = bwIdxAM;
-      
+
     } else {
     bwIdxFM = (v == 1) ? bwIdxFM + 1 : bwIdxFM - 1;
     if (bwIdxFM > maxFmBw)
@@ -1272,7 +1272,7 @@ void doBandwidth(int8_t v)
 }
 
 /**
- * Show cmd on display. It means you are setting up something.  
+ * Show cmd on display. It means you are setting up something.
  */
 void showCommandStatus(char * currentCmd)
 {
@@ -1312,7 +1312,7 @@ void doAgc(int8_t v) {
   else if (isSSB()) {
     if      (v == 1)   SsbAgcIdx ++;
     else if (v == -1)  SsbAgcIdx --;
-    
+
     // Limit range
     if (SsbAgcIdx < 0)
       SsbAgcIdx = 1;
@@ -1320,13 +1320,13 @@ void doAgc(int8_t v) {
       SsbAgcIdx = 0;
 
     // Select
-    agcIdx = SsbAgcIdx;    
+    agcIdx = SsbAgcIdx;
   }
 
   else {
     if      (v == 1)   AmAgcIdx ++;
     else if (v == -1)  AmAgcIdx --;
- 
+
     // Limit range
     if (AmAgcIdx < 0)
       AmAgcIdx = 37;
@@ -1334,25 +1334,25 @@ void doAgc(int8_t v) {
       AmAgcIdx = 0;
 
     // Select
-    agcIdx = AmAgcIdx;  
+    agcIdx = AmAgcIdx;
   }
 
   // Process agcIdx to generate disableAgc and agcIdx
   // agcIdx     0 1 2 3 4 5 6  ..... n    (n:    FM = 27, AM = 37, SSB = 1)
-  // agcNdx     0 0 1 2 3 4 5  ..... n -1 (n -1: FM = 26, AM = 36, SSB = 0) 
-  // disableAgc 0 1 1 1 1 1 1  ..... 1 
+  // agcNdx     0 0 1 2 3 4 5  ..... n -1 (n -1: FM = 26, AM = 36, SSB = 0)
+  // disableAgc 0 1 1 1 1 1 1  ..... 1
   disableAgc = (agcIdx > 0);     // if true, disable AGC; else, AGC is enabled
   if (agcIdx > 1)
     agcNdx = agcIdx - 1;
   else
-    agcNdx = 0;  
+    agcNdx = 0;
 
   // Configure SI4732/5
   rx.setAutomaticGainControl(disableAgc, agcNdx); // if agcNdx = 0, no attenuation
 
   // Only call showAgcAtt() if incr/decr action (allows the doAgc(0) to act as getAgc)
   if (v != 0) showAgcAtt();
-  
+
   delay(MIN_ELAPSED_TIME); // waits a little more for releasing the button.
   elapsedCommand = millis();
 }
@@ -1369,11 +1369,11 @@ void doStep(int8_t v)
         idxFmStep = 0;
       else if (idxFmStep < 0)
         idxFmStep = lastFmStep;
-        
+
       currentStepIdx = idxFmStep;
-      rx.setFrequencyStep(tabFmStep[currentStepIdx]);      
+      rx.setFrequencyStep(tabFmStep[currentStepIdx]);
     }
-    
+
     else {
       idxAmStep = (v == 1) ? idxAmStep + 1 : idxAmStep - 1;
       if (idxAmStep > getLastStep())
@@ -1406,23 +1406,23 @@ void doStep(int8_t v)
       if (!isSSB())
           rx.setSeekAmSpacing((band[bandIdx].currentStepIdx >= AmTotalSteps) ? 1 : tabStep[band[bandIdx].currentStepIdx]);
       */
-          
+
       //showStep();
 
       currentStepIdx = idxAmStep;
       //rx.setFrequencyStep(tabAmStep[currentStepIdx]);
       rx.setSeekAmSpacing(5); // Max 10kHz for spacing
     }
-    
+
     // Debug
     #if DEBUG2_PRINT
-    int temp_LastStep = getLastStep(); 
+    int temp_LastStep = getLastStep();
     Serial.print("Info: doStep() >>> currentStepIdx = ");
     Serial.print(currentStepIdx);
     Serial.print(", getLastStep() = ");
     Serial.println(temp_LastStep);
     #endif
-    
+
     band[bandIdx].currentStepIdx = currentStepIdx;
     showStep();
     elapsedCommand = millis();
@@ -1434,7 +1434,7 @@ void doStep(int8_t v)
 void doMode(int8_t v)
 {
   currentMode = bandMODE[bandIdx];               // G8PTN: Added to support mode per band
-  
+
   if (currentMode != FM)                         // Nothing to do if FM mode
   {
     if (v == 1)  { // clockwise
@@ -1458,7 +1458,7 @@ void doMode(int8_t v)
       {
         currentMode = AM;
         bfoOn = ssbLoaded = false;
-        
+
         // G8PTN: When exiting SSB mode update the current frequency and BFO
         currentFrequency = currentFrequency + (currentBFO / 1000);
         currentBFO = 0;
@@ -1485,13 +1485,13 @@ void doMode(int8_t v)
       {
         currentMode = AM;
         bfoOn = ssbLoaded = false;
-        
+
         // G8PTN: When exiting SSB mode update the current frequency and BFO
         currentFrequency = currentFrequency + (currentBFO / 1000);
         currentBFO = 0;
       }
     }
-    
+
     band[bandIdx].currentFreq = currentFrequency;
     band[bandIdx].currentStepIdx = currentStepIdx;
     bandMODE[bandIdx] = currentMode;                      // G8PTN: Added to support mode per band
@@ -1537,10 +1537,10 @@ void showFrequencySeek(uint16_t freq)
 void doSeek()
 {
   if (isSSB()) return; // It does not work for SSB mode
-  
+
   rx.seekStationProgress(showFrequencySeek, checkStopSeeking, seekDirection);   // G8PTN: Added checkStopSeeking
   currentFrequency = rx.getFrequency();
-  
+
 }
 
 /**
@@ -1555,7 +1555,7 @@ void doSoftMute(int8_t v)
     if (isSSB()) {
       if      (v == 1)   SsbSoftMuteIdx ++;
       else if (v == -1)  SsbSoftMuteIdx --;
-    
+
       // Limit range
       if (SsbSoftMuteIdx < 0)
         SsbSoftMuteIdx = 32;
@@ -1569,7 +1569,7 @@ void doSoftMute(int8_t v)
     else {
       if      (v == 1)   AmSoftMuteIdx ++;
       else if (v == -1)  AmSoftMuteIdx --;
-    
+
       // Limit range
       if (AmSoftMuteIdx < 0)
         AmSoftMuteIdx = 32;
@@ -1579,7 +1579,7 @@ void doSoftMute(int8_t v)
       // Select
       softMuteMaxAttIdx = AmSoftMuteIdx;
     }
-  
+
   rx.setAmSoftMuteMaxAttenuation(softMuteMaxAttIdx);
 
   // Only call showSoftMute() if incr/decr action (allows the doSoftMute(0) to act as getSoftMute)
@@ -1636,7 +1636,7 @@ void doCurrentMenuCmd() {
       }
       showFrequency();
       break;
-    #endif     
+    #endif
     case BW:                        // BW
       cmdBandwidth = true;
       showBandwidth();
@@ -1647,23 +1647,23 @@ void doCurrentMenuCmd() {
       break;
     case SOFTMUTE:                  // SOFTMUTE
       if (currentMode != FM) {
-        cmdSoftMuteMaxAtt = true;         
+        cmdSoftMuteMaxAtt = true;
       }
-      showSoftMute(); 
+      showSoftMute();
       break;
     case SEEKUP:                    // SEEKUP
       seekStop = false;             // G8PTN: Flag is set by rotary encoder and cleared on seek entry
       seekDirection = 1;
       doSeek();
-      break;  
+      break;
     case SEEKDOWN:                  // SEEKDOWN
       seekStop = false;             // G8PTN: Flag is set by rotary encoder and cleared on seek entry
       seekDirection = 0;
       doSeek();
-      break;    
+      break;
     case BAND:                      // BAND
       cmdBand = true;
-      drawSprite();  
+      drawSprite();
       break;
     case MUTE:                      // MUTE
       muted=!muted;
@@ -1671,9 +1671,9 @@ void doCurrentMenuCmd() {
       {
         mute_vol_val = rx.getVolume();
         rx.setVolume(0);
-      }     
+      }
       else rx.setVolume(mute_vol_val);
-      drawSprite();  
+      drawSprite();
       break;
 
     // G8PTN: Added
@@ -1688,15 +1688,15 @@ void doCurrentMenuCmd() {
     // G8PTN: Added
     case BRIGHTNESS:                // BRIGHTNESS
       cmdBrt = true;
-      showBrt(); 
+      showBrt();
       break;
 
     // G8PTN: Added
     case AVC:                       // AVC
-      if (currentMode != FM) { 
-        cmdAvc = true;    
+      if (currentMode != FM) {
+        cmdAvc = true;
       }
-      showAvc(); 
+      showAvc();
       break;
 
     default:
@@ -1752,7 +1752,7 @@ uint8_t getStrength() {
     if  (rssi > 76)                   return 17;  //>S9 +60
     // newStereoPilot=si4735.getCurrentPilot();
   }
-}    
+}
 
 // G8PTN: Alternative layout
 void drawMenu() {
@@ -1760,12 +1760,12 @@ void drawMenu() {
     spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
     spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
     spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
-    
+
     char label_menu [16];
     sprintf(label_menu, "Menu %2.2d/%2.2d", (menuIdx + 1), (lastMenu + 1));
     //spr.drawString("Menu",38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
     spr.drawString(label_menu,38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
-    
+
     spr.setTextFont(0);
     spr.setTextColor(0xBEDF,TFT_MENU_BACK);
     spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,0x105B);
@@ -1775,7 +1775,7 @@ void drawMenu() {
       spr.drawString(menu[abs((menuIdx+lastMenu+1+i)%(lastMenu+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
     }
   } else {
-    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);    
+    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
     spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
     spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
     spr.drawString(menu[menuIdx],38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
@@ -1786,14 +1786,14 @@ void drawMenu() {
 
     //G8PTN: Added to reduce calls to getLastStep()
     int temp_LastStep = getLastStep();
-    
+
     for(int i=-2;i<3;i++){
       if (i==0) spr.setTextColor(0xBEDF,0x105B);
       else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       if (cmdMode)
         if (currentMode == FM) {
           if (i==0) spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
-        }          
+        }
         else spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
       if (cmdStep)
         if (currentMode == FM) spr.drawString(FmStepDesc[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
@@ -1834,7 +1834,7 @@ void drawMenu() {
         sprintf(sAgc, "%2.2d", agcNdx);
         spr.drawString(sAgc,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,7);
       }
-    }        
+    }
     if (cmdSoftMuteMaxAtt) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
@@ -1866,7 +1866,7 @@ void drawMenu() {
       spr.drawNumber(currentAVC,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
       spr.drawString("dB",38+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
     }
-        
+
     spr.setTextColor(TFT_WHITE,TFT_BLACK);
   }
 }
@@ -1893,7 +1893,7 @@ void drawSprite()
   screen_toggle = !screen_toggle;
   spr.drawCircle(clock_datum+50,11,6,TFT_WHITE);
   if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,TFT_BLACK);
-  else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN);  
+  else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN);
 
   // EEPROM write request icon
   spr.drawCircle(clock_datum+70,11,6,TFT_WHITE);
@@ -1901,7 +1901,7 @@ void drawSprite()
     spr.fillCircle(clock_datum+70,11,5,TFT_RED);
     eeprom_wr_flag = false;
   }
-  else spr.fillCircle(clock_datum+70,11,5,TFT_BLACK); 
+  else spr.fillCircle(clock_datum+70,11,5,TFT_BLACK);
 
   if (currentMode == FM) {
     spr.setTextDatum(MR_DATUM);
@@ -1922,34 +1922,34 @@ void drawSprite()
       sprintf(stail, ".%3.3d", tail);
       spr.drawString(skhz,freq_offset_x,freq_offset_y,7);
       spr.setTextDatum(ML_DATUM);
-      spr.drawString(stail,5+freq_offset_x,15+freq_offset_y,4);   
+      spr.drawString(stail,5+freq_offset_x,15+freq_offset_y,4);
     }
     else {
       spr.drawNumber(currentFrequency,freq_offset_x,freq_offset_y,7);
       spr.setTextDatum(ML_DATUM);
       spr.drawString(".000",5+freq_offset_x,15+freq_offset_y,4);
-     
+
     }
-    spr.drawString("kHz",funit_offset_x,funit_offset_y,4); 
+    spr.drawString("kHz",funit_offset_x,funit_offset_y,4);
     spr.setTextDatum(MC_DATUM);
   }
-  
+
   //if (isMenuMode() or cmdBand) drawMenu();
-  if (isMenuMode()) drawMenu();                      // G8PTN: Removed cmdBand, now part of isMenuMode() 
+  if (isMenuMode()) drawMenu();                      // G8PTN: Removed cmdBand, now part of isMenuMode()
   else {
     countClick = 0;
     spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);    
+    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
     spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_WHITE);
     spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
-    spr.drawString("Band:",6+menu_offset_x,64+menu_offset_y+(-3*16),2);    
+    spr.drawString("Band:",6+menu_offset_x,64+menu_offset_y+(-3*16),2);
     spr.drawString(band[bandIdx].bandName,48+menu_offset_x,64+menu_offset_y+(-3*16),2);
-    spr.drawString("Mode:",6+menu_offset_x,64+menu_offset_y+(-2*16),2);    
-    spr.drawString(bandModeDesc[currentMode],48+menu_offset_x,64+menu_offset_y+(-2*16),2);    
+    spr.drawString("Mode:",6+menu_offset_x,64+menu_offset_y+(-2*16),2);
+    spr.drawString(bandModeDesc[currentMode],48+menu_offset_x,64+menu_offset_y+(-2*16),2);
     spr.drawString("Step:",6+menu_offset_x,64+menu_offset_y+(-1*16),2);
     if (currentMode == FM) spr.drawString(FmStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-1*16),2);
     else spr.drawString(AmSsbStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-1*16),2);
-    spr.drawString("BW:",6+menu_offset_x,64+menu_offset_y+(0*16),2);        
+    spr.drawString("BW:",6+menu_offset_x,64+menu_offset_y+(0*16),2);
     if (isSSB())
     {
       spr.drawString(bandwidthSSB[bwIdxSSB].desc,48+menu_offset_x,64+menu_offset_y+(0*16),2);
@@ -1963,11 +1963,11 @@ void drawSprite()
       spr.drawString(bandwidthFM[bwIdxFM].desc,48+menu_offset_x,64+menu_offset_y+(0*16),2);
     }
     if (agcNdx == 0 && agcIdx == 0) {
-      spr.drawString("AGC:",6+menu_offset_x,64+menu_offset_y+(1*16),2);        
+      spr.drawString("AGC:",6+menu_offset_x,64+menu_offset_y+(1*16),2);
       spr.drawString("On",48+menu_offset_x,64+menu_offset_y+(1*16),2);
     } else {
       sprintf(sAgc, "%2.2d", agcNdx);
-      spr.drawString("ATTN:",6+menu_offset_x,64+menu_offset_y+(1*16),2);        
+      spr.drawString("ATTN:",6+menu_offset_x,64+menu_offset_y+(1*16),2);
       spr.drawString(sAgc,48+menu_offset_x,64+menu_offset_y+(1*16),2);
     }
 
@@ -1990,7 +1990,7 @@ void drawSprite()
     }
     else spr.drawNumber(rx.getVolume(),48+menu_offset_x,64+menu_offset_y+(2*16),2);
     spr.setTextDatum(MC_DATUM);
-    
+
   }
 
   if (bfoOn) {
@@ -1998,8 +1998,8 @@ void drawSprite()
     spr.setTextDatum(ML_DATUM);
     spr.drawString("BFO:",10,158,4);
     spr.drawString(bfo,80,158,4);
-    spr.setTextDatum(MC_DATUM);    
-  
+    spr.setTextDatum(MC_DATUM);
+
   }
 
 
@@ -2009,7 +2009,7 @@ void drawSprite()
       // Option 1 - Variable heaght bars
       //spr.fillRect(244+(i*4),80-(i*1),2,4+(i*1),0x3526);
       // Option 2 - Fixed heaght bars
-      //spr.fillRect(1+meter_offset_x+(i*8),1+meter_offset_y,3,20,0x3526);     // Option 2a 
+      //spr.fillRect(1+meter_offset_x+(i*8),1+meter_offset_y,3,20,0x3526);     // Option 2a
       spr.fillRect(1+meter_offset_x+(i*8),1+meter_offset_y,3,20,TFT_GREEN);    // Option 2b
     else
       // Option 1 - Variable heaght bars
@@ -2022,7 +2022,7 @@ void drawSprite()
   //spr.setTextColor(TFT_DARKGREY,TFT_BLACK);                                                                 // Option 2a
   spr.drawLine(1+meter_offset_x,25+meter_offset_y,5+meter_offset_x+(15*8),25+meter_offset_y,TFT_WHITE);       // Option 2b
   spr.setTextColor(TFT_WHITE,TFT_BLACK);                                                                      // Option 2b
-  
+
   spr.drawString("S",1+meter_offset_x,45+meter_offset_y,2);
   for(int i=0;i<16;i++)
     {
@@ -2051,12 +2051,12 @@ void drawSprite()
     spr.setTextDatum(ML_DATUM);
     spr.drawString(bufferStationName,rds_offset_x,rds_offset_y,4);
     spr.setTextDatum(MC_DATUM);
-    // spr.setTextColor(TFT_WHITE,TFT_BLACK);    
+    // spr.setTextColor(TFT_WHITE,TFT_BLACK);
   }
     /*
     else {
     spr.fillSmoothRoundRect(1+mode_offset_x,1+mode_offset_y,76,22,4,TFT_WHITE);
-    spr.fillSmoothRoundRect(2+mode_offset_x,2+mode_offset_y,74,20,4,TFT_BLACK);  
+    spr.fillSmoothRoundRect(2+mode_offset_x,2+mode_offset_y,74,20,4,TFT_BLACK);
     spr.drawString(bandModeDesc[currentMode],38+mode_offset_x,11+mode_offset_y,2);
   }
   */
@@ -2066,13 +2066,13 @@ void drawSprite()
   if (tuning_flag == false) {
     batteryMonitor();
     spr.pushSprite(0,0);
-  }  
+  }
 #else
   // No hold off
   batteryMonitor();
   spr.pushSprite(0,0);
 #endif
-  
+
 }
 
 
@@ -2113,7 +2113,7 @@ void checkRDS()
       stationName = rx.getRdsText0A();
       rdsTime = rx.getRdsTime();
       // if ( rdsMsg != NULL )   showRDSMsg();
-      if (stationName != NULL)         
+      if (stationName != NULL)
           showRDSStation();
       // if ( rdsTime != NULL ) showRDSTime();
     }
@@ -2128,7 +2128,7 @@ void checkRDS()
 // Check Battery Level
 void batteryMonitor() {
 
-  // Read ADC and calculate average  
+  // Read ADC and calculate average
   adc_read_total = 0;                 // Reset to 0 at start of calculation
   for (int i = 0; i < 10; i++) {
     adc_read_total += analogRead(VBAT_MON);
@@ -2173,7 +2173,7 @@ void batteryMonitor() {
   // Debug
 #if DEBUG3_PRINT
   Serial.print("Info: batteryMonitor() >>> batt_soc_state = "); Serial.print(batt_soc_state); Serial.print(", ");
-  Serial.print("ADC count (average) = "); Serial.print(adc_read_avr); Serial.print(", "); 
+  Serial.print("ADC count (average) = "); Serial.print(adc_read_avr); Serial.print(", ");
   Serial.print("ADC voltage (average) = "); Serial.println(adc_volt_avr);
 #endif
 
@@ -2262,9 +2262,9 @@ void doFrequencyTuneSSB()
     updateBFO();
 
     if (redundant != 0)
-      
+
     {
-        clampSSBBand();                                   // G8PTN: Added          
+        clampSSBBand();                                   // G8PTN: Added
         rx.setFrequency(currentFrequency);
         //agcSetFunc(); //Re-apply to remove noize        // G8PTN: Commented out
         currentFrequency = rx.getFrequency();
@@ -2278,11 +2278,11 @@ void doFrequencyTuneSSB()
     if (clampSSBBand()) {
       // Clamp frequency to band limits                  // Automatically done by function call
       //showFrequency();                                 // This action is not required
-      
+
       // Debug
       #if DEBUG1_PRINT
       Serial.println("Info: clampSSBBand() >>> SSB Band Clamp !");
-      #endif     
+      #endif
     }
 
 }
@@ -2293,7 +2293,7 @@ bool clampSSBBand()
     uint16_t freq = currentFrequency + (currentBFO / 1000);
 
     // Special case to cover SSB frequency negative!
-    bool SsbFreqNeg = false; 
+    bool SsbFreqNeg = false;
     if (currentFrequency & 0x8000)
       SsbFreqNeg = true;
 
@@ -2328,7 +2328,7 @@ void updateBFO()
     // To move frequency forward, need to move the BFO backwards, so multiply by -1
     currentCAL = bandCAL[bandIdx];    // Select from table
     rx.setSSBBfo((currentBFO + currentCAL) * -1);
-      
+
     // Debug
     #if DEBUG2_PRINT
     Serial.print("Info: updateBFO() >>> ");
@@ -2358,7 +2358,7 @@ void doCal( int16_t v ) {
   // If in SSB mode set the SI4732/5 BFO value
   // This adjustments the BFO whilst in the calibration menu
   if (isSSB()) updateBFO();
-  
+
   showCal();
   delay(MIN_ELAPSED_TIME); // waits a little more for releasing the button.
 }
@@ -2396,11 +2396,11 @@ drawSprite();
 void doAvc(int16_t v) {
   // Only allow for AM and SSB modes
   if (currentMode != FM) {
-    
+
     if (isSSB()) {
       if      (v == 1)   SsbAvcIdx += 2;
       else if (v == -1)  SsbAvcIdx -= 2;
-    
+
       // Limit range
       if (SsbAvcIdx < 12)
         SsbAvcIdx = 90;
@@ -2414,7 +2414,7 @@ void doAvc(int16_t v) {
     else {
       if      (v == 1)   AmAvcIdx += 2;
       else if (v == -1)  AmAvcIdx -= 2;
-    
+
       // Limit range
       if (AmAvcIdx < 12)
         AmAvcIdx = 90;
@@ -2489,7 +2489,7 @@ void clock_time()
 {
   if ((micros() - clock_timer) >= 1000000) {
     clock_timer = micros();
-    time_seconds++;    
+    time_seconds++;
     if (time_seconds >= 60) {
       time_seconds = 0;
       time_minutes ++;
@@ -2505,7 +2505,7 @@ void clock_time()
     }
 
     // Format for display HH:MM (24 hour format)
-    sprintf(time_disp, "%2.2d:%2.2d", time_hours, time_minutes);  
+    sprintf(time_disp, "%2.2d:%2.2d", time_hours, time_minutes);
   }
 }
 
@@ -2529,7 +2529,7 @@ void displayOn() {
  */
 void loop()
 {
-  
+
   // Check if the encoder has moved.
   if (encoderCount != 0)
   {
@@ -2539,8 +2539,8 @@ void loop()
       currentBFO = (encoderCount == 1) ? (currentBFO + currentBFOStep) : (currentBFO - currentBFOStep);
       // G8PTN: Clamp range to +/- BFOMax (as per doFrequencyTuneSSB)
       if (currentBFO >  BFOMax) currentBFO =  BFOMax;
-      if (currentBFO < -BFOMax) currentBFO = -BFOMax;  
-      band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // G8PTN; Calculate frequency value to store in EEPROM    
+      if (currentBFO < -BFOMax) currentBFO = -BFOMax;
+      band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // G8PTN; Calculate frequency value to store in EEPROM
       updateBFO();
       showBFO();
     }
@@ -2567,7 +2567,7 @@ void loop()
     else if (cmdBrt)
       doBrt(encoderCount);
     else if (cmdAvc)
-      doAvc(encoderCount);    
+      doAvc(encoderCount);
 
     // G8PTN: Added SSB tuning
     else if (isSSB()) {
@@ -2582,12 +2582,12 @@ void loop()
       Serial.print(tuning_flag);
       Serial.print(", millis = ");
       Serial.println(millis());
-      #endif      
+      #endif
 #endif
-      
+
       doFrequencyTuneSSB();
       currentFrequency = rx.getFrequency();
-      
+
       // Debug
       #if DEBUG1_PRINT
       Serial.print("Info: SSB >>> ");
@@ -2598,7 +2598,7 @@ void loop()
       Serial.print(", rx.setSSBbfo() = ");
       Serial.println((currentBFO + currentCAL) * -1);
       #endif
-      
+
       showFrequency();
     }
     else {
@@ -2609,11 +2609,11 @@ void loop()
       tuning_timer = millis();
       #if DEBUG3_PRINT
       Serial.print("Info: TUNE_HOLDOFF FM/AM (Set) >>> ");
-      Serial.print("tuning_flag = ");     
+      Serial.print("tuning_flag = ");
       Serial.print(tuning_flag);
       Serial.print(", millis = ");
       Serial.println(millis());
-      #endif    
+      #endif
 #endif
 
       // G8PTN: Used in place of rx.frequencyUp() and rx.frequencyDown()
@@ -2627,14 +2627,14 @@ void loop()
       uint16_t bMax = band[bandIdx].maximumFreq;                            // Assign upper band limit
 
       // Special case to cover AM frequency negative!
-      bool AmFreqNeg = false; 
+      bool AmFreqNeg = false;
       if ((currentMode == AM) && (currentFrequency & 0x8000))
         AmFreqNeg = true;
 
       // Priority to minimum check to cover AM frequency negative
       if ((currentFrequency < bMin) || AmFreqNeg)
         currentFrequency = bMax;                                           // Lower band limit or AM frequency negative
-      else if (currentFrequency > bMax)                                  
+      else if (currentFrequency > bMax)
         currentFrequency = bMin;                                           // Upper band limit
 
       rx.setFrequency(currentFrequency);                                   // Set new frequency
@@ -2649,12 +2649,12 @@ void loop()
         rx.frequencyDown();
       }
       */
-      
+
       if (currentMode == FM) cleanBfoRdsInfo();
       // Show the current frequency only if it has changed
       currentFrequency = rx.getFrequency();
       band[bandIdx].currentFreq = currentFrequency;            // G8PTN: Added to ensure update of currentFreq in table for AM/FM
-      
+
       // Debug
       #if DEBUG1_PRINT
       Serial.print("Info: AM/FM >>> currentFrequency = ");
@@ -2663,8 +2663,8 @@ void loop()
       Serial.println(currentBFO);                              // Print to check the currentBFO value
       //Serial.print(", rx.setSSBbfo() = ");                   // rx.setSSBbfo() will not have been written
       //Serial.println((currentBFO + currentCAL) * -1);        // rx.setSSBbfo() will not have been written
-      #endif 
-        
+      #endif
+
       showFrequency();
     }
 
@@ -2735,17 +2735,17 @@ void loop()
     #if DEBUG3_PRINT
     Serial.println("Info: loop() >>> Checking signal information");
     #endif
-    
+
     rx.getCurrentReceivedSignalQuality();
     snr= rx.getCurrentSNR();
     int aux = rx.getCurrentRSSI();
-    
+
     // Debug
     #if DEBUG3_PRINT
     Serial.print("Info: loop() >>> RSSI = ");
     Serial.println(rssi);
-    #endif 
-    
+    #endif
+
     //if (rssi != aux && !isMenuMode())
     if (rssi != aux)                            // G8PTN: Based on 1.2s update, always allow S-Meter
     {
@@ -2753,7 +2753,7 @@ void loop()
       #if DEBUG3_PRINT
       Serial.println("Info: loop() >>> RSI diff detected");
       #endif
-      
+
       rssi = aux;
       showRSSI();
     }
@@ -2769,12 +2769,12 @@ void loop()
       // showBFO();
       disableCommands();
       showStatus();
-    } 
+    }
     //else if (isMenuMode() or cmdBand) {
     else if (isMenuMode()) {                     // G8PTN: Removed cmdBand, now part of isMenuMode()
       disableCommands();
       showStatus();
-    } 
+    }
     elapsedCommand = millis();
   }
 
@@ -2787,7 +2787,7 @@ void loop()
   if ((millis() - lastRDSCheck) > RDS_CHECK_TIME) {
     if ((currentMode == FM) and (snr >= 12)) checkRDS();
     lastRDSCheck = millis();
-  }  
+  }
 
   // Show the current frequency only if it has changed
   if (itIsTimeToSave)
@@ -2808,7 +2808,7 @@ void loop()
   // This covers the case where there is nothing else triggering a refresh
   if ((millis() - background_timer) > BACKGROUND_REFRESH_TIME) {
     background_timer = millis();
-    if (!isMenuMode()) showStatus(); 
+    if (!isMenuMode()) showStatus();
   }
 
 #if TUNE_HOLDOFF
@@ -2822,12 +2822,12 @@ void loop()
       Serial.print("tuning_flag = ");
       Serial.print(tuning_flag);
       Serial.print(", millis = ");
-      Serial.println(millis()); 
-      #endif 
-    } 
+      Serial.println(millis());
+      #endif
+    }
   }
 #endif
-    
+
   // Run clock
   clock_time();
 
@@ -2852,7 +2852,7 @@ void loop()
     // Remote serial
     Serial.print(app_ver);                      // Firmware version
     Serial.print(",");
-    
+
     Serial.print(currentFrequency);             // Frequency (KHz)
     Serial.print(",");
     Serial.print(currentBFO);                   // Frequency (Hz x 1000)
@@ -2886,18 +2886,18 @@ void loop()
 
     Serial.print(remote_volume);                // Volume
     Serial.print(",");
-    Serial.print(remote_rssi);                  // RSSI 
-    Serial.print(",");  
+    Serial.print(remote_rssi);                  // RSSI
+    Serial.print(",");
     Serial.print(adc_read_avr);                 // V_BAT/2 (ADC average value)
-    Serial.print(",");            
+    Serial.print(",");
     Serial.println(g_remote_seqnum);            // Sequence number
   }
-    
+
   if (Serial.available() > 0)
   {
     char key = Serial.read();
     switch (key)
-    {         
+    {
         case 'U':                              // Encoder Up
           encoderCount ++;
           break;
@@ -2907,7 +2907,7 @@ void loop()
         case 'P':                              // Encoder Push Button
           pb1_pressed = true;
           break;
-          
+
         case 'B':                              // Band Up
           setBand(1);
           break;
@@ -2966,10 +2966,10 @@ void loop()
           break;
 
         default:
-          break;           
+          break;
     }
   }
-  
+
 #endif
 
   // Add a small default delay in the main loop
