@@ -1,3 +1,15 @@
+## 1.01 (2025-03-11)
+
+
+### Added
+
+- Added "MODE" configuration per band (FM, AM, LSB, USB) 
+
+
+### Changed
+
+- Improved tuning speed by delaying the display updates 
+
 ## 1.00 (2025-03-11)
 
 

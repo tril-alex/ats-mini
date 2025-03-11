@@ -1,1 +1,0 @@
-Added "MODE" configuration per band (FM, AM, LSB, USB)
