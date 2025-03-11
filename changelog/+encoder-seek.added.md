@@ -1,1 +1,0 @@
-AM/FM station search by scrolling with the encoder pressed (the search can also be stopped by rotating the encoder)

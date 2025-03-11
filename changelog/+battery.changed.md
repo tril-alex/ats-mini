@@ -1,1 +1,0 @@
-Changed the charging indicator (lightning icon instead of the EXT text)

@@ -1,1 +1,0 @@
-Fixed the duplication of the MW2 band name

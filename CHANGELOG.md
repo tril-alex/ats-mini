@@ -1,3 +1,29 @@
+## 1.02 (2025-03-11)
+
+
+### Added
+
+- * Display timeout has been added (Settings > Sleep), a value of zero disables the timeout
+  * Turning the display off/on by long pressing the encoder (2 seconds). This reduces QRM from the display
+  * Added "O" and "o" commands (display off and on) to the serial port protocol 
+- AM/FM station search by scrolling with the encoder pressed (the search can also be stopped by rotating the encoder) 
+- Pressing the encoder for more than 0.5 seconds triggers volume adjustment (this compensates the Volume menu option no longer being highlighted by default) 
+
+
+### Changed
+
+- * The menu has been reorganized, and the Spare items have been removed
+  * A Settings menu has been added, and the display brightness adjustment option has been moved there
+  * The position in the main menu and settings menu is remembered (until power is turned off)
+  * The startup splash screen has been moved to Settings > About (but the reset of settings by turning on the receiver with the encoder pressed still works)
+  * The Seek Up/Down menu items have been removed 
+- Changed the charging indicator (lightning icon instead of the EXT text) 
+
+
+### Fixed
+
+- Fixed the duplication of the MW2 band name 
+
 ## 1.01 (2025-03-11)
 
 
