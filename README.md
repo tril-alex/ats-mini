@@ -23,6 +23,7 @@ The pinout table is shown below.
 The relevant colums are ESP32-WROOM-1 "Pin Name" and "ATS-Mini Sketch Pin Definitions"
 
 | ESP32-WROOM-1<br>Pin # | ESP32-WROOM-1<br>Pin Name | ATS-MINI Sketch<br>Pin Definitions | TFT_eSPI<br>Pin Definition | xtronic.org<br>Schematic | Comments<br>Info         |
+|------------------------|---------------------------|------------------------------------|----------------------------|--------------------------|--------------------------|
 | 1                      | GND                       |                                    |                            | GND                      |                          |
 | 2                      | 3V3                       |                                    |                            | VCC_33                   |                          |
 | 3                      | EN                        |                                    |                            | EN                       | RST Button               |
