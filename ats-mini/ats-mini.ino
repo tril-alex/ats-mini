@@ -1843,7 +1843,8 @@ void drawMenu() {
     char label_menu [16];
     sprintf(label_menu, "Menu %2.2d/%2.2d", (menuIdx + 1), (lastMenu + 1));
     //spr.drawString("Menu",38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
-    spr.drawString(label_menu,38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
+    spr.drawString(label_menu,40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
+    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, TFT_RED);
 
     spr.setTextFont(0);
     spr.setTextColor(0xBEDF,TFT_MENU_BACK);
@@ -1851,13 +1852,14 @@ void drawMenu() {
     for(int i=-2; i<3; i++){
       if (i==0) spr.setTextColor(0xBEDF,0x105B);
       else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.drawString(menu[abs((menuIdx+lastMenu+1+i)%(lastMenu+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+      spr.drawString(menu[abs((menuIdx+lastMenu+1+i)%(lastMenu+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
     }
   } else if (cmdSettings) {
     spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
     spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
     spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
-    spr.drawString("Settings",38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
+    spr.drawString("Settings",40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
+    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, TFT_RED);
 
     spr.setTextFont(0);
     spr.setTextColor(0xBEDF,TFT_MENU_BACK);
@@ -1865,17 +1867,19 @@ void drawMenu() {
     for(int i=-2; i<3; i++) {
       if (i==0) spr.setTextColor(0xBEDF,0x105B);
       else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.drawString(settingsMenu[abs((settingsMenuIdx+lastSettingsMenu+1+i)%(lastSettingsMenu+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+      spr.drawString(settingsMenu[abs((settingsMenuIdx+lastSettingsMenu+1+i)%(lastSettingsMenu+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
     }
   } else {
     spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
     spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
     spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
     if (cmdBrt || cmdSleep) {
-      spr.drawString(settingsMenu[settingsMenuIdx],38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
+      spr.drawString(settingsMenu[settingsMenuIdx],40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
     } else {
-      spr.drawString(menu[menuIdx],38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
+      spr.drawString(menu[menuIdx],40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
     }
+    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, TFT_RED);
+
     spr.setTextFont(0);
     spr.setTextColor(0xBEDF,TFT_MENU_BACK);
     // spr.fillRect(6,24+(2*16),67,16,0xBEDF);
@@ -1889,34 +1893,34 @@ void drawMenu() {
       else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       if (cmdMode)
         if (currentMode == FM) {
-          if (i==0) spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+          if (i==0) spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         }
-        else spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+        else spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
       if (cmdStep)
-        if (currentMode == FM) spr.drawString(FmStepDesc[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
-        else spr.drawString(AmSsbStepDesc[abs((currentStepIdx+temp_LastStep+1+i)%(temp_LastStep+1))],38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
-      if (cmdBand) spr.drawString(band[abs((bandIdx+lastBand+1+i)%(lastBand+1))].bandName,38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+        if (currentMode == FM) spr.drawString(FmStepDesc[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+        else spr.drawString(AmSsbStepDesc[abs((currentStepIdx+temp_LastStep+1+i)%(temp_LastStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+      if (cmdBand) spr.drawString(band[abs((bandIdx+lastBand+1+i)%(lastBand+1))].bandName,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
       if (cmdBandwidth) {
         if (isSSB())
         {
-          spr.drawString(bandwidthSSB[abs((bwIdxSSB+lastBandwidthSSB+1+i)%(lastBandwidthSSB+1))].desc,38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+          spr.drawString(bandwidthSSB[abs((bwIdxSSB+lastBandwidthSSB+1+i)%(lastBandwidthSSB+1))].desc,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
           // bw = (char *)bandwidthSSB[bwIdxSSB].desc;
           // showBFO();
         }
         else if (currentMode == AM)
         {
-          spr.drawString(bandwidthAM[abs((bwIdxAM+lastBandwidthAM+1+i)%(lastBandwidthAM+1))].desc,38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+          spr.drawString(bandwidthAM[abs((bwIdxAM+lastBandwidthAM+1+i)%(lastBandwidthAM+1))].desc,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         }
         else
         {
-          spr.drawString(bandwidthFM[abs((bwIdxFM+lastBandwidthFM+1+i)%(lastBandwidthFM+1))].desc,38+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+          spr.drawString(bandwidthFM[abs((bwIdxFM+lastBandwidthFM+1+i)%(lastBandwidthFM+1))].desc,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         }
       }
     }
     if (cmdVolume) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
-      spr.drawNumber(rx.getVolume(),38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,7);
+      spr.drawNumber(rx.getVolume(),40+menu_offset_x+(menu_delta_x/2),66+menu_offset_y,7);
     }
     if (cmdAgc) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
@@ -1924,50 +1928,50 @@ void drawMenu() {
       // rx.getAutomaticGainControl();             // G8PTN: Read back value is not used
       if (agcNdx == 0 && agcIdx == 0) {
         spr.setFreeFont(&Orbitron_Light_24);
-        spr.drawString("AGC",38+menu_offset_x+(menu_delta_x/2),48+menu_offset_y);
-        spr.drawString("On",38+menu_offset_x+(menu_delta_x/2),72+menu_offset_y);
+        spr.drawString("AGC",40+menu_offset_x+(menu_delta_x/2),48+menu_offset_y);
+        spr.drawString("On",40+menu_offset_x+(menu_delta_x/2),72+menu_offset_y);
         spr.setTextFont(0);
       } else {
         sprintf(sAgc, "%2.2d", agcNdx);
-        spr.drawString(sAgc,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,7);
+        spr.drawString(sAgc,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,7);
       }
     }
     if (cmdSoftMuteMaxAtt) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
-      spr.drawString("Max Attn",38+menu_offset_x+(menu_delta_x/2),32+menu_offset_y,2);
-      spr.drawNumber(softMuteMaxAttIdx,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
-      spr.drawString("dB",38+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
+      spr.drawString("Max Attn",40+menu_offset_x+(menu_delta_x/2),32+menu_offset_y,2);
+      spr.drawNumber(softMuteMaxAttIdx,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
+      spr.drawString("dB",40+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
     }
 
     // G8PTN: Added
     if (cmdCal) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
-      spr.drawNumber(currentCAL,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
-      spr.drawString("Hz",38+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
+      spr.drawNumber(currentCAL,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
+      spr.drawString("Hz",40+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
     }
 
     // G8PTN: Added
     if (cmdAvc) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
-      spr.drawString("Max Gain",38+menu_offset_x+(menu_delta_x/2),32+menu_offset_y,2);
-      spr.drawNumber(currentAVC,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
-      spr.drawString("dB",38+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
+      spr.drawString("Max Gain",40+menu_offset_x+(menu_delta_x/2),32+menu_offset_y,2);
+      spr.drawNumber(currentAVC,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
+      spr.drawString("dB",40+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
     }
 
     // G8PTN: Added
     if (cmdBrt) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
-      spr.drawNumber(currentBrt,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
+      spr.drawNumber(currentBrt,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
     }
 
     if (cmdSleep) {
       spr.setTextColor(0xBEDF,TFT_MENU_BACK);
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
-      spr.drawNumber(currentSleep,38+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
+      spr.drawNumber(currentSleep,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
     }
 
     spr.setTextColor(TFT_WHITE,TFT_BLACK);
