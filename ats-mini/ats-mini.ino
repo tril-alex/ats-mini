@@ -73,7 +73,7 @@
 #define vol_offset_y   150    // Volume vertical offset
 #define rds_offset_x    10    // RDS horizontal offset
 #define rds_offset_y   158    // RDS vertical offset
-#define batt_datum     240    // Battery meter x offset
+#define batt_datum     282    // Battery meter x offset
 #define clock_datum      6    // Clock x offset
 
 // Battery Monitoring
@@ -2149,7 +2149,7 @@ void batteryMonitor() {
   default:
     if      (batt_soc_state > 3) batt_soc_state = 0;                                   // State (Illegal) > 0
     else    batt_soc_state = batt_soc_state;                                           // Keep current state
-    break;   
+    break;
   }
 
   // Debug
@@ -2184,23 +2184,26 @@ void batteryMonitor() {
   }
 
   // Set display information
-  spr.fillRect(batt_datum,5,30,14,TFT_WHITE);
-  spr.fillRect(batt_datum + 1,6,28,12,TFT_BLACK);
-  spr.fillRect(batt_datum + 30,7,3,10,TFT_WHITE);
-  spr.fillRect(batt_datum + 1,6,chargeLevel,12,batteryLevelColor);
+  spr.fillRect(batt_datum, 5, 30, 14, TFT_WHITE);
+  spr.fillRect(batt_datum + 30, 7, 3, 10, TFT_WHITE);
 
-  spr.setTextColor(TFT_WHITE,TFT_BLUE);
+  spr.setTextColor(TFT_WHITE, TFT_BLUE);
   spr.setTextDatum(ML_DATUM);
 
   // The hardware has a load sharing circuit to allow simultaneous charge and power
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V
   // If the average voltage is greater than 4.3V, show "EXT" on the display
   if (adc_volt_avr > 4.3) {
-    spr.drawString("EXT",batt_datum + 45,12,2);
+    /* spr.drawString("EXT", batt_datum - 35, 12, 2); */
+    spr.fillRect(batt_datum + 1, 6, 28, 12, TFT_BLUE);
+    spr.fillTriangle(batt_datum + 6, 11, batt_datum + 16, 11, batt_datum + 16, 8, TFT_YELLOW);
+    spr.fillTriangle(batt_datum + 13, 12, batt_datum + 13, 15, batt_datum + 23, 12, TFT_YELLOW);
   }
   else {
-    spr.drawFloat(adc_volt_avr,2,batt_datum + 37,12,2);
-    spr.drawString("V",batt_datum + 70,12,2);
+    spr.fillRect(batt_datum + 1, 6, 28, 12, TFT_BLACK);
+    spr.fillRect(batt_datum + 1, 6, chargeLevel, 12, batteryLevelColor);
+    spr.drawFloat(adc_volt_avr, 2, batt_datum - 45, 12, 2);
+    spr.drawString("V", batt_datum - 13, 12, 2);
   }
 
   // Debug
