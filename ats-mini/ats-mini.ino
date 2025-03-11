@@ -519,9 +519,8 @@ void setup()
 
   // TFT display brightness control (PWM)
   // Note: At brightness levels below 100%, switching from the PWM may cause power spikes and/or RFI
-  ledcSetup(0, 16000, 8);           // Port 0, 16kHz, 8-bit
-  ledcAttachPin(PIN_LCD_BL, 0);     // Pin assignment
-  ledcWrite(0, 255);                // Default value 255 = 100%)
+  ledcAttach(PIN_LCD_BL, 16000, 8);  // Pin assignment, 16kHz, 8-bit
+  ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%)
 
   // Display startup information
   tft.setTextSize(2);
@@ -630,7 +629,7 @@ void setup()
   else {
     saveAllReceiverInformation();                        // Set EEPROM to defaults
     rx.setVolume(volume);                                // Set initial volume after EEPROM reset
-    ledcWrite(0, currentBrt);                            // Set initial brightness after EEPROM reset
+    ledcWrite(PIN_LCD_BL, currentBrt);                            // Set initial brightness after EEPROM reset
   }
 
   // Debug
@@ -794,7 +793,7 @@ void readAllReceiverInformation()
   EEPROM.end();
 
   // G8PTN: Added
-  ledcWrite(0, currentBrt);
+  ledcWrite(PIN_LCD_BL, currentBrt);
 
   currentFrequency = band[bandIdx].currentFreq;
 
@@ -2278,7 +2277,7 @@ void doBrt( uint16_t v ) {
     if (currentBrt < 32) currentBrt = 32;
   }
 
-  ledcWrite(0, currentBrt);
+  ledcWrite(PIN_LCD_BL, currentBrt);
   showBrt();
   delay(MIN_ELAPSED_TIME); // waits a little more for releasing the button.
 }
