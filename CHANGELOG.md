@@ -1,3 +1,20 @@
+## 1.03 (2025-03-11)
+
+
+### Added
+
+- Add screenshot feature, new command to toggle serial log. Send "C" over the serial port to make a screenshot, then feed the resulting HEX dump to the "xxd -r -p" command to get a BMP image. Use the "t" command to toggle the serial log. 
+
+
+### Changed
+
+- Center and underline the menu headers. Thanks to R8ADR for the patch 
+
+
+### Fixed
+
+- Fix "P" (button press) serial command 
+
 ## 1.02 (2025-03-11)
 
 
