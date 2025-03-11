@@ -12,9 +12,26 @@ G8PTN, Dave (2025)
 
 ## Development notes
 
-- Special instructions for the TFT-eSPI library
-  Ref: https://github.com/Xinyuan-LilyGO/T-Display-S3#quick-start
-- The code for this sketch was developed using Arduino IDE 1.8.19
+Install [Arduino CLI](https://arduino.github.io/arduino-cli/1.2/installation/)
+
+```shell
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+```
+
+Install the toolchain and libraries
+
+```shell
+arduino-cli core install esp32:esp32
+arduino-cli lib install "PU2CLR SI4735" TFT_eSPI
+arduino-cli board details -b esp32:esp32:esp32s3
+```
+
+Compile and flash the firmware
+
+``` shell
+arduino-cli compile -b esp32:esp32:esp32s3 --board-options CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none --clean -e -p COM_PORT -u ats-mini
+```
+
 
 ## Pinout
 
