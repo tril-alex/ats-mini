@@ -151,8 +151,8 @@ const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 // Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
 // ====================================================================================================================================================
 const uint8_t  app_id  = 66;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
-const uint16_t app_ver = 102;         //     v1.01     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
-char app_date[] = "2025-03-09";
+const uint16_t app_ver = 103;         //     v1.01     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
+char app_date[] = "2025-03-10";
 const int eeprom_address = 0;         //               EEPROM start address
 const int eeprom_set_address = 256;   //               EEPROM setting base address
 const int eeprom_setp_address = 272;  //               EEPROM setting (per band) base address
@@ -281,6 +281,7 @@ char time_disp [16];
 #if USE_REMOTE
 uint32_t g_remote_timer = millis();
 uint8_t g_remote_seqnum = 0;
+bool g_remote_log = false;
 #endif
 
 
@@ -2673,6 +2674,10 @@ void clock_time()
   }
 }
 
+void toggleRemoteLog() {
+  g_remote_log = !g_remote_log;
+}
+
 void displayOff() {
   display_on = false;
   ledcWrite(PIN_LCD_BL, 0);
@@ -2690,6 +2695,44 @@ void displayOn() {
   drawSprite();
 }
 
+void captureScreen() {
+  uint16_t width = spr.width(), height = spr.height();
+  char sb[9];
+  Serial.println("");
+  // 14 bytes of BMP header
+  Serial.print("424d"); // BM
+  sprintf(sb, "%08x", htonl(14 + 40 + 12 + width * height * 2)); // Image size
+  Serial.print(sb);
+  Serial.print("00000000");
+  sprintf(sb, "%08x", htonl(14 + 40 + 12)); // Offset to image data
+  Serial.print(sb);
+
+  //Image header
+  Serial.print("28000000"); // Header size
+  sprintf(sb, "%08x", htonl(width));
+  Serial.print(sb);
+  sprintf(sb, "%08x", htonl(height));
+  Serial.print(sb);
+  Serial.print("01001000"); // 1 plane, 16 bpp
+  Serial.print("00000000"); // Compression
+  Serial.print("00000000"); // Compressed image size
+  Serial.print("00000000"); // X res
+  Serial.print("00000000"); // Y res
+  Serial.print("00000000"); // Color map
+  Serial.print("00000000"); // Colors
+  Serial.print("00f80000"); // Red mask
+  Serial.print("e0070000"); // Green mask
+  Serial.println("1f000000"); // Blue mask
+
+  // Image data
+  for (int y=height-1; y>=0; y--) {
+    for (int x=0; x<width; x++) {
+      sprintf(sb, "%04x", htons(spr.readPixel(x, y)));
+      Serial.print(sb);
+    }
+    Serial.println("");
+  }
+}
 
 /**
  * Main loop
@@ -3050,7 +3093,7 @@ void loop()
 #if USE_REMOTE
   // REMOTE Serial - Experimental
 
-  if (millis() - g_remote_timer >= 500)
+  if (millis() - g_remote_timer >= 500 && g_remote_log)
   {
     g_remote_timer = millis();
 
@@ -3178,6 +3221,14 @@ void loop()
 
         case 'o':
           displayOn();
+          break;
+
+        case 'C':
+          captureScreen();
+          break;
+
+        case 't':
+          toggleRemoteLog();
           break;
 
         default:
