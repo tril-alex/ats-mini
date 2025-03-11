@@ -1,0 +1,1 @@
+Improved tuning speed by delaying the display updates
