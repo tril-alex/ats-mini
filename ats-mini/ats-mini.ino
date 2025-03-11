@@ -877,12 +877,8 @@ void readAllReceiverInformation()
     loadSSB();
     bwIdxSSB = (bwIdx > 5) ? 5 : bwIdx;
     rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
-    // If audio bandwidth selected is about 2 kHz or below, it is recommended to set Sideband Cutoff Filter to 0.
-    if (bandwidthSSB[bwIdxSSB].idx == 0 || bandwidthSSB[bwIdxSSB].idx == 4 || bandwidthSSB[bwIdxSSB].idx == 5)
-      rx.setSSBSidebandCutoffFilter(0);
-    else
-      rx.setSSBSidebandCutoffFilter(1);
-      updateBFO();
+    correctCutoffFilter();
+    updateBFO();
   }
   else if (currentMode == AM)
   {
@@ -1051,6 +1047,20 @@ void showSoftMute()
 }
 
 /**
+ * Show message "Loading SSB"
+ */
+
+void showLoadingSSB()
+{
+  if (display_on) {
+    spr.fillSmoothRoundRect(80,40,160,40,4,TFT_WHITE);
+    spr.fillSmoothRoundRect(81,41,158,38,4,TFT_MENU_BACK);
+    spr.drawString("Loading SSB",160,62,4);
+    spr.pushSprite(0,0);
+  }
+}
+
+/**
  *   Sets Band up (1) or down (!1)
  */
 void setBand(int8_t up_down)
@@ -1072,13 +1082,7 @@ void setBand(int8_t up_down)
     if (ssbLoaded == false)
     {
       // Only loadSSB if not already loaded
-      if (display_on) {
-        spr.fillSmoothRoundRect(80,40,160,40,4,TFT_WHITE);
-        spr.fillSmoothRoundRect(81,41,158,38,4,TFT_MENU_BACK);
-        spr.drawString("Loading SSB",160,62,4);
-        spr.pushSprite(0,0);
-      }
-
+      showLoadingSSB();
       loadSSB();
       ssbLoaded = true;
     }
@@ -1233,11 +1237,21 @@ void useBand()
 }
 
 
-void loadSSB() {
+void loadSSB()
+{
   rx.setI2CFastModeCustom(400000); // You can try rx.setI2CFastModeCustom(700000); or greater value
   rx.loadPatch(ssb_patch_content, size_content, bandwidthSSB[bwIdxSSB].idx);
   rx.setI2CFastModeCustom(100000);
   ssbLoaded = true;
+}
+
+void correctCutoffFilter()
+{
+  // If audio bandwidth selected is about 2 kHz or below, it is recommended to set Sideband Cutoff Filter to 0.
+  if (bandwidthSSB[bwIdxSSB].idx == 0 || bandwidthSSB[bwIdxSSB].idx == 4 || bandwidthSSB[bwIdxSSB].idx == 5)
+    rx.setSSBSidebandCutoffFilter(0);
+  else
+    rx.setSSBSidebandCutoffFilter(1);
 }
 
 /**
@@ -1255,11 +1269,7 @@ void doBandwidth(int8_t v)
         bwIdxSSB = maxSsbBw;
 
       rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
-      // If audio bandwidth selected is about 2 kHz or below, it is recommended to set Sideband Cutoff Filter to 0.
-      if (bandwidthSSB[bwIdxSSB].idx == 0 || bandwidthSSB[bwIdxSSB].idx == 4 || bandwidthSSB[bwIdxSSB].idx == 5)
-        rx.setSSBSidebandCutoffFilter(0);
-      else
-        rx.setSSBSidebandCutoffFilter(1);
+      correctCutoffFilter();
 
       band[bandIdx].bandwidthIdx = bwIdxSSB;
     }
@@ -1452,13 +1462,8 @@ void doMode(int8_t v)
       if (currentMode == AM)
       {
         // If you were in AM mode, it is necessary to load SSB patch (every time)
-        if (display_on) {
-          spr.fillSmoothRoundRect(80,40,160,40,4,TFT_WHITE);
-          spr.fillSmoothRoundRect(81,41,158,38,4,TFT_MENU_BACK);
-          spr.drawString("Loading SSB",160,62,4);
-          spr.pushSprite(0,0);
-        }
 
+        showLoadingSSB();
         loadSSB();
         ssbLoaded = true;
         currentMode = LSB;
@@ -1478,14 +1483,7 @@ void doMode(int8_t v)
       if (currentMode == AM)
       {
         // If you were in AM mode, it is necessary to load SSB patch (every time)
-
-        if (display_on) {
-          spr.fillSmoothRoundRect(80,40,160,40,4,TFT_WHITE);
-          spr.fillSmoothRoundRect(81,41,158,38,4,TFT_MENU_BACK);
-          spr.drawString("Loading SSB",160,62,4);
-          spr.pushSprite(0,0);
-        }
-
+        showLoadingSSB();
         loadSSB();
         ssbLoaded = true;
         currentMode = USB;

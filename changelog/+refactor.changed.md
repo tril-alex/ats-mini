@@ -1,0 +1,1 @@
+Refactor the code to make it more DRY
