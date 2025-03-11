@@ -2686,6 +2686,7 @@ void displayOn() {
   drawSprite();
 }
 
+
 /**
  * Main loop
  */
@@ -3115,7 +3116,7 @@ void loop()
           encoderCount --;
           break;
         case 'P':                              // Encoder Push Button
-          pb1_pressed = true;
+          pb1_released = true;
           break;
 
         case 'B':                              // Band Up
