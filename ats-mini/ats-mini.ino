@@ -109,8 +109,8 @@
 #define AM  3
 
 // Menu Options
-#define BAND         0
-#define MODE         1
+#define MODE         0
+#define BAND         1
 #define VOLUME       2
 #define STEP         3
 #define BW           4
@@ -118,15 +118,12 @@
 #define AGC_ATT      6
 #define SOFTMUTE     7
 #define AVC          8
-#define SPARE1       9
-#define SEEKUP      10
-#define SEEKDOWN    11
-#define CALIBRATION 12
-#define BRIGHTNESS  13
+#define SEEKUP       9
+#define SEEKDOWN    10
+#define CALIBRATION 11
+#define BRIGHTNESS  12
 #if BFO_MENU_EN
-#define BFO         14
-#else
-#define SPARE2      14
+#define BFO         13
 #endif
 
 
@@ -135,7 +132,6 @@
 
 #define EEPROM_SIZE     512
 #define STORE_TIME    10000                  // Time of inactivity to make the current receiver status writable (10s)
-                      
 
 // =================================
 // CONSTANTS AND VARIABLES
@@ -151,7 +147,7 @@ const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 // ====================================================================================================================================================
 const uint8_t  app_id  = 65;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
 const uint16_t app_ver = 101;         //     v1.01     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
-char app_date[] = "2025-03-07\0";
+char app_date[] = "2025-03-08\0";
 const int eeprom_address = 0;         //               EEPROM start address
 const int eeprom_set_address = 256;   //               EEPROM setting base adddress
 const int eeprom_setp_address = 272;  //               EEPROM setting (per band) base adddress
@@ -275,20 +271,42 @@ uint8_t g_remote_seqnum = 0;
 
 // Menu Description
 #if BFO_MENU_EN
-// With BFO           <---- 00 ----> <---- 01 ----> <---- 02 ----> <---- 03 ----> <---- 04 ----> <---- 05 ----> <---- 06 ----> <---- 07 ----> <---- 08 ----> <---- 09 ---->
-const char *menu[] = {    "Band",        "Mode",       "Volume",       "Step",     "Bandwidth",      "Mute",      "AGC/ATTN",    "SoftMute",       "AVC",       "Spare 1",
-
-
-//                    <---- 10 ----> <---- 11 ----> <---- 12 ----> <---- 13 ----> <---- 14 ----> 
-                         "Seek Up",     "Seek Dn",   "Calibration", "Brightness",     "BFO"     };
+// With BFO
+const char *menu[] = {
+  "Mode",
+  "Band",
+  "Volume",
+  "Step",
+  "Bandwidth",
+  "Mute",
+  "AGC/ATTN",
+  "SoftMute",
+  "AVC",
+  "Seek Up",
+  "Seek Dn",
+  "Calibration",
+  "Brightness",
+  "BFO"
+};
 
 
 #else
-// Without BFO        <---- 00 ----> <---- 01 ----> <---- 02 ----> <---- 03 ----> <---- 04 ----> <---- 05 ----> <---- 06 ----> <---- 07 ----> <---- 08 ----> <---- 09 ---->
-const char *menu[] = {    "Band",        "Mode",       "Volume",       "Step",     "Bandwidth",      "Mute",      "AGC/ATTN",    "SoftMute",       "AVC",       "Spare 1",
-
-//                    <---- 10 ----> <---- 11 ----> <---- 12 ----> <---- 13 ----> <---- 14 ---->
-                         "Seek Up",     "Seek Dn",   "Calibration", "Brightness",    "Spare 2"  };
+// Without BFO
+const char *menu[] = {
+  "Mode",
+  "Band",
+  "Volume",
+  "Step",
+  "Bandwidth",
+  "Mute",
+  "AGC/ATTN",
+  "SoftMute",
+  "AVC",
+  "Seek Up",
+  "Seek Dn",
+  "Calibration",
+  "Brightness"
+};
 
 #endif
 
@@ -405,7 +423,7 @@ Band band[] = {
     {"VHF", FM_BAND_TYPE, 6400, 10800, 10390, 1, 0},
     {"MW1", MW_BAND_TYPE, 150, 1720, 810, 3, 4},
     {"MW2", MW_BAND_TYPE, 531, 1701, 783, 2, 4},
-    {"MW2", MW_BAND_TYPE, 1700, 3500, 2500, 1, 4},
+    {"MW3", MW_BAND_TYPE, 1700, 3500, 2500, 1, 4},
     {"80M", MW_BAND_TYPE, 3500, 4000, 3700, 0, 4},
     {"SW1", SW_BAND_TYPE, 4000, 5500, 4885, 1, 4},
     {"SW2", SW_BAND_TYPE, 5500, 6500, 6000, 1, 4},
@@ -2686,7 +2704,7 @@ void loop()
         {
           //cmdBand = !cmdBand;
           cmdMenu = !cmdMenu;
-          menuIdx = VOLUME;          
+          menuIdx = VOLUME;
           currentMenuCmd = menuIdx;
           drawSprite();
         }
