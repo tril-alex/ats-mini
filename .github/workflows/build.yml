@@ -1,0 +1,63 @@
+name: Build Firmware
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.ino'
+      - '**.cpp'
+      - '**.h'
+      - '.github/workflows/build.yml'
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+    paths:
+      - '**.ino'
+      - '**.cpp'
+      - '**.h'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.board.fqbn }}
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    strategy:
+      matrix:
+        board:
+          - fqbn: esp32:esp32:esp32s3
+            artifact-suffix: ""
+            platforms: |
+              - name: esp32:esp32
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile firmware
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          libraries: |
+            - name: "PU2CLR SI4735"
+            - name: TFT_eSPI
+          sketch-paths: ats-mini
+          enable-deltas-report: true
+          cli-compile-flags: |
+            - --export-binaries
+            - --board-options
+            - CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none
+
+      - name: Save sketches report as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          path: sketches-reports
+          name: sketches-report-${{ matrix.board.artifact-name-suffix }}
