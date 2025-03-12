@@ -2169,7 +2169,7 @@ void drawSprite()
             spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
             if (currentMode == FM) spr.drawFloat(temp/10.0, 1, i*8, 140, 2);
             else if (temp >= 100) spr.drawFloat(temp/100.0, 3, i*8, 140, 2);
-            else spr.drawNumber(temp*10, i*8, 130, 2);
+            else spr.drawNumber(temp*10, i*8, 140, 2);
           } else if((temp%5)==0 && (temp%10)!=0) {
             spr.drawLine(i*8, 169, i*8, 150, lineColor);
             spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
