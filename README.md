@@ -7,8 +7,7 @@ Based on the following sources:
 * Ralph Xavier:      https://github.com/ralphxavier/SI4735
 * PU2CLR, Ricardo:   https://github.com/pu2clr/SI4735
 * Goshante:          https://github.com/goshante/ats20_ats_ex
-
-G8PTN, Dave (2025)
+* G8PTN, Dave:       https://github.com/G8PTN/ATS_MINI
 
 ## Development notes
 
