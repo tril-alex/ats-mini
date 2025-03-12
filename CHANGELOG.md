@@ -1,3 +1,11 @@
+## 1.04 (2025-03-12)
+
+
+### Changed
+
+- Refactor the code to make it more DRY 
+- Return the Volos Project UI with some changes. The new s-meter also serves as a stereo indicator on FM. 
+
 ## 1.03 (2025-03-11)
 
 

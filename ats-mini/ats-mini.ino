@@ -153,8 +153,8 @@ const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 // Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
 // ====================================================================================================================================================
 const uint8_t  app_id  = 66;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
-const uint16_t app_ver = 103;         //     v1.01     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
-char app_date[] = "2025-03-10";
+const uint16_t app_ver = 104;         //     v1.04     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
+char app_date[] = "2025-03-12";
 const int eeprom_address = 0;         //               EEPROM start address
 const int eeprom_set_address = 256;   //               EEPROM setting base address
 const int eeprom_setp_address = 272;  //               EEPROM setting (per band) base address
@@ -681,7 +681,7 @@ void setup()
   ver_read |= EEPROM.read(eeprom_ver_address + 1);
   EEPROM.end();
 
-  if ((id_read == app_id) && (ver_read == app_ver)) {
+  if (id_read == app_id) {
     readAllReceiverInformation();                        // Load EEPROM values
   }
   else {
@@ -2012,7 +2012,7 @@ void drawSprite()
     get_fw_ver();
     spr.drawString(fw_ver, menu_offset_x + 2, menu_offset_y+33, 2);
     spr.drawString("Authors: PU2CLR (Ricardo Caratti),", menu_offset_x + 2, menu_offset_y+33+16*2, 2);
-    spr.drawString("Volos Projects, ralphxavier, Synnygold,", menu_offset_x + 2, menu_offset_y+33+16*3, 2);
+    spr.drawString("Volos Projects, ralphxavier, Sunnygold,", menu_offset_x + 2, menu_offset_y+33+16*3, 2);
     spr.drawString("G8PTN (Dave), R9UCL (Max Arnold)", menu_offset_x + 2, menu_offset_y+33+16*4, 2);
     spr.setTextDatum(MC_DATUM);
   } else {
