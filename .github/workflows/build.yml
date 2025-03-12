@@ -49,11 +49,12 @@ jobs:
             - name: "PU2CLR SI4735"
             - name: TFT_eSPI
           sketch-paths: ats-mini
-          enable-deltas-report: true
           cli-compile-flags: |
             - --export-binaries
             - --board-options
             - CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none
+          enable-deltas-report: true
+          enable-warnings-report: true
 
       - name: Save sketches report as workflow artifact
         uses: actions/upload-artifact@v4

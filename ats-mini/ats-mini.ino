@@ -1829,6 +1829,7 @@ uint8_t getStrength() {
     if  (rssi > 76)                   return 17;  //>S9 +60
     // newStereoPilot=si4735.getCurrentPilot();
   }
+  return 1;
 }
 
 // G8PTN: Alternative layout
