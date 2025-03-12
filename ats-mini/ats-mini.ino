@@ -59,22 +59,24 @@
 // Display position control
 // Added during development, code could be replaced with fixed values
 #define menu_offset_x    0    // Menu horizontal offset
-#define menu_offset_y   25    // Menu vertical offset
+#define menu_offset_y   20    // Menu vertical offset
 #define menu_delta_x    10    // Menu width delta
-#define meter_offset_x 185    // Meter horizontal offset
-#define meter_offset_y 115    // Meter vertical offset
-#define freq_offset_x  260    // Frequency horizontal offset
-#define freq_offset_y   75    // Frequency vertical offset
-#define funit_offset_x 265    // Frequency Unit horizontal offset
-#define funit_offset_y  55    // Frequency Unitvertical offset
-#define mode_offset_x   95    // Mode horizontal offset
-#define mode_offset_y  114    // Mode vertical offset
+#define meter_offset_x  00    // Meter horizontal offset
+#define meter_offset_y   0    // Meter vertical offset
+#define freq_offset_x  250    // Frequency horizontal offset
+#define freq_offset_y   65    // Frequency vertical offset
+#define funit_offset_x 255    // Frequency Unit horizontal offset
+#define funit_offset_y  48    // Frequency Unit vertical offset
+#define band_offset_x  150    // Band horizontal offset
+#define band_offset_y    3    // Band vertical offset
+// #define mode_offset_x   95    // Mode horizontal offset
+// #define mode_offset_y  114    // Mode vertical offset
 #define vol_offset_x   120    // Volume horizontal offset
 #define vol_offset_y   150    // Volume vertical offset
-#define rds_offset_x    10    // RDS horizontal offset
-#define rds_offset_y   158    // RDS vertical offset
-#define batt_datum     282    // Battery meter x offset
-#define clock_datum      6    // Clock x offset
+#define rds_offset_x   165    // RDS horizontal offset
+#define rds_offset_y    94    // RDS vertical offset
+#define batt_datum     286    // Battery meter x offset
+#define clock_datum     90    // Clock x offset
 
 // Battery Monitoring
 #define BATT_ADC_READS          10  // ADC reads for average calculation (Maximum value = 16 to avoid rollover in average calculation)
@@ -207,6 +209,7 @@ uint16_t currentFrequency;
 const uint16_t currentBFOStep = 10;
 
 char sAgc[15];
+char sAvc[15];
 
 // G8PTN: Main additional variables
 // BFO and Calibration limits (BFOMax + CALMax <= 16000)
@@ -988,8 +991,6 @@ void showBandwidth()
  */
 void showRSSI()
 {
-  char sMeter[10];
-  sprintf(sMeter, "S:%d ", rssi);
   drawSprite();
 }
 
@@ -1972,9 +1973,8 @@ void drawMenu() {
       spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
       spr.drawNumber(currentSleep,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
     }
-
-    spr.setTextColor(TFT_WHITE,TFT_BLACK);
   }
+  spr.setTextColor(TFT_WHITE,TFT_BLACK);
 }
 
 
@@ -1984,30 +1984,27 @@ void drawSprite()
 {
   if (!display_on) return;
   spr.fillSprite(TFT_BLACK);
-  spr.setTextColor(TFT_WHITE,TFT_BLACK);
-
-  // Status bar
-  spr.fillRect(0,0,320,22,TFT_BLUE);
+  spr.setTextColor(TFT_WHITE, TFT_BLACK);
 
   // Time
-  spr.setTextColor(TFT_WHITE,TFT_BLUE);
-  spr.setTextDatum(ML_DATUM);
-  spr.drawString(time_disp,clock_datum,12,2);
-  spr.setTextColor(TFT_WHITE,TFT_BLACK);
+  /* spr.setTextColor(TFT_WHITE,TFT_BLACK); */
+  /* spr.setTextDatum(ML_DATUM); */
+  /* spr.drawString(time_disp,clock_datum,12,2); */
+  /* spr.setTextColor(TFT_WHITE,TFT_BLACK); */
 
-  // Screen activity icon
-  screen_toggle = !screen_toggle;
-  spr.drawCircle(clock_datum+50,11,6,TFT_WHITE);
-  if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,TFT_BLACK);
-  else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN);
+  /* // Screen activity icon */
+  /* screen_toggle = !screen_toggle; */
+  /* spr.drawCircle(clock_datum+50,11,6,TFT_WHITE); */
+  /* if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,TFT_BLACK); */
+  /* else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN); */
 
-  // EEPROM write request icon
-  spr.drawCircle(clock_datum+70,11,6,TFT_WHITE);
-  if (eeprom_wr_flag){
-    spr.fillCircle(clock_datum+70,11,5,TFT_RED);
-    eeprom_wr_flag = false;
-  }
-  else spr.fillCircle(clock_datum+70,11,5,TFT_BLACK);
+  /* // EEPROM write request icon */
+  /* spr.drawCircle(clock_datum+70,11,6,TFT_WHITE); */
+  /* if (eeprom_wr_flag){ */
+  /*   spr.fillCircle(clock_datum+70,11,5,TFT_RED); */
+  /*   eeprom_wr_flag = false; */
+  /* } */
+  /* else spr.fillCircle(clock_datum+70,11,5,TFT_BLACK); */
 
   if (cmdAbout) {
     spr.setTextDatum(TL_DATUM);
@@ -2019,11 +2016,22 @@ void drawSprite()
     spr.drawString("G8PTN (Dave), R9UCL (Max Arnold)", menu_offset_x + 2, menu_offset_y+33+16*4, 2);
     spr.setTextDatum(MC_DATUM);
   } else {
+
+    spr.setFreeFont(&Orbitron_Light_24);
+    spr.setTextDatum(TC_DATUM);
+    spr.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+    uint16_t band_width = spr.drawString(band[bandIdx].bandName, band_offset_x, band_offset_y);
+    spr.setTextDatum(TL_DATUM);
+    uint16_t mode_width = spr.drawString(bandModeDesc[currentMode], band_offset_x + band_width / 2 + 12, band_offset_y + 8, 2);
+    spr.drawSmoothRoundRect(band_offset_x + band_width / 2 + 7, band_offset_y + 7, 4, 4, mode_width + 8, 17, TFT_LIGHTGREY, TFT_BLACK);
+    spr.setTextColor(TFT_WHITE, TFT_BLACK);
+    spr.setTextDatum(MC_DATUM);
+
     if (currentMode == FM) {
       spr.setTextDatum(MR_DATUM);
       spr.drawFloat(currentFrequency/100.00,2,freq_offset_x,freq_offset_y,7);
       spr.setTextDatum(ML_DATUM);
-      spr.drawString("MHz",funit_offset_x,funit_offset_y,4);
+      spr.drawString("MHz",funit_offset_x,funit_offset_y);
       spr.setTextDatum(MC_DATUM);
     } else {
       spr.setTextDatum(MR_DATUM);
@@ -2043,46 +2051,52 @@ void drawSprite()
         spr.setTextDatum(ML_DATUM);
         spr.drawString(".000",5+freq_offset_x,15+freq_offset_y,4);
       }
-      spr.drawString("kHz",funit_offset_x,funit_offset_y,4);
+      spr.drawString("kHz",funit_offset_x,funit_offset_y);
       spr.setTextDatum(MC_DATUM);
     }
 
     if (isMenuMode()) drawMenu();                      // G8PTN: Removed cmdBand, now part of isMenuMode()
     else {
-      // countClick = 0;
+
       spr.setTextDatum(ML_DATUM);
       spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
       spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_WHITE);
       spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
-      spr.drawString("Band:",6+menu_offset_x,64+menu_offset_y+(-3*16),2);
-      spr.drawString(band[bandIdx].bandName,48+menu_offset_x,64+menu_offset_y+(-3*16),2);
-      spr.drawString("Mode:",6+menu_offset_x,64+menu_offset_y+(-2*16),2);
-      spr.drawString(bandModeDesc[currentMode],48+menu_offset_x,64+menu_offset_y+(-2*16),2);
-      spr.drawString("Step:",6+menu_offset_x,64+menu_offset_y+(-1*16),2);
-      if (currentMode == FM) spr.drawString(FmStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-1*16),2);
-      else spr.drawString(AmSsbStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-1*16),2);
-      spr.drawString("BW:",6+menu_offset_x,64+menu_offset_y+(0*16),2);
+      spr.drawString("Step:",6+menu_offset_x,64+menu_offset_y+(-3*16),2);
+      if (currentMode == FM) spr.drawString(FmStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-3*16),2);
+      else spr.drawString(AmSsbStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-3*16),2);
+      spr.drawString("BW:",6+menu_offset_x,64+menu_offset_y+(-2*16),2);
       if (isSSB())
         {
-          spr.drawString(bandwidthSSB[bwIdxSSB].desc,48+menu_offset_x,64+menu_offset_y+(0*16),2);
+          spr.drawString(bandwidthSSB[bwIdxSSB].desc,48+menu_offset_x,64+menu_offset_y+(-2*16),2);
         }
       else if (currentMode == AM)
         {
-          spr.drawString(bandwidthAM[bwIdxAM].desc,48+menu_offset_x,64+menu_offset_y+(0*16),2);
+          spr.drawString(bandwidthAM[bwIdxAM].desc,48+menu_offset_x,64+menu_offset_y+(-2*16),2);
         }
       else
         {
-          spr.drawString(bandwidthFM[bwIdxFM].desc,48+menu_offset_x,64+menu_offset_y+(0*16),2);
+          spr.drawString(bandwidthFM[bwIdxFM].desc,48+menu_offset_x,64+menu_offset_y+(-2*16),2);
         }
       if (agcNdx == 0 && agcIdx == 0) {
-        spr.drawString("AGC:",6+menu_offset_x,64+menu_offset_y+(1*16),2);
-        spr.drawString("On",48+menu_offset_x,64+menu_offset_y+(1*16),2);
+        spr.drawString("AGC:",6+menu_offset_x,64+menu_offset_y+(-1*16),2);
+        spr.drawString("On",48+menu_offset_x,64+menu_offset_y+(-1*16),2);
       } else {
         sprintf(sAgc, "%2.2d", agcNdx);
-        spr.drawString("ATTN:",6+menu_offset_x,64+menu_offset_y+(1*16),2);
-        spr.drawString(sAgc,48+menu_offset_x,64+menu_offset_y+(1*16),2);
+        spr.drawString("Att:",6+menu_offset_x,64+menu_offset_y+(-1*16),2);
+        spr.drawString(sAgc,48+menu_offset_x,64+menu_offset_y+(-1*16),2);
       }
-
+      spr.drawString("AVC:", 6+menu_offset_x, 64+menu_offset_y + (0*16), 2);
+      if (currentMode !=FM) {
+        if (isSSB()) {
+          sprintf(sAvc, "%2.2ddB", SsbAvcIdx);
+        } else {
+          sprintf(sAvc, "%2.2ddB", AmAvcIdx);
+        }
+      } else {
+        sprintf(sAvc, "n/a");
+      }
+      spr.drawString(sAvc, 48+menu_offset_x, 64+menu_offset_y + (0*16), 2);
       /*
         spr.drawString("BFO:",6+menu_offset_x,64+menu_offset_y+(2*16),2);
         if (isSSB()) {
@@ -2093,16 +2107,15 @@ void drawSprite()
         spr.setTextDatum(MC_DATUM);
       */
 
-      spr.drawString("VOL:",6+menu_offset_x,64+menu_offset_y+(2*16),2);
+      spr.drawString("Vol:",6+menu_offset_x,64+menu_offset_y+(1*16),2);
       if (muted) {
         //spr.setTextDatum(MR_DATUM);
         spr.setTextColor(TFT_WHITE,TFT_RED);
-        spr.drawString("Muted",48+menu_offset_x,64+menu_offset_y+(2*16),2);
+        spr.drawString("Muted",48+menu_offset_x,64+menu_offset_y+(1*16),2);
         spr.setTextColor(TFT_WHITE,TFT_BLACK);
       }
-      else spr.drawNumber(rx.getVolume(),48+menu_offset_x,64+menu_offset_y+(2*16),2);
+      else spr.drawNumber(rx.getVolume(),48+menu_offset_x,64+menu_offset_y+(1*16),2);
       spr.setTextDatum(MC_DATUM);
-
     }
 
     if (bfoOn) {
@@ -2114,54 +2127,58 @@ void drawSprite()
     }
 
     // S-Meter
-    for(int i=0;i<getStrength();i++)
+    spr.drawTriangle(meter_offset_x + 1, meter_offset_y + 1, meter_offset_x + 11, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 6, TFT_LIGHTGREY);
+    spr.drawLine(meter_offset_x + 6, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 12, TFT_LIGHTGREY);
+    for(int i=0; i<getStrength(); i++)
       if (i<10)
-        // Option 1 - Variable heaght bars
-        //spr.fillRect(244+(i*4),80-(i*1),2,4+(i*1),0x3526);
-        // Option 2 - Fixed heaght bars
-        //spr.fillRect(1+meter_offset_x+(i*8),1+meter_offset_y,3,20,0x3526);     // Option 2a
-        spr.fillRect(1+meter_offset_x+(i*8),1+meter_offset_y,3,20,TFT_GREEN);    // Option 2b
+        spr.fillRect(15+meter_offset_x + (i*4), 1+meter_offset_y, 2, 12, TFT_GREEN);
       else
-        // Option 1 - Variable heaght bars
-        //spr.fillRect(244+(i*4),80-(i*1),2,4+(i*1),TFT_RED);
-        // Option 2 - Fixed heaght bars
-        spr.fillRect(1+meter_offset_x+(i*8),1+meter_offset_y,3,20,TFT_RED);
-
-    // S-Meter Scale
-    //spr.drawLine(1+meter_offset_x,25+meter_offset_y,5+meter_offset_x+(15*8),25+meter_offset_y,TFT_DARKGREY);  // Option 2a
-    //spr.setTextColor(TFT_DARKGREY,TFT_BLACK);                                                                 // Option 2a
-    spr.drawLine(1+meter_offset_x,25+meter_offset_y,5+meter_offset_x+(15*8),25+meter_offset_y,TFT_WHITE);       // Option 2b
-    spr.setTextColor(TFT_WHITE,TFT_BLACK);                                                                      // Option 2b
-
-    spr.drawString("S",1+meter_offset_x,45+meter_offset_y,2);
-    for(int i=0;i<16;i++)
-      {
-        if (i%2) {
-          //spr.drawLine(2+meter_offset_x+(i*8),25+meter_offset_y,2+meter_offset_x+(i*8),35+meter_offset_y,TFT_DARKGREY);  // Option 2a
-          spr.drawLine(2+meter_offset_x+(i*8),25+meter_offset_y,2+meter_offset_x+(i*8),35+meter_offset_y,TFT_WHITE);       // Option 2b
-          if (i < 10)  spr.drawNumber(i,2+meter_offset_x+(i*8),45+meter_offset_y,2);
-          if (i == 13) spr.drawString("+40",2+meter_offset_x+(i*8),45+meter_offset_y,2);
-        }
-      }
-    spr.setTextColor(TFT_WHITE,TFT_BLACK);
+        spr.fillRect(15+meter_offset_x + (i*4), 1+meter_offset_y, 2, 12, TFT_RED);
 
     if (currentMode == FM) {
-      spr.fillSmoothRoundRect(1+mode_offset_x,1+mode_offset_y,76,22,4,TFT_WHITE);
-      spr.fillSmoothRoundRect(2+mode_offset_x,2+mode_offset_y,74,20,4,TFT_BLACK);
       if (rx.getCurrentPilot()) {
-        //spr.setTextColor(TFT_RED,TFT_BLACK);                                       // STEREO Option 1
-        spr.fillSmoothRoundRect(2+mode_offset_x,2+mode_offset_y,74,20,4,TFT_RED);    // STEREO Option 2
-        spr.setTextColor(TFT_WHITE,TFT_RED);                                         // STEREO Option 2
-        spr.drawString("STEREO",38+mode_offset_x,11+mode_offset_y,2);
-        spr.setTextColor(TFT_WHITE,TFT_BLACK);
-      } else spr.drawString("MONO",38+mode_offset_x,11+mode_offset_y,2);
+        spr.fillRect(15 + meter_offset_x, 6+meter_offset_y, 4*17, 2, TFT_BLACK);
+      }
 
       // spr.setTextColor(TFT_MAGENTA,TFT_BLACK);
-      spr.setTextDatum(ML_DATUM);
-      spr.drawString(bufferStationName,rds_offset_x,rds_offset_y,4);
+      spr.setTextDatum(TC_DATUM);
+      spr.drawString(bufferStationName, rds_offset_x, rds_offset_y, 4);
       spr.setTextDatum(MC_DATUM);
       // spr.setTextColor(TFT_WHITE,TFT_BLACK);
     }
+
+    // Tuner scale
+    spr.fillTriangle(156, 122, 160, 132, 164, 122, TFT_RED);
+    spr.drawLine(160, 124, 160, 169, TFT_RED);
+
+    spr.setTextDatum(MC_DATUM);
+    int temp;
+    if (isSSB()) {
+      temp = (currentFrequency + currentBFO/1000)/10.00 - 20;
+    } else {
+      temp = currentFrequency/10.00 - 20;
+    }
+    uint16_t lineColor;
+    for(int i=0;i<40;i++)
+      {
+        if (i==20) lineColor=TFT_RED;
+        else lineColor=0xC638;
+        if (!(temp<band[bandIdx].minimumFreq/10.00 or temp>band[bandIdx].maximumFreq/10.00)) {
+          if((temp%10)==0){
+            spr.drawLine(i*8, 169, i*8, 150, lineColor);
+            spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
+            if (currentMode == FM) spr.drawFloat(temp/10.0, 1, i*8, 140, 2);
+            else if (temp >= 100) spr.drawFloat(temp/100.0, 3, i*8, 140, 2);
+            else spr.drawNumber(temp*10, i*8, 130, 2);
+          } else if((temp%5)==0 && (temp%10)!=0) {
+            spr.drawLine(i*8, 169, i*8, 150, lineColor);
+            spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
+          } else {
+            spr.drawLine(i*8, 169, i*8, 160, lineColor);
+          }
+        }
+        temp += 1;
+      }
     /*
       else {
       spr.fillSmoothRoundRect(1+mode_offset_x,1+mode_offset_y,76,22,4,TFT_WHITE);
@@ -2312,26 +2329,26 @@ void batteryMonitor() {
   }
 
   // Set display information
-  spr.fillRect(batt_datum, 5, 30, 14, TFT_WHITE);
-  spr.fillRect(batt_datum + 30, 7, 3, 10, TFT_WHITE);
+  spr.fillRect(batt_datum, 1, 30, 14, TFT_WHITE);
+  spr.fillRect(batt_datum + 30, 3, 3, 10, TFT_WHITE);
 
-  spr.setTextColor(TFT_WHITE, TFT_BLUE);
-  spr.setTextDatum(ML_DATUM);
+  spr.setTextColor(TFT_WHITE, TFT_BLACK);
+  spr.setTextDatum(TR_DATUM);
 
   // The hardware has a load sharing circuit to allow simultaneous charge and power
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V
-  // If the average voltage is greater than 4.3V, show "EXT" on the display
+  // If the average voltage is greater than 4.3V, show ligtning on the display
   if (adc_volt_avr > 4.3) {
-    /* spr.drawString("EXT", batt_datum - 35, 12, 2); */
-    spr.fillRect(batt_datum + 1, 6, 28, 12, TFT_BLUE);
-    spr.fillTriangle(batt_datum + 6, 11, batt_datum + 16, 11, batt_datum + 16, 8, TFT_YELLOW);
-    spr.fillTriangle(batt_datum + 13, 12, batt_datum + 13, 15, batt_datum + 23, 12, TFT_YELLOW);
+    spr.fillRect(batt_datum + 1, 2, 28, 12, TFT_BLUE);
+    spr.fillTriangle(batt_datum + 6, 7, batt_datum + 16, 7, batt_datum + 16, 4, TFT_YELLOW);
+    spr.fillTriangle(batt_datum + 23, 8, batt_datum + 13, 8, batt_datum + 13, 11, TFT_YELLOW);
   }
   else {
-    spr.fillRect(batt_datum + 1, 6, 28, 12, TFT_BLACK);
-    spr.fillRect(batt_datum + 1, 6, chargeLevel, 12, batteryLevelColor);
-    spr.drawFloat(adc_volt_avr, 2, batt_datum - 45, 12, 2);
-    spr.drawString("V", batt_datum - 13, 12, 2);
+    char voltage[8];
+    spr.fillRect(batt_datum + 1, 2, 28, 12, TFT_BLACK);
+    spr.fillRect(batt_datum + 1, 2, chargeLevel, 12, batteryLevelColor);
+    sprintf(voltage, "%.02fV", adc_volt_avr);
+    spr.drawString(voltage, batt_datum - 3, 0, 2);
   }
 
   // Debug
