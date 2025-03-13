@@ -2009,12 +2009,13 @@ void drawSprite()
 
   if (cmdAbout) {
     spr.setTextDatum(TL_DATUM);
-    spr.drawString("ESP32-SI4732 Receiver", menu_offset_x, menu_offset_y + 4, 4);
+    spr.drawString("ESP32-SI4732 Receiver", 0, 0, 4);
     get_fw_ver();
-    spr.drawString(fw_ver, menu_offset_x + 2, menu_offset_y+33, 2);
-    spr.drawString("Authors: PU2CLR (Ricardo Caratti),", menu_offset_x + 2, menu_offset_y+33+16*2, 2);
-    spr.drawString("Volos Projects, ralphxavier, Sunnygold,", menu_offset_x + 2, menu_offset_y+33+16*3, 2);
-    spr.drawString("G8PTN (Dave), R9UCL (Max Arnold)", menu_offset_x + 2, menu_offset_y+33+16*4, 2);
+    spr.drawString(fw_ver, 2, 33, 2);
+    spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 33 + 16, 2);
+    spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 33 + 16 * 3, 2);
+    spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 33 + 16 * 4, 2);
+    spr.drawString("G8PTN (Dave), R9UCL (Max Arnold)", 2, 33 + 16 * 5, 2);
     spr.setTextDatum(MC_DATUM);
   } else {
 
@@ -2192,12 +2193,12 @@ void drawSprite()
 #if TUNE_HOLDOFF
   // Update if not tuning
   if (tuning_flag == false) {
-    batteryMonitor();
+    if (!cmdAbout) batteryMonitor();
     spr.pushSprite(0,0);
   }
 #else
   // No hold off
-  batteryMonitor();
+  if (!cmdAbout) batteryMonitor();
   spr.pushSprite(0,0);
 #endif
 
