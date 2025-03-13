@@ -31,7 +31,7 @@ jobs:
       matrix:
         board:
           - fqbn: esp32:esp32:esp32s3
-            artifact-suffix: ""
+            artifact-suffix: "esp32s3"
             platforms: |
               - name: esp32:esp32
 
@@ -53,6 +53,8 @@ jobs:
             - --export-binaries
             - --board-options
             - CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none
+            - --warnings
+            - none
           enable-deltas-report: true
           enable-warnings-report: true
 
