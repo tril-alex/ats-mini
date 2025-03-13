@@ -36,7 +36,7 @@ arduino-cli compile -b esp32:esp32:esp32s3 --board-options CDCOnBoot=cdc,FlashSi
 
 The pinout table is shown below.
 
-The relevant colums are ESP32-WROOM-1 "Pin Name" and "ATS-Mini Sketch Pin Definitions"
+The relevant colums are ESP32-S3-WROOM-1 "Pin Name" and "ATS-Mini Sketch Pin Definitions"
 
 | ESP32-S3-WROOM-1<br>Pin # | ESP32-S3-WROOM-1<br>Pin Name | ATS-MINI Sketch<br>Pin Definitions | TFT_eSPI<br>Pin Definition | xtronic.org<br>Schematic | Comments<br>Info         |
 |---------------------------|------------------------------|------------------------------------|----------------------------|--------------------------|--------------------------|
