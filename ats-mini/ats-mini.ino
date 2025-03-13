@@ -2130,16 +2130,16 @@ void drawSprite()
 
     // S-Meter
     spr.drawTriangle(meter_offset_x + 1, meter_offset_y + 1, meter_offset_x + 11, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 6, TFT_LIGHTGREY);
-    spr.drawLine(meter_offset_x + 6, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 12, TFT_LIGHTGREY);
+    spr.drawLine(meter_offset_x + 6, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 14, TFT_LIGHTGREY);
     for(int i=0; i<getStrength(); i++)
       if (i<10)
-        spr.fillRect(15+meter_offset_x + (i*4), 1+meter_offset_y, 2, 12, TFT_GREEN);
+        spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, TFT_GREEN);
       else
-        spr.fillRect(15+meter_offset_x + (i*4), 1+meter_offset_y, 2, 12, TFT_RED);
+        spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, TFT_RED);
 
     if (currentMode == FM) {
       if (rx.getCurrentPilot()) {
-        spr.fillRect(15 + meter_offset_x, 6+meter_offset_y, 4*17, 2, TFT_BLACK);
+        spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, TFT_BLACK);
       }
 
       // spr.setTextColor(TFT_MAGENTA,TFT_BLACK);
@@ -2173,8 +2173,8 @@ void drawSprite()
             else if (temp >= 100) spr.drawFloat(temp/100.0, 3, i*8, 140, 2);
             else spr.drawNumber(temp*10, i*8, 140, 2);
           } else if((temp%5)==0 && (temp%10)!=0) {
-            spr.drawLine(i*8, 169, i*8, 150, lineColor);
-            spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
+            spr.drawLine(i*8, 169, i*8, 155, lineColor);
+            spr.drawLine((i*8)+1, 169, (i*8)+1, 155, lineColor);
           } else {
             spr.drawLine(i*8, 169, i*8, 160, lineColor);
           }
