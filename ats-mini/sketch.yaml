@@ -1,0 +1,10 @@
+profiles:
+  esp32s3:
+    fqbn: esp32:esp32:esp32s3
+    platforms:
+      - platform: esp32:esp32 (3.1.1)
+    libraries:
+      - PU2CLR SI4735 (2.1.8)
+      - TFT_eSPI (2.5.43)
+
+default_profile: esp32s3

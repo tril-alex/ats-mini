@@ -5,35 +5,24 @@ on:
     branches:
       - main
     paths:
-      - '**.ino'
-      - '**.cpp'
-      - '**.h'
+      - 'ats-mini/**'
       - '.github/workflows/build.yml'
   push:
-    tags:
-      - 'v*'
-    branches:
-      - main
+    # tags:
+    #   - 'v*'
+    # branches:
+    #   - main
     paths:
-      - '**.ino'
-      - '**.cpp'
-      - '**.h'
+      - 'ats-mini/**'
       - '.github/workflows/build.yml'
   workflow_dispatch:
 
 jobs:
   build:
-    name: ${{ matrix.board.fqbn }}
     runs-on: ubuntu-latest
     permissions: {}
-
     strategy:
-      matrix:
-        board:
-          - fqbn: esp32:esp32:esp32s3
-            artifact-suffix: "esp32s3"
-            platforms: |
-              - name: esp32:esp32
+      fail-fast: true
 
     steps:
       - name: Checkout repository
@@ -43,16 +32,29 @@ jobs:
         uses: arduino/compile-sketches@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          fqbn: ${{ matrix.board.fqbn }}
-          platforms: ${{ matrix.board.platforms }}
-          libraries: |
-            - name: "PU2CLR SI4735"
-            - name: TFT_eSPI
-          sketch-paths: ats-mini
+          sketch-paths: |
+            - ats-mini
+          fqbn: esp32:esp32:esp32s3
           cli-compile-flags: |
+            - --profile
+            - esp32s3
             - --export-binaries
             - --board-options
-            - CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none
+            - CDCOnBoot=cdc
+            - --board-options
+            - FlashSize=8M
+            - --board-options
+            - PSRAM=disabled
+            - --board-options
+            - CPUFreq=80
+            - --board-options
+            - USBMode=hwcdc
+            - --board-options
+            - FlashMode=qio
+            - --board-options
+            - PartitionScheme=default_8MB
+            - --board-options
+            - DebugLevel=none
             - --warnings
             - none
           enable-deltas-report: true
@@ -63,4 +65,18 @@ jobs:
         with:
           if-no-files-found: error
           path: sketches-reports
-          name: sketches-report-${{ matrix.board.artifact-name-suffix }}
+          name: sketches-report
+
+      # - name: Prepare compiled artifact
+      #   run: |
+      #     mkdir -p artifact && mv "build/esp32.esp32.esp32/*.ino.bin" "build/esp32.esp32.esp32/*.ino.partitions.bin" "artifact/"
+
+      # - name: Get commit hash
+      #   id: slug
+      #   run: echo "::set-output name=sha7::$(echo "${GITHUB_SHA}" | cut -c1-7)"
+
+      # - name: Upload
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.sha7 }}
+      #     path: ${{ env.ARTIFACT_FOLDER }}
