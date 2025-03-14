@@ -94,7 +94,7 @@
 #define DEFAULT_VOLUME          35  // change it for your favorite sound volume
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
-#define CLICK_TIME             100
+#define CLICK_TIME              50
 #define SHORT_PRESS_TIME       500
 #define LONG_PRESS_TIME        2000
 
