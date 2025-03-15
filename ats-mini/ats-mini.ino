@@ -61,8 +61,10 @@
 #define menu_offset_x    0    // Menu horizontal offset
 #define menu_offset_y   20    // Menu vertical offset
 #define menu_delta_x    10    // Menu width delta
-#define meter_offset_x  00    // Meter horizontal offset
+#define meter_offset_x   0    // Meter horizontal offset
 #define meter_offset_y   0    // Meter vertical offset
+#define save_offset_x   87    // EEPROM save icon horizontal offset
+#define save_offset_y    0    // EEPROM save icon vertical offset
 #define freq_offset_x  250    // Frequency horizontal offset
 #define freq_offset_y   65    // Frequency vertical offset
 #define funit_offset_x 255    // Frequency Unit horizontal offset
@@ -2008,13 +2010,18 @@ void drawSprite()
   /* if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,theme[themeIdx].bg); */
   /* else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN); */
 
-  /* // EEPROM write request icon */
-  /* spr.drawCircle(clock_datum+70,11,6,theme[themeIdx].text); */
-  /* if (eeprom_wr_flag){ */
-  /*   spr.fillCircle(clock_datum+70,11,5,TFT_RED); */
-  /*   eeprom_wr_flag = false; */
-  /* } */
-  /* else spr.fillCircle(clock_datum+70,11,5,theme[themeIdx].bg); */
+  // EEPROM write request icon
+#if THEME_EDITOR
+  eeprom_wr_flag = true;
+#endif
+  if (eeprom_wr_flag){
+    spr.fillRect(save_offset_x+3, save_offset_y+2, 3, 5, theme[themeIdx].save_icon);
+    spr.fillTriangle(save_offset_x+1, save_offset_y+7, save_offset_x+7, save_offset_y+7, save_offset_x+4, save_offset_y+10, theme[themeIdx].save_icon);
+    spr.drawLine(save_offset_x, save_offset_y+12, save_offset_x, save_offset_y+13, theme[themeIdx].save_icon);
+    spr.drawLine(save_offset_x, save_offset_y+13, save_offset_x+8, save_offset_y+13, theme[themeIdx].save_icon);
+    spr.drawLine(save_offset_x+8, save_offset_y+13, save_offset_x+8, save_offset_y+12, theme[themeIdx].save_icon);
+    eeprom_wr_flag = false;
+  }
 
   if (cmdAbout) {
     // About screen
@@ -2165,7 +2172,11 @@ void drawSprite()
 
       spr.setTextDatum(TC_DATUM);
       spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
+#if THEME_EDITOR
+      spr.drawString("*STATION*", rds_offset_x, rds_offset_y, 4);
+#else
       spr.drawString(bufferStationName, rds_offset_x, rds_offset_y, 4);
+#endif
     }
 
     // Tuner scale

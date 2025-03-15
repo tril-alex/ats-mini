@@ -1,5 +1,5 @@
 // Theme editor
-#define THEME_EDITOR 1         // Enables setting and printing of theme colors
+#define THEME_EDITOR 0         // Enables setting and printing of theme colors
 
 typedef struct {
   char name[12];
@@ -11,6 +11,8 @@ typedef struct {
   uint16_t smeter_icon;
   uint16_t smeter_bar;
   uint16_t smeter_bar_plus;
+
+  uint16_t save_icon;
 
   uint16_t batt_voltage;
   uint16_t batt_border;
@@ -62,6 +64,7 @@ const ColorTheme theme[] = {
     0xD69A, // smeter_icon
     0x07E0, // smeter_bar
     0xF800, // smeter_bar_plus
+    0xF800, // save_icon
     0xFFFF, // batt_voltage
     0xFFFF, // batt_border
     0x07E0, // batt_full
@@ -100,6 +103,7 @@ const ColorTheme theme[] = {
     0xD69A, // smeter_icon
     0x07E0, // smeter_bar
     0xF800, // smeter_bar_plus
+    0xF800, // save_icon
     0xFFFF, // batt_voltage
     0xFFFF, // batt_border
     0x07E0, // batt_full
@@ -138,6 +142,7 @@ const ColorTheme theme[] = {
     0x18C3, // smeter_icon
     0x632C, // smeter_bar
     0x18C3, // smeter_bar_plus
+    0x632C, // save_icon
     0x18C3, // batt_voltage
     0x0000, // batt_border
     0x632C, // batt_full
@@ -176,6 +181,7 @@ const ColorTheme theme[] = {
     0x18C3, // smeter_icon
     0x4208, // smeter_bar
     0x2945, // smeter_bar_plus
+    0x4208, // save_icon
     0x18C3, // batt_voltage
     0x0000, // batt_border
     0x4208, // batt_full
@@ -214,6 +220,7 @@ const ColorTheme theme[] = {
     0xB925, // smeter_icon
     0x8925, // smeter_bar
     0xF800, // smeter_bar_plus
+    0xF800, // save_icon
     0xDA8A, // batt_voltage
     0xDA8A, // batt_border
     0x8925, // batt_full
@@ -252,6 +259,7 @@ const ColorTheme theme[] = {
     0x052D, // smeter_icon
     0x052D, // smeter_bar
     0x07AD, // smeter_bar_plus
+    0x2364, // save_icon
     0x052D, // batt_voltage
     0x07AD, // batt_border
     0x052D, // batt_full
