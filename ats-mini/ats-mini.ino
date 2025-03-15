@@ -134,9 +134,6 @@
 #define MENU_SLEEP        1
 #define MENU_ABOUT        2
 
-#define TFT_MENU_BACK TFT_BLACK              // 0x01E9
-#define TFT_MENU_HIGHLIGHT_BACK TFT_BLUE
-
 #define EEPROM_SIZE     512
 #define STORE_TIME    10000                  // Time of inactivity to make the current receiver status writable (10s)
 
@@ -290,6 +287,8 @@ bool g_remote_log = false;
 
 // Tables
 
+#include "themes.h"
+
 // Menu Description
 #if BFO_MENU_EN
 // With BFO
@@ -415,7 +414,6 @@ uint16_t currentStepIdx = 1;
 const char *bandModeDesc[] = {"FM", "LSB", "USB", "AM"};
 const int lastBandModeDesc = (sizeof bandModeDesc / sizeof(char *)) - 1;
 uint8_t currentMode = FM;
-
 
 /**
  *  Band data structure
@@ -579,12 +577,12 @@ void setup()
   // TFT display setup
   tft.begin();
   tft.setRotation(3);
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(theme[themeIdx].bg);
   spr.createSprite(320,170);
   spr.setTextDatum(MC_DATUM);
   spr.setSwapBytes(true);
   spr.setFreeFont(&Orbitron_Light_24);
-  spr.setTextColor(TFT_WHITE,TFT_BLACK);
+  spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
 
   // TFT display brightness control (PWM)
   // Note: At brightness levels below 100%, switching from the PWM may cause power spikes and/or RFI
@@ -601,13 +599,13 @@ void setup()
   if (digitalRead(ENCODER_PUSH_BUTTON) == LOW) {
 
     tft.setTextSize(2);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
     get_fw_ver();
     tft.println(fw_ver);
     tft.println();
     EEPROM.write(eeprom_address, 0);
     EEPROM.commit();
-    tft.setTextColor(TFT_RED, TFT_BLACK);
+    tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
     tft.print("EEPROM Resetting");
     delay(2000);
   }
@@ -629,7 +627,7 @@ void setup()
 
   if ( si4735Addr == 0 ) {
     tft.setTextSize(2);
-    tft.setTextColor(TFT_RED, TFT_BLACK);
+    tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
     tft.println("Si4735 not detected");
     while (1);
   }
@@ -726,14 +724,14 @@ void setup()
 void print(uint8_t col, uint8_t lin, const GFXfont *font, uint8_t textSize, const char *msg) {
   tft.setCursor(col,lin);
   tft.setTextSize(textSize);
-  tft.setTextColor(TFT_RED, TFT_BLACK);
+  tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
   tft.println(msg);
 }
 
 void printParam(const char *msg) {
- tft.fillScreen(TFT_BLACK);
- print(0,10,NULL,2, msg);
- }
+  tft.fillScreen(theme[themeIdx].bg);
+  print(0,10,NULL,2, msg);
+}
 
 /*
    writes the conrrent receiver information into the eeprom.
@@ -1022,7 +1020,6 @@ void showStep()
  */
 void showBFO()
 {
-
   if (currentBFO > 0)
     sprintf(bfo, "+%4.4d", currentBFO);
   else
@@ -1054,8 +1051,9 @@ void showSoftMute()
 void showLoadingSSB()
 {
   if (display_on) {
-    spr.fillSmoothRoundRect(80,40,160,40,4,TFT_WHITE);
-    spr.fillSmoothRoundRect(81,41,158,38,4,TFT_MENU_BACK);
+    spr.setTextDatum(MC_DATUM);
+    spr.fillSmoothRoundRect(80,40,160,40,4,theme[themeIdx].text);
+    spr.fillSmoothRoundRect(81,41,158,38,4,theme[themeIdx].menu_bg);
     spr.drawString("Loading SSB",160,62,4);
     spr.pushSprite(0,0);
   }
@@ -1685,16 +1683,6 @@ void doCurrentMenuCmd() {
       }
       showSoftMute();
       break;
-      /* case MENU_SEEKUP:
-      seekStop = false; // G8PTN: Flag is set by rotary encoder and cleared on seek entry
-      seekDirection = 1;
-      doSeek();
-      break;
-    case MENU_SEEKDOWN:
-      seekStop = false; // G8PTN: Flag is set by rotary encoder and cleared on seek entry
-      seekDirection = 0;
-      doSeek();
-      break; */
     case MENU_BAND:
       cmdBand = true;
       drawSprite();
@@ -1836,71 +1824,75 @@ uint8_t getStrength() {
 void drawMenu() {
   if (!display_on) return;
 
+  spr.setTextDatum(MC_DATUM);
   if (cmdMenu) {
-    spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
-    spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
-    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
+    spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,theme[themeIdx].menu_border);
+    spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,theme[themeIdx].menu_bg);
+    spr.setTextColor(theme[themeIdx].menu_hdr, theme[themeIdx].menu_bg);
 
     char label_menu [16];
     sprintf(label_menu, "Menu %2.2d/%2.2d", (menuIdx + 1), (lastMenu + 1));
     //spr.drawString("Menu",38+menu_offset_x+(menu_delta_x/2),14+menu_offset_y,2);
     spr.drawString(label_menu,40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
-    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, TFT_RED);
+    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, theme[themeIdx].menu_border);
 
     spr.setTextFont(0);
-    spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-    spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,0x105B);
+    spr.setTextColor(theme[themeIdx].menu_item, theme[themeIdx].menu_bg);
+    spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_hl_bg);
     for(int i=-2; i<3; i++){
-      if (i==0) spr.setTextColor(0xBEDF,0x105B);
-      else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
+      if (i==0) spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      else spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
       spr.drawString(menu[abs((menuIdx+lastMenu+1+i)%(lastMenu+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
     }
   } else if (cmdSettings) {
-    spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
-    spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
-    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
+    spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,theme[themeIdx].menu_border);
+    spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,theme[themeIdx].menu_bg);
+    spr.setTextColor(theme[themeIdx].menu_hdr, theme[themeIdx].menu_bg);
     spr.drawString("Settings",40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
-    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, TFT_RED);
+    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, theme[themeIdx].menu_border);
 
     spr.setTextFont(0);
-    spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-    spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,0x105B);
+    spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+    spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_hl_bg);
     for(int i=-2; i<3; i++) {
-      if (i==0) spr.setTextColor(0xBEDF,0x105B);
-      else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
+      if (i==0) spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      else spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
       spr.drawString(settingsMenu[abs((settingsMenuIdx+lastSettingsMenu+1+i)%(lastSettingsMenu+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
     }
   } else {
-    spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
-    spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_RED);
-    spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
+    spr.setTextColor(theme[themeIdx].menu_hdr,theme[themeIdx].menu_bg);
+    spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,theme[themeIdx].menu_border);
+    spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,theme[themeIdx].menu_bg);
     if (cmdBrt || cmdSleep) {
       spr.drawString(settingsMenu[settingsMenuIdx],40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
     } else {
       spr.drawString(menu[menuIdx],40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
     }
-    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, TFT_RED);
+    spr.drawLine(1+menu_offset_x, 23+menu_offset_y, 76+menu_delta_x, 23+menu_offset_y, theme[themeIdx].menu_border);
 
     spr.setTextFont(0);
-    spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-    // spr.fillRect(6,24+(2*16),67,16,0xBEDF);
-    spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,0x105B);
+    spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+    spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_hl_bg);
 
     //G8PTN: Added to reduce calls to getLastStep()
     int temp_LastStep = getLastStep();
 
     for(int i=-2;i<3;i++){
-      if (i==0) spr.setTextColor(0xBEDF,0x105B);
-      else spr.setTextColor(0xBEDF,TFT_MENU_BACK);
+      if (i==0) spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      else spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+
       if (cmdMode)
         if (currentMode == FM) {
           if (i==0) spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         }
         else spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+
       if (cmdStep)
         if (currentMode == FM) spr.drawString(FmStepDesc[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         else spr.drawString(AmSsbStepDesc[abs((currentStepIdx+temp_LastStep+1+i)%(temp_LastStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+
       if (cmdBand) spr.drawString(band[abs((bandIdx+lastBand+1+i)%(lastBand+1))].bandName,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+
       if (cmdBandwidth) {
         if (isSSB())
         {
@@ -1917,15 +1909,16 @@ void drawMenu() {
           spr.drawString(bandwidthFM[abs((bwIdxFM+lastBandwidthFM+1+i)%(lastBandwidthFM+1))].desc,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         }
       }
+
     }
     if (cmdVolume) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       spr.drawNumber(rx.getVolume(),40+menu_offset_x+(menu_delta_x/2),66+menu_offset_y,7);
     }
     if (cmdAgc) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       // rx.getAutomaticGainControl();             // G8PTN: Read back value is not used
       if (agcNdx == 0 && agcIdx == 0) {
         spr.setFreeFont(&Orbitron_Light_24);
@@ -1938,8 +1931,8 @@ void drawMenu() {
       }
     }
     if (cmdSoftMuteMaxAtt) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       spr.drawString("Max Attn",40+menu_offset_x+(menu_delta_x/2),32+menu_offset_y,2);
       spr.drawNumber(softMuteMaxAttIdx,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
       spr.drawString("dB",40+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
@@ -1947,16 +1940,16 @@ void drawMenu() {
 
     // G8PTN: Added
     if (cmdCal) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       spr.drawNumber(currentCAL,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
       spr.drawString("Hz",40+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
     }
 
     // G8PTN: Added
     if (cmdAvc) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       spr.drawString("Max Gain",40+menu_offset_x+(menu_delta_x/2),32+menu_offset_y,2);
       spr.drawNumber(currentAVC,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
       spr.drawString("dB",40+menu_offset_x+(menu_delta_x/2),90+menu_offset_y,4);
@@ -1964,18 +1957,17 @@ void drawMenu() {
 
     // G8PTN: Added
     if (cmdBrt) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       spr.drawNumber(currentBrt,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
     }
 
     if (cmdSleep) {
-      spr.setTextColor(0xBEDF,TFT_MENU_BACK);
-      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
+      spr.fillRoundRect(6+menu_offset_x,24+menu_offset_y+(2*16),66+menu_delta_x,16,2,theme[themeIdx].menu_bg);
       spr.drawNumber(currentSleep,40+menu_offset_x+(menu_delta_x/2),60+menu_offset_y,4);
     }
   }
-  spr.setTextColor(TFT_WHITE,TFT_BLACK);
 }
 
 
@@ -1984,59 +1976,63 @@ void drawMenu() {
 void drawSprite()
 {
   if (!display_on) return;
-  spr.fillSprite(TFT_BLACK);
-  spr.setTextColor(TFT_WHITE, TFT_BLACK);
+  spr.fillSprite(theme[themeIdx].bg);
 
   // Time
-  /* spr.setTextColor(TFT_WHITE,TFT_BLACK); */
+  /* spr.setTextColor(theme[themeIdx].text,theme[themeIdx].bg); */
   /* spr.setTextDatum(ML_DATUM); */
   /* spr.drawString(time_disp,clock_datum,12,2); */
-  /* spr.setTextColor(TFT_WHITE,TFT_BLACK); */
+  /* spr.setTextColor(theme[themeIdx].text,theme[themeIdx].bg); */
 
   /* // Screen activity icon */
   /* screen_toggle = !screen_toggle; */
-  /* spr.drawCircle(clock_datum+50,11,6,TFT_WHITE); */
-  /* if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,TFT_BLACK); */
+  /* spr.drawCircle(clock_datum+50,11,6,theme[themeIdx].text); */
+  /* if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,theme[themeIdx].bg); */
   /* else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN); */
 
   /* // EEPROM write request icon */
-  /* spr.drawCircle(clock_datum+70,11,6,TFT_WHITE); */
+  /* spr.drawCircle(clock_datum+70,11,6,theme[themeIdx].text); */
   /* if (eeprom_wr_flag){ */
   /*   spr.fillCircle(clock_datum+70,11,5,TFT_RED); */
   /*   eeprom_wr_flag = false; */
   /* } */
-  /* else spr.fillCircle(clock_datum+70,11,5,TFT_BLACK); */
+  /* else spr.fillCircle(clock_datum+70,11,5,theme[themeIdx].bg); */
 
   if (cmdAbout) {
+    // About screen
     spr.setTextDatum(TL_DATUM);
+    spr.setTextColor(theme[themeIdx].text_muted, theme[themeIdx].bg);
     spr.drawString("ESP32-SI4732 Receiver", 0, 0, 4);
+    spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
     get_fw_ver();
     spr.drawString(fw_ver, 2, 33, 2);
     spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 33 + 16, 2);
     spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 33 + 16 * 3, 2);
     spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 33 + 16 * 4, 2);
-    spr.drawString("G8PTN (Dave), R9UCL (Max Arnold)", 2, 33 + 16 * 5, 2);
-    spr.setTextDatum(MC_DATUM);
+    spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold)", 2, 33 + 16 * 5, 2);
   } else {
-
+    // Band and mode
     spr.setFreeFont(&Orbitron_Light_24);
     spr.setTextDatum(TC_DATUM);
-    spr.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+    spr.setTextColor(theme[themeIdx].band_text, theme[themeIdx].bg);
     uint16_t band_width = spr.drawString(band[bandIdx].bandName, band_offset_x, band_offset_y);
     spr.setTextDatum(TL_DATUM);
+    spr.setTextColor(theme[themeIdx].mode_text, theme[themeIdx].bg);
     uint16_t mode_width = spr.drawString(bandModeDesc[currentMode], band_offset_x + band_width / 2 + 12, band_offset_y + 8, 2);
-    spr.drawSmoothRoundRect(band_offset_x + band_width / 2 + 7, band_offset_y + 7, 4, 4, mode_width + 8, 17, TFT_LIGHTGREY, TFT_BLACK);
-    spr.setTextColor(TFT_WHITE, TFT_BLACK);
-    spr.setTextDatum(MC_DATUM);
+    spr.drawSmoothRoundRect(band_offset_x + band_width / 2 + 7, band_offset_y + 7, 4, 4, mode_width + 8, 17, theme[themeIdx].mode_border, theme[themeIdx].bg);
 
     if (currentMode == FM) {
+      // FM frequency
       spr.setTextDatum(MR_DATUM);
-      spr.drawFloat(currentFrequency/100.00,2,freq_offset_x,freq_offset_y,7);
+      spr.setTextColor(theme[themeIdx].freq_text, theme[themeIdx].bg);
+      spr.drawFloat(currentFrequency/100.00, 2, freq_offset_x, freq_offset_y, 7);
       spr.setTextDatum(ML_DATUM);
-      spr.drawString("MHz",funit_offset_x,funit_offset_y);
-      spr.setTextDatum(MC_DATUM);
+      spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
+      spr.drawString("MHz", funit_offset_x, funit_offset_y);
     } else {
+      // Other modes frequency
       spr.setTextDatum(MR_DATUM);
+      spr.setTextColor(theme[themeIdx].freq_text, theme[themeIdx].bg);
       if (isSSB()) {
         uint32_t freq  = (uint32_t(currentFrequency) * 1000) + currentBFO;
         uint16_t khz   = freq / 1000;
@@ -2045,25 +2041,26 @@ void drawSprite()
         char stail [32];
         sprintf(skhz, "%3.3u", khz);
         sprintf(stail, ".%3.3d", tail);
-        spr.drawString(skhz,freq_offset_x,freq_offset_y,7);
+        spr.drawString(skhz, freq_offset_x, freq_offset_y, 7);
         spr.setTextDatum(ML_DATUM);
-        spr.drawString(stail,5+freq_offset_x,15+freq_offset_y,4);
+        spr.drawString(stail, 5+freq_offset_x, 15+freq_offset_y, 4);
       } else {
-        spr.drawNumber(currentFrequency,freq_offset_x,freq_offset_y,7);
+        spr.drawNumber(currentFrequency, freq_offset_x, freq_offset_y, 7);
         spr.setTextDatum(ML_DATUM);
-        spr.drawString(".000",5+freq_offset_x,15+freq_offset_y,4);
+        spr.drawString(".000", 5+freq_offset_x, 15+freq_offset_y, 4);
       }
-      spr.drawString("kHz",funit_offset_x,funit_offset_y);
-      spr.setTextDatum(MC_DATUM);
+      spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
+      spr.drawString("kHz", funit_offset_x, funit_offset_y);
     }
 
-    if (isMenuMode()) drawMenu();                      // G8PTN: Removed cmdBand, now part of isMenuMode()
-    else {
-
+    if (isMenuMode()) {
+      drawMenu();
+    } else {
+      // Info box
       spr.setTextDatum(ML_DATUM);
-      spr.setTextColor(TFT_WHITE,TFT_MENU_BACK);
-      spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,TFT_WHITE);
-      spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,TFT_MENU_BACK);
+      spr.setTextColor(theme[themeIdx].box_text, theme[themeIdx].box_bg);
+      spr.fillSmoothRoundRect(1+menu_offset_x, 1+menu_offset_y, 76+menu_delta_x, 110, 4, theme[themeIdx].box_border);
+      spr.fillSmoothRoundRect(2+menu_offset_x, 2+menu_offset_y, 74+menu_delta_x, 108, 4, theme[themeIdx].box_bg);
       spr.drawString("Step:",6+menu_offset_x,64+menu_offset_y+(-3*16),2);
       if (currentMode == FM) spr.drawString(FmStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-3*16),2);
       else spr.drawString(AmSsbStepDesc[currentStepIdx],48+menu_offset_x,64+menu_offset_y+(-3*16),2);
@@ -2112,48 +2109,47 @@ void drawSprite()
       spr.drawString("Vol:",6+menu_offset_x,64+menu_offset_y+(1*16),2);
       if (muted) {
         //spr.setTextDatum(MR_DATUM);
-        spr.setTextColor(TFT_WHITE,TFT_RED);
+        spr.setTextColor(theme[themeIdx].box_off_text, theme[themeIdx].box_off_bg);
         spr.drawString("Muted",48+menu_offset_x,64+menu_offset_y+(1*16),2);
-        spr.setTextColor(TFT_WHITE,TFT_BLACK);
+      } else {
+        spr.setTextColor(theme[themeIdx].box_text, theme[themeIdx].box_bg);
+        spr.drawNumber(rx.getVolume(),48+menu_offset_x,64+menu_offset_y+(1*16),2);
       }
-      else spr.drawNumber(rx.getVolume(),48+menu_offset_x,64+menu_offset_y+(1*16),2);
-      spr.setTextDatum(MC_DATUM);
     }
 
     if (bfoOn) {
-      spr.setTextColor(TFT_WHITE,TFT_BLACK);
       spr.setTextDatum(ML_DATUM);
+      spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
       spr.drawString("BFO:",10,158,4);
       spr.drawString(bfo,80,158,4);
-      spr.setTextDatum(MC_DATUM);
     }
 
     // S-Meter
-    spr.drawTriangle(meter_offset_x + 1, meter_offset_y + 1, meter_offset_x + 11, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 6, TFT_LIGHTGREY);
-    spr.drawLine(meter_offset_x + 6, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 14, TFT_LIGHTGREY);
-    for(int i=0; i<getStrength(); i++)
-      if (i<10)
-        spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, TFT_GREEN);
-      else
-        spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, TFT_RED);
-
+    spr.drawTriangle(meter_offset_x + 1, meter_offset_y + 1, meter_offset_x + 11, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 6, theme[themeIdx].smeter_icon);
+    spr.drawLine(meter_offset_x + 6, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 14, theme[themeIdx].smeter_icon);
+    for(int i=0; i<getStrength(); i++) {
+      if (i<10) {
+        spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, theme[themeIdx].smeter_bar);
+      } else {
+        spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, theme[themeIdx].smeter_bar_plus);
+      }
+    }
     if (currentMode == FM) {
       if (rx.getCurrentPilot()) {
-        spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, TFT_BLACK);
+        spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, theme[themeIdx].bg);
       }
 
-      // spr.setTextColor(TFT_MAGENTA,TFT_BLACK);
       spr.setTextDatum(TC_DATUM);
+      spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
       spr.drawString(bufferStationName, rds_offset_x, rds_offset_y, 4);
-      spr.setTextDatum(MC_DATUM);
-      // spr.setTextColor(TFT_WHITE,TFT_BLACK);
     }
 
     // Tuner scale
-    spr.fillTriangle(156, 122, 160, 132, 164, 122, TFT_RED);
-    spr.drawLine(160, 124, 160, 169, TFT_RED);
+    spr.fillTriangle(156, 122, 160, 132, 164, 122, theme[themeIdx].scale_pointer);
+    spr.drawLine(160, 124, 160, 169, theme[themeIdx].scale_pointer);
 
     spr.setTextDatum(MC_DATUM);
+    spr.setTextColor(theme[themeIdx].scale_text, theme[themeIdx].bg);
     int temp;
     if (isSSB()) {
       temp = (currentFrequency + currentBFO/1000)/10.00 - 20;
@@ -2161,33 +2157,25 @@ void drawSprite()
       temp = currentFrequency/10.00 - 20;
     }
     uint16_t lineColor;
-    for(int i=0;i<40;i++)
-      {
-        if (i==20) lineColor=TFT_RED;
-        else lineColor=0xC638;
-        if (!(temp<band[bandIdx].minimumFreq/10.00 or temp>band[bandIdx].maximumFreq/10.00)) {
-          if((temp%10)==0){
-            spr.drawLine(i*8, 169, i*8, 150, lineColor);
-            spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
-            if (currentMode == FM) spr.drawFloat(temp/10.0, 1, i*8, 140, 2);
-            else if (temp >= 100) spr.drawFloat(temp/100.0, 3, i*8, 140, 2);
-            else spr.drawNumber(temp*10, i*8, 140, 2);
-          } else if((temp%5)==0 && (temp%10)!=0) {
-            spr.drawLine(i*8, 169, i*8, 155, lineColor);
-            spr.drawLine((i*8)+1, 169, (i*8)+1, 155, lineColor);
-          } else {
-            spr.drawLine(i*8, 169, i*8, 160, lineColor);
-          }
+    for(int i=0; i<40; i++) {
+      if (i==20) lineColor=theme[themeIdx].scale_pointer;
+      else lineColor=theme[themeIdx].scale_line;
+      if (!(temp<band[bandIdx].minimumFreq/10.00 or temp>band[bandIdx].maximumFreq/10.00)) {
+        if((temp%10)==0){
+          spr.drawLine(i*8, 169, i*8, 150, lineColor);
+          spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
+          if (currentMode == FM) spr.drawFloat(temp/10.0, 1, i*8, 140, 2);
+          else if (temp >= 100) spr.drawFloat(temp/100.0, 3, i*8, 140, 2);
+          else spr.drawNumber(temp*10, i*8, 140, 2);
+        } else if((temp%5)==0 && (temp%10)!=0) {
+          spr.drawLine(i*8, 169, i*8, 155, lineColor);
+          spr.drawLine((i*8)+1, 169, (i*8)+1, 155, lineColor);
+        } else {
+          spr.drawLine(i*8, 169, i*8, 160, lineColor);
         }
-        temp += 1;
       }
-    /*
-      else {
-      spr.fillSmoothRoundRect(1+mode_offset_x,1+mode_offset_y,76,22,4,TFT_WHITE);
-      spr.fillSmoothRoundRect(2+mode_offset_x,2+mode_offset_y,74,20,4,TFT_BLACK);
-      spr.drawString(bandModeDesc[currentMode],38+mode_offset_x,11+mode_offset_y,2);
-      }
-    */
+      temp += 1;
+    }
   }
 
 #if TUNE_HOLDOFF
@@ -2315,50 +2303,43 @@ void batteryMonitor() {
 
   if (batt_soc_state == 0 ) {
     chargeLevel=7;
-    batteryLevelColor=TFT_RED;
+    batteryLevelColor=theme[themeIdx].batt_low;
   }
   if (batt_soc_state == 1 ) {
     chargeLevel=14;
-    batteryLevelColor=TFT_GREEN;
+    batteryLevelColor=theme[themeIdx].batt_full;
   }
   if (batt_soc_state == 2 ) {
     chargeLevel=21;
-    batteryLevelColor=TFT_GREEN;
+    batteryLevelColor=theme[themeIdx].batt_full;
   }
   if (batt_soc_state == 3 ) {
     chargeLevel=28;
-    batteryLevelColor=TFT_GREEN;
+    batteryLevelColor=theme[themeIdx].batt_full;
   }
 
   // Set display information
-  spr.fillRect(batt_datum, 1, 30, 14, TFT_WHITE);
-  spr.fillRect(batt_datum + 30, 3, 3, 10, TFT_WHITE);
+  spr.fillRect(batt_datum, 1, 30, 14, theme[themeIdx].batt_border);
+  spr.fillRect(batt_datum + 30, 3, 3, 10, theme[themeIdx].batt_border);
 
-  spr.setTextColor(TFT_WHITE, TFT_BLACK);
   spr.setTextDatum(TR_DATUM);
+  spr.setTextColor(theme[themeIdx].batt_voltage, theme[themeIdx].bg);
 
   // The hardware has a load sharing circuit to allow simultaneous charge and power
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V
   // If the average voltage is greater than 4.3V, show ligtning on the display
   if (adc_volt_avr > 4.3) {
-    spr.fillRect(batt_datum + 1, 2, 28, 12, TFT_BLUE);
-    spr.fillTriangle(batt_datum + 6, 7, batt_datum + 16, 7, batt_datum + 16, 4, TFT_YELLOW);
-    spr.fillTriangle(batt_datum + 23, 8, batt_datum + 13, 8, batt_datum + 13, 11, TFT_YELLOW);
+    spr.fillRect(batt_datum + 1, 2, 28, 12, theme[themeIdx].batt_charge);
+    spr.fillTriangle(batt_datum + 6, 7, batt_datum + 16, 7, batt_datum + 16, 4, theme[themeIdx].batt_icon);
+    spr.fillTriangle(batt_datum + 23, 8, batt_datum + 13, 8, batt_datum + 13, 11, theme[themeIdx].batt_icon);
   }
   else {
     char voltage[8];
-    spr.fillRect(batt_datum + 1, 2, 28, 12, TFT_BLACK);
+    spr.fillRect(batt_datum + 1, 2, 28, 12, theme[themeIdx].bg);
     spr.fillRect(batt_datum + 1, 2, chargeLevel, 12, batteryLevelColor);
     sprintf(voltage, "%.02fV", adc_volt_avr);
     spr.drawString(voltage, batt_datum - 3, 0, 2);
   }
-
-  // Debug
-  //spr.drawNumber(batt_soc_state,batt_datum - 10,12,2);
-
-  spr.setTextColor(TFT_WHITE,TFT_BLACK);
-  spr.setTextDatum(MC_DATUM);
-  //spr.pushSprite(0,0);            // G8PTN: Not needed
 }
 
 
@@ -2367,8 +2348,7 @@ void batteryMonitor() {
 **                - Algorithm from ATS-20_EX Goshante firmware
 ***************************************************************************************/
 // Tuning algorithm
-void doFrequencyTuneSSB()
-{
+void doFrequencyTuneSSB() {
     //const int BFOMax = 16000;    G8PTN: Moved to a global variable
     int step = encoderCount == 1 ? getSteps() : getSteps() * -1;
     int newBFO = currentBFO + step;
@@ -2413,7 +2393,6 @@ void doFrequencyTuneSSB()
       Serial.println("Info: clampSSBBand() >>> SSB Band Clamp !");
       #endif
     }
-
 }
 
 // Clamp SSB tuning to band limits
@@ -2502,9 +2481,7 @@ void doBrt( uint16_t v ) {
   if ( v == 1) {
     currentBrt = currentBrt + 32;
     if (currentBrt > 255) currentBrt = 255;
-  }
-
-  else {
+  } else {
     if (currentBrt == 255) currentBrt = currentBrt - 31;
     else currentBrt = currentBrt - 32;
     if (currentBrt < 32) currentBrt = 32;
@@ -2546,6 +2523,19 @@ void showSleep() {
   drawSprite();
 }
 
+void doTheme( uint16_t v ) {
+  if (v == 1)
+    themeIdx = (themeIdx < lastTheme) ? (themeIdx + 1) : 0;
+  else
+    themeIdx = (themeIdx > 0) ? (themeIdx - 1) : lastTheme;
+
+  showTheme();
+  delay(MIN_ELAPSED_TIME); // waits a little more for releasing the button.
+}
+
+void showTheme() {
+  drawSprite();
+}
 
 void doAvc(int16_t v) {
   // Only allow for AM and SSB modes
@@ -2750,6 +2740,7 @@ void captureScreen() {
     Serial.println("");
   }
 }
+
 
 /**
  * Main loop
@@ -3252,7 +3243,6 @@ void loop()
           break;
     }
   }
-
 #endif
 
   // Add a small default delay in the main loop
