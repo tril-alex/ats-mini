@@ -132,7 +132,8 @@
 // Settings Options
 #define MENU_BRIGHTNESS   0
 #define MENU_SLEEP        1
-#define MENU_ABOUT        2
+#define MENU_THEME        2
+#define MENU_ABOUT        3
 
 #define EEPROM_SIZE     512
 #define STORE_TIME    10000                  // Time of inactivity to make the current receiver status writable (10s)
@@ -149,7 +150,7 @@ const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 // ====================================================================================================================================================
 // Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
 // ====================================================================================================================================================
-const uint8_t  app_id  = 66;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
+const uint8_t  app_id  = 67;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
 const uint16_t app_ver = 104;         //     v1.04     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
 char app_date[] = "2025-03-12";
 const int eeprom_address = 0;         //               EEPROM start address
@@ -187,6 +188,7 @@ bool cmdAvc = false;
 bool cmdSettings = false;
 bool cmdBrt = false;
 bool cmdSleep = false;
+bool cmdTheme = false;
 bool cmdAbout = false;
 
 bool fmRDS = false;
@@ -330,6 +332,7 @@ int8_t currentMenuCmd = -1;
 const char *settingsMenu[] = {
   "Brightness",
   "Sleep",
+  "Theme",
   "About",
 };
 
@@ -785,6 +788,7 @@ void saveAllReceiverInformation()
   EEPROM.write(addr_offset++, SsbSoftMuteIdx);          // Stores the current SSB SoftMute index value
   EEPROM.write(addr_offset++, currentSleep >> 8);       // Stores the current Sleep value (HIGH byte)
   EEPROM.write(addr_offset++, currentSleep & 0XFF);     // Stores the current Sleep value (LOW byte)
+  EEPROM.write(addr_offset++, themeIdx);                // Stores the current Theme index value
   EEPROM.commit();
 
   addr_offset = eeprom_setp_address;
@@ -843,6 +847,7 @@ void readAllReceiverInformation()
   SsbSoftMuteIdx  = EEPROM.read(addr_offset++);           // Reads stored SSB SoftMute index value
   currentSleep    = EEPROM.read(addr_offset++) << 8;      // Reads stored Sleep value (HIGH byte)
   currentSleep   |= EEPROM.read(addr_offset++);           // Reads stored Sleep value (LOW byte)
+  themeIdx        = EEPROM.read(addr_offset++);           // Reads stored Theme index value
 
   addr_offset = eeprom_setp_address;
   for (int i = 0; i <= lastBand; i++)
@@ -931,6 +936,7 @@ void disableCommands()
   cmdSettings = false;
   cmdBrt = false;
   cmdSleep = false;
+  cmdTheme = false;
   cmdAbout = false;
 }
 
@@ -1745,6 +1751,11 @@ void doCurrentSettingsMenuCmd() {
       showSleep();
       break;
 
+  case MENU_THEME:
+      cmdTheme = true;
+      showTheme();
+      break;
+
   case MENU_ABOUT:
       cmdAbout = true;
       showAbout();
@@ -1775,7 +1786,8 @@ bool isMenuMode() {
           cmdAvc |
           cmdSettings |
           cmdBrt |
-          cmdSleep
+          cmdSleep |
+          cmdTheme
           );
 }
 
@@ -1863,7 +1875,7 @@ void drawMenu() {
     spr.setTextColor(theme[themeIdx].menu_hdr,theme[themeIdx].menu_bg);
     spr.fillSmoothRoundRect(1+menu_offset_x,1+menu_offset_y,76+menu_delta_x,110,4,theme[themeIdx].menu_border);
     spr.fillSmoothRoundRect(2+menu_offset_x,2+menu_offset_y,74+menu_delta_x,108,4,theme[themeIdx].menu_bg);
-    if (cmdBrt || cmdSleep) {
+    if (cmdBrt || cmdSleep || cmdTheme) {
       spr.drawString(settingsMenu[settingsMenuIdx],40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
     } else {
       spr.drawString(menu[menuIdx],40+menu_offset_x+(menu_delta_x/2),12+menu_offset_y,2);
@@ -1910,6 +1922,9 @@ void drawMenu() {
         }
       }
 
+      if (cmdTheme) {
+        spr.drawString(theme[abs((themeIdx+lastTheme+1+i)%(lastTheme+1))].name, 40+menu_offset_x+(menu_delta_x/2), 64+menu_offset_y+(i*16), 2);
+      }
     }
     if (cmdVolume) {
       spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
@@ -2805,6 +2820,8 @@ void loop()
       doBrt(encoderCount);
     else if (cmdSleep)
       doSleep(encoderCount);
+    else if (cmdTheme)
+      doTheme(encoderCount);
     else if (cmdAbout)
       doAbout(encoderCount);
 
