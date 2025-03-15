@@ -1792,6 +1792,9 @@ bool isMenuMode() {
 }
 
 uint8_t getStrength() {
+#if THEME_EDITOR
+  return 17;
+#endif
   if (currentMode != FM) {
     //dBuV to S point conversion HF
     if ((rssi >= 0) and (rssi <=  1)) return  1;  // S0
@@ -2035,6 +2038,12 @@ void drawSprite()
     spr.setTextColor(theme[themeIdx].mode_text, theme[themeIdx].bg);
     uint16_t mode_width = spr.drawString(bandModeDesc[currentMode], band_offset_x + band_width / 2 + 12, band_offset_y + 8, 2);
     spr.drawSmoothRoundRect(band_offset_x + band_width / 2 + 7, band_offset_y + 7, 4, 4, mode_width + 8, 17, theme[themeIdx].mode_border, theme[themeIdx].bg);
+
+#if THEME_EDITOR
+    spr.setTextDatum(TR_DATUM);
+    spr.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
+    spr.drawString("WARN", 319, rds_offset_y, 4);
+#endif
 
     if (currentMode == FM) {
       // FM frequency
@@ -2340,6 +2349,17 @@ void batteryMonitor() {
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(theme[themeIdx].batt_voltage, theme[themeIdx].bg);
 
+#if THEME_EDITOR
+  spr.fillRect(batt_datum - 32, 1, 30, 14, theme[themeIdx].batt_border);
+  spr.fillRect(batt_datum -32 + 30, 3, 3, 10, theme[themeIdx].batt_border);
+
+  spr.fillRect(batt_datum -32 + 1, 2, 28, 12, theme[themeIdx].bg);
+  spr.fillRect(batt_datum -32 + 1, 2, 21, 12, theme[themeIdx].batt_full);
+  spr.fillRect(batt_datum -32 + 1, 2, 14, 12, theme[themeIdx].batt_low);
+  spr.drawString("4.0V", batt_datum -32 - 3, 0, 2);
+
+  adc_volt_avr = 4.5;
+#endif
   // The hardware has a load sharing circuit to allow simultaneous charge and power
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V
   // If the average voltage is greater than 4.3V, show ligtning on the display
@@ -2756,6 +2776,67 @@ void captureScreen() {
   }
 }
 
+#if THEME_EDITOR
+char readSerialWithEcho() {
+  char key;
+  while (Serial.available() == 0) {};
+  key = Serial.read();
+  Serial.print(key);
+  return key;
+}
+
+uint8_t char2nibble(char key) {
+  if (key < '0') return 0;
+  if (key <= '9') return key - '0';
+  if (key < 'A') return 0;
+  if (key <= 'F') return key - 'A' + 10;
+  if (key < 'a') return 0;
+  if (key <= 'f') return key - 'a' + 10;
+}
+
+void setColorTheme() {
+  Serial.print("Enter a string of hex colors (x0001x0002...): ");
+  int i = 0;
+  char key;
+  while(true) {
+    if (i >= (sizeof(ColorTheme) - offsetof(ColorTheme, bg))) {
+      Serial.println(" Ok");
+      break;
+    }
+    key = readSerialWithEcho();
+    if (key != 'x') {
+      Serial.println(" Err");
+      break;
+    }
+
+    key = readSerialWithEcho();
+    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1] = char2nibble(key) * 16;
+    key = readSerialWithEcho();
+    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1] |= char2nibble(key);
+
+    key = readSerialWithEcho();
+    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i] = char2nibble(key) * 16;
+    key = readSerialWithEcho();
+    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i] |= char2nibble(key);
+
+    i += sizeof(uint16_t);
+  }
+  drawSprite();
+}
+
+
+void getColorTheme() {
+  char sb[6];
+  Serial.print("Color theme ");
+  Serial.print(theme[themeIdx].name);
+  Serial.print(": ");
+  for (int i=0; i<(sizeof(ColorTheme) - offsetof(ColorTheme, bg)); i += sizeof(uint16_t)) {
+    sprintf(sb, "x%02X%02X", ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1], ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i]);
+    Serial.print(sb);
+  }
+  Serial.println();
+}
+#endif
 
 /**
  * Main loop
@@ -3255,6 +3336,16 @@ void loop()
         case 't':
           toggleRemoteLog();
           break;
+
+#if THEME_EDITOR
+        case '!':
+          setColorTheme();
+          break;
+
+        case '@':
+          getColorTheme();
+          break;
+#endif
 
         default:
           break;

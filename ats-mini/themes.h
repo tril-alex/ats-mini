@@ -1,3 +1,6 @@
+// Theme editor
+#define THEME_EDITOR 1         // Enables setting and printing of theme colors
+
 typedef struct {
   char name[12];
   uint16_t bg;
@@ -45,8 +48,11 @@ typedef struct {
   uint16_t scale_line;
 } ColorTheme;
 
+#if THEME_EDITOR
+ColorTheme theme[] = {
+#else
 const ColorTheme theme[] = {
-
+#endif
   {
     "Default",
     0x0000, // bg
