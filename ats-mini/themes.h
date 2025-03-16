@@ -175,40 +175,40 @@ const ColorTheme theme[] = {
   {
     "Pager",
     0x4309, // bg
-    0x1165, // text
-    0x3A08, // text_muted
+    0x00C2, // text
+    0x1165, // text_muted
     0xF800, // text_warn
     0x18C3, // smeter_icon
-    0x3A08, // smeter_bar
-    0x18C3, // smeter_bar_plus
+    0x1165, // smeter_bar
+    0x00C2, // smeter_bar_plus
     0x18C3, // save_icon
     0x18C3, // batt_voltage
     0x0000, // batt_border
-    0x3A08, // batt_full
-    0x1165, // batt_low
+    0x1165, // batt_full
+    0x00C2, // batt_low
     0x4309, // batt_charge
-    0x1165, // batt_icon
-    0x1165, // band_text
-    0x1165, // mode_text
-    0x1165, // mode_border
+    0x00C2, // batt_icon
+    0x00C2, // band_text
+    0x00C2, // mode_text
+    0x00C2, // mode_border
     0x4309, // box_bg
-    0x1165, // box_border
-    0x1165, // box_text
-    0x1165, // box_off_bg
+    0x00C2, // box_border
+    0x00C2, // box_text
+    0x00C2, // box_off_bg
     0x4309, // box_off_text
     0x4309, // menu_bg
-    0x1165, // menu_border
+    0x00C2, // menu_border
     0x18C3, // menu_hdr
-    0x1165, // menu_item
-    0x1165, // menu_hl_bg
+    0x00C2, // menu_item
+    0x00C2, // menu_hl_bg
     0x4309, // menu_hl_text
-    0x1165, // menu_param
-    0x1165, // freq_text
-    0x3A08, // funit_text
-    0x3A08, // rds_text
+    0x00C2, // menu_param
+    0x00C2, // freq_text
+    0x1165, // funit_text
+    0x1165, // rds_text
     0x18C3, // scale_text
     0x0000, // scale_pointer
-    0x3A08, // scale_line
+    0x1165, // scale_line
   },
 
   {
