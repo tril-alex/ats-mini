@@ -1,1 +1,0 @@
-Add EEPROM write icon

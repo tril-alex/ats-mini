@@ -1,3 +1,23 @@
+## 1.05 (2025-03-16)
+
+
+### Added
+
+- Add EEPROM write icon 
+- New color themes: Bluesky, eInk, Pager, Orange, Night, Phosphor 
+- Support for color themes 
+- Theme editor. To enable it, recompile the firmware with THEME_EDITOR=1 and connect via USB serial port. Press @ to print the current theme, change it using any text editor (see themes.h for details), then press ! and paste the updated theme (effective until the receiver is powered off). Once you are happy, add the resulting colors to themes.h. Check out a useful color picker as well https://chrishewett.com/blog/true-rgb565-colour-picker/ 
+
+
+### Changed
+
+- Add repo URL to the About screen, hide battery 
+
+
+### Fixed
+
+- Fix tuner scale height on MW1 & MW2 bands 
+
 ## 1.04 (2025-03-12)
 
 

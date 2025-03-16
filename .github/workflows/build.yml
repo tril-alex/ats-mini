@@ -76,7 +76,8 @@ jobs:
             - DebugLevel=none
             - --warnings
             - none
-          enable-deltas-report: true
+          # Disabled to prevent building artifact for a previous commit
+          enable-deltas-report: false
           enable-warnings-report: true
 
       - name: Save sketches report artifact
