@@ -100,7 +100,7 @@ jobs:
           path: artifact
 
   release:
-    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))) }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) }}
     needs: build
     runs-on: ubuntu-latest
     permissions:
