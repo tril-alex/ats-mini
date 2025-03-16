@@ -28,7 +28,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           fetch-tags: true
+
+      - name: Get version
+        id: slug
+        run: |
+          echo "VERSION=$(git describe --tags --always --dirty || echo v0.00)" >> $GITHUB_OUTPUT
 
       - name: Compile firmware
         uses: arduino/compile-sketches@v1
@@ -73,14 +79,8 @@ jobs:
         run: |
           mkdir -p artifact/ats-mini && mv ats-mini/build/esp32.esp32.esp32s3/*.ino.bin ats-mini/build/esp32.esp32.esp32s3/*.ino.*.bin artifact/ats-mini/
 
-      - name: Get commit hash
-        id: slug
-        run: |
-          echo "SHA7=$(echo "${GITHUB_SHA}" | cut -c1-7)" >> $GITHUB_OUTPUT
-          echo "VERSION=$(git describe --abbrev=0 --tags || echo v0.00)" >> $GITHUB_OUTPUT
-
       - name: Upload compiled artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.VERSION }}+${{ steps.slug.outputs.SHA7 }}
+          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.VERSION }}
           path: artifact
