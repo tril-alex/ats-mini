@@ -28,6 +28,8 @@ jobs:
     permissions: {}
     strategy:
       fail-fast: true
+    outputs:
+      slug: ${{ steps.slug.outputs.slug }}
 
     steps:
       - name: Checkout repository
@@ -37,10 +39,10 @@ jobs:
           fetch-tags: true
           ref: "${{ github.event.inputs.revision || github.ref }}"
 
-      - name: Get version
+      - name: Get version slug
         id: slug
         run: |
-          echo "VERSION=$(git describe --tags --always --dirty || echo v0.00)" >> $GITHUB_OUTPUT
+          echo "slug=$(git describe --tags --always --dirty || echo v0.00)" >> $GITHUB_OUTPUT
 
       - name: Compile firmware
         uses: arduino/compile-sketches@v1
@@ -77,7 +79,7 @@ jobs:
           enable-deltas-report: true
           enable-warnings-report: true
 
-      - name: Save sketches report as workflow artifact
+      - name: Save sketches report artifact
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
@@ -91,5 +93,38 @@ jobs:
       - name: Upload compiled artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.VERSION }}
+          if-no-files-found: error
+          name: ${{ github.event.repository.name }}-${{ steps.slug.outputs.slug }}
           path: artifact
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Download the build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}
+          path: artifact
+      - name: Archive the build artifact
+        run: cd "artifact" && zip -9 -r "../${FILENAME}" *
+        env:
+          FILENAME: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}.zip
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SLUG: ${{ needs.build.outputs.slug }}
+        run: |
+          gh release create "$SLUG" --repo '${{ github.repository }}'
+      - name: Upload release artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FILENAME: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}.zip
+          SLUG: ${{ needs.build.outputs.slug }}
+        run: |
+          gh release upload "$SLUG" "$FILENAME" --repo '${{ github.repository }}' --clobber
