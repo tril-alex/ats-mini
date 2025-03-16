@@ -42,7 +42,7 @@ jobs:
       - name: Get version slug
         id: slug
         run: |
-          echo "slug=$(git describe --tags --always --dirty || echo v0.00)" >> $GITHUB_OUTPUT
+          echo "slug=$(git describe --tags --match 'v?.??' --always --dirty || echo v0.00)" >> $GITHUB_OUTPUT
 
       - name: Compile firmware
         uses: arduino/compile-sketches@v1
