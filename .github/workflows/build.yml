@@ -55,22 +55,6 @@ jobs:
             - --profile
             - esp32s3
             - --export-binaries
-            - --board-options
-            - CDCOnBoot=cdc
-            - --board-options
-            - FlashSize=8M
-            - --board-options
-            - PSRAM=disabled
-            - --board-options
-            - CPUFreq=80
-            - --board-options
-            - USBMode=hwcdc
-            - --board-options
-            - FlashMode=qio
-            - --board-options
-            - PartitionScheme=default_8MB
-            - --board-options
-            - DebugLevel=none
           # Disabled to prevent building artifact for a previous commit
           enable-deltas-report: false
           enable-warnings-report: true

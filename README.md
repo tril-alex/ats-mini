@@ -16,7 +16,7 @@ Based on the following sources:
 3. Compile and flash the firmware
 
 ``` shell
-arduino-cli compile --board-options CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none --clean -e -p COM_PORT -u ats-mini
+arduino-cli compile --clean -e -p COM_PORT -u ats-mini
 ```
 
 
