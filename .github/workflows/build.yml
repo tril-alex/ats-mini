@@ -49,13 +49,12 @@ jobs:
           sketch-paths: |
             - ats-mini
           fqbn: esp32:esp32:esp32s3
-          platforms: esp32:esp32
+          platforms: |
+            - name: esp32:esp32
           libraries: |
             - name: "PU2CLR SI4735"
             - name: TFT_eSPI
           cli-compile-flags: |
-            - --profile
-            - esp32s3
             - --export-binaries
             - --board-options
             - CDCOnBoot=cdc
