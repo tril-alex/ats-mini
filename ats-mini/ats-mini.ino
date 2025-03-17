@@ -92,7 +92,6 @@
 #define MIN_ELAPSED_TIME         5  // 300
 #define MIN_ELAPSED_RSSI_TIME  200  // RSSI check uses IN_ELAPSED_RSSI_TIME * 6 = 1.2s
 #define ELAPSED_COMMAND      10000  // time to turn off the last command controlled by encoder. Time to goes back to the VFO control // G8PTN: Increased time and corrected comment
-#define ELAPSED_CLICK         1500  // time to check the double click commands
 #define DEFAULT_VOLUME          35  // change it for your favorite sound volume
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
@@ -171,7 +170,6 @@ int8_t agcIdx = 0;
 uint8_t disableAgc = 0;
 int8_t agcNdx = 0;
 int8_t softMuteMaxAttIdx = 4;
-uint8_t countClick = 0;
 
 uint8_t seekDirection = 1;
 bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary encoder detection
@@ -932,7 +930,6 @@ void disableCommands()
   cmdMode = false;
   cmdMenu = false;
   cmdSoftMuteMaxAtt = false;
-  countClick = 0;
   cmdCal = false;
   cmdAvc = false;
   cmdSettings = false;
@@ -2852,15 +2849,10 @@ void getColorTheme() {
 /**
  * Main loop
  */
-void loop()
-{
-
+void loop() {
   // Check if the encoder has moved.
-  if (encoderCount != 0 && currentSleep && !display_on) {
-    displayOn();
+  if (encoderCount != 0 && !display_on) {
     encoderCount = 0;
-    delay(MIN_ELAPSED_TIME);
-    elapsedSleep = millis();
   } else if (encoderCount != 0 && pb1_pressed) {
     seekDirection = (encoderCount == 1) ? 1 : 0;
     seekModePress = true;
@@ -2873,8 +2865,7 @@ void loop()
     elapsedSleep = millis();
   } else if (encoderCount != 0) {
     // G8PTN: The manual BFO adjusment is not required with the doFrequencyTuneSSB method, but leave for debug
-    if (bfoOn & isSSB())
-    {
+    if (bfoOn & isSSB()) {
       currentBFO = (encoderCount == 1) ? (currentBFO + currentBFOStep) : (currentBFO - currentBFOStep);
       // G8PTN: Clamp range to +/- BFOMax (as per doFrequencyTuneSSB)
       if (currentBFO >  BFOMax) currentBFO =  BFOMax;
@@ -2948,8 +2939,7 @@ void loop()
       #endif
 
       showFrequency();
-    }
-    else {
+    } else {
 
 #if TUNE_HOLDOFF
       // Tuning timer to hold off (FM/AM) display updates
@@ -3020,9 +3010,7 @@ void loop()
     resetEepromDelay();
     delay(MIN_ELAPSED_TIME);
     elapsedSleep = elapsedCommand = millis();
-  }
-  else
-  {
+  } else {
     if (pb1_long_pressed && !seekModePress) {
       pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
       if (display_on) {
@@ -3045,31 +3033,27 @@ void loop()
       elapsedSleep = elapsedCommand = millis();
    } else if (pb1_released && !pb1_long_released && !seekModePress) {
       pb1_released = pb1_short_released = pb1_long_released = false;
-      countClick++;
-      if (currentSleep && !display_on) {
-        displayOn();
+      if (!display_on) {
+        if (currentSleep) {
+          displayOn();
+          elapsedSleep = millis();
+          delay(MIN_ELAPSED_TIME);
+        }
       } else if (cmdMenu) {
         currentMenuCmd = menuIdx;
         doCurrentMenuCmd();
       } else if (cmdSettings) {
         currentSettingsMenuCmd = settingsMenuIdx;
         doCurrentSettingsMenuCmd();
-      }
-      //else if (countClick == 1)
-      else if (countClick >= 1)                   // G8PTN: All actions now done on single press
-      { // If just one click, you can select the band by rotating the encoder
-        if (isMenuMode() || cmdAbout)
-        {
+      } else {
+        if (isMenuMode() || cmdAbout) {
           disableCommands();
           showStatus();
           showCommandStatus((char *)"VFO ");
-        }
-        else if (bfoOn) {
+        } else if (bfoOn) {
           bfoOn = false;
           showStatus();
-        }
-        else
-        {
+        } else {
           cmdMenu = !cmdMenu;
           // menuIdx = MENU_VOLUME;
           currentMenuCmd = menuIdx;
@@ -3077,12 +3061,6 @@ void loop()
           currentSettingsMenuCmd = settingsMenuIdx;
           drawSprite();
         }
-      }
-      else                                       // G8PTN: Not used
-      { // GO to MENU if more than one click in less than 1/2 seconds.
-        cmdMenu = !cmdMenu;
-        if (cmdMenu)
-          showMenu();
       }
       delay(MIN_ELAPSED_TIME);
       elapsedSleep = elapsedCommand = millis();
@@ -3147,12 +3125,6 @@ void loop()
       showStatus();
     }
     elapsedCommand = millis();
-  }
-
-  if ((millis() - elapsedClick) > ELAPSED_CLICK)
-  {
-    countClick = 0;
-    elapsedClick = millis();
   }
 
   if ((millis() - lastRDSCheck) > RDS_CHECK_TIME) {
