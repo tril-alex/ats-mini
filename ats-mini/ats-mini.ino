@@ -1105,11 +1105,9 @@ void setBand(int8_t up_down)
 /**
  * Switch the radio to current band
  */
-void useBand()
-{
+void useBand() {
   currentMode = bandMODE[bandIdx];                  // G8PTN: Added to support mode per band
-  if (band[bandIdx].bandType == FM_BAND_TYPE)
-  {
+  if (band[bandIdx].bandType == FM_BAND_TYPE) {
     currentMode = FM;
     rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, tabFmStep[band[bandIdx].currentStepIdx]);
@@ -1122,13 +1120,10 @@ void useBand()
     rx.setRdsConfig(1, 2, 2, 2, 2);
     rx.setGpioCtl(1,0,0);   // G8PTN: Enable GPIO1 as output
     rx.setGpio(0,0,0);      // G8PTN: Set GPIO1 = 0
-  }
-  else
-  {
+  } else {
     // set the tuning capacitor for SW or MW/LW
     rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
-    if (ssbLoaded)
-    {
+    if (ssbLoaded) {
       // Configure SI4732 for SSB
       rx.setSSB(
         band[bandIdx].minimumFreq,
@@ -1143,9 +1138,7 @@ void useBand()
       else bwIdxSSB = band[bandIdx].bandwidthIdx;
       rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
       updateBFO();                                          // G8PTN: If SSB is loaded update BFO
-    }
-    else
-    {
+    } else {
       currentMode = AM;
       rx.setAM(
         band[bandIdx].minimumFreq,
@@ -1162,7 +1155,6 @@ void useBand()
     rx.setGpio(1,0,0);      // G8PTN: Set GPIO1 = 1
     rx.setSeekAmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq); // Consider the range all defined current band
     rx.setSeekAmSpacing(5); // Max 10kHz for spacing
-
   }
 
   // G8PTN: Added
@@ -3196,6 +3188,8 @@ void loop() {
     rx.getCurrentReceivedSignalQuality();
     uint8_t remote_rssi = rx.getCurrentRSSI();
 
+    uint16_t tuning_capacitor = rx.getAntennaTuningCapacitor();
+ 
     // Remote serial
     Serial.print(app_ver);                      // Firmware version
     Serial.print(",");
@@ -3220,20 +3214,11 @@ void loop() {
     Serial.print(agcIdx);                       // AGC/ATTN (FM/AM/SSB)
     Serial.print(",");
 
-    Serial.print(cmdBand);                      // Band command mode
-    Serial.print(",");
-    Serial.print(cmdMode);                      // Mode command mode
-    Serial.print(",");
-    Serial.print(cmdStep);                      // Step command mode
-    Serial.print(",");
-    Serial.print(cmdBandwidth);                 // Bandwidth command mode
-    Serial.print(",");
-    Serial.print(cmdAgc);                       // AGC/ATTN command mode
-    Serial.print(",");
-
     Serial.print(remote_volume);                // Volume
     Serial.print(",");
     Serial.print(remote_rssi);                  // RSSI
+    Serial.print(",");
+    Serial.print(tuning_capacitor);             // Tuning cappacitor
     Serial.print(",");
     Serial.print(adc_read_avr);                 // V_BAT/2 (ADC average value)
     Serial.print(",");
