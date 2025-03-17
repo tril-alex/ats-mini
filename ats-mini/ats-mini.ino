@@ -2631,7 +2631,7 @@ drawSprite();
 }
 
 
-void button_check() {
+void buttonCheck() {
   // G8PTN: Added
   // Push button detection
   // Only execute every 10 ms
@@ -3023,8 +3023,6 @@ void loop()
   }
   else
   {
-    // G8PTN: Modified to use new button detection. Disable band menu on single push. Default to volume option
-    //if (digitalRead(ENCODER_PUSH_BUTTON) == LOW)
     if (pb1_long_pressed && !seekModePress) {
       pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
       if (display_on) {
@@ -3036,6 +3034,10 @@ void loop()
       delay(MIN_ELAPSED_TIME);
     } else if (pb1_short_released && !seekModePress) {
       pb1_released = pb1_short_released = pb1_long_released = false;
+      if (muted) {
+        rx.setVolume(mute_vol_val);
+        muted = false;
+      }
       cmdVolume = true;
       menuIdx = MENU_VOLUME;
       showVolume();
@@ -3043,7 +3045,6 @@ void loop()
       elapsedSleep = elapsedCommand = millis();
    } else if (pb1_released && !pb1_long_released && !seekModePress) {
       pb1_released = pb1_short_released = pb1_long_released = false;
-      //while (digitalRead(ENCODER_PUSH_BUTTON) == LOW) { }
       countClick++;
       if (currentSleep && !display_on) {
         displayOn();
@@ -3069,7 +3070,6 @@ void loop()
         }
         else
         {
-          //cmdBand = !cmdBand;
           cmdMenu = !cmdMenu;
           // menuIdx = MENU_VOLUME;
           currentMenuCmd = menuIdx;
@@ -3089,7 +3089,7 @@ void loop()
     }
   }
 
-  // Disable commands control
+  // Display sleep timeout
   if (currentSleep && display_on) {
     if ((millis() - elapsedSleep) > currentSleep * 1000) {
       displayOff();
@@ -3173,7 +3173,7 @@ void loop()
 
   // Check for button activity
   // In this case used for falling edge detection
-  button_check();
+  buttonCheck();
   if (!pb1_pressed && seekModePress) {
     seekModePress = false;
     pb1_released = pb1_short_released = pb1_long_released = false;
