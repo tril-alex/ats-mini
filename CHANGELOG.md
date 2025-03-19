@@ -1,3 +1,5 @@
+# Changelog
+
 ## 1.05 (2025-03-16)
 
 
@@ -71,6 +73,7 @@
 
 ## 1.01 (2025-03-11)
 
+Identical to 1.01 by Dave (G8PTN), just recompiled for `esp32:esp32@3.1.3` Arduino core.
 
 ### Added
 
@@ -83,6 +86,7 @@
 
 ## 1.00 (2025-03-11)
 
+Identical to 1.00 by Dave (G8PTN), just recompiled for `esp32:esp32@3.1.3` Arduino core.
 
 ### Added
 
