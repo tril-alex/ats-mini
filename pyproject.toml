@@ -1,3 +1,16 @@
+[project]
+name = "ats-mini"
+version = "0.00"
+requires-python = ">=3.12"
+
+dependencies = [
+  "towncrier",
+  "sphinx",
+  "furo",
+  "myst_parser",
+  "sphinx-autobuild",
+]
+
 [tool.towncrier]
 name = "ATS Mini"
 filename = "CHANGELOG.md"
