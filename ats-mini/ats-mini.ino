@@ -77,7 +77,8 @@
 #define vol_offset_y   150    // Volume vertical offset
 #define rds_offset_x   165    // RDS horizontal offset
 #define rds_offset_y    94    // RDS vertical offset
-#define batt_datum     286    // Battery meter x offset
+#define batt_offset_x  286    // Battery meter x offset
+#define batt_offset_y    0    // Battery meter y offset
 #define clock_datum     90    // Clock x offset
 
 // Battery Monitoring
@@ -2343,20 +2344,20 @@ void batteryMonitor() {
   }
 
   // Set display information
-  spr.fillRect(batt_datum, 1, 30, 14, theme[themeIdx].batt_border);
-  spr.fillRect(batt_datum + 30, 3, 3, 10, theme[themeIdx].batt_border);
+  spr.fillRect(batt_offset_x, batt_offset_y + 1, 30, 14, theme[themeIdx].batt_border);
+  spr.fillRect(batt_offset_x + 30, batt_offset_y + 3, 3, 10, theme[themeIdx].batt_border);
 
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(theme[themeIdx].batt_voltage, theme[themeIdx].bg);
 
 #if THEME_EDITOR
-  spr.fillRect(batt_datum - 32, 1, 30, 14, theme[themeIdx].batt_border);
-  spr.fillRect(batt_datum -32 + 30, 3, 3, 10, theme[themeIdx].batt_border);
+  spr.fillRect(batt_offset_x - 32, batt_offset_y + 1, 30, 14, theme[themeIdx].batt_border);
+  spr.fillRect(batt_offset_x - 32 + 30, batt_offset_y + 3, 3, 10, theme[themeIdx].batt_border);
 
-  spr.fillRect(batt_datum -32 + 1, 2, 28, 12, theme[themeIdx].bg);
-  spr.fillRect(batt_datum -32 + 1, 2, 21, 12, theme[themeIdx].batt_full);
-  spr.fillRect(batt_datum -32 + 1, 2, 14, 12, theme[themeIdx].batt_low);
-  spr.drawString("4.0V", batt_datum -32 - 3, 0, 2);
+  spr.fillRect(batt_offset_x -32 + 1, batt_offset_y + 2, 28, 12, theme[themeIdx].bg);
+  spr.fillRect(batt_offset_x -32 + 1, batt_offset_y + 2, 21, 12, theme[themeIdx].batt_full);
+  spr.fillRect(batt_offset_x -32 + 1, batt_offset_y + 2, 14, 12, theme[themeIdx].batt_low);
+  spr.drawString("4.0V", batt_offset_x -32 - 3, batt_offset_y, 2);
 
   adc_volt_avr = 4.5;
 #endif
@@ -2364,16 +2365,16 @@ void batteryMonitor() {
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V
   // If the average voltage is greater than 4.3V, show ligtning on the display
   if (adc_volt_avr > 4.3) {
-    spr.fillRect(batt_datum + 1, 2, 28, 12, theme[themeIdx].batt_charge);
-    spr.fillTriangle(batt_datum + 6, 7, batt_datum + 16, 7, batt_datum + 16, 4, theme[themeIdx].batt_icon);
-    spr.fillTriangle(batt_datum + 23, 8, batt_datum + 13, 8, batt_datum + 13, 11, theme[themeIdx].batt_icon);
+    spr.fillRect(batt_offset_x + 1, batt_offset_y + 2, 28, 12, theme[themeIdx].batt_charge);
+    spr.fillTriangle(batt_offset_x + 6, batt_offset_y + 7, batt_offset_x + 16, batt_offset_y + 7, batt_offset_x + 16, batt_offset_y + 4, theme[themeIdx].batt_icon);
+    spr.fillTriangle(batt_offset_x + 23, batt_offset_y + 8, batt_offset_x + 13, batt_offset_y + 8, batt_offset_x + 13, batt_offset_y + 11, theme[themeIdx].batt_icon);
   }
   else {
     char voltage[8];
-    spr.fillRect(batt_datum + 1, 2, 28, 12, theme[themeIdx].bg);
-    spr.fillRect(batt_datum + 1, 2, chargeLevel, 12, batteryLevelColor);
+    spr.fillRect(batt_offset_x + 1, batt_offset_y + 2, 28, 12, theme[themeIdx].bg);
+    spr.fillRect(batt_offset_x + 1, batt_offset_y + 2, chargeLevel, 12, batteryLevelColor);
     sprintf(voltage, "%.02fV", adc_volt_avr);
-    spr.drawString(voltage, batt_datum - 3, 0, 2);
+    spr.drawString(voltage, batt_offset_x - 3, batt_offset_y, 2);
   }
 }
 
