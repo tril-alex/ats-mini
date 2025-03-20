@@ -1,6 +1,18 @@
 # Changelog
 
-The project documentation is avaiable at https://esp32-si4732.github.io/ats-mini/
+The project documentation is available at https://esp32-si4732.github.io/ats-mini/
+
+<!-- towncrier release notes start -->
+
+## 1.06 (2025-03-20)
+
+
+### Changed
+
+- Unmute the audio on volume middle press shortcut [#1](https://github.com/esp32-si4732/ats-mini/issues/1)
+- Lock encoder rotation during sleep, #8 [#8](https://github.com/esp32-si4732/ats-mini/issues/8)
+- Redraw the battery indicator in iOS style [#11](https://github.com/esp32-si4732/ats-mini/issues/11)
+- Print tuning capacitor value to Serial port 
 
 ## 1.05 (2025-03-16)
 
