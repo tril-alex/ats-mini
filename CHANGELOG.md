@@ -1,5 +1,7 @@
 # Changelog
 
+The project documentation is avaiable at https://esp32-si4732.github.io/ats-mini/
+
 ## 1.05 (2025-03-16)
 
 

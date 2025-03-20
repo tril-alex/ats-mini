@@ -3,6 +3,8 @@
 maxdepth: 1
 hidden: true
 ---
+development.md
+hardware.md
 changelog.md
 ```
 
