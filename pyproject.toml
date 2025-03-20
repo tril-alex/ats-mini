@@ -11,6 +11,9 @@ dependencies = [
   "sphinx-autobuild",
 ]
 
+[tool.uv]
+required-version = ">=0.6.8"
+
 [tool.towncrier]
 name = "ATS Mini"
 filename = "CHANGELOG.md"
