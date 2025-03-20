@@ -77,7 +77,7 @@
 #define vol_offset_y   150    // Volume vertical offset
 #define rds_offset_x   165    // RDS horizontal offset
 #define rds_offset_y    94    // RDS vertical offset
-#define batt_offset_x  286    // Battery meter x offset
+#define batt_offset_x  288    // Battery meter x offset
 #define batt_offset_y    0    // Battery meter y offset
 #define clock_datum     90    // Clock x offset
 
@@ -2327,37 +2327,38 @@ void batteryMonitor() {
   uint16_t batteryLevelColor;
 
   if (batt_soc_state == 0 ) {
-    chargeLevel=7;
+    chargeLevel=6;
     batteryLevelColor=theme[themeIdx].batt_low;
   }
   if (batt_soc_state == 1 ) {
-    chargeLevel=14;
+    chargeLevel=12;
     batteryLevelColor=theme[themeIdx].batt_full;
   }
   if (batt_soc_state == 2 ) {
-    chargeLevel=21;
+    chargeLevel=18;
     batteryLevelColor=theme[themeIdx].batt_full;
   }
   if (batt_soc_state == 3 ) {
-    chargeLevel=28;
+    chargeLevel=24;
     batteryLevelColor=theme[themeIdx].batt_full;
   }
 
   // Set display information
-  spr.fillRect(batt_offset_x, batt_offset_y + 1, 30, 14, theme[themeIdx].batt_border);
-  spr.fillRect(batt_offset_x + 30, batt_offset_y + 3, 3, 10, theme[themeIdx].batt_border);
+  spr.drawRoundRect(batt_offset_x, batt_offset_y + 1, 28, 14, 3, theme[themeIdx].batt_border);
+  spr.drawLine(batt_offset_x + 29, batt_offset_y + 5, batt_offset_x + 29, batt_offset_y + 10, theme[themeIdx].batt_border);
+  spr.drawLine(batt_offset_x + 30, batt_offset_y + 6, batt_offset_x + 30, batt_offset_y + 9, theme[themeIdx].batt_border);
 
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(theme[themeIdx].batt_voltage, theme[themeIdx].bg);
 
 #if THEME_EDITOR
-  spr.fillRect(batt_offset_x - 32, batt_offset_y + 1, 30, 14, theme[themeIdx].batt_border);
-  spr.fillRect(batt_offset_x - 32 + 30, batt_offset_y + 3, 3, 10, theme[themeIdx].batt_border);
+  spr.drawRoundRect(batt_offset_x - 31, batt_offset_y + 1, 28, 14, 3, theme[themeIdx].batt_border);
+  spr.drawLine(batt_offset_x - 31 + 29, batt_offset_y + 5, batt_offset_x - 31 + 29, batt_offset_y + 10, theme[themeIdx].batt_border);
+  spr.drawLine(batt_offset_x - 31 + 30, batt_offset_y + 6, batt_offset_x - 31 + 30, batt_offset_y + 9, theme[themeIdx].batt_border);
 
-  spr.fillRect(batt_offset_x -32 + 1, batt_offset_y + 2, 28, 12, theme[themeIdx].bg);
-  spr.fillRect(batt_offset_x -32 + 1, batt_offset_y + 2, 21, 12, theme[themeIdx].batt_full);
-  spr.fillRect(batt_offset_x -32 + 1, batt_offset_y + 2, 14, 12, theme[themeIdx].batt_low);
-  spr.drawString("4.0V", batt_offset_x -32 - 3, batt_offset_y, 2);
+  spr.fillRoundRect(batt_offset_x - 31 + 2, batt_offset_y + 3, 18, 10, 2, theme[themeIdx].batt_full);
+  spr.fillRoundRect(batt_offset_x - 31 + 2, batt_offset_y + 3, 12, 10, 2, theme[themeIdx].batt_low);
+  spr.drawString("4.0V", batt_offset_x - 31 - 3, batt_offset_y, 2);
 
   adc_volt_avr = 4.5;
 #endif
@@ -2365,14 +2366,20 @@ void batteryMonitor() {
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V
   // If the average voltage is greater than 4.3V, show ligtning on the display
   if (adc_volt_avr > 4.3) {
-    spr.fillRect(batt_offset_x + 1, batt_offset_y + 2, 28, 12, theme[themeIdx].batt_charge);
-    spr.fillTriangle(batt_offset_x + 6, batt_offset_y + 7, batt_offset_x + 16, batt_offset_y + 7, batt_offset_x + 16, batt_offset_y + 4, theme[themeIdx].batt_icon);
-    spr.fillTriangle(batt_offset_x + 23, batt_offset_y + 8, batt_offset_x + 13, batt_offset_y + 8, batt_offset_x + 13, batt_offset_y + 11, theme[themeIdx].batt_icon);
-  }
-  else {
+    spr.fillRoundRect(batt_offset_x + 2, batt_offset_y + 3, 24, 10, 2, theme[themeIdx].batt_charge);
+    spr.drawLine(batt_offset_x + 9 + 8, batt_offset_y + 1, batt_offset_x + 9 + 6, batt_offset_y + 1 + 5, theme[themeIdx].bg);
+    spr.drawLine(batt_offset_x + 9 + 6, batt_offset_y + 1 + 5, batt_offset_x + 9 + 10, batt_offset_y + 1 + 5, theme[themeIdx].bg);
+    spr.drawLine(batt_offset_x + 9 + 11, batt_offset_y + 1 + 6, batt_offset_x + 9 + 4, batt_offset_y + 1 + 13, theme[themeIdx].bg);
+    spr.drawLine(batt_offset_x + 9 + 2, batt_offset_y + 1 + 13, batt_offset_x + 9 + 4, batt_offset_y + 1 + 8, theme[themeIdx].bg);
+    spr.drawLine(batt_offset_x + 9 + 4, batt_offset_y + 1 + 8, batt_offset_x + 9 + 0, batt_offset_y + 1 + 8, theme[themeIdx].bg);
+    spr.drawLine(batt_offset_x + 9 - 1, batt_offset_y + 1 + 7, batt_offset_x + 9 + 6, batt_offset_y + 1 + 0, theme[themeIdx].bg);
+    spr.fillTriangle(batt_offset_x + 9 + 7, batt_offset_y + 1, batt_offset_x + 9 + 4, batt_offset_y + 1 + 6, batt_offset_x + 9, batt_offset_y + 1 + 7, theme[themeIdx].batt_icon);
+    spr.fillTriangle(batt_offset_x + 9 + 5, batt_offset_y + 1 + 6, batt_offset_x + 9 + 10, batt_offset_y + 1 + 6, batt_offset_x + 9 + 3, batt_offset_y + 1 + 13, theme[themeIdx].batt_icon);
+    spr.fillRect(batt_offset_x + 9 + 1, batt_offset_y + 1 + 6, 9, 2, theme[themeIdx].batt_icon);
+    spr.drawPixel(batt_offset_x + 9 + 3, batt_offset_y + 1 + 12, theme[themeIdx].batt_icon);
+  } else {
     char voltage[8];
-    spr.fillRect(batt_offset_x + 1, batt_offset_y + 2, 28, 12, theme[themeIdx].bg);
-    spr.fillRect(batt_offset_x + 1, batt_offset_y + 2, chargeLevel, 12, batteryLevelColor);
+    spr.fillRoundRect(batt_offset_x + 2, batt_offset_y + 3, chargeLevel, 10, 2, batteryLevelColor);
     sprintf(voltage, "%.02fV", adc_volt_avr);
     spr.drawString(voltage, batt_offset_x - 3, batt_offset_y, 2);
   }
