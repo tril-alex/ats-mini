@@ -50,7 +50,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sketch-paths: |
             - ats-mini
-          fqbn: esp32:esp32:esp32s3
+          fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB
           cli-compile-flags: |
             - --profile
             - esp32s3
