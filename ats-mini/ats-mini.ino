@@ -1110,7 +1110,7 @@ void useBand() {
   currentMode = bandMODE[bandIdx];                  // G8PTN: Added to support mode per band
   if (band[bandIdx].bandType == FM_BAND_TYPE) {
     currentMode = FM;
-    rx.setTuneFrequencyAntennaCapacitor(0);
+    // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, tabFmStep[band[bandIdx].currentStepIdx]);
     rx.setSeekFmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
     bfoOn = ssbLoaded = false;
@@ -1123,7 +1123,7 @@ void useBand() {
     rx.setGpio(0,0,0);      // G8PTN: Set GPIO1 = 0
   } else {
     // set the tuning capacitor for SW or MW/LW
-    rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
+    // rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
     if (ssbLoaded) {
       // Configure SI4732 for SSB
       rx.setSSB(
