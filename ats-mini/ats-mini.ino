@@ -3209,7 +3209,7 @@ void loop() {
     Serial.print(currentBFO);                   // Frequency (Hz x 1000)
     Serial.print(",");
 
-    Serial.print(bandIdx);                      // Band
+    Serial.print(band[bandIdx].bandName);      // Band
     Serial.print(",");
     Serial.print(currentMode);                  // Mode
     Serial.print(",");
