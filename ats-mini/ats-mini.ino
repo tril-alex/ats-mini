@@ -3196,8 +3196,10 @@ void loop() {
     rx.getCurrentReceivedSignalQuality();
     uint8_t remote_rssi = rx.getCurrentRSSI();
 
+    // Use rx.getFrequency to force read of capacitor value from SI4732/5
+    rx.getFrequency();
     uint16_t tuning_capacitor = rx.getAntennaTuningCapacitor();
- 
+
     // Remote serial
     Serial.print(app_ver);                      // Firmware version
     Serial.print(",");
