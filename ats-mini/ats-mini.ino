@@ -1414,8 +1414,7 @@ void doStep(int8_t v)
           idxAmStep = AmTotalStepsSsb;
       */
 
-      if (!isSSB() || isSSB() && idxAmStep < AmTotalSteps)
-      {
+      if (!isSSB() || (isSSB() && idxAmStep < AmTotalSteps)) {
           currentStepIdx = idxAmStep;
           rx.setFrequencyStep(tabAmStep[idxAmStep]);
       }
@@ -1789,7 +1788,7 @@ uint8_t getStrength() {
 #endif
   if (currentMode != FM) {
     //dBuV to S point conversion HF
-    if ((rssi >= 0) and (rssi <=  1)) return  1;  // S0
+    if ((rssi <=  1)) return  1;                  // S0
     if ((rssi >  1) and (rssi <=  2)) return  2;  // S1         // G8PTN: Corrected table
     if ((rssi >  2) and (rssi <=  3)) return  3;  // S2
     if ((rssi >  3) and (rssi <=  4)) return  4;  // S3
@@ -1810,7 +1809,7 @@ uint8_t getStrength() {
   else
   {
     //dBuV to S point conversion FM
-    if  (rssi >= 0  and (rssi <=  1)) return  1;               // G8PTN: Corrected table
+    if  ((rssi <=  1)) return  1;                 // G8PTN: Corrected table
     if ((rssi >  1) and (rssi <=  2)) return  7;  // S6
     if ((rssi >  2) and (rssi <=  8)) return  8;  // S7
     if ((rssi >  8) and (rssi <= 14)) return  9;  // S8
@@ -1888,17 +1887,23 @@ void drawMenu() {
       if (i==0) spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
       else spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
-      if (cmdMode)
+      if (cmdMode) {
         if (currentMode == FM) {
           if (i==0) spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+        } else {
+          spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
         }
-        else spr.drawString(bandModeDesc[abs((currentMode+lastBandModeDesc+1+i)%(lastBandModeDesc+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
-
-      if (cmdStep)
-        if (currentMode == FM) spr.drawString(FmStepDesc[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
-        else spr.drawString(AmSsbStepDesc[abs((currentStepIdx+temp_LastStep+1+i)%(temp_LastStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
-
-      if (cmdBand) spr.drawString(band[abs((bandIdx+lastBand+1+i)%(lastBand+1))].bandName,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+      }
+      if (cmdStep) {
+        if (currentMode == FM) {
+          spr.drawString(FmStepDesc[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+        } else {
+          spr.drawString(AmSsbStepDesc[abs((currentStepIdx+temp_LastStep+1+i)%(temp_LastStep+1))],40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+        }
+      }
+      if (cmdBand) {
+        spr.drawString(band[abs((bandIdx+lastBand+1+i)%(lastBand+1))].bandName,40+menu_offset_x+(menu_delta_x/2),64+menu_offset_y+(i*16),2);
+      }
 
       if (cmdBandwidth) {
         if (isSSB())
@@ -1981,8 +1986,6 @@ void drawMenu() {
 }
 
 
-
-// G8PTN: Alternative layout
 void drawSprite()
 {
   if (!display_on) return;
@@ -2323,8 +2326,8 @@ void batteryMonitor() {
 
   // SOC display information
   // Variable: chargeLevel = pixel width, batteryLevelColor = Colour of level
-  int chargeLevel;
-  uint16_t batteryLevelColor;
+  int chargeLevel = 24;
+  uint16_t batteryLevelColor = theme[themeIdx].batt_full;
 
   if (batt_soc_state == 0 ) {
     chargeLevel=6;
@@ -2751,17 +2754,17 @@ void captureScreen() {
   Serial.println("");
   // 14 bytes of BMP header
   Serial.print("424d"); // BM
-  sprintf(sb, "%08x", htonl(14 + 40 + 12 + width * height * 2)); // Image size
+  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12 + width * height * 2)); // Image size
   Serial.print(sb);
   Serial.print("00000000");
-  sprintf(sb, "%08x", htonl(14 + 40 + 12)); // Offset to image data
+  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12)); // Offset to image data
   Serial.print(sb);
 
   //Image header
   Serial.print("28000000"); // Header size
-  sprintf(sb, "%08x", htonl(width));
+  sprintf(sb, "%08x", (unsigned int)htonl(width));
   Serial.print(sb);
-  sprintf(sb, "%08x", htonl(height));
+  sprintf(sb, "%08x", (unsigned int)htonl(height));
   Serial.print(sb);
   Serial.print("01001000"); // 1 plane, 16 bpp
   Serial.print("00000000"); // Compression
