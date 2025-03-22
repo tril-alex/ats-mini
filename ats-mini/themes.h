@@ -2,7 +2,7 @@
 #define THEME_EDITOR 0         // Enables setting and printing of theme colors
 
 typedef struct {
-  char name[12];
+  char *name;
   uint16_t bg;
   uint16_t text;
   uint16_t text_muted;
