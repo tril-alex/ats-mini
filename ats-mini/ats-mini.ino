@@ -3011,6 +3011,7 @@ void loop() {
         rx.setVolume(mute_vol_val);
         muted = false;
       }
+      disableCommands();
       cmdVolume = true;
       menuIdx = MENU_VOLUME;
       showVolume();
