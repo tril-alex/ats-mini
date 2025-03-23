@@ -532,7 +532,7 @@ int getLastStep()
 
   if (isSSB())
     return AmTotalSteps + SsbTotalSteps - 1;
-  else if (bandIdx == LW_BAND_TYPE || bandIdx == MW_BAND_TYPE)    // G8PTN; Added in place of check in doStep() for LW/MW step limit
+  else if (band[bandIdx].bandType == LW_BAND_TYPE || band[bandIdx].bandType == MW_BAND_TYPE)    // G8PTN; Added in place of check in doStep() for LW/MW step limit
     return AmTotalStepsSsb;
   else
     return AmTotalSteps - 1;
@@ -1205,13 +1205,6 @@ void useBand() {
 
   }
 
-  /*
-  // G8PTN: Why is this required?
-  if ((bandIdx == LW_BAND_TYPE || bandIdx == MW_BAND_TYPE)
-      && idxAmStep > AmTotalStepsSsb)
-      idxAmStep = AmTotalStepsSsb;
-  */
-
   // Debug
   #if DEBUG2_PRINT
   Serial.print("Info: useBand() >>> currentStepIdx = ");
@@ -1402,17 +1395,6 @@ void doStep(int8_t v)
       //SSB Step limit
       else if (isSSB() && idxAmStep >= AmTotalStepsSsb && idxAmStep < AmTotalSteps)
           idxAmStep = v == 1 ? AmTotalSteps : AmTotalStepsSsb - 1;
-
-      // G8PTN: Reduced steps for LW/MW now covered in getLastStep()
-      /*
-      //LW/MW Step limit
-      else if ((bandIdx == LW_BAND_TYPE || bandIdx == MW_BAND_TYPE)
-          && v == 1 && idxAmStep > AmTotalStepsSsb && idxAmStep < AmTotalSteps)
-          idxAmStep = AmTotalSteps;
-      else if ((bandIdx == LW_BAND_TYPE || bandIdx == MW_BAND_TYPE)
-          && v != 1 && idxAmStep > AmTotalStepsSsb && idxAmStep < AmTotalSteps)
-          idxAmStep = AmTotalStepsSsb;
-      */
 
       if (!isSSB() || (isSSB() && idxAmStep < AmTotalSteps)) {
           currentStepIdx = idxAmStep;
