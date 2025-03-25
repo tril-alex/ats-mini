@@ -66,4 +66,4 @@ You can use a pair of precision tweezers like this to short the button contacts:
 
 Or solder the missing buttons:
 
-![](_static/boot-reset-buttons-missing.jpg) ![](_static/boot-reset-buttons-soldered.jpg)
+![](_static/button.jpg) ![](_static/boot-reset-buttons-missing.jpg) ![](_static/boot-reset-buttons-soldered.jpg)
