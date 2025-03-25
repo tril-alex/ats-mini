@@ -2,6 +2,23 @@
 
 ## Backup
 
+If you just bought the receiver, want to experiment with different firmwares but want to be able to revert to the stock one, use the following instructions.
+
+1. Install `uv` (Windows, macOS, Linux) <https://docs.astral.sh/uv/getting-started/installation/>
+2. Power on the receiver and connect it to your computer via USB
+3. Run the following command
+   ```
+   uvx --from esptool esptool.py --chip esp32s3 --port SERIAL_PORT --baud 921600 read_flash 0x0 ALL original-flash.bin
+   ```
+
+## Restore
+
+The following command will restore the firmware from backup:
+
+```shell
+uvx --from esptool esptool.py --chip esp32s3 --port SERIAL_PORT --baud 921600 --before default_reset --after hard_reset write_flash  -z --flash_mode keep --flash_freq keep --flash_size keep 0x0 original-flash.bin
+```
+
 ## Recovery
 
 Please ensure the receiver has [BOOT and RESET](hardware.md#boot-and-reset-buttons) buttons on the PCB.
