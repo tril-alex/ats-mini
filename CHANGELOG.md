@@ -4,6 +4,26 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 1.08 (2025-03-25)
+
+
+### Added
+
+- Support press+rotate for faster SSB tuning [#4](https://github.com/esp32-si4732/ats-mini/issues/4)
+- Add channel information for CB. Support European and Russian channel lists from A to H. [#21](https://github.com/esp32-si4732/ats-mini/issues/21)
+
+
+### Changed
+
+- The default CB channel has been changed to the most popular frequency in Russia 27135 kHz (C15E). [#21](https://github.com/esp32-si4732/ats-mini/issues/21)
+- Remove some delays and extra screen repaints (might or might not make the tuning process a bit faster) 
+
+
+### Fixed
+
+- Fix getLastStep for LW/MW [#18](https://github.com/esp32-si4732/ats-mini/issues/18)
+- Fix the volume shortcut bug with active menu [#20](https://github.com/esp32-si4732/ats-mini/issues/20)
+
 ## 1.07 (2025-03-21)
 
 
