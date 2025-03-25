@@ -4,7 +4,7 @@
 Flashing the firmware can make your receiver unusable.
 ```
 
-Before proceeding, please check whether the receiver board has BOOT & RST buttons soldered, which can help to recover it. Also there is a way to back up the stock firmware, so you can roll back to it if you want.
+Before proceeding, please check whether the receiver board has BOOT & RESET buttons soldered, which can help to [recover](recovery.md#recovery) it. Also there is a way to [back up](recovery.md#backup) the stock firmware, so you can roll back to it if you want.
 
 ## Firmware files
 
