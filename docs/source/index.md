@@ -29,8 +29,6 @@ The receiver uses ESP32-S3 and SI4732 and is based on the following projects:
 
 An alternative firmware called [ATS Mini](https://github.com/G8PTN/ATS_MINI/) was developed by Dave (G8PTN) based on Ralph Xavier's work and [firmware for ATS-20 by Goshante](https://github.com/goshante/ats20_ats_ex/). He also documented a lot of things.
 
-## Repositories
-
 ## Useful links
 
 * [ESP32S3-SI4732 Receiver](https://oshwhub.com/sunnygold/esp32s3-si4732-shou-yin-ji) the official project page in Chinese (also the QQ group 854656412)
