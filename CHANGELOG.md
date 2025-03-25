@@ -1,6 +1,6 @@
 # Changelog
 
-The project documentation is available at <https://esp32-si4732.github.io/ats-mini/>
+The project documentation is available at <https://esp32-si4732.github.io/ats-mini/>. The firmware flashing instructions are available at <https://esp32-si4732.github.io/ats-mini/flash.html>
 
 <!-- towncrier release notes start -->
 

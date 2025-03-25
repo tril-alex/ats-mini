@@ -3,6 +3,7 @@
 maxdepth: 1
 hidden: true
 ---
+flash.md
 development.md
 hardware.md
 changelog.md

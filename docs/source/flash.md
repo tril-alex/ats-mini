@@ -1,0 +1,48 @@
+# Flashing the firmware
+
+```{warning}
+Flashing the firmware can make your receiver unusable.
+```
+
+Before proceeding, please check whether the receiver board has BOOT & RST buttons soldered, which can help to recover it. Also there is a way to back up the stock firmware, so you can roll back to it if you want.
+
+## Firmware files
+
+A firmware archive contains the following files:
+
+1. `CHANGELOG.md` - a text file that describes what's new in each firmware version
+2. `ats-mini.ino.bootloader.bin` - a bootloader (should be flashed at address `0x0`)
+3. `ats-mini.ino.partitions.bin` - a partition table (should be flashed at address `0x8000`)
+4. `ats-mini.ino.bin` - a firmware itself (should be flashed at address `0x10000`)
+5. `ats-mini.ino.merged.bin` - the three previous files combined into one (should be flashed at address `0x0`)
+
+So, you need to flash your receiver using just one of the following two ways:
+
+- Flash the first three files (bootloader, partitions, firmware) using the right addresses. The receiver settings might be reset in some versions.
+
+OR
+
+- Only flash the last file (merged) using the `0x0` address. The receiver settings will be always reset.
+
+## Flash using a web browser
+
+Works on: Windows, macOS, Linux
+
+This is the simplest method, but you need a browser that supports the [Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API). This means Chrome and [some other browsers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility). No, Firefox and Safari can't do it.
+
+```{tip}
+On Linux, please make sure that the user account that runs your browser has the [necessary permissions](https://www.reddit.com/r/linuxquestions/comments/vqzev0/browser_serial_port_fails_to_open/) to access the serial port.
+```
+
+1. Connect your receiver to a computer using USB and power it on.
+2. A new serial port should appear. On Windows check the USB Serial COM port in the Windows Device Manager, on macOS it will look like `/dev/tty.usbmodemXXXX`, on Linux like `/dev/ttyACMX`.
+3. Open the following link: <https://espressif.github.io/esptool-js/>
+4. Press the `Connect` button and choose the right serial port.
+5. Add either the three separate firmware files at the [right addresses](#firmware-files), or the merged one at `0x0`.
+6. Press the `Program` button.
+7. Wait until the following text will appear in the black serial log window: `Leaving... Hard resetting via RTS pin...`
+8. Press the `Disconnect` button.
+9. Power off and power on the receiver.
+10. Check out the firmware version in Menu -> Settings -> About.
+
+![](_static/esp-web-flasher.png)
