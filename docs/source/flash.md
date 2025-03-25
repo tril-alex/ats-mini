@@ -43,6 +43,24 @@ On Linux, please make sure that the user account that runs your browser has the 
 7. Wait until the following text will appear in the black serial log window: `Leaving... Hard resetting via RTS pin...`
 8. Press the `Disconnect` button.
 9. Power off and power on the receiver.
-10. Check out the firmware version in Menu -> Settings -> About.
+10. Check out the firmware version in Menu -> Settings -> About on the receiver.
 
 ![](_static/esp-web-flasher.png)
+
+## Flash Download Tool
+
+Works on: Windows
+
+1. Download the Expressif [Flash Download Tool](https://docs.espressif.com/projects/esp-test-tools/en/latest/esp32/production_stage/tools/flash_download_tool.html), unpack the archive.
+2. Connect your receiver to a computer using USB and power it on.
+3. A new serial port should appear, check the USB Serial COM port in the Windows Device Manager.
+4. Run the `flash_dowload_tool` executable file.
+5. Choose `Chip Type: ESP32-S3`, `WorkMode: Develop`, `LoadMode: UART`.
+6. Add either the three separate firmware files at the [right addresses](#firmware-files), or the merged one at `0x0`. Enable the check boxes next to the file bars.
+7. Set the COM port and other settings.
+8. After checking all information is correct, press the `START` button.
+9. Wait until the following text will appear in the black log window: `is stub and send flash finish`
+10. Power off and power on the receiver.
+11. Check out the firmware version in Menu -> Settings -> About on the receiver.
+
+![](_static/flash-download-tool.png)
