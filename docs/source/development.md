@@ -1,5 +1,10 @@
 # Development
 
+```{include} ../../CONTRIBUTING.md
+```
+
+## Compiling the source code
+
 1. Install [Arduino CLI](https://arduino.github.io/arduino-cli/1.2/installation/).
 2. Go to the repository root folder
 3. Compile and flash the firmware
