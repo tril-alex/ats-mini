@@ -22,4 +22,4 @@ The SRH805S SMA-M antenna supports 144/430/1200MHz and is not really suitable fo
 
 ## Desktop stands
 
-* https://www.thingiverse.com/thing:6968102
+* <https://www.thingiverse.com/thing:6968102>
