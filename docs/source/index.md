@@ -5,8 +5,10 @@ hidden: true
 ---
 flash.md
 recovery.md
-development.md
+accessories.md
+mods.md
 hardware.md
+development.md
 changelog.md
 ```
 
