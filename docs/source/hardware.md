@@ -58,12 +58,4 @@ The relevant columns are ESP32-S3-WROOM-1 "Pin Name" and "ATS-Mini Sketch Pin De
 
 ## BOOT and RESET buttons
 
-Some of the ESP32-SI4732 receivers sold on AliExpress do not have the BOOT and RESET buttons soldered in. You will need these buttons if you want to recover a receiver that was bricked because of a failed flashing process.
-
-You can use a pair of precision tweezers like this to short the button contacts:
-
-![](_static/precision-tweezers.jpg)
-
-Or solder the missing buttons:
-
-![](_static/button.jpg) ![](_static/boot-reset-buttons-missing.jpg) ![](_static/boot-reset-buttons-soldered.jpg)
+Some of the ESP32-SI4732 receivers do not have the BOOT and RESET buttons soldered in. You will need these buttons if you want to recover a receiver that was bricked because of a failed flashing process. Here is how to add the [BOOT & RESET](mods.md#boot-and-reset-buttons) buttons.

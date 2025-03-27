@@ -21,7 +21,7 @@ uvx --from esptool esptool.py --chip esp32s3 --port SERIAL_PORT --baud 921600 --
 
 ## Recovery
 
-Please ensure the receiver has [BOOT and RESET](hardware.md#boot-and-reset-buttons) buttons on the PCB.
+Please ensure the receiver has [BOOT and RESET](mods.md#boot-and-reset-buttons) buttons on the PCB.
 
 The recovery process is as follows:
 
