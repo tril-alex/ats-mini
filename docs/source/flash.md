@@ -11,18 +11,18 @@ Before proceeding, please check whether the receiver board has [BOOT & RESET but
 A firmware archive contains the following files:
 
 1. `CHANGELOG.md` - a text file that describes what's new in each firmware version
-2. `ats-mini.ino.bootloader.bin` - a bootloader (should be flashed at address `0x0`)
-3. `ats-mini.ino.partitions.bin` - a partition table (should be flashed at address `0x8000`)
-4. `ats-mini.ino.bin` - a firmware itself (should be flashed at address `0x10000`)
-5. `ats-mini.ino.merged.bin` - the three previous files combined into one (should be flashed at address `0x0`)
+2. `ats-mini.ino.bootloader.bin` - a bootloader (should be flashed at address **`0x0`**)
+3. `ats-mini.ino.partitions.bin` - a partition table (should be flashed at address **`0x8000`**)
+4. `ats-mini.ino.bin` - a firmware itself (should be flashed at address **`0x10000`**)
+5. `ats-mini.ino.merged.bin` - the three previous files combined into one (should be flashed at address **`0x0`**)
 
-So, you need to flash your receiver using just one of the following two ways:
+So, you need to flash your receiver using **just one** of the following two ways:
 
-- Flash the first three files (bootloader, partitions, firmware) using the right addresses. The receiver settings might be reset in some versions.
+- Flash the three files (**2** - `bootloader`, **3** - `partitions`, **4** - `firmware` using the right addresses. The receiver settings might be reset in some versions.
 
-OR
+**OR**
 
-- Only flash the last file (merged) using the `0x0` address. The receiver settings will be always reset.
+- Only flash the last file (**5** - `merged`) using the **`0x0`** address. The receiver settings will be always reset.
 
 ## Flash using a web browser
 
