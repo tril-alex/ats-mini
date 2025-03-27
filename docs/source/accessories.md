@@ -19,3 +19,7 @@
 The SRH805S SMA-M antenna supports 144/430/1200MHz and is not really suitable for the bands supported by the receiver. But it is tiny and could work for strong FM signals.
 
 ![](_static/esp32-si4732-ui-theme.jpg)
+
+## Desktop stands
+
+* https://www.thingiverse.com/thing:6968102
