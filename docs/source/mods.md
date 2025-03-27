@@ -12,6 +12,12 @@ Or solder the missing buttons:
 
 ![](_static/button.jpg) ![](_static/boot-reset-buttons-missing.jpg) ![](_static/boot-reset-buttons-soldered.jpg)
 
+## Speaker
+
+Some of the units have a smaller speaker. You can install a bigger one (1511) that is used in the original project ([aliexpress.com](https://www.aliexpress.com/item/1005006309723573.html), [aliexpress.ru](https://aliexpress.ru/item/1005005725740853.html)):
+
+![](_static/speaker.jpg)
+
 ## Hi-Z match circuit
 
 [ Micro Pocket SSB Receiver - NEW FIRMWARE + Hi-Z CIRCUIT Mod](https://youtu.be/BzrOE9BFpyU?feature=shared&t=916)
