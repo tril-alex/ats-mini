@@ -1,7 +1,7 @@
 // Theme editor
 #define THEME_EDITOR 0         // Enables setting and printing of theme colors
 
-typedef struct {
+typedef struct __attribute__ ((packed)) {
   char *name;
   uint16_t bg;
   uint16_t text;
@@ -253,15 +253,15 @@ const ColorTheme theme[] = {
   {
     "Night",
     0x0000, // bg
-    0xDA8A, // text
+    0xD986, // text
     0xB925, // text_muted
     0xF800, // text_warn
     0xB925, // smeter_icon
     0x8925, // smeter_bar
     0xF800, // smeter_bar_plus
     0xF800, // save_icon
-    0xDA8A, // batt_voltage
-    0xDA8A, // batt_border
+    0xD986, // batt_voltage
+    0xD986, // batt_border
     0x8925, // batt_full
     0xF800, // batt_low
     0x0000, // batt_charge
@@ -273,18 +273,18 @@ const ColorTheme theme[] = {
     0xB925, // box_border
     0xB925, // box_text
     0x70C3, // box_off_bg
-    0xDA8A, // box_off_text
+    0xD986, // box_off_text
     0x0000, // menu_bg
     0xF800, // menu_border
-    0xDA8A, // menu_hdr
+    0xD986, // menu_hdr
     0xF800, // menu_item
-    0x70C3, // menu_hl_bg
-    0xDA8A, // menu_hl_text
-    0xDA8A, // menu_param
-    0xDA8A, // freq_text
+    0xD986, // menu_hl_bg
+    0x0000, // menu_hl_text
+    0xD986, // menu_param
+    0xD986, // freq_text
     0xB925, // funit_text
     0xB925, // rds_text
-    0xDA8A, // scale_text
+    0xD986, // scale_text
     0xF800, // scale_pointer
     0xB925, // scale_line
   },
