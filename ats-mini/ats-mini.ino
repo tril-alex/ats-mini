@@ -157,8 +157,8 @@ const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 // Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
 // ====================================================================================================================================================
 const uint8_t  app_id  = 67;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
-const uint16_t app_ver = 108;         //     v1.08     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
-char app_date[] = "2025-03-25";
+const uint16_t app_ver = 109;         //               EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
+char app_date[] = "2025-04-03";
 const int eeprom_address = 0;         //               EEPROM start address
 const int eeprom_set_address = 256;   //               EEPROM setting base address
 const int eeprom_setp_address = 272;  //               EEPROM setting (per band) base address

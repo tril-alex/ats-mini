@@ -4,6 +4,19 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 1.09 (2025-04-03)
+
+
+### Added
+
+- + Now aligning frequency to the step when tuning in AM and FM modes. [#30](https://github.com/esp32-si4732/ats-mini/issues/30)
+- **RDS Time Synchronization**: Added support for displaying the current time synchronized via RDS (Radio Data System) when tuned to FM stations broadcasting time information. The time is displayed below the battery icon and includes a "Z" suffix to indicate UTC time. The time display is only visible after successful synchronization with an RDS signal. [#34](https://github.com/esp32-si4732/ats-mini/issues/34)
+
+
+### Changed
+
+- Make the Night color theme less bright, fix theme length 
+
 ## 1.08 (2025-03-25)
 
 
