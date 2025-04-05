@@ -217,27 +217,6 @@ uint8_t currentMode = FM;
 // Defaults
 int16_t bandCAL[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-const char *cbChannelNumber[] = {
-    "1", "2", "3", "41",
-    "4", "5", "6", "7", "42",
-    "8", "9", "10", "11", "43",
-    "12", "13", "14", "15", "44",
-    "16", "17", "18", "19", "45",
-    "20", "21", "22", "23",
-    "24", "25", "26", "27",
-    "28", "29", "30", "31",
-    "32", "33", "34", "35",
-    "36", "37", "38", "39",
-    "40",
-};
-
-char *rdsMsg;
-char *stationName;
-char *rdsTime;
-char bufferStationName[50];
-char bufferRdsMsg[100];
-char bufferRdsTime[32];
-
 uint8_t rssi = 0;
 uint8_t snr = 0;
 uint8_t volume = DEFAULT_VOLUME;
@@ -394,7 +373,7 @@ void setup()
   // Attached pin to allows SI4732 library to mute audio as required to minimise loud clicks
   rx.setAudioMuteMcuPin(AUDIO_MUTE);
 
-  cleanBfoRdsInfo();
+  clearStationName();
 
   delay(300);
 
@@ -765,7 +744,7 @@ void useBand() {
 
   rssi = 0;
   snr = 0;
-  cleanBfoRdsInfo();
+  clearStationName();
   drawScreen(currentCmd);
 }
 
@@ -815,107 +794,6 @@ void doSeek()
 
 }
 
-// Activates a menu option
-void doMenuCommand(uint16_t menuCmd)
-{
-  // No command yet
-  currentCmd = CMD_NONE;
-
-  switch(menuCmd)
-  {
-    case MENU_VOLUME:
-      if(muted)
-      {
-        rx.setVolume(mute_vol_val);
-        muted = false;
-      }
-      currentCmd = CMD_VOLUME;
-      break;
-
-    case MENU_STEP:
-      currentCmd = CMD_STEP;
-      break;
-    case MENU_MODE:
-      currentCmd = CMD_MODE;
-      break;
-    case MENU_BW:
-      currentCmd = CMD_BANDWIDTH;
-      break;
-    case MENU_AGC_ATT:
-      currentCmd = CMD_AGC;
-      break;
-    case MENU_SOFTMUTE:
-      if(currentMode!=FM) currentCmd = CMD_SOFTMUTEMAXATT;
-      break;
-    case MENU_BAND:
-      currentCmd = CMD_BAND;
-      break;
-    case MENU_AVC:
-      if(currentMode!=FM) currentCmd = CMD_AVC;
-      break;
-    case MENU_SETTINGS:
-      currentCmd = CMD_SETTINGS;
-      break;
-
-    case MENU_CALIBRATION:
-      if(isSSB())
-      {
-        currentCmd = CMD_CAL;
-        currentCAL = bandCAL[bandIdx];
-      }
-      break;
-
-    case MENU_MUTE:
-      muted = !muted;
-      if(!muted)
-        rx.setVolume(mute_vol_val);
-      else
-      {
-        mute_vol_val = rx.getVolume();
-        rx.setVolume(0);
-      }
-      break;
-
-#if BFO_MENU_EN
-    case MENU_BFO:
-      if(isSSB()) bfoOn = true;
-      break;
-#endif
-  }
-
-  // Redraw screen
-  drawScreen(currentCmd);
-}
-
-
-/**
- * Starts the SETTINGS action process
- */
-void doCurrentSettingsMenuCmd()
-{
-  disableCommands();
-
-  switch(currentSettingsMenuCmd)
-  {
-    case MENU_BRIGHTNESS:
-      currentCmd = CMD_BRT;
-      break;
-    case MENU_SLEEP:
-      currentCmd = CMD_SLEEP;
-      break;
-    case MENU_THEME:
-      currentCmd = CMD_THEME;
-      break;
-    case MENU_ABOUT:
-      currentCmd = CMD_ABOUT;
-      break;
-  }
-
-  currentSettingsMenuCmd = -1;
-  drawScreen(currentCmd);
-}
-
-
 uint8_t getStrength() {
 #if THEME_EDITOR
   return 17;
@@ -958,95 +836,6 @@ uint8_t getStrength() {
     // newStereoPilot=si4735.getCurrentPilot();
   }
   return 1;
-}
-
-void cleanBfoRdsInfo()
-{
-  bufferStationName[0]='\0';
-}
-
-void showRDSMsg()
-{
-  rdsMsg[35] = bufferRdsMsg[35] = '\0';
-  if (strcmp(bufferRdsMsg, rdsMsg) == 0)
-    return;
-}
-
-void showRDSStation()
-{
-  if (strcmp(bufferStationName, stationName) == 0 ) return;
-  cleanBfoRdsInfo();
-  strcpy(bufferStationName, stationName);
-  drawScreen(currentCmd);
-}
-
-void showRDSTime()
-{
-  if(!strcmp(bufferRdsTime, rdsTime)) return;
-
-  // @@@ WRITE CODE HERE!
-}
-
-void checkRDS()
-{
-  rx.getRdsStatus();
-  if (rx.getRdsReceived())
-  {
-    if (rx.getRdsSync() && rx.getRdsSyncFound())
-    {
-      rdsMsg = rx.getRdsText2A();
-      stationName = rx.getRdsText0A();
-      rdsTime = rx.getRdsTime();
-      // if ( rdsMsg != NULL )   showRDSMsg();
-      if (stationName != NULL)
-          showRDSStation();
-      // if ( rdsTime != NULL ) showRDSTime();
-    }
-  }
-}
-
-void checkCBChannel()
-{
-  const int column_step = 450;  // In kHz
-  const int row_step = 10;
-  const int max_columns = 8; // A-H
-  const int max_rows = 45;
-
-  if (currentFrequency < MIN_CB_FREQUENCY || currentFrequency > MAX_CB_FREQUENCY) {
-    bufferStationName[0] = '\0';
-    return;
-  }
-
-  int offset = currentFrequency - MIN_CB_FREQUENCY;
-  char type = 'R';
-
-  if (offset % 10 == 5) {
-    type = 'E';
-    offset -= 5;
-  }
-
-  int column_index = offset / column_step;
-
-  if (column_index >= max_columns) {
-    bufferStationName[0] = '\0';
-    return;
-  }
-
-  int remainder = offset % column_step;
-
-  if (remainder % row_step != 0) {
-    bufferStationName[0] = '\0';
-    return;
-  }
-
-  int row_number = remainder / row_step;
-
-  if (row_number >= max_rows || row_number < 0) {
-    bufferStationName[0] = '\0';
-    return;
-  }
-
-  sprintf(bufferStationName, "%c%s%c", 'A' + column_index, cbChannelNumber[row_number], type);
 }
 
 /***************************************************************************************
@@ -1484,10 +1273,10 @@ void doRotate(int8_t dir)
     rx.setFrequency(currentFrequency);
    
     // Clear FM RDS information
-    if(currentMode==FM) cleanBfoRdsInfo();
+    if(currentMode==FM) clearStationName();
    
     // Check current CB channel
-    if(isCB()) checkCBChannel();
+    if(isCB()) checkCbChannel();
    
     // G8PTN: Added to ensure update of currentFreq in table for AM/FM
     band[bandIdx].currentFreq = currentFrequency = rx.getFrequency();
@@ -1549,9 +1338,7 @@ void loop()
       muted = false;
     }
 
-    disableCommands();
-    currentCmd = CMD_VOLUME;
-    menuIdx = MENU_VOLUME;
+    clickMenu(MENU_VOLUME);
     drawScreen(currentCmd);
 
     // Wait a little more for the button release
@@ -1568,14 +1355,9 @@ void loop()
     {
       if(currentSleep) displayOn();
     }
-    else if(currentCmd==CMD_MENU)
+    else if(clickSideBar(currentCmd))
     {
-      doMenuCommand(menuIdx);
-    }
-    else if(currentCmd==CMD_SETTINGS)
-    {
-      currentSettingsMenuCmd = settingsMenuIdx;
-      doCurrentSettingsMenuCmd();
+      // Do nothing, command handled
     }
     else if(isModalMode(currentCmd))
     {
@@ -1655,7 +1437,7 @@ void loop()
 
   if((millis() - lastRDSCheck) > RDS_CHECK_TIME)
   {
-    if((currentMode == FM) && (snr >= 12)) checkRDS();
+    if((currentMode == FM) && (snr >= 12)) checkRds();
     lastRDSCheck = millis();
   }
 

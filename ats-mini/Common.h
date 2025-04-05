@@ -223,10 +223,16 @@ void drawBattery(int x, int y);
 // Menu.c
 void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
+bool clickSideBar(uint16_t cmd);
 void doSoftMute(int dir);
 void doAgc(int dir);
 void doAvc(int dir);
 void selectBand(uint8_t idx);
+
+// Station.c
+void clearStationName();
+void checkRds();
+void checkCbChannel();
 
 #if USE_REMOTE
 // Remote.c

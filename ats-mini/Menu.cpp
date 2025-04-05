@@ -220,9 +220,81 @@ static void doMenu(int dir)
   menuIdx = wrap_range(menuIdx, dir, 0, LAST_ITEM(menu));
 }
 
+static void clickMenu(int cmd)
+{
+  // No command yet
+  currentCmd = CMD_NONE;
+
+  switch(cmd)
+  {
+    case MENU_STEP:     currentCmd = CMD_STEP; break;
+    case MENU_MODE:     currentCmd = CMD_MODE; break;
+    case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
+    case MENU_AGC_ATT:  currentCmd = CMD_AGC; break;
+    case MENU_BAND:     currentCmd = CMD_BAND; break;
+    case MENU_SETTINGS: currentCmd = CMD_SETTINGS; break;
+
+    case MENU_SOFTMUTE:
+      if(currentMode!=FM) currentCmd = CMD_SOFTMUTEMAXATT;
+      break;
+
+    case MENU_AVC:
+      if(currentMode!=FM) currentCmd = CMD_AVC;
+      break;
+
+    case MENU_VOLUME:
+      if(muted)
+      {
+        rx.setVolume(mute_vol_val);
+        muted = false;
+      }
+      currentCmd = CMD_VOLUME;
+      break;
+
+    case MENU_CALIBRATION:
+      if(isSSB())
+      {
+        currentCmd = CMD_CAL;
+        currentCAL = bandCAL[bandIdx];
+      }
+      break;
+
+    case MENU_MUTE:
+      muted = !muted;
+      if(!muted)
+        rx.setVolume(mute_vol_val);
+      else
+      {
+        mute_vol_val = rx.getVolume();
+        rx.setVolume(0);
+      }
+      break;
+
+#if BFO_MENU_EN
+    case MENU_BFO:
+      if(isSSB()) bfoOn = true;
+      break;
+#endif
+  }
+}
+
 static void doSettings(int dir)
 {
   settingsIdx = wrap_range(settingsIdx, dir, 0, LAST_ITEM(settings));
+}
+
+static void clickSettings(int cmd)
+{
+  // No command yet
+  currentCmd = CMD_NONE;
+
+  switch(cmd)
+  {
+    case MENU_BRIGHTNESS: currentCmd = CMD_BRT; break;
+    case MENU_SLEEP:      currentCmd = CMD_SLEEP; break;
+    case MENU_THEME:      currentCmd = CMD_THEME; break;
+    case MENU_ABOUT:      currentCmd = CMD_ABOUT; break;
+  }
 }
 
 static void doVolume(int dir)
@@ -460,6 +532,7 @@ static void doBandwidth(int dir)
 //
 // Handle encoder input in menu
 //
+
 bool doSideBar(uint16_t cmd, int dir)
 {
   // Ignore idle encoder
@@ -483,6 +556,22 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_THEME:     doTheme(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
+  }
+
+  // Redraw screen
+  drawScreen(currentCmd);
+
+  // Encoder input handled
+  return(true);
+}
+
+bool clickSideBar(uint16_t cmd)
+{
+  switch(cmd)
+  {
+    case CMD_MENU:     clickMenu(menuIdx);break;
+    case CMD_SETTINGS: clickSettings(settingsIdx);break;
+    default:           return(false);
   }
 
   // Redraw screen
