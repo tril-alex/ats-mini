@@ -24,10 +24,6 @@
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
 #define TUNE_HOLDOFF_TIME         90    // Timer to hold off display whilst tuning
 
-
-#define MIN_CB_FREQUENCY 26060
-#define MAX_CB_FREQUENCY 29665
-
 #define EEPROM_SIZE     512
 #define STORE_TIME    10000                  // Time of inactivity to make the current receiver status writable (10s)
 
@@ -158,57 +154,7 @@ bool g_remote_log = false;
 
 #include "themes.h"
 
-
-int tabAmStep[] = {
-  1,      // 0   AM/SSB   (kHz)
-  5,      // 1   AM/SSB   (kHz)
-  9,      // 2   AM/SSB   (kHz)
-  10,     // 3   AM/SSB   (kHz)
-  50,     // 4   AM       (kHz)
-  100,    // 5   AM       (kHz)
-  1000,   // 6   AM       (kHz)
-  10,     // 7   SSB      (Hz)
-  25,     // 8   SSB      (Hz)
-  50,     // 9   SSB      (Hz)
-  100,    // 10  SSB      (Hz)
-  500     // 11  SSB      (Hz)
-};
-
-int tabSsbFastStep[] = {
-  1,   // 0->1 (1kHz -> 5kHz)
-  3,   // 1->3 (5kHz -> 10kHz)
-  2,   // 2->2 (9kHz -> 9kHz)
-  3,   // 3->3 (10kHz -> 10kHz)
-  4,   // 4->4 (50kHz -> 50kHz) n/a
-  5,   // 5->5 (100kHz -> 100kHz) n/a
-  6,   // 6->6 (1MHz -> 1MHz) n/a
-  10,  // 7->10 (10Hz -> 100Hz)
-  10,  // 8->10 (25Hz -> 100Hz)
-  11,  // 9->11 (50Hz -> 500Hz)
-  0,   // 10->0 (100Hz -> 1kHz)
-  1,   // 11->1 (500Hz -> 5kHz)
-};
-
-uint8_t AmTotalSteps = 7;                          // Total AM steps
-uint8_t AmTotalStepsSsb = 4;                       // G8PTN: Original : AM(LW/MW) 1k, 5k, 9k, 10k, 50k        : SSB 1k, 5k, 9k, 10k
-//uint8_t AmTotalStepsSsb = 5;                     // G8PTN: Option 1 : AM(LW/MW) 1k, 5k, 9k, 10k, 100k       : SSB 1k, 5k, 9k, 10k, 50k
-//uint8_t AmTotalStepsSsb = 6;                     // G8PTN: Option 2 : AM(LW/MW) 1k, 5k, 9k, 10k, 100k , 1M  : SSB 1k, 5k, 9k, 10k, 50k, 100k
-//uint8_t AmTotalStepsSsb = 7;                     // G8PTN: Invalid option (Do not use)
-uint8_t SsbTotalSteps = 5;                         // SSB sub 1kHz steps
-volatile int8_t idxAmStep = 3;
-
-const char *AmSsbStepDesc[] = {"1k", "5k", "9k", "10k", "50k", "100k", "1M", "10Hz", "25Hz", "50Hz", "0.1k", "0.5k"};
-
-int tabFmStep[] = {5, 10, 20, 100};                             // G8PTN: Added 1MHz step
-const int lastFmStep = (sizeof tabFmStep / sizeof(int)) - 1;
-int idxFmStep = 1;
-
-const char *FmStepDesc[] = {"50k", "100k", "200k", "1M"};
-
-uint16_t currentStepIdx = 1;
-
 uint8_t currentMode = FM;
-
 
 //int tabStep[] = {1, 5, 10, 50, 100, 500, 1000};
 //const int lastStep = (sizeof tabStep / sizeof(int)) - 1;
@@ -220,47 +166,6 @@ int16_t bandCAL[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 uint8_t rssi = 0;
 uint8_t snr = 0;
 uint8_t volume = DEFAULT_VOLUME;
-
-// Generation of step value
-int getSteps(bool fast)
-{
-  if(isSSB())
-  {
-    // SSB: Return in Hz used for VFO + BFO tuning
-    int8_t idxAmStepEff = fast? tabSsbFastStep[idxAmStep] : idxAmStep;
-    return(tabAmStep[idxAmStepEff] * (idxAmStepEff>=AmTotalSteps? 1 : 1000));
-  }
-  else
-  {
-    // AM: Set to 0kHz if step is from the SSB Hz values
-    // @@@ FIXME!!!
-    if(idxAmStep>=AmTotalSteps) idxAmStep = 0;
-    // AM: Return value in KHz for SI4732 step
-    return(tabAmStep[idxAmStep]);
-  }
-}
-
-// Generate last step index
-int getLastStep()
-{
-  // Debug
-  #if DEBUG2_PRINT
-  Serial.print("Info: getLastStep() >>> AmTotalSteps = ");
-  Serial.print(AmTotalSteps);
-  Serial.print(", SsbTotalSteps = ");
-  Serial.print(SsbTotalSteps);
-  Serial.print(", isSSB = ");
-  Serial.println(isSSB());
-  #endif
-
-  if(isSSB())
-    return AmTotalSteps + SsbTotalSteps - 1;
-  else if(band[bandIdx].bandType == LW_BAND_TYPE || band[bandIdx].bandType == MW_BAND_TYPE)    // G8PTN; Added in place of check in doStep() for LW/MW step limit
-    return AmTotalStepsSsb;
-  else
-    return AmTotalSteps - 1;
-}
-
 
 // Devices class declarations
 Rotary encoder = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);      // G8PTN: Corrected mapping based on rotary library
@@ -494,7 +399,7 @@ void saveAllReceiverInformation()
   //   must be disabled otherwise band[bandIdx].currentFreq = 0 (where bandIdx = 0; by default) on EEPROM reset
   //band[bandIdx].currentFreq = currentFrequency;
 
-  for (int i = 0; i <= lastBand; i++)
+  for (int i = 0; i <= getTotalBands(); i++)
   {
     EEPROM.write(addr_offset++, (band[i].currentFreq >> 8));   // Stores the current Frequency HIGH byte for the band
     EEPROM.write(addr_offset++, (band[i].currentFreq & 0xFF)); // Stores the current Frequency LOW byte for the band
@@ -520,11 +425,11 @@ void saveAllReceiverInformation()
   EEPROM.commit();
 
   addr_offset = eeprom_setp_address;
-  for (int i = 0; i <= lastBand; i++)
+  for (int i = 0; i <= getTotalBands(); i++)
   {
     EEPROM.write(addr_offset++, (bandCAL[i] >> 8));     // Stores the current Calibration value (HIGH byte) for the band
     EEPROM.write(addr_offset++, (bandCAL[i] & 0XFF));   // Stores the current Calibration value (LOW byte) for the band
-    EEPROM.write(addr_offset++,  bandMODE[i]);          // Stores the current Mode value for the band
+    EEPROM.write(addr_offset++, band[i].bandMode);      // Stores the current Mode value for the band
     EEPROM.commit();
   }
 
@@ -553,7 +458,7 @@ void readAllReceiverInformation()
   currentBFO |= EEPROM.read(eeprom_address + 6);          // G8PTN: Reads stored BFO value (HIGH byte)
 
   addr_offset = 7;
-  for (int i = 0; i <= lastBand; i++)
+  for (int i = 0; i <= getTotalBands(); i++)
   {
     band[i].currentFreq = EEPROM.read(addr_offset++) << 8;
     band[i].currentFreq |= EEPROM.read(addr_offset++);
@@ -577,11 +482,11 @@ void readAllReceiverInformation()
   themeIdx        = EEPROM.read(addr_offset++);           // Reads stored Theme index value
 
   addr_offset = eeprom_setp_address;
-  for (int i = 0; i <= lastBand; i++)
+  for (int i = 0; i <= getTotalBands(); i++)
   {
-    bandCAL[i]    = EEPROM.read(addr_offset++) << 8;      // Reads stored Calibration value (HIGH byte) per band
-    bandCAL[i]   |= EEPROM.read(addr_offset++);           // Reads stored Calibration value (LOW byte) per band
-    bandMODE[i]   = EEPROM.read(addr_offset++);           // Reads stored Mode value per band
+    bandCAL[i]  = EEPROM.read(addr_offset++) << 8;      // Reads stored Calibration value (HIGH byte) per band
+    bandCAL[i] |= EEPROM.read(addr_offset++);           // Reads stored Calibration value (LOW byte) per band
+    band[i].bandMode = EEPROM.read(addr_offset++);      // Reads stored Mode value per band
   }
 
   EEPROM.end();
@@ -628,56 +533,60 @@ ICACHE_RAM_ATTR void rotaryEncoder()
 /**
  * Switch the radio to current band
  */
-void useBand() {
-  currentMode = bandMODE[bandIdx];                  // G8PTN: Added to support mode per band
-  if (band[bandIdx].bandType == FM_BAND_TYPE) {
-    currentMode = FM;
+void useBand(uint8_t bandIdx)
+{
+  // Set mode, frequency, step, bandwidth
+  selectBand(bandIdx);
+
+  if(band[bandIdx].bandType==FM_BAND_TYPE)
+  {
     // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, tabFmStep[band[bandIdx].currentStepIdx]);
     rx.setSeekFmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
-    bfoOn = ssbLoaded = false;
-    bwIdxFM = band[bandIdx].bandwidthIdx;
-    rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
     rx.setFMDeEmphasis(1);
     rx.RdsInit();
     rx.setRdsConfig(1, 2, 2, 2, 2);
     rx.setGpioCtl(1,0,0);   // G8PTN: Enable GPIO1 as output
     rx.setGpio(0,0,0);      // G8PTN: Set GPIO1 = 0
-  } else {
-    // set the tuning capacitor for SW or MW/LW
+  } 
+  else
+  {
+    // Set the tuning capacitor for SW or MW/LW
     // rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
-    if (ssbLoaded) {
-      // Configure SI4732 for SSB
+
+    if(ssbLoaded)
+    {
+      // Configure SI4732 for SSB (SI4732 step not used, set to 0)
       rx.setSSB(
         band[bandIdx].minimumFreq,
         band[bandIdx].maximumFreq,
         band[bandIdx].currentFreq,
-        0,                                                  // SI4732 step is not used for SSB!
-        currentMode);
-
-      rx.setSSBAutomaticVolumeControl(1);                   // G8PTN: Always enabled
-      //rx.setSsbSoftMuteMaxAttenuation(softMuteMaxAttIdx); // G8PTN: Commented out
-      if   (band[bandIdx].bandwidthIdx > 5) bwIdxSSB = 5;   // G8PTN: Limit value
-      else bwIdxSSB = band[bandIdx].bandwidthIdx;
-      rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
-      updateBFO();                                          // G8PTN: If SSB is loaded update BFO
-    } else {
-      currentMode = AM;
+        0, currentMode
+      );
+      // G8PTN: Always enabled
+      rx.setSSBAutomaticVolumeControl(1);
+      // G8PTN: Commented out
+      //rx.setSsbSoftMuteMaxAttenuation(softMuteMaxAttIdx);
+    }
+    else
+    {
+      // Setting step to 1kHz
       rx.setAM(
         band[bandIdx].minimumFreq,
         band[bandIdx].maximumFreq,
         band[bandIdx].currentFreq,
-        band[bandIdx].currentStepIdx >= AmTotalSteps ? 1 : tabAmStep[band[bandIdx].currentStepIdx]);   // Set to 1kHz
-
-      bfoOn = false;
-      bwIdxAM = band[bandIdx].bandwidthIdx;
-      rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
-      //rx.setAmSoftMuteMaxAttenuation(softMuteMaxAttIdx); //Soft Mute for AM or SSB
+        band[bandIdx].currentStepIdx >= AmTotalSteps ? 1 : amStep[band[bandIdx].currentStepIdx].step
+      );
     }
-    rx.setGpioCtl(1,0,0);   // G8PTN: Enable GPIO1 as output
-    rx.setGpio(1,0,0);      // G8PTN: Set GPIO1 = 1
-    rx.setSeekAmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq); // Consider the range all defined current band
-    rx.setSeekAmSpacing(5); // Max 10kHz for spacing
+
+    // G8PTN: Enable GPIO1 as output
+    rx.setGpioCtl(1,0,0);
+    // G8PTN: Set GPIO1 = 1
+    rx.setGpio(1,0,0);
+    // Consider the range all defined current band
+    rx.setSeekAmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
+    // Max 10kHz for spacing
+    rx.setSeekAmSpacing(5);
   }
 
   // G8PTN: Added
@@ -695,40 +604,8 @@ void useBand() {
 
   delay(100);
 
-  // Default
-  currentFrequency = band[bandIdx].currentFreq;
-  currentStepIdx = band[bandIdx].currentStepIdx;    // Default. Need to modify for AM/SSB as required
-
-
-  if (currentMode == FM)
-      idxFmStep = band[bandIdx].currentStepIdx;
-  else
-  {
-    // Default for AM/SSB
-    idxAmStep = band[bandIdx].currentStepIdx;
-
-
-    // Update depending on currentMode and currentStepIdx
-    // If outside SSB step ranges
-    if (isSSB() && currentStepIdx >= AmTotalStepsSsb && currentStepIdx <AmTotalSteps)
-    {
-      currentStepIdx = 0;;
-      idxAmStep = 0;
-      band[bandIdx].currentStepIdx = 0;
-    }
-
-    // If outside AM step ranges
-    if (currentMode == AM && currentStepIdx >= AmTotalSteps)
-    {
-      currentStepIdx = 0;;
-      idxAmStep = 0;
-      band[bandIdx].currentStepIdx = 0;
-    }
-
-  }
-
+#if DEBUG2_PRINT
   // Debug
-  #if DEBUG2_PRINT
   Serial.print("Info: useBand() >>> currentStepIdx = ");
   Serial.print(currentStepIdx);
   Serial.print(", idxAmStep = ");
@@ -737,13 +614,11 @@ void useBand() {
   Serial.print(band[bandIdx].currentStepIdx);
   Serial.print(", currentMode = ");
   Serial.println(currentMode);
-  #endif
-
-  // Store mode
-  bandMODE[bandIdx] = currentMode;               // G8PTN: Added to support mode per band
+#endif
 
   rssi = 0;
-  snr = 0;
+  snr  = 0;
+ 
   clearStationName();
   drawScreen(currentCmd);
 }
@@ -1200,9 +1075,9 @@ void doRotate(int8_t dir)
   }
 
   //
-  // Command-specific rotation
+  // Side bar menus / settings
   //
-  else if(doInput(currentCmd, encoderCount))
+  else if(doSideBar(currentCmd, encoderCount))
   {
     // Do nothing, everything is done
   }
@@ -1255,7 +1130,7 @@ void doRotate(int8_t dir)
 #endif
 
     // G8PTN: Used in place of rx.frequencyUp() and rx.frequencyDown()
-    uint16_t step = currentMode==FM ? tabFmStep[currentStepIdx] : tabAmStep[currentStepIdx]; 
+    uint16_t step = getCurrentStep()->step;
     uint16_t stepAdjust = currentFrequency % step;
     step = !stepAdjust? step : dir>0? step - stepAdjust : stepAdjust;
     currentFrequency += step * dir;
@@ -1338,8 +1213,7 @@ void loop()
       muted = false;
     }
 
-    clickMenu(MENU_VOLUME);
-    drawScreen(currentCmd);
+    clickVolume();
 
     // Wait a little more for the button release
     delay(MIN_ELAPSED_TIME);
@@ -1374,7 +1248,6 @@ void loop()
     {
       // Activate menu
       currentCmd = CMD_MENU;
-      currentSettingsMenuCmd = settingsMenuIdx;
       drawScreen(currentCmd);
     }
 

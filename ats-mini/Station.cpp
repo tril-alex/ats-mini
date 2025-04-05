@@ -1,5 +1,8 @@
 #include "Common.h"
 
+#define MIN_CB_FREQUENCY 26060
+#define MAX_CB_FREQUENCY 29665
+
 const char *cbChannelNumber[] =
 {
   "1",  "2",  "3",  "41",
@@ -16,8 +19,13 @@ const char *cbChannelNumber[] =
 };
 
 char bufStationName[50] = "";
-char bufRdsMessage[100] = "";
-char bufRdsTime[32] = "";
+char bufMessage[100]    = "";
+char bufRdsTime[32]     = "";
+
+const char *getStationName()
+{
+  return(bufStationName);
+}
 
 void clearStationName()
 {

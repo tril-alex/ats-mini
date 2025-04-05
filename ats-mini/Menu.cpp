@@ -50,7 +50,6 @@ const char *menu[] =
 #define MENU_ABOUT        3
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
-int8_t currentSettingsCmd = -1;
 
 const char *settings[] =
 {
@@ -74,7 +73,7 @@ uint8_t AmTotalSteps    = 7; // Total AM steps
 uint8_t AmTotalStepsSsb = 4; // G8PTN: Original : AM(LW/MW) 1k, 5k, 9k, 10k, 50k        : SSB 1k, 5k, 9k, 10k
 uint8_t SsbTotalSteps   = 5; // SSB sub 1kHz steps
 
-int idxFmStep = 1;
+int fmStepIdx = 1;
 Step fmStep[] =
 {
   {   5, "50k"  }, 
@@ -83,7 +82,7 @@ Step fmStep[] =
   { 100, "1M"   },  
 };
 
-volatile int8_t idxAmStep = 3;
+volatile int8_t amStepIdx = 3;
 Step amStep[] =
 {
   {    1, "1k"   },  // 0   AM/SSB   (kHz)
@@ -115,6 +114,47 @@ int ssbFastStep[] =
   0,   // 10->0 (100Hz -> 1kHz)
   1,   // 11->1 (500Hz -> 5kHz)
 };
+
+const Step *getCurrentStep()
+{
+  return(currentMode==FM?  &fmStep[fmStepIdx] : &amStep[amStepIdx]);
+}
+
+int getLastStep()
+{
+  if(isSSB())
+    return(AmTotalSteps + SsbTotalSteps - 1);
+  else if(currentMode==FM)
+    return(LAST_ITEM(fmStep));
+  // G8PTN; Added in place of check in doStep() for LW/MW step limit
+  else if(band[bandIdx].bandType == LW_BAND_TYPE || band[bandIdx].bandType == MW_BAND_TYPE)
+    return(AmTotalStepsSsb);
+  else
+    return(AmTotalSteps - 1);
+}
+
+// @@@ FIXME: This function is only used for SSB tuning!
+int getSteps(bool fast)
+{
+  if(isSSB())
+  {
+    // SSB: Return in Hz used for VFO + BFO tuning
+    int i = fast? ssbFastStep[amStepIdx] : amStepIdx;
+    return(amStep[i].step * (i>=AmTotalSteps? 1 : 1000));
+  }
+  else if(currentMode==FM)
+  {
+    return(fmStep[fmStepIdx].step);
+  }
+  else
+  {
+    // AM: Set to 0kHz if step is from the SSB Hz values
+    // @@@ FIXME!!!
+    if(amStepIdx>=AmTotalSteps) amStepIdx = 0;
+    // AM: Return value in KHz for SI4732 step
+    return(amStep[amStepIdx].step);
+  }
+}
 
 //
 // Bandwidth Menu
@@ -153,6 +193,19 @@ Bandwidth bandwidthFM[] =
   {4, "40k"}
 };
 
+void setSsbBandwidth(int idx)
+{
+  // Set Audio 
+  rx.setSSBAudioBandwidth(bandwidthSSB[idx].idx);
+
+  // If audio bandwidth selected is about 2 kHz or below, it is
+  // recommended to set Sideband Cutoff Filter to 0.
+  if(bandwidthSSB[idx].idx==0 || bandwidthSSB[idx].idx==4 || bandwidthSSB[idx].idx==5)
+    rx.setSSBSidebandCutoffFilter(0);
+  else
+    rx.setSSBSidebandCutoffFilter(1);
+}
+
 //
 // Bands Menu
 //
@@ -190,6 +243,8 @@ Band band[] =
   // All band. LW, MW and SW (from 150kHz to 30MHz)
   {"ALL", SW_BAND_TYPE, AM,  150, 30000, 15000, 0, 4} 
 };
+
+int getTotalBands() { return(ITEM_COUNT(band)); }
 
 //
 // Utility functions to change menu values
@@ -344,28 +399,27 @@ static void doSleep(int dir)
 
 static void doStep(int dir)
 {
+  int lastStep = getLastStep();
+
   if(currentMode==FM)
   {
-    currentStepIdx = idxFmStep = wrap_range(idxFmStep, dir, 0, LAST_ITEM(fmStep));
-    rx.setFrequencyStep(fmStep[currentStepIdx].step);
+    fmStepIdx = wrap_range(fmStepIdx, dir, 0, lastStep);
+    band[bandIdx].currentStepIdx = fmStepIdx;
+    rx.setFrequencyStep(fmStep[fmStepIdx].step);
   }
   else
   {
-    int lastAmStep = getLastStep();
-    idxAmStep = wrap_range(idxAmStep, dir, 0, lastAmStep);
+    amStepIdx = wrap_range(amStepIdx, dir, 0, lastStep);
 
     // SSB step limit
-    if(isSSB() && idxAmStep>=AmTotalStepsSsb && idxAmStep<AmTotalSteps)
-      idxAmStep = dir>0? AmTotalSteps : AmTotalStepsSsb-1;
+    if(isSSB() && amStepIdx>=AmTotalStepsSsb && amStepIdx<AmTotalSteps)
+      amStepIdx = dir>0? AmTotalSteps : AmTotalStepsSsb-1;
+
+    band[bandIdx].currentStepIdx = amStepIdx;
 
     // ?????
-    if(!isSSB() || (idxAmStep<AmTotalSteps))
-    {
-      currentStepIdx = idxAmStep;
-      rx.setFrequencyStep(amStep[idxAmStep].step);
-    }
-
-    currentStepIdx = idxAmStep;
+    if(!isSSB() || (amStepIdx<AmTotalSteps))
+      rx.setFrequencyStep(amStep[amStepIdx].step);
 
     // Max 10kHz for spacing
     rx.setSeekAmSpacing(5);
@@ -379,8 +433,6 @@ static void doStep(int dir)
   Serial.print(", getLastStep() = ");
   Serial.println(lastStep);
 #endif
-
-  band[bandIdx].currentStepIdx = currentStepIdx;
 }
 
 void doAgc(int dir)
@@ -489,7 +541,7 @@ static void doBand(int dir)
   currentBFO = 0;
 
   // Change band
-  bandIdx = wrap_range(bandIdx, dir, 0, lastBand);
+  bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(band));
   currentMode = band[bandIdx].bandMode;
 
   // Load SSB patch as required
@@ -511,8 +563,7 @@ static void doBandwidth(int dir)
   if(isSSB())
   {
     bwIdxSSB = wrap_range(bwIdxSSB, dir, 0, LAST_ITEM(bandwidthSSB));
-    rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
-    correctCutoffFilter();
+    setSsbBandwidth(bwIdxSSB);
     band[bandIdx].bandwidthIdx = bwIdxSSB;
   }
   else if(currentMode==AM)
@@ -581,6 +632,12 @@ bool clickSideBar(uint16_t cmd)
   return(true);
 }
 
+void clickVolume()
+{
+  clickMenu(MENU_VOLUME);
+  drawScreen(currentCmd);
+}
+
 //
 // Selecting given band
 //
@@ -593,13 +650,13 @@ void selectBand(uint8_t idx)
 
   if(band[bandIdx].bandType==FM_BAND_TYPE)
   {
-    currentStepIdx = idxFmStep = band[bandIdx].currentStepIdx;
-    rx.setFrequencyStep(fmStep[currentStepIdx].step);
+    fmStepIdx = band[bandIdx].currentStepIdx;
+    rx.setFrequencyStep(fmStep[fmStepIdx].step);
   }
   else
   {
-    currentStepIdx = idxAmStep = band[bandIdx].currentStepIdx;
-    rx.setFrequencyStep(amStep[currentStepIdx].step);
+    amStepIdx = band[bandIdx].currentStepIdx;
+    rx.setFrequencyStep(amStep[amStepIdx].step);
   }
 
   int bwIdx = band[bandIdx].bandwidthIdx;
@@ -608,19 +665,20 @@ void selectBand(uint8_t idx)
   {
     loadSSB();
     bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
-    rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
-    correctCutoffFilter();
+    setSsbBandwidth(bwIdxSSB);
     updateBFO();
   }
   else if(currentMode==FM)
   {
     bwIdxFM = min(bwIdx, LAST_ITEM(bandwidthFM));
     rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
+    bfoOn = ssbLoaded = false;
   }
   else
   {
     bwIdxAM = min(bwIdx, LAST_ITEM(bandwidthAM));
     rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
+    bfoOn = false;
   }
 }
 
@@ -657,8 +715,7 @@ static void drawMenu(int x, int y, int sx)
   spr.setTextColor(theme[themeIdx].menu_hdr, theme[themeIdx].menu_bg);
 
   char label_menu[16];
-  sprintf(label_menu, "Menu %2.2d/%2.2d", (menuIdx + 1), (lastMenu + 1));
-  //spr.drawString("Menu",38+x+(sx/2),14+y,2);
+  sprintf(label_menu, "Menu %2.2d/%2.2d", menuIdx + 1, ITEM_COUNT(menu));
   spr.drawString(label_menu,40+x+(sx/2),12+y,2);
   spr.drawLine(1+x, 23+y, 76+sx, 23+y, theme[themeIdx].menu_border);
 
@@ -666,6 +723,7 @@ static void drawMenu(int x, int y, int sx)
   spr.setTextColor(theme[themeIdx].menu_item, theme[themeIdx].menu_bg);
   spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_hl_bg);
 
+  int count = ITEM_COUNT(menu);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
@@ -673,7 +731,7 @@ static void drawMenu(int x, int y, int sx)
     else
       spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
-    spr.drawString(menu[abs((menuIdx+lastMenu+1+i)%(lastMenu+1))],40+x+(sx/2),64+y+(i*16),2);
+    spr.drawString(menu[abs((menuIdx+count+i)%count)],40+x+(sx/2),64+y+(i*16),2);
   }
 }
 
@@ -691,6 +749,7 @@ static void drawSettings(int x, int y, int sx)
   spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
   spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_hl_bg);
 
+  int count = ITEM_COUNT(settings);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
@@ -698,7 +757,7 @@ static void drawSettings(int x, int y, int sx)
     else
       spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
-    spr.drawString(settings[abs((settingsIdx+lastSettingsMenu+1+i)%(lastSettingsMenu+1))],40+x+(sx/2),64+y+(i*16),2);
+    spr.drawString(settings[abs((settingsIdx+count+i)%count)],40+x+(sx/2),64+y+(i*16),2);
   }
 }
 
@@ -706,6 +765,7 @@ static void drawMode(int x, int y, int sx)
 {
   drawCommon(CMD_MODE, x, y, sx);
 
+  int count = ITEM_COUNT(bandModeDesc);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
@@ -714,16 +774,13 @@ static void drawMode(int x, int y, int sx)
       spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
     if((currentMode!=FM) || (i==0))
-    {
-      int count = ITEM_COUNT(bandModeDesc);
       spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)],40+x+(sx/2),64+y+(i*16),2);
-    }
   }
 }
 
 static void drawStep(int x, int y, int sx)
 {
-  int lastStep = getLastStep();
+  int stepCount = getLastStep() + 1;
 
   drawCommon(CMD_STEP, x, y, sx);
 
@@ -735,9 +792,9 @@ static void drawStep(int x, int y, int sx)
       spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
     if(currentMode==FM)
-      spr.drawString(fmStep[abs((currentStepIdx+lastFmStep+1+i)%(lastFmStep+1))].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(fmStep[abs((fmStepIdx+stepCount+i)%stepCount)].desc,40+x+(sx/2),64+y+(i*16),2);
     else
-      spr.drawString(amStep[abs((currentStepIdx+lastStep+1+i)%(lastStep+1))].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(amStep[abs((amStepIdx+stepCount+i)%stepCount)].desc,40+x+(sx/2),64+y+(i*16),2);
   }
 }
 
@@ -745,6 +802,7 @@ static void drawBand(int x, int y, int sx)
 {
   drawCommon(CMD_BAND, x, y, sx);
 
+  int count = ITEM_COUNT(band);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
@@ -752,7 +810,7 @@ static void drawBand(int x, int y, int sx)
     else
       spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
-    spr.drawString(band[abs((bandIdx+lastBand+1+i)%(lastBand+1))].bandName,40+x+(sx/2),64+y+(i*16),2);
+    spr.drawString(band[abs((bandIdx+count+i)%count)].bandName,40+x+(sx/2),64+y+(i*16),2);
   }
 }
 
@@ -789,6 +847,7 @@ static void drawTheme(int x, int y, int sx)
 {
   drawCommon(CMD_THEME, x, y, sx);
 
+  int count = ITEM_COUNT(theme);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
@@ -796,7 +855,6 @@ static void drawTheme(int x, int y, int sx)
     else
       spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
 
-    int count = ITEM_COUNT(theme);
     spr.drawString(theme[abs((themeIdx+count+i)%count)].name, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -916,9 +974,9 @@ static void drawInfo(int x, int y, int sx)
   spr.drawString("Step:",6+x,64+y+(-3*16),2);
 
   if(currentMode==FM)
-    spr.drawString(fmStep[currentStepIdx].desc,48+x,64+y+(-3*16),2);
+    spr.drawString(fmStep[fmStepIdx].desc,48+x,64+y+(-3*16),2);
   else
-    spr.drawString(amStep[currentStepIdx].desc,48+x,64+y+(-3*16),2);
+    spr.drawString(amStep[amStepIdx].desc,48+x,64+y+(-3*16),2);
 
   spr.drawString("BW:",6+x,64+y+(-2*16),2);
 

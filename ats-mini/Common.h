@@ -110,7 +110,7 @@ typedef struct
   uint16_t minimumFreq;   // Minimum frequency of the band
   uint16_t maximumFreq;   // maximum frequency of the band
   uint16_t currentFreq;   // Default frequency or current frequency
-  int8_t currentStepIdx;  // Idex of tabStepAM:  Defeult frequency step (See tabStepAM)
+  int8_t currentStepIdx;  // Index of stepAM[]: defeult frequency step (see stepAM[])
   int8_t bandwidthIdx;    // Index of the table bandwidthFM, bandwidthAM or bandwidthSSB;
 } Band;
 
@@ -121,6 +121,7 @@ typedef struct
 extern SI4735 rx;
 extern TFT_eSprite spr;
 extern Band band[];
+extern const char *bandModeDesc[];
 
 extern bool display_on;
 extern bool bfoOn;
@@ -129,6 +130,7 @@ extern bool tuning_flag;
 extern bool eeprom_wr_flag;
 extern bool muted;
 
+extern uint8_t mute_vol_val;
 extern uint16_t currentFrequency;
 extern const uint16_t currentBFOStep;
 extern int16_t currentBFO;
@@ -144,40 +146,13 @@ extern int8_t agcNdx;
 extern int8_t softMuteMaxAttIdx;
 extern uint8_t disableAgc;
 
-extern int8_t menuIdx;
-extern int8_t settingsMenuIdx;
-extern int8_t FmAgcIdx;
-extern int8_t AmAgcIdx;
-extern int8_t SsbAgcIdx;
-extern int8_t AmAvcIdx;
-extern int8_t SsbAvcIdx;
-extern int8_t AmSoftMuteIdx;
-extern int8_t SsbSoftMuteIdx;
-extern uint16_t currentStepIdx;
-extern volatile int8_t idxAmStep;
-extern int idxFmStep;
 extern int bandIdx;
-extern uint8_t AmTotalSteps;
-extern uint8_t AmTotalStepsSsb;
-
 extern int8_t bwIdxAM;
-extern const int8_t maxAmBw;
-extern const int lastBandwidthAM;
 extern int8_t bwIdxFM;
-extern const int8_t maxFmBw;
-extern const int lastBandwidthFM;
-
-extern const int lastMenu;
-extern const int lastSettingsMenu;
-extern const int lastBand;
-extern const int lastFmStep;
+extern int8_t bwIdxSSB;
 extern const int CALMax;
 
 extern int16_t bandCAL[];
-extern uint8_t bandMODE[];
-extern int tabAmStep[];
-extern int tabSsbFastStep[];
-extern int tabFmStep[];
 
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 static inline bool isCB()  { return(bandIdx==BAND_CB); }
@@ -202,13 +177,10 @@ static inline bool isModalMode(uint16_t cmd)
 
 // SSB functions
 void loadSSB();
-void correctCutoffFilter();
 
 const char *get_fw_ver();
 void useBand();
 uint8_t getStrength();
-int getSteps(bool fast = false);
-int getLastStep();
 void updateBFO();
 
 // Draw.c
@@ -224,12 +196,17 @@ void drawBattery(int x, int y);
 void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 bool clickSideBar(uint16_t cmd);
+void clickVolume();
 void doSoftMute(int dir);
 void doAgc(int dir);
 void doAvc(int dir);
 void selectBand(uint8_t idx);
+int getTotalBands();
+const Step *getCurrentStep();
+int getSteps(bool fast = false);
 
 // Station.c
+const char *getStationName();
 void clearStationName();
 void checkRds();
 void checkCbChannel();

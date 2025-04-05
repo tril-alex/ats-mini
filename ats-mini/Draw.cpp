@@ -220,7 +220,7 @@ void drawScreen(uint16_t cmd)
 #if THEME_EDITOR
     spr.drawString("*STATION*", rds_offset_x, rds_offset_y, 4);
 #else
-    spr.drawString(bufferStationName, rds_offset_x, rds_offset_y, 4);
+    spr.drawString(getStationName(), rds_offset_x, rds_offset_y, 4);
 #endif
   }
 
@@ -229,7 +229,7 @@ void drawScreen(uint16_t cmd)
   {
     spr.setTextDatum(TC_DATUM);
     spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
-    spr.drawString(bufferStationName, rds_offset_x, rds_offset_y, 4);
+    spr.drawString(getStationName(), rds_offset_x, rds_offset_y, 4);
   }
 
   //
