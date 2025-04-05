@@ -217,11 +217,6 @@ uint8_t currentMode = FM;
 // Defaults
 int16_t bandCAL[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-// Mode (per band). Size needs to be the same as band[] and mode needs to be appropriate for bandType
-// Example bandType = FM_BAND_TYPE, bandMODE = FM. All other BAND_TYPE's, bandMODE = AM/LSB/USB
-// Defaults
-uint8_t bandMODE[] = {FM, AM, AM, AM, LSB, AM, AM, LSB, AM, AM, AM, AM, USB, AM, AM, USB, AM, AM, USB, AM};
-
 const char *cbChannelNumber[] = {
     "1", "2", "3", "41",
     "4", "5", "6", "7", "42",
@@ -569,7 +564,6 @@ void readAllReceiverInformation()
 {
   uint8_t volume;
   int addr_offset;
-  int bwIdx;
   EEPROM.begin(EEPROM_SIZE);
 
   volume = EEPROM.read(eeprom_address + 1); // Gets the stored volume;
@@ -616,45 +610,7 @@ void readAllReceiverInformation()
   // G8PTN: Added
   ledcWrite(PIN_LCD_BL, currentBrt);
 
-  currentFrequency = band[bandIdx].currentFreq;
-  currentMode = bandMODE[bandIdx];                       // G8PTN: Added to support mode per band
-
-  if (band[bandIdx].bandType == FM_BAND_TYPE)
-  {
-    currentStepIdx = idxFmStep = band[bandIdx].currentStepIdx;
-    rx.setFrequencyStep(tabFmStep[currentStepIdx]);
-  }
-  else
-  {
-    currentStepIdx = idxAmStep = band[bandIdx].currentStepIdx;
-    rx.setFrequencyStep(tabAmStep[currentStepIdx]);
-  }
-
-  bwIdx = band[bandIdx].bandwidthIdx;
-
-  if (isSSB())
-  {
-    loadSSB();
-    bwIdxSSB = (bwIdx > 5) ? 5 : bwIdx;
-    rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
-    correctCutoffFilter();
-    updateBFO();
-  }
-  else if (currentMode == AM)
-  {
-    bwIdxAM = bwIdx;
-    rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
-  }
-  else
-  {
-    bwIdxFM = bwIdx;
-    rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-  }
-
-  if (currentBFO > 0)
-    sprintf(bfo, "+%4.4d", currentBFO);
-  else
-    sprintf(bfo, "%4.4d", currentBFO);
+  selectBand(bandIdx);
 
   delay(50);
   rx.setVolume(volume);
@@ -688,19 +644,6 @@ ICACHE_RAM_ATTR void rotaryEncoder()
     encoderCount = (encoderStatus == DIR_CW) ? 1 : -1;
     seekStop = true;  // G8PTN: Added flag
   }
-}
-
-/**
- *  Shows the current BFO value
- */
-void showBFO()
-{
-  if (currentBFO > 0)
-    sprintf(bfo, "+%4.4d", currentBFO);
-  else
-    sprintf(bfo, "%4.4d", currentBFO);
-
-  drawScreen(currentCmd);
 }
 
 /**
@@ -935,11 +878,7 @@ void doMenuCommand(uint16_t menuCmd)
 
 #if BFO_MENU_EN
     case MENU_BFO:
-      if(isSSB())
-      {
-        bfoOn = true;
-        showBFO();
-      }
+      if(isSSB()) bfoOn = true;
       break;
 #endif
   }
@@ -1469,7 +1408,6 @@ void doRotate(int8_t dir)
     if (currentBFO < -BFOMax) currentBFO = -BFOMax;
     band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // G8PTN; Calculate frequency value to store in EEPROM
     updateBFO();
-    showBFO();
   }
 
   //

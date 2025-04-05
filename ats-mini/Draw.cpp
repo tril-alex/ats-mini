@@ -185,10 +185,16 @@ void drawScreen(uint16_t cmd)
   // BFO
   if(bfoOn)
   {
+    char text[32];
+    if(currentBFO>0)
+      sprintf(text, "+%4.4d", currentBFO);
+    else
+      sprintf(text, "%4.4d", currentBFO);
+
     spr.setTextDatum(ML_DATUM);
     spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
     spr.drawString("BFO:",10,158,4);
-    spr.drawString(bfo,80,158,4);
+    spr.drawString(text,80,158,4);
   }
 
   // S-Meter

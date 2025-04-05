@@ -105,7 +105,8 @@ typedef struct
 typedef struct
 {
   const char *bandName;   // Band description
-  uint8_t bandType;       // Band type (FM, MW or SW)
+  uint8_t bandType;       // Band type (FM, MW, or SW)
+  uint8_t bandMode;       // Band mode (FM, AM, LSB, or SSB)
   uint16_t minimumFreq;   // Minimum frequency of the band
   uint16_t maximumFreq;   // maximum frequency of the band
   uint16_t currentFreq;   // Default frequency or current frequency
@@ -215,19 +216,17 @@ void drawLoadingSSB();
 void drawCommandStatus(const char *status);
 void drawScreen(uint16_t cmd);
 
-// Input.c
-bool doInput(uint16_t cmd, int dir);
-void doSoftMute(int dir);
-void doAgc(int dir);
-void doAvc(int dir);
-
 // Battery.c
 float batteryMonitor();
 void drawBattery(int x, int y);
 
 // Menu.c
-bool doSideBar(uint16_t cmd, int dir);
 void drawSideBar(uint16_t cmd, int x, int y, int sx);
+bool doSideBar(uint16_t cmd, int dir);
+void doSoftMute(int dir);
+void doAgc(int dir);
+void doAvc(int dir);
+void selectBand(uint8_t idx);
 
 #if USE_REMOTE
 // Remote.c

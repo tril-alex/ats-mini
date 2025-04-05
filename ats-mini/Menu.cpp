@@ -168,31 +168,34 @@ int bandIdx = 0;
 
 Band band[] =
 {
-  {"VHF", FM_BAND_TYPE, 6400, 10800, 10390, 1, 0},
-  {"MW1", MW_BAND_TYPE, 150, 1720, 810, 3, 4},
-  {"MW2", MW_BAND_TYPE, 531, 1701, 783, 2, 4},
-  {"MW3", MW_BAND_TYPE, 1700, 3500, 2500, 1, 4},
-  {"80M", MW_BAND_TYPE, 3500, 4000, 3700, 0, 4},
-  {"SW1", SW_BAND_TYPE, 4000, 5500, 4885, 1, 4},
-  {"SW2", SW_BAND_TYPE, 5500, 6500, 6000, 1, 4},
-  {"40M", SW_BAND_TYPE, 6500, 7300, 7100, 0, 4},
-  {"SW3", SW_BAND_TYPE, 7200, 8000, 7200, 1, 4},
-  {"SW4", SW_BAND_TYPE, 9000, 11000, 9500, 1, 4},
-  {"SW5", SW_BAND_TYPE, 11100, 13000, 11900, 1, 4},
-  {"SW6", SW_BAND_TYPE, 13000, 14000, 13500, 1, 4},
-  {"20M", SW_BAND_TYPE, 14000, 15000, 14200, 0, 4},
-  {"SW7", SW_BAND_TYPE, 15000, 17000, 15300, 1, 4},
-  {"SW8", SW_BAND_TYPE, 17000, 18000, 17500, 1, 4},
-  {"15M", SW_BAND_TYPE, 20000, 21400, 21100, 0, 4},
-  {"SW9", SW_BAND_TYPE, 21400, 22800, 21500, 1, 4},
-  {"CB ", SW_BAND_TYPE, 26000, 30000, 27135, 0, 4},
-  {"10M", SW_BAND_TYPE, 28000, 30000, 28400, 0, 4},
-  {"ALL", SW_BAND_TYPE, 150, 30000, 15000, 0, 4} // All band. LW, MW and SW (from 150kHz to 30MHz)
+  {"VHF", FM_BAND_TYPE, FM,  6400, 10800, 10390, 1, 0},
+  {"MW1", MW_BAND_TYPE, AM,  150, 1720, 810, 3, 4},
+  {"MW2", MW_BAND_TYPE, AM,  531, 1701, 783, 2, 4},
+  {"MW3", MW_BAND_TYPE, AM,  1700, 3500, 2500, 1, 4},
+  {"80M", MW_BAND_TYPE, LSB, 3500, 4000, 3700, 0, 4},
+  {"SW1", SW_BAND_TYPE, AM,  4000, 5500, 4885, 1, 4},
+  {"SW2", SW_BAND_TYPE, AM,  5500, 6500, 6000, 1, 4},
+  {"40M", SW_BAND_TYPE, LSB, 6500, 7300, 7100, 0, 4},
+  {"SW3", SW_BAND_TYPE, AM,  7200, 8000, 7200, 1, 4},
+  {"SW4", SW_BAND_TYPE, AM,  9000, 11000, 9500, 1, 4},
+  {"SW5", SW_BAND_TYPE, AM,  11100, 13000, 11900, 1, 4},
+  {"SW6", SW_BAND_TYPE, AM,  13000, 14000, 13500, 1, 4},
+  {"20M", SW_BAND_TYPE, USB, 14000, 15000, 14200, 0, 4},
+  {"SW7", SW_BAND_TYPE, AM,  15000, 17000, 15300, 1, 4},
+  {"SW8", SW_BAND_TYPE, AM,  17000, 18000, 17500, 1, 4},
+  {"15M", SW_BAND_TYPE, USB, 20000, 21400, 21100, 0, 4},
+  {"SW9", SW_BAND_TYPE, AM,  21400, 22800, 21500, 1, 4},
+  {"CB ", SW_BAND_TYPE, AM,  26000, 30000, 27135, 0, 4},
+  {"10M", SW_BAND_TYPE, USB, 28000, 30000, 28400, 0, 4},
+  // All band. LW, MW and SW (from 150kHz to 30MHz)
+  {"ALL", SW_BAND_TYPE, AM,  150, 30000, 15000, 0, 4} 
 };
 
 //
 // Utility functions to change menu values
 //
+
+static inline int min(int x, int y) { return(x<y? x:y); }
 
 static inline int wrap_range(int v, int dir, int vMin, int vMax)
 {
@@ -333,7 +336,7 @@ void doAgc(int dir)
 static void doMode(int dir)
 {
   // This is our current mode
-  currentMode = bandMODE[bandIdx];
+  currentMode = band[bandIdx].bandMode;
 
   // Nothing to do if FM mode
   if(currentMode==FM) return;
@@ -389,7 +392,7 @@ static void doMode(int dir)
 
   band[bandIdx].currentFreq = currentFrequency;
   band[bandIdx].currentStepIdx = currentStepIdx;
-  bandMODE[bandIdx] = currentMode;
+  band[bandIdx].bandMode = currentMode;
   useBand();
 }
 
@@ -415,7 +418,7 @@ static void doBand(int dir)
 
   // Change band
   bandIdx = wrap_range(bandIdx, dir, 0, lastBand);
-  currentMode = bandMODE[bandIdx];
+  currentMode = band[bandIdx].bandMode;
 
   // Load SSB patch as required
   if(!isSSB())
@@ -489,6 +492,48 @@ bool doSideBar(uint16_t cmd, int dir)
   return(true);
 }
 
+//
+// Selecting given band
+//
+
+void selectBand(uint8_t idx)
+{
+  bandIdx = min(idx, LAST_ITEM(band));
+  currentFrequency = band[bandIdx].currentFreq;
+  currentMode = band[bandIdx].bandMode;
+
+  if(band[bandIdx].bandType==FM_BAND_TYPE)
+  {
+    currentStepIdx = idxFmStep = band[bandIdx].currentStepIdx;
+    rx.setFrequencyStep(fmStep[currentStepIdx].step);
+  }
+  else
+  {
+    currentStepIdx = idxAmStep = band[bandIdx].currentStepIdx;
+    rx.setFrequencyStep(amStep[currentStepIdx].step);
+  }
+
+  int bwIdx = band[bandIdx].bandwidthIdx;
+
+  if(isSSB())
+  {
+    loadSSB();
+    bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
+    rx.setSSBAudioBandwidth(bandwidthSSB[bwIdxSSB].idx);
+    correctCutoffFilter();
+    updateBFO();
+  }
+  else if(currentMode==FM)
+  {
+    bwIdxFM = min(bwIdx, LAST_ITEM(bandwidthFM));
+    rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
+  }
+  else
+  {
+    bwIdxAM = min(bwIdx, LAST_ITEM(bandwidthAM));
+    rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
+  }
+}
 
 //
 // Draw functions
