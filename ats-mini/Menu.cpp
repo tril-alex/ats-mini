@@ -1047,7 +1047,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_SETTINGS:  drawSettings(x, y, sx);  break;
     case CMD_MODE:      drawMode(x, y, sx);      break;
     case CMD_STEP:      drawStep(x, y, sx);      break;
-    case CMD_BAND:      drawStep(x, y, sx);      break;
+    case CMD_BAND:      drawBand(x, y, sx);      break;
     case CMD_BANDWIDTH: drawBandwidth(x, y, sx); break;
     case CMD_THEME:     drawTheme(x, y, sx);     break;
     case CMD_VOLUME:    drawVolume(x, y, sx);    break;

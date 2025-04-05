@@ -119,9 +119,6 @@ void drawScreen(uint16_t cmd)
     return;
   }
 
-  // Draw left-side menu/info bar
-  drawSideBar(cmd, menu_offset_x, menu_offset_y, menu_delta_x);
-
   //
   // Band and mode
   //
@@ -181,6 +178,10 @@ void drawScreen(uint16_t cmd)
     spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
     spr.drawString("kHz", funit_offset_x, funit_offset_y);
   }
+
+  // Draw left-side menu/info bar
+  // @@@ FIXME: Frequency display (above) intersects the side bar!
+  drawSideBar(cmd, menu_offset_x, menu_offset_y, menu_delta_x);
 
   // BFO
   if(bfoOn)
