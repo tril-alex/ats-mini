@@ -1,5 +1,6 @@
-#if USE_REMOTE
 #include "Common.h"
+
+#if USE_REMOTE
 
 void remotePrintStatus()
 {

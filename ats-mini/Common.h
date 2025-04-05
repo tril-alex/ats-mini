@@ -5,9 +5,10 @@
 #include <TFT_eSPI.h>
 #include <SI4735.h>
 
-#define USE_REMOTE    1  // Enable serial port control and monitoring
+#define USE_REMOTE    0  // Enable serial port control and monitoring
 #define TUNE_HOLDOFF  1  // Hold off display updates while tuning
 #define BFO_MENU_EN   0  // Add BFO menu option for debugging
+#define THEME_EDITOR  0  // Enable setting and printing of theme colors
 #define DEBUG1_PRINT  0  // Highest level - Primary information
 #define DEBUG2_PRINT  0  //               - Function call results
 #define DEBUG3_PRINT  0  //               - Misc
@@ -140,6 +141,15 @@ extern int16_t currentCAL;
 extern int8_t currentAVC;
 extern uint16_t currentBrt;
 extern uint16_t currentSleep;
+extern uint8_t AmTotalSteps;
+
+extern int8_t FmAgcIdx;
+extern int8_t AmAgcIdx;
+extern int8_t SsbAgcIdx;
+extern int8_t AmAvcIdx;
+extern int8_t SsbAvcIdx;
+extern int8_t AmSoftMuteIdx;
+extern int8_t SsbSoftMuteIdx;
 
 extern int8_t agcIdx;
 extern int8_t agcNdx;
@@ -176,10 +186,10 @@ static inline bool isModalMode(uint16_t cmd)
 }
 
 // SSB functions
-void loadSSB();
+void loadSSB(uint8_t bandwidth);
 
 const char *get_fw_ver();
-void useBand();
+void useBand(uint8_t bandIdx);
 uint8_t getStrength();
 void updateBFO();
 
@@ -197,9 +207,9 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 bool clickSideBar(uint16_t cmd);
 void clickVolume();
-void doSoftMute(int dir);
-void doAgc(int dir);
-void doAvc(int dir);
+void doSoftMute(int dir = 0);
+void doAgc(int dir = 0);
+void doAvc(int dir = 0);
 void selectBand(uint8_t idx);
 int getTotalBands();
 const Step *getCurrentStep();

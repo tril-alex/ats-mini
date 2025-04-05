@@ -342,7 +342,7 @@ void setup()
 
   // ** SI4732 STARTUP **
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
-  useBand();
+  useBand(bandIdx);
 
   drawScreen(currentCmd);
 
@@ -541,7 +541,7 @@ void useBand(uint8_t bandIdx)
   if(band[bandIdx].bandType==FM_BAND_TYPE)
   {
     // rx.setTuneFrequencyAntennaCapacitor(0);
-    rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, tabFmStep[band[bandIdx].currentStepIdx]);
+    rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, getCurrentStep()->step);
     rx.setSeekFmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
     rx.setFMDeEmphasis(1);
     rx.RdsInit();
@@ -575,7 +575,7 @@ void useBand(uint8_t bandIdx)
         band[bandIdx].minimumFreq,
         band[bandIdx].maximumFreq,
         band[bandIdx].currentFreq,
-        band[bandIdx].currentStepIdx >= AmTotalSteps ? 1 : amStep[band[bandIdx].currentStepIdx].step
+        band[bandIdx].currentStepIdx >= AmTotalSteps ? 1 : getCurrentStep()->step
       );
     }
 
@@ -623,21 +623,12 @@ void useBand(uint8_t bandIdx)
   drawScreen(currentCmd);
 }
 
-void loadSSB()
+void loadSSB(uint8_t bandwidth)
 {
   rx.setI2CFastModeCustom(400000); // You can try rx.setI2CFastModeCustom(700000); or greater value
-  rx.loadPatch(ssb_patch_content, size_content, bandwidthSSB[bwIdxSSB].idx);
+  rx.loadPatch(ssb_patch_content, size_content, bandwidth);
   rx.setI2CFastModeCustom(100000);
   ssbLoaded = true;
-}
-
-void correctCutoffFilter()
-{
-  // If audio bandwidth selected is about 2 kHz or below, it is recommended to set Sideband Cutoff Filter to 0.
-  if (bandwidthSSB[bwIdxSSB].idx == 0 || bandwidthSSB[bwIdxSSB].idx == 4 || bandwidthSSB[bwIdxSSB].idx == 5)
-    rx.setSSBSidebandCutoffFilter(0);
-  else
-    rx.setSSBSidebandCutoffFilter(1);
 }
 
 /**
@@ -903,9 +894,12 @@ void clock_time()
   }
 }
 
-void toggleRemoteLog() {
+#if USE_REMOTE
+void toggleRemoteLog()
+{
   g_remote_log = !g_remote_log;
 }
+#endif
 
 void displayOff() {
   display_on = false;
@@ -1283,7 +1277,7 @@ void loop()
       Serial.println("Info: loop() >>> RSI diff detected");
 #endif
       rssi = aux;
-      showRSSI();
+      drawScreen(currentCmd);
     }
 
     elapsedRSSI = millis();
@@ -1343,7 +1337,7 @@ void loop()
   if(tuning_flag && ((millis() - tuning_timer) > TUNE_HOLDOFF_TIME))
   {
     tuning_flag = false;
-    showFrequency();
+    drawScreen(currentCmd);
 #if DEBUG3_PRINT
     Serial.print("Info: TUNE_HOLDOFF (Reset) >>> ");
     Serial.print("tuning_flag = ");

@@ -359,7 +359,7 @@ static void doVolume(int dir)
 
 static void doTheme(int dir)
 {
-  themeIdx = wrap_range(themeIdx, dir, 0, LAST_ITEM(theme));
+  themeIdx = wrap_range(themeIdx, dir, 0, getTotalThemes() - 1);
 }
 
 void doAvc(int dir)
@@ -473,7 +473,7 @@ static void doMode(int dir)
       case AM:
         // When switching from AM mode, load SSB patch!
         drawLoadingSSB();
-        loadSSB();
+        loadSSB(bandwidthSSB[bwIdxSSB].idx);
         ssbLoaded = true;
         currentMode = LSB;
         break;
@@ -497,7 +497,7 @@ static void doMode(int dir)
       case AM:
         // If switching from AM mode, load SSB patch!
         drawLoadingSSB();
-        loadSSB();
+        loadSSB(bandwidthSSB[bwIdxSSB].idx);
         ssbLoaded = true;
         currentMode = USB;
         break;
@@ -515,9 +515,9 @@ static void doMode(int dir)
   }
 
   band[bandIdx].currentFreq = currentFrequency;
-  band[bandIdx].currentStepIdx = currentStepIdx;
+  band[bandIdx].currentStepIdx = amStepIdx;
   band[bandIdx].bandMode = currentMode;
-  useBand();
+  useBand(bandIdx);
 }
 
 void doSoftMute(int dir)
@@ -537,7 +537,7 @@ static void doBand(int dir)
 {
   // G8PTN: Reset BFO when changing band and store frequency
   band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);
-  band[bandIdx].currentStepIdx = currentStepIdx;
+  band[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
   currentBFO = 0;
 
   // Change band
@@ -550,12 +550,12 @@ static void doBand(int dir)
   else if(!ssbLoaded)
   {
     drawLoadingSSB();
-    loadSSB();
+    loadSSB(bandwidthSSB[bwIdxSSB].idx);
     ssbLoaded = true;
   }
 
   // Set new band
-  useBand();
+  useBand(bandIdx);
 }
 
 static void doBandwidth(int dir)
@@ -663,7 +663,7 @@ void selectBand(uint8_t idx)
 
   if(isSSB())
   {
-    loadSSB();
+    loadSSB(bandwidthSSB[bwIdxSSB].idx);
     bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
     setSsbBandwidth(bwIdxSSB);
     updateBFO();
@@ -847,7 +847,7 @@ static void drawTheme(int x, int y, int sx)
 {
   drawCommon(CMD_THEME, x, y, sx);
 
-  int count = ITEM_COUNT(theme);
+  int count = getTotalThemes();
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
