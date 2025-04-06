@@ -27,6 +27,9 @@
 #define batt_offset_y    0    // Battery meter y offset
 #define clock_datum     90    // Clock x offset
 
+//
+// Show ABOUT screen
+//
 static void drawAbout()
 {
   // About screen
@@ -75,6 +78,160 @@ void drawCommandStatus(const char *status)
 }
 
 //
+// Draw band and mode indicators
+//
+static void drawBandAndMode(const char *band, const char *mode, int x, int y)
+{
+  spr.setTextDatum(TC_DATUM);
+  spr.setTextColor(theme[themeIdx].band_text, theme[themeIdx].bg);
+  uint16_t band_width = spr.drawString(band, x, y);
+
+  spr.setTextDatum(TL_DATUM);
+  spr.setTextColor(theme[themeIdx].mode_text, theme[themeIdx].bg);
+  uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 12, y + 8, 2);
+
+  spr.drawSmoothRoundRect(x + band_width / 2 + 7, y + 7, 4, 4, mode_width + 8, 17, theme[themeIdx].mode_border, theme[themeIdx].bg);
+}
+
+//
+// Draw frequency
+//
+static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
+{
+  spr.setTextDatum(MR_DATUM);
+  spr.setTextColor(theme[themeIdx].freq_text, theme[themeIdx].bg);
+
+  if(currentMode==FM)
+  {
+    // FM frequency
+    spr.drawFloat(freq/100.00, 2, x, y, 7);
+    spr.setTextDatum(ML_DATUM);
+    spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
+    spr.drawString("MHz", ux, uy);
+  }
+  else
+  {
+    if(isSSB())
+    {
+      // SSB frequency
+      char text[32];
+      freq = freq * 1000 + currentBFO;
+      sprintf(text, "%3.3u", freq / 1000);
+      spr.drawString(text, x, y, 7);
+      spr.setTextDatum(ML_DATUM);
+      sprintf(text, ".%3.3d", freq % 1000);
+      spr.drawString(text, 5+x, 15+y, 4);
+    }
+    else
+    {
+      // AM frequency
+      spr.drawNumber(freq, x, y, 7);
+      spr.setTextDatum(ML_DATUM);
+      spr.drawString(".000", 5+x, 15+y, 4);
+    }
+
+    // SSB/AM frequencies are measured in kHz
+    spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
+    spr.drawString("kHz", ux, uy);
+  }
+}
+
+//
+// Draw tuner scale
+//
+static void drawScale(uint32_t freq)
+{
+  spr.fillTriangle(156, 122, 160, 132, 164, 122, theme[themeIdx].scale_pointer);
+  spr.drawLine(160, 124, 160, 169, theme[themeIdx].scale_pointer);
+
+  spr.setTextDatum(MC_DATUM);
+  spr.setTextColor(theme[themeIdx].scale_text, theme[themeIdx].bg);
+
+  // Start drawing frequencies from the left 
+  freq = freq/10 - 20;
+
+  // Get band edges
+  const Band *band = getCurrentBand();
+  uint32_t minFreq = band->minimumFreq/10;
+  uint32_t maxFreq = band->maximumFreq/10;
+
+  for(int i=0 ; i<40 ; i++, freq++)
+  {
+    if(freq>=minFreq && freq<=maxFreq)
+    {
+      uint16_t lineColor = i==20?
+        theme[themeIdx].scale_pointer : theme[themeIdx].scale_line;
+
+      if((freq%10)==0)
+      {
+        spr.drawLine(i*8, 169, i*8, 150, lineColor);
+        spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
+        if(currentMode==FM)
+          spr.drawFloat(freq/10.0, 1, i*8, 140, 2);
+        else if(freq>=100)
+          spr.drawFloat(freq/100.0, 3, i*8, 140, 2);
+        else
+          spr.drawNumber(freq*10, i*8, 140, 2);
+      }
+      else if((freq%5)==0 && (freq%10)!=0)
+      {
+        spr.drawLine(i*8, 169, i*8, 155, lineColor);
+        spr.drawLine((i*8)+1, 169, (i*8)+1, 155, lineColor);
+      }
+      else
+      {
+        spr.drawLine(i*8, 169, i*8, 160, lineColor);
+      }
+    }
+  }
+}
+
+//
+// Draw BFO
+//
+static void drawBFO(int bfo, int x, int y)
+{
+  char text[32];
+
+  if(bfo>0)
+    sprintf(text, "+%4.4d", bfo);
+  else
+    sprintf(text, "%4.4d", bfo);
+
+  spr.setTextDatum(ML_DATUM);
+  spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
+  spr.drawString("BFO:",x,y,4);
+  spr.drawString(text,x+70,y,4);
+}
+
+//
+// Draw S-meter
+//
+static void drawSMeter(int strength, int x, int y)
+{
+  spr.drawTriangle(x + 1, y + 1, x + 11, y + 1, x + 6, y + 6, theme[themeIdx].smeter_icon);
+  spr.drawLine(x + 6, y + 1, x + 6, y + 14, theme[themeIdx].smeter_icon);
+
+  for(int i=0 ; i<strength ; i++)
+  {
+    if(i<10)
+      spr.fillRect(15+x + (i*4), 2+y, 2, 12, theme[themeIdx].smeter_bar);
+    else
+      spr.fillRect(15+x + (i*4), 2+y, 2, 12, theme[themeIdx].smeter_bar_plus);
+  }
+}
+
+//
+// Draw RDS station name (also CB channel, etc)
+//
+static void drawStationName(const char *name, int x, int y)
+{
+  spr.setTextDatum(TC_DATUM);
+  spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
+  spr.drawString(name, x, y, 4);
+}
+
+//
 // Draw screen according to given command
 //
 void drawScreen(uint16_t cmd)
@@ -106,17 +263,17 @@ void drawScreen(uint16_t cmd)
     return;
   }
 
+  // Set font we are going to use
+  spr.setFreeFont(&Orbitron_Light_24);
+
   //
   // Band and mode
   //
-  spr.setFreeFont(&Orbitron_Light_24);
-  spr.setTextDatum(TC_DATUM);
-  spr.setTextColor(theme[themeIdx].band_text, theme[themeIdx].bg);
-  uint16_t band_width = spr.drawString(getCurrentBand()->bandName, band_offset_x, band_offset_y);
-  spr.setTextDatum(TL_DATUM);
-  spr.setTextColor(theme[themeIdx].mode_text, theme[themeIdx].bg);
-  uint16_t mode_width = spr.drawString(bandModeDesc[currentMode], band_offset_x + band_width / 2 + 12, band_offset_y + 8, 2);
-  spr.drawSmoothRoundRect(band_offset_x + band_width / 2 + 7, band_offset_y + 7, 4, 4, mode_width + 8, 17, theme[themeIdx].mode_border, theme[themeIdx].bg);
+  drawBandAndMode(
+    getCurrentBand()->bandName,
+    bandModeDesc[currentMode],
+    band_offset_x, band_offset_y
+  );
 
 #if THEME_EDITOR
   spr.setTextDatum(TR_DATUM);
@@ -124,143 +281,41 @@ void drawScreen(uint16_t cmd)
   spr.drawString("WARN", 319, rds_offset_y, 4);
 #endif
 
-  //
-  // Frequency
-  //
-  spr.setTextDatum(MR_DATUM);
-  spr.setTextColor(theme[themeIdx].freq_text, theme[themeIdx].bg);
-  if(currentMode==FM)
-  {
-    // FM frequency
-    spr.drawFloat(currentFrequency/100.00, 2, freq_offset_x, freq_offset_y, 7);
-    spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
-    spr.drawString("MHz", funit_offset_x, funit_offset_y);
-  }
-  else
-  {
-    if(isSSB())
-    {
-      // SSB frequency
-      uint32_t freq  = (uint32_t(currentFrequency) * 1000) + currentBFO;
-      uint16_t khz   = freq / 1000;
-      uint16_t tail  = (freq % 1000);
-      char skhz [32];
-      char stail [32];
-      sprintf(skhz, "%3.3u", khz);
-      sprintf(stail, ".%3.3d", tail);
-      spr.drawString(skhz, freq_offset_x, freq_offset_y, 7);
-      spr.setTextDatum(ML_DATUM);
-      spr.drawString(stail, 5+freq_offset_x, 15+freq_offset_y, 4);
-    }
-    else
-    {
-      // AM frequency
-      spr.drawNumber(currentFrequency, freq_offset_x, freq_offset_y, 7);
-      spr.setTextDatum(ML_DATUM);
-      spr.drawString(".000", 5+freq_offset_x, 15+freq_offset_y, 4);
-    }
-
-    // SSB/AM frequencies are measured in kHz
-    spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
-    spr.drawString("kHz", funit_offset_x, funit_offset_y);
-  }
+  // Draw frequency and units
+  drawFrequency(
+    currentFrequency,
+    freq_offset_x, freq_offset_y,
+    funit_offset_x, funit_offset_y
+  );
 
   // Draw left-side menu/info bar
   // @@@ FIXME: Frequency display (above) intersects the side bar!
   drawSideBar(cmd, menu_offset_x, menu_offset_y, menu_delta_x);
 
-  // BFO
-  if(bfoOn)
-  {
-    char text[32];
-    if(currentBFO>0)
-      sprintf(text, "+%4.4d", currentBFO);
-    else
-      sprintf(text, "%4.4d", currentBFO);
+  // Draw BFO value
+  if(bfoOn) drawBFO(currentBFO, 10, 158);
 
-    spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
-    spr.drawString("BFO:",10,158,4);
-    spr.drawString(text,80,158,4);
-  }
+  // Draw S-meter
+  drawSMeter(getStrength(), meter_offset_x, meter_offset_y);
 
-  // S-Meter
-  spr.drawTriangle(meter_offset_x + 1, meter_offset_y + 1, meter_offset_x + 11, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 6, theme[themeIdx].smeter_icon);
-  spr.drawLine(meter_offset_x + 6, meter_offset_y + 1, meter_offset_x + 6, meter_offset_y + 14, theme[themeIdx].smeter_icon);
-  for(int i=0 ; i<getStrength() ; i++)
-  {
-    if(i<10)
-      spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, theme[themeIdx].smeter_bar);
-    else
-      spr.fillRect(15+meter_offset_x + (i*4), 2+meter_offset_y, 2, 12, theme[themeIdx].smeter_bar_plus);
-  }
-
-  // RDS info
+  // Draw FM-specific information
   if(currentMode==FM)
   {
+    // Indicate FM pilot detection
     if(rx.getCurrentPilot())
       spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, theme[themeIdx].bg);
-
-    spr.setTextDatum(TC_DATUM);
-    spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
-
-#if THEME_EDITOR
-    spr.drawString("*STATION*", rds_offset_x, rds_offset_y, 4);
-#else
-    spr.drawString(getStationName(), rds_offset_x, rds_offset_y, 4);
-#endif
+    // Draw RDS station name
+    drawStationName(getStationName(), rds_offset_x, rds_offset_y);
   }
-
-  // CB info
-  if(isCB())
+  // Draw CB-specific information
+  else if(isCB())
   {
-    spr.setTextDatum(TC_DATUM);
-    spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
-    spr.drawString(getStationName(), rds_offset_x, rds_offset_y, 4);
+    // Draw CB channel name
+    drawStationName(getStationName(), rds_offset_x, rds_offset_y);
   }
 
-  //
-  // Tuner scale
-  //
-  spr.fillTriangle(156, 122, 160, 132, 164, 122, theme[themeIdx].scale_pointer);
-  spr.drawLine(160, 124, 160, 169, theme[themeIdx].scale_pointer);
-  spr.setTextDatum(MC_DATUM);
-  spr.setTextColor(theme[themeIdx].scale_text, theme[themeIdx].bg);
-
-  int freq = isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency;
-  freq = freq/10 - 20;
-
-  for(int i=0 ; i<40 ; i++, freq++)
-  {
-    uint16_t lineColor = i==20?
-      theme[themeIdx].scale_pointer : theme[themeIdx].scale_line;
-
-    const Band *band = getCurrentBand();
-    if(!(freq<band->minimumFreq/10.00 || freq>band->maximumFreq/10.00))
-    {
-      if((freq%10)==0)
-      {
-        spr.drawLine(i*8, 169, i*8, 150, lineColor);
-        spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
-        if(currentMode==FM)
-          spr.drawFloat(freq/10.0, 1, i*8, 140, 2);
-        else if(freq>=100)
-          spr.drawFloat(freq/100.0, 3, i*8, 140, 2);
-        else
-          spr.drawNumber(freq*10, i*8, 140, 2);
-      }
-      else if((freq%5)==0 && (freq%10)!=0)
-      {
-        spr.drawLine(i*8, 169, i*8, 155, lineColor);
-        spr.drawLine((i*8)+1, 169, (i*8)+1, 155, lineColor);
-      }
-      else
-      {
-        spr.drawLine(i*8, 169, i*8, 160, lineColor);
-      }
-    }
-  }
+  // Draw tuner scale
+  drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
 
 #if TUNE_HOLDOFF
   // Update if not tuning
