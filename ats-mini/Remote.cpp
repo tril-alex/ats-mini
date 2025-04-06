@@ -3,7 +3,6 @@
 #if USE_REMOTE
 
 // @@@ FIXME: These should not be force-exported!!!
-extern "C" const uint16_t app_ver;
 extern "C" volatile int encoderCount;
 extern "C" bool pb1_released;
 
