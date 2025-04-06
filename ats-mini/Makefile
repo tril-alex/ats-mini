@@ -9,7 +9,7 @@ BUILD_PROPERY = --build-property "build.extra_flags=-DDEBUG=$(DEBUG_LEVEL)"
 PORT := /dev/cu.usbmodem1101
 
 INO = ats-mini.ino
-HEADERS = Common.h Themes.h User_Setup.h Rotary.h patch_init.h
+HEADERS = Common.h Themes.h Menu.h User_Setup.h Rotary.h patch_init.h
 ELF = ./build/$(FQBN)/$(INO).elf
 
 SRC = \

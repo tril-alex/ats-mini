@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Themes.h"
+#include "Menu.h"
 
 //
 // Main Menu

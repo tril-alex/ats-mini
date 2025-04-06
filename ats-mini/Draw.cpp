@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Themes.h"
+#include "Menu.h"
 
 // Display position control
 #define menu_offset_x    0    // Menu horizontal offset
@@ -41,7 +42,7 @@ static void drawAbout()
   spr.setTextColor(theme[themeIdx].text_muted, theme[themeIdx].bg);
   spr.drawString("ESP32-SI4732 Receiver", 0, 0, 4);
   spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
-  spr.drawString(get_fw_ver(), 2, 33, 2);
+  spr.drawString(getVersion(), 2, 33, 2);
   spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 33 + 16, 2);
   spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 33 + 16 * 3, 2);
   spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 33 + 16 * 4, 2);

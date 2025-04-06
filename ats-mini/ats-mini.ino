@@ -8,6 +8,7 @@
 #include <SI4735.h>
 #include "Rotary.h"              // Disabled half-step mode
 #include "Common.h"
+#include "Menu.h"
 #include "patch_init.h"          // SSB patch for whole SSBRX initialization string
 
 // SI473/5 and UI
@@ -165,7 +166,7 @@ TFT_eSprite spr = TFT_eSprite(&tft);
 
 SI4735 rx;
 
-const char *get_fw_ver()
+const char *getVersion()
 {
   static char versionString[25] = "\0";
 
@@ -227,7 +228,7 @@ void setup()
 
     tft.setTextSize(2);
     tft.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
-    tft.println(get_fw_ver());
+    tft.println(getVersion());
     tft.println();
     EEPROM.write(eeprom_address, 0);
     EEPROM.commit();

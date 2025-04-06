@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Menu.h"
 
 #if USE_REMOTE
 
