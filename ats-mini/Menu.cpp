@@ -245,6 +245,7 @@ Band band[] =
 };
 
 int getTotalBands() { return(ITEM_COUNT(band)); }
+Band *getCurrentBand() { return(&band[bandIdx]); }
 
 //
 // Utility functions to change menu values
@@ -352,7 +353,7 @@ static void clickSettings(int cmd)
   }
 }
 
-static void doVolume(int dir)
+void doVolume(int dir)
 {
   if(dir>0) rx.volumeUp(); else if(dir<0) rx.volumeDown();
 }
@@ -385,7 +386,7 @@ static void doCal(int dir)
   if(isSSB()) updateBFO();
 }
 
-static void doBrt(int dir)
+void doBrt(int dir)
 {
   currentBrt = clamp_range(currentBrt, 32*dir, 32, 255);
 
@@ -397,7 +398,7 @@ static void doSleep(int dir)
   currentSleep = clamp_range(currentSleep, 5*dir, 0, 255);
 }
 
-static void doStep(int dir)
+void doStep(int dir)
 {
   int lastStep = getLastStep();
 
@@ -457,7 +458,7 @@ void doAgc(int dir)
   rx.setAutomaticGainControl(disableAgc, agcNdx);
 }
 
-static void doMode(int dir)
+void doMode(int dir)
 {
   // This is our current mode
   currentMode = band[bandIdx].bandMode;
@@ -533,7 +534,7 @@ void doSoftMute(int dir)
   rx.setAmSoftMuteMaxAttenuation(softMuteMaxAttIdx);
 }
 
-static void doBand(int dir)
+void doBand(int dir)
 {
   // G8PTN: Reset BFO when changing band and store frequency
   band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);
@@ -558,7 +559,7 @@ static void doBand(int dir)
   useBand(bandIdx);
 }
 
-static void doBandwidth(int dir)
+void doBandwidth(int dir)
 {
   if(isSSB())
   {

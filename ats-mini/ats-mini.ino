@@ -39,9 +39,6 @@ const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 // ====================================================================================================================================================
 // Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
 // ====================================================================================================================================================
-const uint8_t  app_id  = 67;          //               EEPROM ID.  If EEPROM read value mismatch, reset EEPROM            eeprom_address        1
-const uint16_t app_ver = 108;         //     v1.08     EEPROM VER. If EEPROM read value mismatch (older), reset EEPROM    eeprom_ver_address    2
-char app_date[] = "2025-03-25";
 const int eeprom_address = 0;         //               EEPROM start address
 const int eeprom_set_address = 256;   //               EEPROM setting base address
 const int eeprom_setp_address = 272;  //               EEPROM setting (per band) base address
@@ -142,14 +139,6 @@ uint8_t time_minutes = 0;
 uint8_t time_hours = 0;
 char time_disp [16];
 
-// Remote serial
-#if USE_REMOTE
-uint32_t g_remote_timer = millis();
-uint8_t g_remote_seqnum = 0;
-bool g_remote_log = false;
-#endif
-
-
 // Tables
 
 #include "themes.h"
@@ -178,16 +167,16 @@ SI4735 rx;
 
 const char *get_fw_ver()
 {
-  static char fw_ver[25] = "\0";
+  static char versionString[25] = "\0";
 
-  if(!fw_ver[0])
-  {
-    uint16_t ver_major = (app_ver / 100);
-    uint16_t ver_minor = (app_ver % 100);
-    sprintf(fw_ver, "F/W: v%1.1d.%2.2d %s", ver_major, ver_minor, app_date);
-  }
+  if(!versionString[0])
+    sprintf(versionString, "F/W: v%1.1d.%2.2d %s",
+      APP_VERSION / 100,
+      APP_VERSION % 100,
+      __DATE__
+    );
 
-  return(fw_ver);
+  return(versionString);
 }
 
 void setup()
@@ -232,7 +221,7 @@ void setup()
   EEPROM.begin(EEPROM_SIZE);
 
   // Press and hold Encoder button to force an EEPROM reset
-  // Indirectly forces the reset by setting app_id = 0 (Detected in the subsequent check for app_id and app_ver)
+  // Indirectly forces the reset by setting APP_ID = 0 (Detected in the subsequent check for APP_ID and APP_VERSION)
   // Note: EEPROM reset is recommended after firmware updates
   if (digitalRead(ENCODER_PUSH_BUTTON) == LOW) {
 
@@ -288,8 +277,8 @@ void setup()
 
 
   // Checking the EEPROM content
-  // Checks app_id (which covers manual reset) and app_ver which allows for automatic reset
-  // The app_ver is equivalent to a F/W version.
+  // Checks APP_ID (which covers manual reset) and APP_VERSION which allows for automatic reset
+  // The APP_VERSION is equivalent to a F/W version.
 
   // Debug
   // Read all EEPROM locations
@@ -306,7 +295,7 @@ void setup()
   EEPROM.end();
   #endif
 
-  // Perform check against app_id and app_ver
+  // Perform check against APP_ID and APP_VERSION
   uint8_t  id_read;
   uint16_t ver_read;
 
@@ -316,10 +305,11 @@ void setup()
   ver_read |= EEPROM.read(eeprom_ver_address + 1);
   EEPROM.end();
 
-  if (id_read == app_id) {
+  if (id_read == APP_ID) {
     readAllReceiverInformation();                        // Load EEPROM values
   }
-  else {
+  else
+  {
     saveAllReceiverInformation();                        // Set EEPROM to defaults
     rx.setVolume(volume);                                // Set initial volume after EEPROM reset
     ledcWrite(PIN_LCD_BL, currentBrt);                   // Set initial brightness after EEPROM reset
@@ -381,7 +371,7 @@ void saveAllReceiverInformation()
 
   EEPROM.begin(EEPROM_SIZE);
 
-  EEPROM.write(eeprom_address, app_id);                 // Stores the app id;
+  EEPROM.write(eeprom_address, APP_ID);                 // Stores the APP_ID;
   EEPROM.write(eeprom_address + 1, rx.getVolume());     // Stores the current Volume
   EEPROM.write(eeprom_address + 2, bandIdx);            // Stores the current band
   EEPROM.write(eeprom_address + 3, fmRDS);              // G8PTN: Not used
@@ -434,8 +424,8 @@ void saveAllReceiverInformation()
   }
 
   addr_offset = eeprom_ver_address;
-  EEPROM.write(addr_offset++, app_ver >> 8);            // Stores app_ver (HIGH byte)
-  EEPROM.write(addr_offset++, app_ver & 0XFF);          // Stores app_ver (LOW byte)
+  EEPROM.write(addr_offset++, APP_VERSION >> 8);        // Stores APP_VERSION (HIGH byte)
+  EEPROM.write(addr_offset++, APP_VERSION & 0XFF);      // Stores APP_VERSION (LOW byte)
   EEPROM.commit();
 
   EEPROM.end();
@@ -894,14 +884,8 @@ void clock_time()
   }
 }
 
-#if USE_REMOTE
-void toggleRemoteLog()
+void displayOff()
 {
-  g_remote_log = !g_remote_log;
-}
-#endif
-
-void displayOff() {
   display_on = false;
   ledcWrite(PIN_LCD_BL, 0);
   tft.writecommand(ST7789_DISPOFF);
@@ -909,52 +893,14 @@ void displayOff() {
   delay(120);
 }
 
-void displayOn() {
+void displayOn()
+{
   display_on = true;
   tft.writecommand(ST7789_SLPOUT);
   delay(120);
   tft.writecommand(ST7789_DISPON);
   ledcWrite(PIN_LCD_BL, currentBrt);
   drawScreen(currentCmd);
-}
-
-void captureScreen() {
-  uint16_t width = spr.width(), height = spr.height();
-  char sb[9];
-  Serial.println("");
-  // 14 bytes of BMP header
-  Serial.print("424d"); // BM
-  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12 + width * height * 2)); // Image size
-  Serial.print(sb);
-  Serial.print("00000000");
-  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12)); // Offset to image data
-  Serial.print(sb);
-
-  //Image header
-  Serial.print("28000000"); // Header size
-  sprintf(sb, "%08x", (unsigned int)htonl(width));
-  Serial.print(sb);
-  sprintf(sb, "%08x", (unsigned int)htonl(height));
-  Serial.print(sb);
-  Serial.print("01001000"); // 1 plane, 16 bpp
-  Serial.print("00000000"); // Compression
-  Serial.print("00000000"); // Compressed image size
-  Serial.print("00000000"); // X res
-  Serial.print("00000000"); // Y res
-  Serial.print("00000000"); // Color map
-  Serial.print("00000000"); // Colors
-  Serial.print("00f80000"); // Red mask
-  Serial.print("e0070000"); // Green mask
-  Serial.println("1f000000"); // Blue mask
-
-  // Image data
-  for (int y=height-1; y>=0; y--) {
-    for (int x=0; x<width; x++) {
-      sprintf(sb, "%04x", htons(spr.readPixel(x, y)));
-      Serial.print(sb);
-    }
-    Serial.println("");
-  }
 }
 
 #if THEME_EDITOR
@@ -1353,15 +1299,7 @@ void loop()
 
 #if USE_REMOTE
   // Periodically print status to serial
-  if(millis() - g_remote_timer >= 500 && g_remote_log)
-  {
-    // Mark time and increment diagnostic sequence number
-    g_remote_timer = millis();
-    g_remote_seqnum++;
-    // Show status
-    remotePrintStatus();
-  }
-
+  remoteTickTime(millis());
   // Receive and execute serial command
   if(Serial.available()>0) remoteDoCommand(Serial.read());
 #endif

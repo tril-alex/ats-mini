@@ -125,7 +125,7 @@ void drawScreen(uint16_t cmd)
   spr.setFreeFont(&Orbitron_Light_24);
   spr.setTextDatum(TC_DATUM);
   spr.setTextColor(theme[themeIdx].band_text, theme[themeIdx].bg);
-  uint16_t band_width = spr.drawString(band[bandIdx].bandName, band_offset_x, band_offset_y);
+  uint16_t band_width = spr.drawString(getCurrentBand()->bandName, band_offset_x, band_offset_y);
   spr.setTextDatum(TL_DATUM);
   spr.setTextColor(theme[themeIdx].mode_text, theme[themeIdx].bg);
   uint16_t mode_width = spr.drawString(bandModeDesc[currentMode], band_offset_x + band_width / 2 + 12, band_offset_y + 8, 2);
@@ -249,7 +249,8 @@ void drawScreen(uint16_t cmd)
     uint16_t lineColor = i==20?
       theme[themeIdx].scale_pointer : theme[themeIdx].scale_line;
 
-    if(!(freq<band[bandIdx].minimumFreq/10.00 || freq>band[bandIdx].maximumFreq/10.00))
+    const Band *band = getCurrentBand();
+    if(!(freq<band->minimumFreq/10.00 || freq>band->maximumFreq/10.00))
     {
       if((freq%10)==0)
       {

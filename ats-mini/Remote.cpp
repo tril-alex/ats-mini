@@ -2,21 +2,84 @@
 
 #if USE_REMOTE
 
+// @@@ FIXME: These should not be force-exported!!!
+extern "C" const uint16_t app_ver;
+extern "C" volatile int encoderCount;
+extern "C" bool pb1_released;
+
+uint32_t remoteTimer = millis();
+uint8_t remoteSeqnum = 0;
+bool remoteLogOn = false;
+
+//
+// Capture current screen image to the remote
+//
+void remoteCaptureScreen()
+{
+  uint16_t width  = spr.width();
+  uint16_t height = spr.height();
+  char sb[9];
+
+  // 14 bytes of BMP header
+  Serial.println("");
+  Serial.print("424d"); // BM
+  // Image size
+  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12 + width * height * 2));
+  Serial.print(sb);
+  Serial.print("00000000");
+  // Offset to image data
+  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12));
+  Serial.print(sb);
+
+  // Image header
+  Serial.print("28000000"); // Header size
+  sprintf(sb, "%08x", (unsigned int)htonl(width));
+  Serial.print(sb);
+  sprintf(sb, "%08x", (unsigned int)htonl(height));
+  Serial.print(sb);
+  Serial.print("01001000"); // 1 plane, 16 bpp
+  Serial.print("00000000"); // Compression
+  Serial.print("00000000"); // Compressed image size
+  Serial.print("00000000"); // X res
+  Serial.print("00000000"); // Y res
+  Serial.print("00000000"); // Color map
+  Serial.print("00000000"); // Colors
+  Serial.print("00f80000"); // Red mask
+  Serial.print("e0070000"); // Green mask
+  Serial.println("1f000000"); // Blue mask
+
+  // Image data
+  for(int y=height-1 ; y>=0 ; y--)
+  {
+    for(int x=0 ; x<width ; x++)
+    {
+      sprintf(sb, "%04x", htons(spr.readPixel(x, y)));
+      Serial.print(sb);
+    }
+
+    Serial.println("");
+  }
+}
+
+//
+// Print current status to the remote
+//
 void remotePrintStatus()
 {
   // Prepare information ready to be sent
-  int remote_volume  = rx.getVolume();
+  float remoteVoltage = batteryMonitor();
+  int remoteVolume = rx.getVolume();
 
   // S-Meter conditional on compile option
   rx.getCurrentReceivedSignalQuality();
-  uint8_t remote_rssi = rx.getCurrentRSSI();
+  uint8_t remoteRssi = rx.getCurrentRSSI();
 
   // Use rx.getFrequency to force read of capacitor value from SI4732/5
   rx.getFrequency();
-  uint16_t tuning_capacitor = rx.getAntennaTuningCapacitor();
+  uint16_t tuningCapacitor = rx.getAntennaTuningCapacitor();
 
   // Remote serial
-  Serial.print(app_ver);                      // Firmware version
+  Serial.print(APP_VERSION);                  // Firmware version
   Serial.print(",");
 
   Serial.print(currentFrequency);             // Frequency (KHz)
@@ -24,11 +87,11 @@ void remotePrintStatus()
   Serial.print(currentBFO);                   // Frequency (Hz x 1000)
   Serial.print(",");
 
-  Serial.print(band[bandIdx].bandName);      // Band
+  Serial.print(getCurrentBand()->bandName);   // Band
   Serial.print(",");
   Serial.print(currentMode);                  // Mode
   Serial.print(",");
-  Serial.print(currentStepIdx);               // Step (FM/AM/SSB)
+  Serial.print(getCurrentStep()->step);       // Step (FM/AM/SSB)
   Serial.print(",");
   Serial.print(bwIdxFM);                      // Bandwidth (FM)
   Serial.print(",");
@@ -39,17 +102,35 @@ void remotePrintStatus()
   Serial.print(agcIdx);                       // AGC/ATTN (FM/AM/SSB)
   Serial.print(",");
 
-  Serial.print(remote_volume);                // Volume
+  Serial.print(remoteVolume);                 // Volume
   Serial.print(",");
-  Serial.print(remote_rssi);                  // RSSI
+  Serial.print(remoteRssi);                   // RSSI
   Serial.print(",");
-  Serial.print(tuning_capacitor);             // Tuning cappacitor
+  Serial.print(tuningCapacitor);              // Tuning cappacitor
   Serial.print(",");
-  Serial.print(adc_read_avr);                 // V_BAT/2 (ADC average value)
+  Serial.print(remoteVoltage);                // V_BAT/2 (ADC average value)
   Serial.print(",");
-  Serial.println(g_remote_seqnum);            // Sequence number
+  Serial.println(remoteSeqnum);               // Sequence number
 }
 
+//
+// Tick remote time, periodically printing status
+//
+void remoteTickTime(uint32_t millis)
+{
+  if(millis - remoteTimer >= 500 && remoteLogOn)
+  {
+    // Mark time and increment diagnostic sequence number
+    remoteTimer = millis;
+    remoteSeqnum++;
+    // Show status
+    remotePrintStatus();
+  }
+}
+
+//
+// Recognize and execute given remote command
+//
 bool remoteDoCommand(char key)
 {
   switch(key)
@@ -64,10 +145,10 @@ bool remoteDoCommand(char key)
       pb1_released = true;
       break;
     case 'B': // Band Up
-      setBand(1);
+      doBand(1);
       break;
     case 'b': // Band Down
-      setBand(-1);
+      doBand(-1);
       break;
     case 'M': // Mode Up
       doMode(1);
@@ -112,10 +193,10 @@ bool remoteDoCommand(char key)
       displayOn();
       break;
     case 'C':
-      captureScreen();
+      remoteCaptureScreen();
       break;
     case 't':
-      toggleRemoteLog();
+      remoteLogOn = !remoteLogOn;
       break;
 
 #if THEME_EDITOR

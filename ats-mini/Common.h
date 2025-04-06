@@ -5,6 +5,9 @@
 #include <TFT_eSPI.h>
 #include <SI4735.h>
 
+#define APP_ID        67            // EEPROM ID
+#define APP_VERSION   108           // EEPROM VERSION
+
 #define USE_REMOTE    0  // Enable serial port control and monitoring
 #define TUNE_HOLDOFF  1  // Hold off display updates while tuning
 #define BFO_MENU_EN   0  // Add BFO menu option for debugging
@@ -192,6 +195,8 @@ const char *get_fw_ver();
 void useBand(uint8_t bandIdx);
 uint8_t getStrength();
 void updateBFO();
+void displayOff();
+void displayOn();
 
 // Draw.c
 void drawLoadingSSB();
@@ -207,13 +212,21 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 bool clickSideBar(uint16_t cmd);
 void clickVolume();
-void doSoftMute(int dir = 0);
-void doAgc(int dir = 0);
-void doAvc(int dir = 0);
 void selectBand(uint8_t idx);
 int getTotalBands();
+Band *getCurrentBand();
 const Step *getCurrentStep();
 int getSteps(bool fast = false);
+
+void doSoftMute(int dir);
+void doAgc(int dir);
+void doAvc(int dir);
+void doBandwidth(int dir);
+void doVolume(int dir);
+void doBrt(int dir);
+void doStep(int dir);
+void doMode(int dir);
+void doBand(int dir);
 
 // Station.c
 const char *getStationName();
@@ -223,7 +236,7 @@ void checkCbChannel();
 
 #if USE_REMOTE
 // Remote.c
-void remotePrintStatus();
+void remoteTickTime(uint32_t millis);
 bool remoteDoCommand(char key);
 #endif // USE_REMOTE
 
