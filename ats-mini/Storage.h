@@ -4,7 +4,7 @@
 void eepromTickTime(uint32_t millis);
 void eepromRequestSave();
 void eepromInvalidate();
-bool eepromCheck();
+bool eepromVerify();
 void eepromSaveConfig();
 void eepromLoadConfig();
 

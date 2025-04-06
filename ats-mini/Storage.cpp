@@ -13,7 +13,7 @@
 #define EEPROM_VER_ADDR   0x1F0
 
 // Flag indicating EEPROM write request
-bool eeprom_wr_flag = false;
+bool showEepromFlag = false;
 bool itIsTimeToSave = false;
 long storeTime = millis();
 
@@ -39,11 +39,11 @@ void eepromTickTime(uint32_t millis)
 void drawEepromIndicator(int x, int y)
 {
 #if THEME_EDITOR
-  eeprom_wr_flag = true;
+  showEepromFlag = true;
 #endif
 
   // If need to draw EEPROM icon...
-  if(eeprom_wr_flag)
+  if(showEepromFlag)
   {
     // Draw EEPROM write request icon
     spr.fillRect(x+3, y+2, 3, 5, theme[themeIdx].save_icon);
@@ -53,7 +53,7 @@ void drawEepromIndicator(int x, int y)
     spr.drawLine(x+8, y+13, x+8, y+12, theme[themeIdx].save_icon);
 
     // Icon drawn
-    eeprom_wr_flag = false;
+    showEepromFlag = false;
   }
 }
 
@@ -80,7 +80,7 @@ void eepromInvalidate()
 }
 
 // Check EEPROM contents against APP_ID and APP_VERSION
-bool eepromCheck()
+bool eepromVerify()
 {
   uint8_t  appId;
   uint16_t appVer;
@@ -164,7 +164,7 @@ void eepromSaveConfig()
   EEPROM.end();
 
   // Data has been written into EEPROM
-  eeprom_wr_flag = true;
+  showEepromFlag = true;
 }
 
 void eepromLoadConfig()

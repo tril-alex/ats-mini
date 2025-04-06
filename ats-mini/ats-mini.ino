@@ -242,7 +242,7 @@ void setup()
   digitalWrite(PIN_AMP_EN, HIGH);
 
   // If EEPROM contents are ok...
-  if(eepromCheck())
+  if(eepromVerify())
   {
     // Load configuration from EEPROM
     eepromLoadConfig(); 
@@ -261,6 +261,7 @@ void setup()
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
   useBand(bandIdx);
 
+  // Draw display for the first time
   drawScreen(currentCmd);
 
   // Interrupt actions for Rotary encoder
