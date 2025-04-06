@@ -9,6 +9,7 @@
 #include "Rotary.h"              // Disabled half-step mode
 #include "Common.h"
 #include "Menu.h"
+#include "Storage.h"
 #include "patch_init.h"          // SSB patch for whole SSBRX initialization string
 
 // SI473/5 and UI
@@ -25,28 +26,12 @@
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
 #define TUNE_HOLDOFF_TIME         90    // Timer to hold off display whilst tuning
 
-#define EEPROM_SIZE     512
-#define STORE_TIME    10000                  // Time of inactivity to make the current receiver status writable (10s)
-
 // =================================
 // CONSTANTS AND VARIABLES
 // =================================
 
 // SI4732/5 patch
 const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
-
-
-// EEPROM
-// ====================================================================================================================================================
-// Update F/W version comment as required   F/W VER    Function                                                           Locn (dec)            Bytes
-// ====================================================================================================================================================
-const int eeprom_address = 0;         //               EEPROM start address
-const int eeprom_set_address = 256;   //               EEPROM setting base address
-const int eeprom_setp_address = 272;  //               EEPROM setting (per band) base address
-const int eeprom_ver_address = 496;   //               EEPROM version base address
-
-long storeTime = millis();
-bool itIsTimeToSave = false;
 
 bool bfoOn = false;
 bool ssbLoaded = false;
@@ -62,7 +47,6 @@ bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary en
 bool seekModePress = false;   // Seek happened during long press
 
 uint16_t currentCmd = CMD_NONE;
-bool fmRDS = false;
 
 int16_t currentBFO = 0;
 long elapsedRSSI = millis();
@@ -116,7 +100,6 @@ bool display_on = true;                 // Display state
 
 // Status bar icon flags
 bool screen_toggle = false;             // Toggle when drawsprite is called
-bool eeprom_wr_flag = false;            // Flag indicating EEPROM write request
 
 // Firmware controlled mute
 uint8_t mute_vol_val = 0;               // Volume level when mute is applied
@@ -217,27 +200,9 @@ void setup()
   ledcAttach(PIN_LCD_BL, 16000, 8);  // Pin assignment, 16kHz, 8-bit
   ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%)
 
-  // EEPROM
-  // Note: Use EEPROM.begin(EEPROM_SIZE) before use and EEPROM.begin.end after use to free up memory and avoid memory leaks
-  EEPROM.begin(EEPROM_SIZE);
-
   // Press and hold Encoder button to force an EEPROM reset
-  // Indirectly forces the reset by setting APP_ID = 0 (Detected in the subsequent check for APP_ID and APP_VERSION)
   // Note: EEPROM reset is recommended after firmware updates
-  if (digitalRead(ENCODER_PUSH_BUTTON) == LOW) {
-
-    tft.setTextSize(2);
-    tft.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
-    tft.println(getVersion());
-    tft.println();
-    EEPROM.write(eeprom_address, 0);
-    EEPROM.commit();
-    tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
-    tft.print("EEPROM Resetting");
-    delay(2000);
-  }
-
-  EEPROM.end();
+  if(digitalRead(ENCODER_PUSH_BUTTON)==LOW) eepromInvalidate();
 
   // G8PTN: Moved this to later, to avoid interrupt action
   /*
@@ -276,60 +241,21 @@ void setup()
   // After the SI4732 has been setup, enable the audio amplifier
   digitalWrite(PIN_AMP_EN, HIGH);
 
-
-  // Checking the EEPROM content
-  // Checks APP_ID (which covers manual reset) and APP_VERSION which allows for automatic reset
-  // The APP_VERSION is equivalent to a F/W version.
-
-  // Debug
-  // Read all EEPROM locations
-  #if DEBUG4_PRINT
-  EEPROM.begin(EEPROM_SIZE);
-  Serial.println("**** EEPROM READ: Pre Check");
-  for (int i = 0; i <= (EEPROM_SIZE - 1); i++){
-    Serial.print(EEPROM.read(i));
-    delay(10);
-    Serial.print("\t");
-    if (i%16 == 15) Serial.println();
-  }
-  Serial.println("****");
-  EEPROM.end();
-  #endif
-
-  // Perform check against APP_ID and APP_VERSION
-  uint8_t  id_read;
-  uint16_t ver_read;
-
-  EEPROM.begin(EEPROM_SIZE);
-  id_read = EEPROM.read(eeprom_address);
-  ver_read  = EEPROM.read(eeprom_ver_address) << 8;
-  ver_read |= EEPROM.read(eeprom_ver_address + 1);
-  EEPROM.end();
-
-  if (id_read == APP_ID) {
-    readAllReceiverInformation();                        // Load EEPROM values
+  // If EEPROM contents are ok...
+  if(eepromCheck())
+  {
+    // Load configuration from EEPROM
+    eepromLoadConfig(); 
   }
   else
   {
-    saveAllReceiverInformation();                        // Set EEPROM to defaults
-    rx.setVolume(volume);                                // Set initial volume after EEPROM reset
-    ledcWrite(PIN_LCD_BL, currentBrt);                   // Set initial brightness after EEPROM reset
+    // Save default configuration to EEPROM
+    eepromSaveConfig();
+    // Set initial volume after EEPROM reset
+    rx.setVolume(volume);
+    // Set initial brightness after EEPROM reset
+    ledcWrite(PIN_LCD_BL, currentBrt);
   }
-
-  // Debug
-  // Read all EEPROM locations
-  #if DEBUG4_PRINT
-  EEPROM.begin(EEPROM_SIZE);
-  Serial.println("**** START READ: Post check actions");
-  for (int i = 0; i <= (EEPROM_SIZE - 1); i++){
-    Serial.print(EEPROM.read(i));
-    delay(10);
-    Serial.print("\t");
-    if (i%16 == 15) Serial.println();
-  }
-  Serial.println("****");
-  EEPROM.end();
-  #endif
 
   // ** SI4732 STARTUP **
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
@@ -358,145 +284,6 @@ void print(uint8_t col, uint8_t lin, const GFXfont *font, uint8_t textSize, cons
 void printParam(const char *msg) {
   tft.fillScreen(theme[themeIdx].bg);
   print(0,10,NULL,2, msg);
-}
-
-/*
-   writes the conrrent receiver information into the eeprom.
-   The EEPROM.update avoid write the same data in the same memory position. It will save unnecessary recording.
-*/
-void saveAllReceiverInformation()
-{
-  eeprom_wr_flag = true;
-  int addr_offset;
-  int16_t currentBFOs = (currentBFO % 1000);            // G8PTN: For SSB ensures BFO value is valid wrt band[bandIdx].currentFreq = currentFrequency;
-
-  EEPROM.begin(EEPROM_SIZE);
-
-  EEPROM.write(eeprom_address, APP_ID);                 // Stores the APP_ID;
-  EEPROM.write(eeprom_address + 1, rx.getVolume());     // Stores the current Volume
-  EEPROM.write(eeprom_address + 2, bandIdx);            // Stores the current band
-  EEPROM.write(eeprom_address + 3, fmRDS);              // G8PTN: Not used
-  EEPROM.write(eeprom_address + 4, currentMode);        // Stores the current Mode (FM / AM / LSB / USB). Now per mode, leave for compatibility
-  EEPROM.write(eeprom_address + 5, currentBFOs >> 8);   // G8PTN: Stores the current BFO % 1000 (HIGH byte)
-  EEPROM.write(eeprom_address + 6, currentBFOs & 0XFF); // G8PTN: Stores the current BFO % 1000 (LOW byte)
-  EEPROM.commit();
-
-  addr_offset = 7;
-
-  // G8PTN: Commented out the assignment
-  // - The line appears to be required to ensure the band[bandIdx].currentFreq = currentFrequency
-  // - Updated main code to ensure that this should occur as required with frequency, band or mode changes
-  // - The EEPROM reset code now calls saveAllReceiverInformation(), which is the correct action, this line
-  //   must be disabled otherwise band[bandIdx].currentFreq = 0 (where bandIdx = 0; by default) on EEPROM reset
-  //band[bandIdx].currentFreq = currentFrequency;
-
-  for (int i = 0; i <= getTotalBands(); i++)
-  {
-    EEPROM.write(addr_offset++, (band[i].currentFreq >> 8));   // Stores the current Frequency HIGH byte for the band
-    EEPROM.write(addr_offset++, (band[i].currentFreq & 0xFF)); // Stores the current Frequency LOW byte for the band
-    EEPROM.write(addr_offset++, band[i].currentStepIdx);       // Stores current step of the band
-    EEPROM.write(addr_offset++, band[i].bandwidthIdx);         // table index (direct position) of bandwidth
-    EEPROM.commit();
-  }
-
-  // G8PTN: Added
-  addr_offset = eeprom_set_address;
-  EEPROM.write(addr_offset++, currentBrt >> 8);         // Stores the current Brightness value (HIGH byte)
-  EEPROM.write(addr_offset++, currentBrt & 0XFF);       // Stores the current Brightness value (LOW byte)
-  EEPROM.write(addr_offset++, FmAgcIdx);                // Stores the current FM AGC/ATTN index value
-  EEPROM.write(addr_offset++, AmAgcIdx);                // Stores the current AM AGC/ATTN index value
-  EEPROM.write(addr_offset++, SsbAgcIdx);               // Stores the current SSB AGC/ATTN index value
-  EEPROM.write(addr_offset++, AmAvcIdx);                // Stores the current AM AVC index value
-  EEPROM.write(addr_offset++, SsbAvcIdx);               // Stores the current SSB AVC index value
-  EEPROM.write(addr_offset++, AmSoftMuteIdx);           // Stores the current AM SoftMute index value
-  EEPROM.write(addr_offset++, SsbSoftMuteIdx);          // Stores the current SSB SoftMute index value
-  EEPROM.write(addr_offset++, currentSleep >> 8);       // Stores the current Sleep value (HIGH byte)
-  EEPROM.write(addr_offset++, currentSleep & 0XFF);     // Stores the current Sleep value (LOW byte)
-  EEPROM.write(addr_offset++, themeIdx);                // Stores the current Theme index value
-  EEPROM.commit();
-
-  addr_offset = eeprom_setp_address;
-  for (int i = 0; i <= getTotalBands(); i++)
-  {
-    EEPROM.write(addr_offset++, (bandCAL[i] >> 8));     // Stores the current Calibration value (HIGH byte) for the band
-    EEPROM.write(addr_offset++, (bandCAL[i] & 0XFF));   // Stores the current Calibration value (LOW byte) for the band
-    EEPROM.write(addr_offset++, band[i].bandMode);      // Stores the current Mode value for the band
-    EEPROM.commit();
-  }
-
-  addr_offset = eeprom_ver_address;
-  EEPROM.write(addr_offset++, APP_VERSION >> 8);        // Stores APP_VERSION (HIGH byte)
-  EEPROM.write(addr_offset++, APP_VERSION & 0XFF);      // Stores APP_VERSION (LOW byte)
-  EEPROM.commit();
-
-  EEPROM.end();
-}
-
-/**
- * reads the last receiver status from eeprom.
- */
-void readAllReceiverInformation()
-{
-  uint8_t volume;
-  int addr_offset;
-  EEPROM.begin(EEPROM_SIZE);
-
-  volume = EEPROM.read(eeprom_address + 1); // Gets the stored volume;
-  bandIdx = EEPROM.read(eeprom_address + 2);
-  fmRDS = EEPROM.read(eeprom_address + 3);                // G8PTN: Not used
-  currentMode = EEPROM.read(eeprom_address + 4);          // G8PTM: Reads stored Mode. Now per mode, leave for compatibility
-  currentBFO = EEPROM.read(eeprom_address + 5) << 8;      // G8PTN: Reads stored BFO value (HIGH byte)
-  currentBFO |= EEPROM.read(eeprom_address + 6);          // G8PTN: Reads stored BFO value (HIGH byte)
-
-  addr_offset = 7;
-  for (int i = 0; i <= getTotalBands(); i++)
-  {
-    band[i].currentFreq = EEPROM.read(addr_offset++) << 8;
-    band[i].currentFreq |= EEPROM.read(addr_offset++);
-    band[i].currentStepIdx = EEPROM.read(addr_offset++);
-    band[i].bandwidthIdx = EEPROM.read(addr_offset++);
-  }
-
-  // G8PTN: Added
-  addr_offset = eeprom_set_address;
-  currentBrt      = EEPROM.read(addr_offset++) << 8;      // Reads stored Brightness value (HIGH byte)
-  currentBrt     |= EEPROM.read(addr_offset++);           // Reads stored Brightness value (LOW byte)
-  FmAgcIdx        = EEPROM.read(addr_offset++);           // Reads stored FM AGC/ATTN index value
-  AmAgcIdx        = EEPROM.read(addr_offset++);           // Reads stored AM AGC/ATTN index value
-  SsbAgcIdx       = EEPROM.read(addr_offset++);           // Reads stored SSB AGC/ATTN index value
-  AmAvcIdx        = EEPROM.read(addr_offset++);           // Reads stored AM AVC index value
-  SsbAvcIdx       = EEPROM.read(addr_offset++);           // Reads stored SSB AVC index value
-  AmSoftMuteIdx   = EEPROM.read(addr_offset++);           // Reads stored AM SoftMute index value
-  SsbSoftMuteIdx  = EEPROM.read(addr_offset++);           // Reads stored SSB SoftMute index value
-  currentSleep    = EEPROM.read(addr_offset++) << 8;      // Reads stored Sleep value (HIGH byte)
-  currentSleep   |= EEPROM.read(addr_offset++);           // Reads stored Sleep value (LOW byte)
-  themeIdx        = EEPROM.read(addr_offset++);           // Reads stored Theme index value
-
-  addr_offset = eeprom_setp_address;
-  for (int i = 0; i <= getTotalBands(); i++)
-  {
-    bandCAL[i]  = EEPROM.read(addr_offset++) << 8;      // Reads stored Calibration value (HIGH byte) per band
-    bandCAL[i] |= EEPROM.read(addr_offset++);           // Reads stored Calibration value (LOW byte) per band
-    band[i].bandMode = EEPROM.read(addr_offset++);      // Reads stored Mode value per band
-  }
-
-  EEPROM.end();
-
-  // G8PTN: Added
-  ledcWrite(PIN_LCD_BL, currentBrt);
-
-  selectBand(bandIdx);
-
-  delay(50);
-  rx.setVolume(volume);
-}
-
-// To store any change into the EEPROM, we need at least STORE_TIME
-// milliseconds of inactivity.
-void resetEepromDelay()
-{
-  storeTime = millis();
-  itIsTimeToSave = true;
 }
 
 // When no command is selected, the encoder controls the frequency
@@ -1130,7 +917,7 @@ void loop()
 
     // Clear encoder rotation
     encoderCount = 0;
-    resetEepromDelay();
+    eepromRequestSave();
     elapsedSleep = elapsedCommand = millis();
   }
 
@@ -1255,13 +1042,9 @@ void loop()
     lastRDSCheck = millis();
   }
 
-  // Save the current frequency only if it has changed
-  if(itIsTimeToSave && ((millis() - storeTime) > STORE_TIME))
-  {
-    saveAllReceiverInformation();
-    storeTime = millis();
-    itIsTimeToSave = false;
-  }
+  // Tick EEPROM time, saving changes if the occurred and there has
+  // been no activity for a while
+  eepromTickTime(millis());
 
   // Check for button activity
   buttonCheck();

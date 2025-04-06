@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Themes.h"
+#include "Storage.h"
 #include "Menu.h"
 
 // Display position control
@@ -26,15 +27,6 @@
 #define batt_offset_y    0    // Battery meter y offset
 #define clock_datum     90    // Clock x offset
 
-static void drawEepromIndicator()
-{
-  spr.fillRect(save_offset_x+3, save_offset_y+2, 3, 5, theme[themeIdx].save_icon);
-  spr.fillTriangle(save_offset_x+1, save_offset_y+7, save_offset_x+7, save_offset_y+7, save_offset_x+4, save_offset_y+10, theme[themeIdx].save_icon);
-  spr.drawLine(save_offset_x, save_offset_y+12, save_offset_x, save_offset_y+13, theme[themeIdx].save_icon);
-  spr.drawLine(save_offset_x, save_offset_y+13, save_offset_x+8, save_offset_y+13, theme[themeIdx].save_icon);
-  spr.drawLine(save_offset_x+8, save_offset_y+13, save_offset_x+8, save_offset_y+12, theme[themeIdx].save_icon);
-}
-
 static void drawAbout()
 {
   // About screen
@@ -46,7 +38,8 @@ static void drawAbout()
   spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 33 + 16, 2);
   spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 33 + 16 * 3, 2);
   spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 33 + 16 * 4, 2);
-  spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold)", 2, 33 + 16 * 5, 2);
+  spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 33 + 16 * 5, 2);
+  spr.drawString("Marat Fayzullin", 2, 33 + 16 * 6, 2);
 
 #if TUNE_HOLDOFF
   // Update if not tuning
@@ -88,6 +81,7 @@ void drawScreen(uint16_t cmd)
 {
   if(!display_on) return;
 
+  // Clear screen buffer
   spr.fillSprite(theme[themeIdx].bg);
 
   // Time
@@ -102,16 +96,8 @@ void drawScreen(uint16_t cmd)
   /* if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,theme[themeIdx].bg); */
   /* else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN); */
 
-#if THEME_EDITOR
-  eeprom_wr_flag = true;
-#endif
-
-  // EEPROM write request icon
-  if(eeprom_wr_flag)
-  {
-    drawEepromIndicator();
-    eeprom_wr_flag = false;
-  }
+  // Draw EEPROM write request icon
+  drawEepromIndicator(save_offset_x, save_offset_y);
 
   // About screen is a special case
   if(cmd==CMD_ABOUT)

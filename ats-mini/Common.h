@@ -6,7 +6,7 @@
 #include <SI4735.h>
 
 #define APP_ID        67   // EEPROM ID
-#define APP_VERSION   108  // EEPROM VERSION
+#define APP_VERSION   200  // EEPROM VERSION
 
 #define USE_REMOTE    1  // Enable serial port control and monitoring
 #define TUNE_HOLDOFF  1  // Hold off display updates while tuning
@@ -50,12 +50,12 @@
 
 extern SI4735 rx;
 extern TFT_eSprite spr;
+extern TFT_eSPI tft;
 
 extern bool display_on;
 extern bool bfoOn;
 extern bool ssbLoaded;
 extern bool tuning_flag;
-extern bool eeprom_wr_flag;
 extern bool muted;
 
 extern uint8_t mute_vol_val;
