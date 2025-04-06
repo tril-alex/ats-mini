@@ -84,7 +84,6 @@ extern int8_t softMuteMaxAttIdx;
 extern uint8_t disableAgc;
 
 extern const int CALMax;
-extern int16_t bandCAL[];
 
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
@@ -99,7 +98,7 @@ void displayOn();
 // Draw.c
 void drawLoadingSSB();
 void drawCommandStatus(const char *status);
-void drawScreen(uint16_t cmd);
+void drawScreen();
 
 // Battery.c
 float batteryMonitor();

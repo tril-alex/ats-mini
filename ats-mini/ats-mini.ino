@@ -10,6 +10,7 @@
 #include "Common.h"
 #include "Menu.h"
 #include "Storage.h"
+#include "Themes.h"
 #include "patch_init.h"          // SSB patch for whole SSBRX initialization string
 
 // SI473/5 and UI
@@ -123,25 +124,15 @@ uint8_t time_minutes = 0;
 uint8_t time_hours = 0;
 char time_disp [16];
 
-// Tables
-
-#include "themes.h"
-
 uint8_t currentMode = FM;
-
-//int tabStep[] = {1, 5, 10, 50, 100, 500, 1000};
-//const int lastStep = (sizeof tabStep / sizeof(int)) - 1;
-
-// Calibration (per band). Size needs to be the same as band[]
-// Defaults
-int16_t bandCAL[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 uint8_t rssi = 0;
 uint8_t snr = 0;
 uint8_t volume = DEFAULT_VOLUME;
 
 // Devices class declarations
-Rotary encoder = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);      // G8PTN: Corrected mapping based on rotary library
+// G8PTN: Corrected mapping based on rotary library
+Rotary encoder = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);
 
 
 TFT_eSPI tft = TFT_eSPI();
@@ -262,7 +253,7 @@ void setup()
   useBand(bandIdx);
 
   // Draw display for the first time
-  drawScreen(currentCmd);
+  drawScreen();
 
   // Interrupt actions for Rotary encoder
   // Note: Moved to end of setup to avoid inital interrupt actions
@@ -399,23 +390,25 @@ void useBand(uint8_t bandIdx)
   snr  = 0;
  
   clearStationName();
-  drawScreen(currentCmd);
+  drawScreen();
 }
 
 void loadSSB(uint8_t bandwidth)
 {
-  rx.setI2CFastModeCustom(400000); // You can try rx.setI2CFastModeCustom(700000); or greater value
+  // You can try rx.setI2CFastModeCustom(700000); or greater value
+  rx.setI2CFastModeCustom(400000);
   rx.loadPatch(ssb_patch_content, size_content, bandwidth);
   rx.setI2CFastModeCustom(100000);
   ssbLoaded = true;
 }
 
 /**
- *  This function is called by the seek function process.  G8PTN: Added
+ *  This function is called by the seek function process.
  */
-bool checkStopSeeking() {
-  // Checks the seekStop flag
-  return seekStop;  // returns true if the user rotates the encoder
+bool checkStopSeeking()
+{
+  // Returns true if the user rotates the encoder
+  return(seekStop); 
 }
 
 /**
@@ -424,7 +417,7 @@ bool checkStopSeeking() {
 void showFrequencySeek(uint16_t freq)
 {
   currentFrequency = freq;
-  drawScreen(currentCmd);
+  drawScreen();
 }
 
 /**
@@ -562,11 +555,11 @@ bool clampSSBBand()
 void updateBFO()
 {
     // To move frequency forward, need to move the BFO backwards, so multiply by -1
-    currentCAL = bandCAL[bandIdx];    // Select from table
+    currentCAL = getCurrentBand()->bandCal;
     rx.setSSBBfo((currentBFO + currentCAL) * -1);
 
+#if DEBUG2_PRINT
     // Debug
-    #if DEBUG2_PRINT
     Serial.print("Info: updateBFO() >>> ");
     Serial.print("currentBFO = ");
     Serial.print(currentBFO);
@@ -574,7 +567,7 @@ void updateBFO()
     Serial.print(currentCAL);
     Serial.print(", rx.setSSBbfo() = ");
     Serial.println((currentBFO + currentCAL) * -1);
-    #endif
+#endif
 }
 
 void buttonCheck() {
@@ -689,7 +682,7 @@ void displayOn()
   delay(120);
   tft.writecommand(ST7789_DISPON);
   ledcWrite(PIN_LCD_BL, currentBrt);
-  drawScreen(currentCmd);
+  drawScreen();
 }
 
 #if THEME_EDITOR
@@ -966,18 +959,18 @@ void loop()
     {
       disableCommands();
       drawCommandStatus("VFO ");
-      drawScreen(currentCmd);
+      drawScreen();
     }
     else if(bfoOn)
     {
       bfoOn = false;
-      drawScreen(currentCmd);
+      drawScreen();
     }
     else
     {
       // Activate menu
       currentCmd = CMD_MENU;
-      drawScreen(currentCmd);
+      drawScreen();
     }
 
     // Wait a little more for the button release
@@ -1012,7 +1005,7 @@ void loop()
       Serial.println("Info: loop() >>> RSI diff detected");
 #endif
       rssi = aux;
-      drawScreen(currentCmd);
+      drawScreen();
     }
 
     elapsedRSSI = millis();
@@ -1026,12 +1019,12 @@ void loop()
       bfoOn = false;
       // showBFO();
       disableCommands();
-      drawScreen(currentCmd);
+      drawScreen();
     }
     else if(isModalMode(currentCmd))
     {
       disableCommands();
-      drawScreen(currentCmd);
+      drawScreen();
     }
 
     elapsedCommand = millis();
@@ -1060,7 +1053,7 @@ void loop()
   if((millis() - background_timer) > BACKGROUND_REFRESH_TIME)
   {
     background_timer = millis();
-    if(!isModalMode(currentCmd)) drawScreen(currentCmd);
+    if(!isModalMode(currentCmd)) drawScreen();
   }
 
 #if TUNE_HOLDOFF
@@ -1068,7 +1061,7 @@ void loop()
   if(tuning_flag && ((millis() - tuning_timer) > TUNE_HOLDOFF_TIME))
   {
     tuning_flag = false;
-    drawScreen(currentCmd);
+    drawScreen();
 #if DEBUG3_PRINT
     Serial.print("Info: TUNE_HOLDOFF (Reset) >>> ");
     Serial.print("tuning_flag = ");

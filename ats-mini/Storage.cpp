@@ -95,8 +95,9 @@ bool eepromVerify()
 }
 
 // Store current receiver configuration into the EEPROM.
-// Uses EEPROM.update() to avoid writing the same data in the
-// same memory position. It will save unnecessary recording.
+// @@@ FIXME: Use EEPROM.update() to avoid writing the same
+//            data in the same memory position. It will save
+//            unnecessary recording.
 void eepromSaveConfig()
 {
   // G8PTN: For SSB ensures BFO value is valid with respect to
@@ -150,8 +151,8 @@ void eepromSaveConfig()
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<=getTotalBands() ; i++)
   {
-    EEPROM.write(addr++, (bandCAL[i] >> 8));     // Stores the current Calibration value (HIGH byte) for the band
-    EEPROM.write(addr++, (bandCAL[i] & 0XFF));   // Stores the current Calibration value (LOW byte) for the band
+    EEPROM.write(addr++, (band[i].bandCal >> 8));   // Stores the current Calibration value (HIGH byte) for the band
+    EEPROM.write(addr++, (band[i].bandCal & 0XFF)); // Stores the current Calibration value (LOW byte) for the band
     EEPROM.write(addr++, band[i].bandMode);      // Stores the current Mode value for the band
     EEPROM.commit();
   }
@@ -207,8 +208,8 @@ void eepromLoadConfig()
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<=getTotalBands() ; i++)
   {
-    bandCAL[i]   = EEPROM.read(addr++) << 8;     // Reads stored Calibration value (HIGH byte) per band
-    bandCAL[i]  |= EEPROM.read(addr++);          // Reads stored Calibration value (LOW byte) per band
+    band[i].bandCal  = EEPROM.read(addr++) << 8; // Reads stored Calibration value (HIGH byte) per band
+    band[i].bandCal |= EEPROM.read(addr++);      // Reads stored Calibration value (LOW byte) per band
     band[i].bandMode = EEPROM.read(addr++);      // Reads stored Mode value per band
   }
 

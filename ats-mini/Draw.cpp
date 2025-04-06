@@ -234,7 +234,7 @@ static void drawStationName(const char *name, int x, int y)
 //
 // Draw screen according to given command
 //
-void drawScreen(uint16_t cmd)
+void drawScreen()
 {
   if(!display_on) return;
 
@@ -257,7 +257,7 @@ void drawScreen(uint16_t cmd)
   drawEepromIndicator(save_offset_x, save_offset_y);
 
   // About screen is a special case
-  if(cmd==CMD_ABOUT)
+  if(currentCmd==CMD_ABOUT)
   {
     drawAbout();
     return;
@@ -290,7 +290,7 @@ void drawScreen(uint16_t cmd)
 
   // Draw left-side menu/info bar
   // @@@ FIXME: Frequency display (above) intersects the side bar!
-  drawSideBar(cmd, menu_offset_x, menu_offset_y, menu_delta_x);
+  drawSideBar(currentCmd, menu_offset_x, menu_offset_y, menu_delta_x);
 
   // Draw BFO value
   if(bfoOn) drawBFO(currentBFO, 10, 158);

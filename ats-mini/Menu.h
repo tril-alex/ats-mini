@@ -75,6 +75,7 @@ typedef struct
   uint16_t currentFreq;   // Default frequency or current frequency
   int8_t currentStepIdx;  // Index of stepAM[]: defeult frequency step (see stepAM[])
   int8_t bandwidthIdx;    // Index of the table bandwidthFM, bandwidthAM or bandwidthSSB;
+  int16_t bandCal;        // Calibration value
 } Band;
 
 //

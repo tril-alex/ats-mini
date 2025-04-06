@@ -3,6 +3,49 @@
 #include "Menu.h"
 
 //
+// Bands Menu
+//
+// TO CONFIGURE YOUR OWN BAND PLAN:
+// Add new bands by inserting new lines in the table below. Remove
+// bands by deleting lines. Change bands by editing lines below.
+//
+// NOTE:
+// You have to RESET EEPROM after adding or removing lines in this
+// table. Turn your receiver on with the encoder push button pressed
+// at first time to RESET the EEPROM.
+//
+
+int bandIdx = 0;
+
+Band band[] =
+{
+  {"VHF", FM_BAND_TYPE, FM,   6400, 10800, 10390, 1, 0, 0},
+  {"MW1", MW_BAND_TYPE, AM,    150,  1720,   810, 3, 4, 0},
+  {"MW2", MW_BAND_TYPE, AM,    531,  1701,   783, 2, 4, 0},
+  {"MW3", MW_BAND_TYPE, AM,   1700,  3500,  2500, 1, 4, 0},
+  {"80M", MW_BAND_TYPE, LSB,  3500,  4000,  3700, 0, 4, 0},
+  {"SW1", SW_BAND_TYPE, AM,   4000,  5500,  4885, 1, 4, 0},
+  {"SW2", SW_BAND_TYPE, AM,   5500,  6500,  6000, 1, 4, 0},
+  {"40M", SW_BAND_TYPE, LSB,  6500,  7300,  7100, 0, 4, 0},
+  {"SW3", SW_BAND_TYPE, AM,   7200,  8000,  7200, 1, 4, 0},
+  {"SW4", SW_BAND_TYPE, AM,   9000, 11000,  9500, 1, 4, 0},
+  {"SW5", SW_BAND_TYPE, AM,  11100, 13000, 11900, 1, 4, 0},
+  {"SW6", SW_BAND_TYPE, AM,  13000, 14000, 13500, 1, 4, 0},
+  {"20M", SW_BAND_TYPE, USB, 14000, 15000, 14200, 0, 4, 0},
+  {"SW7", SW_BAND_TYPE, AM,  15000, 17000, 15300, 1, 4, 0},
+  {"SW8", SW_BAND_TYPE, AM,  17000, 18000, 17500, 1, 4, 0},
+  {"15M", SW_BAND_TYPE, USB, 20000, 21400, 21100, 0, 4, 0},
+  {"SW9", SW_BAND_TYPE, AM,  21400, 22800, 21500, 1, 4, 0},
+  {"CB ", SW_BAND_TYPE, AM,  26000, 30000, 27135, 0, 4, 0},
+  {"10M", SW_BAND_TYPE, USB, 28000, 30000, 28400, 0, 4, 0},
+  // All band. LW, MW and SW (from 150kHz to 30MHz)
+  {"ALL", SW_BAND_TYPE, AM,    150, 30000, 15000, 0, 4, 0} 
+};
+
+int getTotalBands() { return(ITEM_COUNT(band)); }
+Band *getCurrentBand() { return(&band[bandIdx]); }
+
+//
 // Main Menu
 //
 
@@ -208,47 +251,6 @@ void setSsbBandwidth(int idx)
 }
 
 //
-// Bands Menu
-//
-// YOU CAN CONFIGURE YOUR OWN BAND PLAN. Be guided by the comments.
-// To add a new band, all you have to do is insert a new line in the table below and adjust the bandCAL and bandMODE size.
-// No extra code will be needed. You can remove a band by deleting a line if you do not want a given band.
-// Also, you can change the parameters of the band.
-// ATTENTION: You have to RESET the eeprom after adding or removing a line of this table.
-//            Turn your receiver on with the encoder push button pressed at first time to RESET the eeprom content.
-//
-
-int bandIdx = 0;
-
-Band band[] =
-{
-  {"VHF", FM_BAND_TYPE, FM,  6400, 10800, 10390, 1, 0},
-  {"MW1", MW_BAND_TYPE, AM,  150, 1720, 810, 3, 4},
-  {"MW2", MW_BAND_TYPE, AM,  531, 1701, 783, 2, 4},
-  {"MW3", MW_BAND_TYPE, AM,  1700, 3500, 2500, 1, 4},
-  {"80M", MW_BAND_TYPE, LSB, 3500, 4000, 3700, 0, 4},
-  {"SW1", SW_BAND_TYPE, AM,  4000, 5500, 4885, 1, 4},
-  {"SW2", SW_BAND_TYPE, AM,  5500, 6500, 6000, 1, 4},
-  {"40M", SW_BAND_TYPE, LSB, 6500, 7300, 7100, 0, 4},
-  {"SW3", SW_BAND_TYPE, AM,  7200, 8000, 7200, 1, 4},
-  {"SW4", SW_BAND_TYPE, AM,  9000, 11000, 9500, 1, 4},
-  {"SW5", SW_BAND_TYPE, AM,  11100, 13000, 11900, 1, 4},
-  {"SW6", SW_BAND_TYPE, AM,  13000, 14000, 13500, 1, 4},
-  {"20M", SW_BAND_TYPE, USB, 14000, 15000, 14200, 0, 4},
-  {"SW7", SW_BAND_TYPE, AM,  15000, 17000, 15300, 1, 4},
-  {"SW8", SW_BAND_TYPE, AM,  17000, 18000, 17500, 1, 4},
-  {"15M", SW_BAND_TYPE, USB, 20000, 21400, 21100, 0, 4},
-  {"SW9", SW_BAND_TYPE, AM,  21400, 22800, 21500, 1, 4},
-  {"CB ", SW_BAND_TYPE, AM,  26000, 30000, 27135, 0, 4},
-  {"10M", SW_BAND_TYPE, USB, 28000, 30000, 28400, 0, 4},
-  // All band. LW, MW and SW (from 150kHz to 30MHz)
-  {"ALL", SW_BAND_TYPE, AM,  150, 30000, 15000, 0, 4} 
-};
-
-int getTotalBands() { return(ITEM_COUNT(band)); }
-Band *getCurrentBand() { return(&band[bandIdx]); }
-
-//
 // Utility functions to change menu values
 //
 
@@ -312,7 +314,7 @@ static void clickMenu(int cmd)
       if(isSSB())
       {
         currentCmd = CMD_CAL;
-        currentCAL = bandCAL[bandIdx];
+        currentCAL = band[bandIdx].bandCal;
       }
       break;
 
@@ -380,7 +382,7 @@ void doAvc(int dir)
 
 static void doCal(int dir)
 {
-  bandCAL[bandIdx] = currentCAL = clamp_range(bandCAL[bandIdx], 10*dir, -CALMax, CALMax);
+  band[bandIdx].bandCal = currentCAL = clamp_range(band[bandIdx].bandCal, 10*dir, -CALMax, CALMax);
 
   // If in SSB mode set the SI4732/5 BFO value
   // This adjusts the BFO while in the calibration menu
@@ -612,7 +614,7 @@ bool doSideBar(uint16_t cmd, int dir)
   }
 
   // Redraw screen
-  drawScreen(currentCmd);
+  drawScreen();
 
   // Encoder input handled
   return(true);
@@ -628,7 +630,7 @@ bool clickSideBar(uint16_t cmd)
   }
 
   // Redraw screen
-  drawScreen(currentCmd);
+  drawScreen();
 
   // Encoder input handled
   return(true);
@@ -637,7 +639,7 @@ bool clickSideBar(uint16_t cmd)
 void clickVolume()
 {
   clickMenu(MENU_VOLUME);
-  drawScreen(currentCmd);
+  drawScreen();
 }
 
 //

@@ -81,7 +81,7 @@ void checkRds()
 //    needRedraw |= showRdsMessage(rx.getRdsText2A());
 //    needRedraw |= showRdsTime(rx.getRdsTime());
 
-    if(needRedraw) drawScreen(currentCmd);
+    if(needRedraw) drawScreen();
   }
 }
 
