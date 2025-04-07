@@ -2,6 +2,10 @@
 
 ## Better encoder knobs
 
+* A 3D-printed knob <https://www.thingiverse.com/thing:6966471>
+
+---
+
 ![](_static/encoder-knob.jpg)
 
 20x13mm 6mm flower shaft ([aliexpress.com](https://www.aliexpress.com/item/1005007003511755.html), [aliexpress.ru](https://aliexpress.ru/item/1005007003511755.html)):
