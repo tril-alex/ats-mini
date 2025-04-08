@@ -59,7 +59,7 @@ typedef struct
 extern uint8_t themeIdx;
 int getTotalThemes();
 
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
 extern ColorTheme theme[];
 void setColorTheme();
 void getColorTheme();

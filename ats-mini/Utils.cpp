@@ -78,7 +78,7 @@ bool displayOn(int x)
 //
 int getStrength(int rssi)
 {
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
   return(17);
 #endif
   if(currentMode!=FM)

@@ -88,7 +88,7 @@ void drawBattery(int x, int y)
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(TH.batt_voltage, TH.bg);
 
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
   spr.drawRoundRect(x - 31, y + 1, 28, 14, 3, TH.batt_border);
   spr.drawLine(x - 31 + 29, y + 5, x - 31 + 29, y + 10, TH.batt_border);
   spr.drawLine(x - 31 + 30, y + 6, x - 31 + 30, y + 9, TH.batt_border);

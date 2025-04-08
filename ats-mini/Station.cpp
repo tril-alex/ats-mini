@@ -24,7 +24,7 @@ char bufRdsTime[32]     = "";
 
 const char *getStationName()
 {
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
   return("*STATION*");
 #else
   return(bufStationName);

@@ -8,15 +8,6 @@
 #define APP_ID        67   // EEPROM ID
 #define APP_VERSION   200  // EEPROM VERSION
 
-#define USE_REMOTE    1  // Enable serial port control and monitoring
-#define TUNE_HOLDOFF  1  // Hold off display updates while tuning
-#define BFO_MENU_EN   0  // Add BFO menu option for debugging
-#define THEME_EDITOR  0  // Enable setting and printing of theme colors
-#define DEBUG1_PRINT  0  // Highest level - Primary information
-#define DEBUG2_PRINT  0  //               - Function call results
-#define DEBUG3_PRINT  0  //               - Misc
-#define DEBUG4_PRINT  0  // Lowest level  - EEPROM
-
 // Modes
 #define FM            0
 #define LSB           1
@@ -115,7 +106,7 @@ void clearStationName();
 void checkRds();
 void checkCbChannel();
 
-#if USE_REMOTE
+#ifdef USE_REMOTE
 // Remote.c
 void remoteTickTime(uint32_t millis);
 bool remoteDoCommand(char key);

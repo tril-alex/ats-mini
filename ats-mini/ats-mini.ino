@@ -579,7 +579,7 @@ void doPressAndRotate(int8_t dir)
 {
   if(isSSB())
   {
-#if TUNE_HOLDOFF
+#ifdef TUNE_HOLDOFF
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -634,7 +634,7 @@ void doRotate(int8_t dir)
   //
   else if(isSSB())
   {
-#if TUNE_HOLDOFF
+#ifdef TUNE_HOLDOFF
     // Tuning timer to hold off (SSB) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -663,7 +663,7 @@ void doRotate(int8_t dir)
   //
   else
   {
-#if TUNE_HOLDOFF
+#ifdef TUNE_HOLDOFF
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -884,7 +884,7 @@ void loop()
     if(!isModalMode(currentCmd)) drawScreen();
   }
 
-#if TUNE_HOLDOFF
+#ifdef TUNE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((millis() - tuning_timer) > TUNE_HOLDOFF_TIME))
   {
@@ -903,7 +903,7 @@ void loop()
   // Run clock
   clock_time();
 
-#if USE_REMOTE
+#ifdef USE_REMOTE
   // Periodically print status to serial
   remoteTickTime(millis());
   // Receive and execute serial command

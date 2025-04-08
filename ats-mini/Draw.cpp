@@ -44,7 +44,7 @@ static void drawAbout()
   spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 33 + 16 * 5, 2);
   spr.drawString("Marat Fayzullin", 2, 33 + 16 * 6, 2);
 
-#if TUNE_HOLDOFF
+#ifdef TUNE_HOLDOFF
   // Update if not tuning
   if(!tuning_flag) spr.pushSprite(0, 0);
 #else
@@ -116,10 +116,10 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
       // SSB frequency
       char text[32];
       freq = freq * 1000 + currentBFO;
-      sprintf(text, "%3.3u", freq / 1000);
+      sprintf(text, "%3.3lu", freq / 1000);
       spr.drawString(text, x, y, 7);
       spr.setTextDatum(ML_DATUM);
-      sprintf(text, ".%3.3d", freq % 1000);
+      sprintf(text, ".%3.3lu", freq % 1000);
       spr.drawString(text, 5+x, 15+y, 4);
     }
     else
@@ -275,7 +275,7 @@ void drawScreen()
     band_offset_x, band_offset_y
   );
 
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(TH.text_warn, TH.bg);
   spr.drawString("WARN", 319, rds_offset_y, 4);
@@ -317,7 +317,7 @@ void drawScreen()
   // Draw tuner scale
   drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
 
-#if TUNE_HOLDOFF
+#ifdef TUNE_HOLDOFF
   // Update if not tuning
   if(!tuning_flag)
   {

@@ -1,6 +1,6 @@
 #include "Themes.h"
 
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
 ColorTheme theme[] =
 #else
 const ColorTheme theme[] =
@@ -283,7 +283,7 @@ const ColorTheme theme[] =
 uint8_t themeIdx = 0;
 int getTotalThemes() { return(ITEM_COUNT(theme)); }
 
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
 
 static char readSerialWithEcho()
 {

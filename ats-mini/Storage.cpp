@@ -38,7 +38,7 @@ void eepromTickTime(uint32_t millis)
 
 void drawEepromIndicator(int x, int y)
 {
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
   showEepromFlag = true;
 #endif
 

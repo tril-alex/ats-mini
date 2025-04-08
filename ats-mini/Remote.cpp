@@ -2,7 +2,7 @@
 #include "Themes.h"
 #include "Menu.h"
 
-#if USE_REMOTE
+#ifdef USE_REMOTE
 
 // @@@ FIXME: These should not be force-exported!!!
 extern volatile int encoderCount;
@@ -200,7 +200,7 @@ bool remoteDoCommand(char key)
       remoteLogOn = !remoteLogOn;
       break;
 
-#if THEME_EDITOR
+#ifdef THEME_EDITOR
     case '!':
       setColorTheme();
       break;
