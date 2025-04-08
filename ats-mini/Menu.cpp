@@ -382,7 +382,7 @@ void doAvc(int dir)
 
 static void doCal(int dir)
 {
-  band[bandIdx].bandCal = currentCAL = clamp_range(band[bandIdx].bandCal, 10*dir, -CALMax, CALMax);
+  band[bandIdx].bandCal = currentCAL = clamp_range(band[bandIdx].bandCal, 10*dir, -MAX_CAL, MAX_CAL);
 
   // If in SSB mode set the SI4732/5 BFO value
   // This adjusts the BFO while in the calibration menu
@@ -463,59 +463,29 @@ void doAgc(int dir)
 
 void doMode(int dir)
 {
-  // This is our current mode
+  // This is our current mode for the current band
   currentMode = band[bandIdx].bandMode;
 
-  // Nothing to do if FM mode
+  // Cannot change away from FM mode
   if(currentMode==FM) return;
 
-  // Clockwise
-  if(dir>0)
+  // Change AM/LSB/USB modes, do not allow FM mode
+  do
+    currentMode = wrap_range(currentMode, dir, 0, LAST_ITEM(bandModeDesc));
+  while(currentMode==FM);
+
+  if(isSSB())
   {
-    switch(currentMode)
-    {
-      case AM:
-        // When switching from AM mode, load SSB patch!
-        drawLoadingSSB();
-        loadSSB(bandwidthSSB[bwIdxSSB].idx);
-        ssbLoaded = true;
-        currentMode = LSB;
-        break;
-      case LSB:
-        currentMode = USB;
-        break;
-      case USB:
-        // When exiting SSB mode, update current frequency and BFO
-        currentFrequency = currentFrequency + (currentBFO / 1000);
-        currentBFO = 0;
-        currentMode = AM;
-        bfoOn = ssbLoaded = false;
-        break;
-    }
+    // When entering SSB mode, load the patch
+    loadSSB(bandwidthSSB[bwIdxSSB].idx);
   }
-  // Counterclockwise
-  else if(dir<0)
+  else
   {
-    switch(currentMode)
-    {
-      case AM:
-        // If switching from AM mode, load SSB patch!
-        drawLoadingSSB();
-        loadSSB(bandwidthSSB[bwIdxSSB].idx);
-        ssbLoaded = true;
-        currentMode = USB;
-        break;
-      case USB:
-        currentMode = LSB;
-        break;
-      case LSB:
-        // When exiting SSB mode, update current frequency and BFO
-        currentFrequency = currentFrequency + (currentBFO / 1000);
-        currentBFO = 0;
-        currentMode = AM;
-        bfoOn = ssbLoaded = false;
-        break;
-    }
+    // When exiting SSB mode, update current frequency and BFO
+    currentFrequency += currentBFO / 1000;
+    currentBFO = 0;
+    bfoOn = false;
+    unloadSSB();
   }
 
   band[bandIdx].currentFreq = currentFrequency;
@@ -539,24 +509,17 @@ void doSoftMute(int dir)
 
 void doBand(int dir)
 {
-  // G8PTN: Reset BFO when changing band and store frequency
+  // Save frequency and mode for the current band
   band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);
   band[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
-  currentBFO = 0;
 
-  // Change band
+  // Reset BFO when changing band
   bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(band));
   currentMode = band[bandIdx].bandMode;
+  currentBFO = 0;
 
   // Load SSB patch as required
-  if(!isSSB())
-    ssbLoaded = false;
-  else if(!ssbLoaded)
-  {
-    drawLoadingSSB();
-    loadSSB(bandwidthSSB[bwIdxSSB].idx);
-    ssbLoaded = true;
-  }
+  if(isSSB()) loadSSB(bandwidthSSB[bwIdxSSB].idx); else unloadSSB();
 
   // Set new band
   useBand(bandIdx);
@@ -676,7 +639,8 @@ void selectBand(uint8_t idx)
   {
     bwIdxFM = min(bwIdx, LAST_ITEM(bandwidthFM));
     rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-    bfoOn = ssbLoaded = false;
+    unloadSSB();
+    bfoOn = false;
   }
   else
   {

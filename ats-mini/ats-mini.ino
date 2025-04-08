@@ -31,8 +31,6 @@
 // =================================
 
 bool bfoOn = false;
-bool ssbLoaded = false;
-char bfo[18]="0000";
 bool muted = false;
 int8_t agcIdx = 0;
 uint8_t disableAgc = 0;
@@ -43,9 +41,6 @@ uint8_t seekDirection = 1;
 bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary encoder detection
 bool seekModePress = false;   // Seek happened during long press
 
-uint16_t currentCmd = CMD_NONE;
-
-int16_t currentBFO = 0;
 long elapsedRSSI = millis();
 long elapsedButton = millis();
 
@@ -57,11 +52,6 @@ volatile int encoderCount = 0;
 uint16_t currentFrequency;
 
 const uint16_t currentBFOStep = 10;
-
-// G8PTN: Main additional variables
-// BFO and Calibration limits (BFOMax + CALMax <= 16000)
-const int BFOMax = 14000;               // Maximum range for currentBFO = +/- BFOMax
-const int CALMax =  2000;               // Maximum range for currentCAL = +/- CALMax
 
 // AGC/ATTN index per mode (FM/AM/SSB)
 int8_t FmAgcIdx = 0;                    // Default FM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 27 = ATTN 0 to 26
@@ -118,11 +108,16 @@ uint8_t time_minutes = 0;
 uint8_t time_hours = 0;
 char time_disp [16];
 
-uint8_t currentMode = FM;
+//
+// Current parameters
+//
+uint16_t currentCmd  = CMD_NONE;
+uint8_t  currentMode = FM;
+int16_t  currentBFO  = 0;
+uint8_t  volume      = DEFAULT_VOLUME;
 
-uint8_t rssi = 0;
-uint8_t snr = 0;
-uint8_t volume = DEFAULT_VOLUME;
+uint8_t  rssi = 0;
+uint8_t  snr  = 0;
 
 //
 // Devices
@@ -273,7 +268,7 @@ void useBand(uint8_t bandIdx)
   // Set mode, frequency, step, bandwidth
   selectBand(bandIdx);
 
-  if(band[bandIdx].bandType==FM_BAND_TYPE)
+  if(currentMode==FM)
   {
     // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, getCurrentStep()->step);
@@ -289,7 +284,7 @@ void useBand(uint8_t bandIdx)
     // Set the tuning capacitor for SW or MW/LW
     // rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
 
-    if(ssbLoaded)
+    if(isSSB())
     {
       // Configure SI4732 for SSB (SI4732 step not used, set to 0)
       rx.setSSB(
@@ -398,12 +393,12 @@ void doFrequencyTuneSSB(bool fast = false) {
     int newBFO = currentBFO + step;
     int redundant = 0;
 
-    if (newBFO > BFOMax) {
-        redundant = (newBFO / BFOMax) * BFOMax;
+    if (newBFO > MAX_BFO) {
+        redundant = (newBFO / MAX_BFO) * MAX_BFO;
         currentFrequency += redundant / 1000;
         newBFO -= redundant;
-    } else if (newBFO < -BFOMax) {
-        redundant = ((abs(newBFO) / BFOMax) * BFOMax);
+    } else if (newBFO < -MAX_BFO) {
+        redundant = ((abs(newBFO) / MAX_BFO) * MAX_BFO);
         currentFrequency -= redundant / 1000;
         newBFO += redundant;
     }
@@ -681,9 +676,9 @@ void doRotate(int8_t dir)
   if(bfoOn && isSSB())
   {
     currentBFO = (encoderCount == 1) ? (currentBFO + currentBFOStep) : (currentBFO - currentBFOStep);
-    // G8PTN: Clamp range to +/- BFOMax (as per doFrequencyTuneSSB)
-    if (currentBFO >  BFOMax) currentBFO =  BFOMax;
-    if (currentBFO < -BFOMax) currentBFO = -BFOMax;
+    // G8PTN: Clamp range to +/- MAX_BFO (as per doFrequencyTuneSSB)
+    if (currentBFO >  MAX_BFO) currentBFO =  MAX_BFO;
+    if (currentBFO < -MAX_BFO) currentBFO = -MAX_BFO;
     band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // G8PTN; Calculate frequency value to store in EEPROM
     updateBFO();
   }

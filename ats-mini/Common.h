@@ -44,6 +44,10 @@
 #define ITEM_COUNT(array) (sizeof(array) / sizeof((array)[0]))
 #define LAST_ITEM(array)  (ITEM_COUNT(array) - 1)
 
+// BFO and Calibration limits (MAX_BFO + MAX_CAL <= 16000)
+#define MAX_BFO       14000  // Maximum range for currentBFO = +/- MAX_BFO
+#define MAX_CAL       2000   // Maximum range for currentCAL = +/- MAX_CAL
+
 //
 // Global Variables
 //
@@ -53,7 +57,6 @@ extern TFT_eSprite spr;
 extern TFT_eSPI tft;
 
 extern bool bfoOn;
-extern bool ssbLoaded;
 extern bool tuning_flag;
 extern bool muted;
 extern uint8_t rssi;
@@ -92,6 +95,7 @@ void updateBFO();
 
 // Utils.c
 void loadSSB(uint8_t bandwidth);
+void unloadSSB();
 const char *getVersion();
 int getStrength(int rssi);
 bool displayOn(int x = 2);
