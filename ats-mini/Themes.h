@@ -56,13 +56,15 @@ typedef struct
   uint16_t scale_line;
 } ColorTheme;
 
+extern uint8_t themeIdx;
+int getTotalThemes();
+
 #if THEME_EDITOR
 extern ColorTheme theme[];
+void setColorTheme();
+void getColorTheme();
 #else
 extern const ColorTheme theme[];
 #endif
-
-extern uint8_t themeIdx;
-int getTotalThemes();
 
 #endif // THEMES_H

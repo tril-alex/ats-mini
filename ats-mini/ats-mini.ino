@@ -572,68 +572,6 @@ void clock_time()
   }
 }
 
-#if THEME_EDITOR
-char readSerialWithEcho() {
-  char key;
-  while (Serial.available() == 0) {};
-  key = Serial.read();
-  Serial.print(key);
-  return key;
-}
-
-uint8_t char2nibble(char key) {
-  if (key < '0') return 0;
-  if (key <= '9') return key - '0';
-  if (key < 'A') return 0;
-  if (key <= 'F') return key - 'A' + 10;
-  if (key < 'a') return 0;
-  if (key <= 'f') return key - 'a' + 10;
-}
-
-void setColorTheme() {
-  Serial.print("Enter a string of hex colors (x0001x0002...): ");
-  int i = 0;
-  char key;
-  while(true) {
-    if (i >= (sizeof(ColorTheme) - offsetof(ColorTheme, bg))) {
-      Serial.println(" Ok");
-      break;
-    }
-    key = readSerialWithEcho();
-    if (key != 'x') {
-      Serial.println(" Err");
-      break;
-    }
-
-    key = readSerialWithEcho();
-    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1] = char2nibble(key) * 16;
-    key = readSerialWithEcho();
-    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1] |= char2nibble(key);
-
-    key = readSerialWithEcho();
-    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i] = char2nibble(key) * 16;
-    key = readSerialWithEcho();
-    ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i] |= char2nibble(key);
-
-    i += sizeof(uint16_t);
-  }
-  drawSprite();
-}
-
-
-void getColorTheme() {
-  char sb[6];
-  Serial.print("Color theme ");
-  Serial.print(TH.name);
-  Serial.print(": ");
-  for (int i=0; i<(sizeof(ColorTheme) - offsetof(ColorTheme, bg)); i += sizeof(uint16_t)) {
-    sprintf(sb, "x%02X%02X", ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1], ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i]);
-    Serial.print(sb);
-  }
-  Serial.println();
-}
-#endif
-
 //
 // Handle encoder PRESS + ROTATE
 //
