@@ -6,23 +6,15 @@ INO	= ats-mini.ino
 ELF	= ./build/$(FQBN)/$(INO).elf
 PORT	= /dev/cu.usbmodem1101
 
-DEBUG_LEVEL =
+DEBUG_LEVEL = 0
 
 # USE_REMOTE   : Enable serial port control and monitoring
 # TUNE_HOLDOFF : Hold off display updates while tuning
 # BFO_MENU_EN  : Add BFO menu option for debugging
 # THEME_EDITOR : Enable setting and printing of theme colors
-# DEBUG1_PRINT : Highest level - Primary information
-# DEBUG2_PRINT :               - Function call results
-# DEBUG3_PRINT :               - Misc
-# DEBUG4_PRINT : Lowest level  - EEPROM
 DEFINES = \
 	-DDEBUG=$(DEBUG_LEVEL) \
-	-DUSE_REMOTE -DNO_THEME_EDITOR -DTUNE_HOLDOFF -DNO_BFO_MENU_EN \
-	-DDEBUG1_PRINT=0 \
-	-DDEBUG2_PRINT=0 \
-	-DDEBUG3_PRINT=0 \
-	-DDEBUG4_PRINT=0
+	-DUSE_REMOTE -DNO_THEME_EDITOR -DTUNE_HOLDOFF -DNO_BFO_MENU_EN
 
 OPTIONS = \
 	--build-property "build.extra_flags=$(DEFINES)" \

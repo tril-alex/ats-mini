@@ -170,7 +170,7 @@ void eepromSaveConfig()
 
 void eepromLoadConfig()
 {
-  uint8_t volume, fmRDS;
+  uint8_t volume;
   int addr;
 
   EEPROM.begin(EEPROM_SIZE);
@@ -178,7 +178,7 @@ void eepromLoadConfig()
   addr        = EEPROM_BASE_ADDR + 1;
   volume      = EEPROM.read(addr++);             // Gets the stored volume;
   bandIdx     = EEPROM.read(addr++);
-  fmRDS       = EEPROM.read(addr++);             // G8PTN: Not used
+                EEPROM.read(addr++);             // G8PTN: Not used
   currentMode = EEPROM.read(addr++);             // G8PTM: Reads stored Mode. Now per mode, leave for compatibility
   currentBFO  = EEPROM.read(addr++) << 8;        // G8PTN: Reads stored BFO value (HIGH byte)
   currentBFO |= EEPROM.read(addr++);             // G8PTN: Reads stored BFO value (HIGH byte)

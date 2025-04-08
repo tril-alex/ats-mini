@@ -428,15 +428,6 @@ void doStep(int dir)
     // Max 10kHz for spacing
     rx.setSeekAmSpacing(5);
   }
-
-  // Debug
-#if DEBUG2_PRINT
-  int lastStep = getLastStep();
-  Serial.print("Info: doStep() >>> currentStepIdx = ");
-  Serial.print(currentStepIdx);
-  Serial.print(", getLastStep() = ");
-  Serial.println(lastStep);
-#endif
 }
 
 void doAgc(int dir)

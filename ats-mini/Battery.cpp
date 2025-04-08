@@ -60,11 +60,6 @@ float batteryMonitor()
       break;
   }
 
-#if DEBUG3_PRINT
-  Serial.print("Info: batteryMonitor() >>> batteryState = "); Serial.print(batteryState); Serial.print(", ");
-  Serial.print("ADC batteryVolts (average) = "); Serial.println(batteryVolts);
-#endif
-
   // Return current voltage
   return(batteryVolts);
 }

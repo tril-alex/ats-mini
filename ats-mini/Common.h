@@ -103,8 +103,8 @@ void drawBattery(int x, int y);
 // Station.c
 const char *getStationName();
 void clearStationName();
-void checkRds();
-void checkCbChannel();
+bool checkRds();
+bool checkCbChannel();
 
 #ifdef USE_REMOTE
 // Remote.c

@@ -36,22 +36,23 @@ void clearStationName()
   bufStationName[0] = '\0';
 }
 
-static bool showRdsMessage(const char *rdsMessage)
+static bool showRdsStation(const char *stationName)
 {
-  if(rdsMessage && strcmp(bufMessage, rdsMessage))
+  if(stationName && strcmp(bufStationName, stationName))
   {
-    strcpy(bufMessage, rdsMessage);
+    strcpy(bufStationName, stationName);
     return(true);
   }
 
   return(false);
 }
 
-static bool showRdsStation(const char *stationName)
+#if 0 // Not used yet, enable later
+static bool showRdsMessage(const char *rdsMessage)
 {
-  if(stationName && strcmp(bufStationName, stationName))
+  if(rdsMessage && strcmp(bufMessage, rdsMessage))
   {
-    strcpy(bufStationName, stationName);
+    strcpy(bufMessage, rdsMessage);
     return(true);
   }
 
@@ -68,24 +69,27 @@ static bool showRdsTime(const char *rdsTime)
 
   return(false);
 }
+#endif
 
-void checkRds()
+bool checkRds()
 {
+  bool needRedraw = false;
+
   rx.getRdsStatus();
 
   if(rx.getRdsReceived() && rx.getRdsSync() && rx.getRdsSyncFound())
   {
-    bool needRedraw = false;
 
     needRedraw |= showRdsStation(rx.getRdsText0A());
 //    needRedraw |= showRdsMessage(rx.getRdsText2A());
 //    needRedraw |= showRdsTime(rx.getRdsTime());
-
-    if(needRedraw) drawScreen();
   }
+
+  // Return TRUE if any RDS information changes
+  return(needRedraw);
 }
 
-void checkCbChannel()
+bool checkCbChannel()
 {
   const int column_step = 450; // In kHz
   const int row_step    = 10;
@@ -93,10 +97,7 @@ void checkCbChannel()
   const int max_rows    = 45;
 
   if(currentFrequency<MIN_CB_FREQUENCY || currentFrequency>MAX_CB_FREQUENCY)
-  {
-    bufStationName[0] = '\0';
-    return;
-  }
+    return(showRdsStation(""));
 
   int offset = currentFrequency - MIN_CB_FREQUENCY;
   char type  = 'R';
@@ -109,21 +110,13 @@ void checkCbChannel()
   int column_index = offset / column_step;
   int remainder    = offset % column_step;
   if((column_index>=max_columns) || (remainder%row_step))
-  {
-    bufStationName[0] = '\0';
-    return;
-  }
+    return(showRdsStation(""));
 
   int row_number = remainder / row_step;
   if((row_number>=max_rows) || (row_number<0))
-  {
-    bufStationName[0] = '\0';
-    return;
-  }
+    return(showRdsStation(""));
 
-  sprintf(bufStationName, "%c%s%c",
-    'A' + column_index,
-    cbChannelNumber[row_number],
-    type
-  );
+  char buf[50];
+  sprintf(buf, "%c%s%c", 'A' + column_index, cbChannelNumber[row_number], type);
+  return(showRdsStation(buf));
 }

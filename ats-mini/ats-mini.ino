@@ -334,18 +334,6 @@ void useBand(uint8_t bandIdx)
 
   delay(100);
 
-#if DEBUG2_PRINT
-  // Debug
-  Serial.print("Info: useBand() >>> currentStepIdx = ");
-  Serial.print(currentStepIdx);
-  Serial.print(", idxAmStep = ");
-  Serial.print(idxAmStep);
-  Serial.print(", band[bandIdx].currentStepIdx = ");
-  Serial.print(band[bandIdx].currentStepIdx);
-  Serial.print(", currentMode = ");
-  Serial.println(currentMode);
-#endif
-
   rssi = 0;
   snr  = 0;
  
@@ -415,12 +403,7 @@ void doFrequencyTuneSSB(bool fast = false) {
 
     band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // Update band table currentFreq
 
-    if (clampSSBBand()) {
-      // Debug
-      #if DEBUG1_PRINT
-      Serial.println("Info: clampSSBBand() >>> SSB Band Clamp !");
-      #endif
-    }
+    clampSSBBand();
 }
 
 // Clamp SSB tuning to band limits
@@ -463,17 +446,6 @@ void updateBFO()
     // To move frequency forward, need to move the BFO backwards, so multiply by -1
     currentCAL = getCurrentBand()->bandCal;
     rx.setSSBBfo((currentBFO + currentCAL) * -1);
-
-#if DEBUG2_PRINT
-    // Debug
-    Serial.print("Info: updateBFO() >>> ");
-    Serial.print("currentBFO = ");
-    Serial.print(currentBFO);
-    Serial.print(", currentCAL = ");
-    Serial.print(currentCAL);
-    Serial.print(", rx.setSSBbfo() = ");
-    Serial.println((currentBFO + currentCAL) * -1);
-#endif
 }
 
 void buttonCheck() {
@@ -490,10 +462,6 @@ void buttonCheck() {
 
     if ((millis() - pb1_edge_time) > CLICK_TIME) {         // Debounced
       if (pb1_stable == HIGH && pb1_last == LOW) {         // button is pressed
-        // Debug
-        #if DEBUG2_PRINT
-        Serial.println("Info: button_check() >>> Button Pressed");
-        #endif
         pb1_pressed_time = pb1_edge_time;
         pb1_short_pressed_time = pb1_long_pressed_time = 0;
         pb1_stable = pb1_last;
@@ -508,23 +476,13 @@ void buttonCheck() {
         if (pb1_press_duration > SHORT_PRESS_TIME && (pb1_short_pressed_time - pb1_pressed_time) != SHORT_PRESS_TIME) {
           pb1_short_pressed = true;
           pb1_short_pressed_time = pb1_pressed_time + SHORT_PRESS_TIME;
-          #if DEBUG2_PRINT
-          Serial.println("Info: button_check() >>> Short Press triggered");
-          #endif
         }
         if (pb1_press_duration > LONG_PRESS_TIME && (pb1_long_pressed_time - pb1_pressed_time) != LONG_PRESS_TIME) {
           pb1_short_pressed = false;
           pb1_long_pressed = true;
           pb1_long_pressed_time = pb1_pressed_time + LONG_PRESS_TIME;
-          #if DEBUG2_PRINT
-          Serial.println("Info: button_check() >>> Long Press triggered");
-          #endif
         }
       } else if (pb1_stable == LOW && pb1_last == HIGH) {  // button is released
-        // Debug
-        #if DEBUG2_PRINT
-        Serial.println("Info: button_check() >>> Button Released");
-        #endif
         pb1_released_time = pb1_edge_time;
         pb1_stable = pb1_last;
         pb1_released = true;
@@ -533,15 +491,9 @@ void buttonCheck() {
         if (pb1_press_duration > LONG_PRESS_TIME) {
           pb1_short_released = false;
           pb1_long_released = true;
-          #if DEBUG2_PRINT
-          Serial.println("Info: button_check() >>> Long Release triggered");
-          #endif
         } else if (pb1_press_duration > SHORT_PRESS_TIME) {
           pb1_short_released = true;
           pb1_long_released = false;
-          #if DEBUG2_PRINT
-          Serial.println("Info: button_check() >>> Short Release triggered");
-          #endif
         }
       }
     }
@@ -583,13 +535,6 @@ void doPressAndRotate(int8_t dir)
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
-#if DEBUG3_PRINT
-    Serial.print("Info: TUNE_HOLDOFF SSB (Set) >>> ");
-    Serial.print("tuning_flag = ");
-    Serial.print(tuning_flag);
-    Serial.print(", millis = ");
-    Serial.println(millis());
-#endif
 #endif
     doFrequencyTuneSSB(true);
   }
@@ -638,24 +583,8 @@ void doRotate(int8_t dir)
     // Tuning timer to hold off (SSB) display updates
     tuning_flag = true;
     tuning_timer = millis();
-#if DEBUG3_PRINT
-    Serial.print("Info: TUNE_HOLDOFF SSB (Set) >>> ");
-    Serial.print("tuning_flag = ");
-    Serial.print(tuning_flag);
-    Serial.print(", millis = ");
-    Serial.println(millis());
-#endif
 #endif
     doFrequencyTuneSSB();
-#if DEBUG1_PRINT
-    Serial.print("Info: SSB >>> ");
-    Serial.print("currentFrequency = ");
-    Serial.print(currentFrequency);
-    Serial.print(", currentBFO = ");
-    Serial.print(currentBFO);
-    Serial.print(", rx.setSSBbfo() = ");
-    Serial.println((currentBFO + currentCAL) * -1);
-#endif
   }
 
   //
@@ -667,13 +596,6 @@ void doRotate(int8_t dir)
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
-#if DEBUG3_PRINT
-    Serial.print("Info: TUNE_HOLDOFF FM/AM (Set) >>> ");
-    Serial.print("tuning_flag = ");
-    Serial.print(tuning_flag);
-    Serial.print(", millis = ");
-    Serial.println(millis());
-#endif
 #endif
 
     // G8PTN: Used in place of rx.frequencyUp() and rx.frequencyDown()
@@ -702,16 +624,6 @@ void doRotate(int8_t dir)
    
     // G8PTN: Added to ensure update of currentFreq in table for AM/FM
     band[bandIdx].currentFreq = currentFrequency = rx.getFrequency();
-     
-#if DEBUG1_PRINT
-    // Debug
-    Serial.print("Info: AM/FM >>> currentFrequency = ");
-    Serial.print(currentFrequency);
-    Serial.print(", currentBFO = ");
-    Serial.println(currentBFO);                              // Print to check the currentBFO value
-    //Serial.print(", rx.setSSBbfo() = ");                   // rx.setSSBbfo() will not have been written
-    //Serial.println((currentBFO + currentCAL) * -1);        // rx.setSSBbfo() will not have been written
-#endif
   }
 }
 
@@ -813,25 +725,13 @@ void loop()
   // Show RSSI status only if this condition has changed
   if((millis() - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)
   {
-#if DEBUG3_PRINT
-    Serial.println("Info: loop() >>> Checking signal information");
-#endif
-
     rx.getCurrentReceivedSignalQuality();
     snr = rx.getCurrentSNR();
     int aux = rx.getCurrentRSSI();
 
-#if DEBUG3_PRINT
-    Serial.print("Info: loop() >>> RSSI = ");
-    Serial.println(rssi);
-#endif
-
     // G8PTN: Based on 1.2s update, always allow S-Meter
     if(rssi!=aux)
     {
-#if DEBUG3_PRINT
-      Serial.println("Info: loop() >>> RSI diff detected");
-#endif
       rssi = aux;
       drawScreen();
     }
@@ -860,7 +760,7 @@ void loop()
 
   if((millis() - lastRDSCheck) > RDS_CHECK_TIME)
   {
-    if((currentMode == FM) && (snr >= 12)) checkRds();
+    if((currentMode == FM) && (snr >= 12) && checkRds()) drawScreen();
     lastRDSCheck = millis();
   }
 
@@ -890,13 +790,6 @@ void loop()
   {
     tuning_flag = false;
     drawScreen();
-#if DEBUG3_PRINT
-    Serial.print("Info: TUNE_HOLDOFF (Reset) >>> ");
-    Serial.print("tuning_flag = ");
-    Serial.print(tuning_flag);
-    Serial.print(", millis = ");
-    Serial.println(millis());
-#endif
   }
 #endif
 
