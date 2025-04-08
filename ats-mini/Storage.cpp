@@ -13,9 +13,9 @@
 #define EEPROM_VER_ADDR   0x1F0
 
 // Flag indicating EEPROM write request
-bool showEepromFlag = false;
-bool itIsTimeToSave = false;
-long storeTime = millis();
+static bool showEepromFlag = false;
+static bool itIsTimeToSave = false;
+static long storeTime = millis();
 
 // To store any change into the EEPROM, we need at least STORE_TIME
 // milliseconds of inactivity.
@@ -46,11 +46,11 @@ void drawEepromIndicator(int x, int y)
   if(showEepromFlag)
   {
     // Draw EEPROM write request icon
-    spr.fillRect(x+3, y+2, 3, 5, theme[themeIdx].save_icon);
-    spr.fillTriangle(x+1, y+7, x+7, y+7, x+4, y+10, theme[themeIdx].save_icon);
-    spr.drawLine(x, y+12, x, y+13, theme[themeIdx].save_icon);
-    spr.drawLine(x, y+13, x+8, y+13, theme[themeIdx].save_icon);
-    spr.drawLine(x+8, y+13, x+8, y+12, theme[themeIdx].save_icon);
+    spr.fillRect(x+3, y+2, 3, 5, TH.save_icon);
+    spr.fillTriangle(x+1, y+7, x+7, y+7, x+4, y+10, TH.save_icon);
+    spr.drawLine(x, y+12, x, y+13, TH.save_icon);
+    spr.drawLine(x, y+13, x+8, y+13, TH.save_icon);
+    spr.drawLine(x+8, y+13, x+8, y+12, TH.save_icon);
 
     // Icon drawn
     showEepromFlag = false;
@@ -67,12 +67,12 @@ void eepromInvalidate()
   EEPROM.begin(EEPROM_SIZE);
 
   tft.setTextSize(2);
-  tft.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
+  tft.setTextColor(TH.text, TH.bg);
   tft.println(getVersion());
   tft.println();
   EEPROM.write(EEPROM_BASE_ADDR, 0x00);
   EEPROM.commit();
-  tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
+  tft.setTextColor(TH.text_warn, TH.bg);
   tft.print("EEPROM Resetting");
   delay(2000);
 

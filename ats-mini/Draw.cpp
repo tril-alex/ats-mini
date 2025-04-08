@@ -34,9 +34,9 @@ static void drawAbout()
 {
   // About screen
   spr.setTextDatum(TL_DATUM);
-  spr.setTextColor(theme[themeIdx].text_muted, theme[themeIdx].bg);
+  spr.setTextColor(TH.text_muted, TH.bg);
   spr.drawString("ESP32-SI4732 Receiver", 0, 0, 4);
-  spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
+  spr.setTextColor(TH.text, TH.bg);
   spr.drawString(getVersion(), 2, 33, 2);
   spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 33 + 16, 2);
   spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 33 + 16 * 3, 2);
@@ -46,10 +46,10 @@ static void drawAbout()
 
 #if TUNE_HOLDOFF
   // Update if not tuning
-  if(!tuning_flag) spr.pushSprite(0,0);
+  if(!tuning_flag) spr.pushSprite(0, 0);
 #else
   // No hold off
-  spr.pushSprite(0,0);
+  spr.pushSprite(0, 0);
 #endif
 }
 
@@ -58,13 +58,13 @@ static void drawAbout()
 //
 void drawLoadingSSB()
 {
-  if(!display_on) return;
+  if(!displayOn()) return;
 
   spr.setTextDatum(MC_DATUM);
-  spr.fillSmoothRoundRect(80,40,160,40,4,theme[themeIdx].text);
-  spr.fillSmoothRoundRect(81,41,158,38,4,theme[themeIdx].menu_bg);
-  spr.drawString("Loading SSB",160,62,4);
-  spr.pushSprite(0,0);
+  spr.fillSmoothRoundRect(80, 40, 160, 40, 4, TH.text);
+  spr.fillSmoothRoundRect(81, 41, 158, 38, 4, TH.menu_bg);
+  spr.drawString("Loading SSB", 160, 62, 4);
+  spr.pushSprite(0, 0);
 }
 
 //
@@ -72,9 +72,9 @@ void drawLoadingSSB()
 //
 void drawCommandStatus(const char *status)
 {
-  if(!display_on) return;
+  if(!displayOn()) return;
 
-  spr.drawString(status,38,14,2);
+  spr.drawString(status, 38, 14, 2);
 }
 
 //
@@ -83,14 +83,14 @@ void drawCommandStatus(const char *status)
 static void drawBandAndMode(const char *band, const char *mode, int x, int y)
 {
   spr.setTextDatum(TC_DATUM);
-  spr.setTextColor(theme[themeIdx].band_text, theme[themeIdx].bg);
+  spr.setTextColor(TH.band_text, TH.bg);
   uint16_t band_width = spr.drawString(band, x, y);
 
   spr.setTextDatum(TL_DATUM);
-  spr.setTextColor(theme[themeIdx].mode_text, theme[themeIdx].bg);
+  spr.setTextColor(TH.mode_text, TH.bg);
   uint16_t mode_width = spr.drawString(mode, x + band_width / 2 + 12, y + 8, 2);
 
-  spr.drawSmoothRoundRect(x + band_width / 2 + 7, y + 7, 4, 4, mode_width + 8, 17, theme[themeIdx].mode_border, theme[themeIdx].bg);
+  spr.drawSmoothRoundRect(x + band_width / 2 + 7, y + 7, 4, 4, mode_width + 8, 17, TH.mode_border, TH.bg);
 }
 
 //
@@ -99,14 +99,14 @@ static void drawBandAndMode(const char *band, const char *mode, int x, int y)
 static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
 {
   spr.setTextDatum(MR_DATUM);
-  spr.setTextColor(theme[themeIdx].freq_text, theme[themeIdx].bg);
+  spr.setTextColor(TH.freq_text, TH.bg);
 
   if(currentMode==FM)
   {
     // FM frequency
     spr.drawFloat(freq/100.00, 2, x, y, 7);
     spr.setTextDatum(ML_DATUM);
-    spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
+    spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("MHz", ux, uy);
   }
   else
@@ -131,7 +131,7 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
     }
 
     // SSB/AM frequencies are measured in kHz
-    spr.setTextColor(theme[themeIdx].funit_text, theme[themeIdx].bg);
+    spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("kHz", ux, uy);
   }
 }
@@ -141,11 +141,11 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
 //
 static void drawScale(uint32_t freq)
 {
-  spr.fillTriangle(156, 122, 160, 132, 164, 122, theme[themeIdx].scale_pointer);
-  spr.drawLine(160, 124, 160, 169, theme[themeIdx].scale_pointer);
+  spr.fillTriangle(156, 122, 160, 132, 164, 122, TH.scale_pointer);
+  spr.drawLine(160, 124, 160, 169, TH.scale_pointer);
 
   spr.setTextDatum(MC_DATUM);
-  spr.setTextColor(theme[themeIdx].scale_text, theme[themeIdx].bg);
+  spr.setTextColor(TH.scale_text, TH.bg);
 
   // Start drawing frequencies from the left 
   freq = freq/10 - 20;
@@ -160,7 +160,7 @@ static void drawScale(uint32_t freq)
     if(freq>=minFreq && freq<=maxFreq)
     {
       uint16_t lineColor = i==20?
-        theme[themeIdx].scale_pointer : theme[themeIdx].scale_line;
+        TH.scale_pointer : TH.scale_line;
 
       if((freq%10)==0)
       {
@@ -199,9 +199,9 @@ static void drawBFO(int bfo, int x, int y)
     sprintf(text, "%4.4d", bfo);
 
   spr.setTextDatum(ML_DATUM);
-  spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
-  spr.drawString("BFO:",x,y,4);
-  spr.drawString(text,x+70,y,4);
+  spr.setTextColor(TH.text, TH.bg);
+  spr.drawString("BFO:", x, y, 4);
+  spr.drawString(text, x+70, y, 4);
 }
 
 //
@@ -209,15 +209,15 @@ static void drawBFO(int bfo, int x, int y)
 //
 static void drawSMeter(int strength, int x, int y)
 {
-  spr.drawTriangle(x + 1, y + 1, x + 11, y + 1, x + 6, y + 6, theme[themeIdx].smeter_icon);
-  spr.drawLine(x + 6, y + 1, x + 6, y + 14, theme[themeIdx].smeter_icon);
+  spr.drawTriangle(x + 1, y + 1, x + 11, y + 1, x + 6, y + 6, TH.smeter_icon);
+  spr.drawLine(x + 6, y + 1, x + 6, y + 14, TH.smeter_icon);
 
   for(int i=0 ; i<strength ; i++)
   {
     if(i<10)
-      spr.fillRect(15+x + (i*4), 2+y, 2, 12, theme[themeIdx].smeter_bar);
+      spr.fillRect(15+x + (i*4), 2+y, 2, 12, TH.smeter_bar);
     else
-      spr.fillRect(15+x + (i*4), 2+y, 2, 12, theme[themeIdx].smeter_bar_plus);
+      spr.fillRect(15+x + (i*4), 2+y, 2, 12, TH.smeter_bar_plus);
   }
 }
 
@@ -227,7 +227,7 @@ static void drawSMeter(int strength, int x, int y)
 static void drawStationName(const char *name, int x, int y)
 {
   spr.setTextDatum(TC_DATUM);
-  spr.setTextColor(theme[themeIdx].rds_text, theme[themeIdx].bg);
+  spr.setTextColor(TH.rds_text, TH.bg);
   spr.drawString(name, x, y, 4);
 }
 
@@ -236,22 +236,22 @@ static void drawStationName(const char *name, int x, int y)
 //
 void drawScreen()
 {
-  if(!display_on) return;
+  if(!displayOn()) return;
 
   // Clear screen buffer
-  spr.fillSprite(theme[themeIdx].bg);
+  spr.fillSprite(TH.bg);
 
   // Time
-  /* spr.setTextColor(theme[themeIdx].text,theme[themeIdx].bg); */
+  /* spr.setTextColor(TH.text, TH.bg); */
   /* spr.setTextDatum(ML_DATUM); */
-  /* spr.drawString(time_disp,clock_datum,12,2); */
-  /* spr.setTextColor(theme[themeIdx].text,theme[themeIdx].bg); */
+  /* spr.drawString(time_disp, clock_datum, 12, 2); */
+  /* spr.setTextColor(TH.text, TH.bg); */
 
   /* // Screen activity icon */
   /* screen_toggle = !screen_toggle; */
-  /* spr.drawCircle(clock_datum+50,11,6,theme[themeIdx].text); */
-  /* if (screen_toggle) spr.fillCircle(clock_datum+50,11,5,theme[themeIdx].bg); */
-  /* else               spr.fillCircle(clock_datum+50,11,5,TFT_GREEN); */
+  /* spr.drawCircle(clock_datum+50, 11, 6, TH.text); */
+  /* if (screen_toggle) spr.fillCircle(clock_datum+50, 11, 5, TH.bg); */
+  /* else               spr.fillCircle(clock_datum+50, 11, 5, TFT_GREEN); */
 
   // Draw EEPROM write request icon
   drawEepromIndicator(save_offset_x, save_offset_y);
@@ -277,7 +277,7 @@ void drawScreen()
 
 #if THEME_EDITOR
   spr.setTextDatum(TR_DATUM);
-  spr.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
+  spr.setTextColor(TH.text_warn, TH.bg);
   spr.drawString("WARN", 319, rds_offset_y, 4);
 #endif
 
@@ -296,14 +296,14 @@ void drawScreen()
   if(bfoOn) drawBFO(currentBFO, 10, 158);
 
   // Draw S-meter
-  drawSMeter(getStrength(), meter_offset_x, meter_offset_y);
+  drawSMeter(getStrength(rssi), meter_offset_x, meter_offset_y);
 
   // Draw FM-specific information
   if(currentMode==FM)
   {
     // Indicate FM pilot detection
     if(rx.getCurrentPilot())
-      spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, theme[themeIdx].bg);
+      spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, TH.bg);
     // Draw RDS station name
     drawStationName(getStationName(), rds_offset_x, rds_offset_y);
   }
@@ -322,11 +322,11 @@ void drawScreen()
   if(!tuning_flag)
   {
     drawBattery(batt_offset_x, batt_offset_y);
-    spr.pushSprite(0,0);
+    spr.pushSprite(0, 0);
   }
 #else
   // No hold off
   drawBattery(batt_offset_x, batt_offset_y);
-  spr.pushSprite(0,0);
+  spr.pushSprite(0, 0);
 #endif
 }

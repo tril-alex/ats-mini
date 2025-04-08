@@ -15,10 +15,10 @@
 
 // State machine used for battery state of charge (SOC) detection with
 // hysteresis (Default = Illegal state)
-uint8_t batteryState = 255; 
+static uint8_t batteryState = 255; 
 
 // Current battery voltage
-float batteryVolts = 4.0;
+static float batteryVolts = 4.0;
 
 //
 // Measure and return battery voltage
@@ -75,26 +75,26 @@ float batteryMonitor()
 //
 void drawBattery(int x, int y)
 {
-  if(!display_on) return;
+  if(!displayOn()) return;
 
   // Measure battery voltage and status
   batteryMonitor();
 
   // Set display information
-  spr.drawRoundRect(x, y + 1, 28, 14, 3, theme[themeIdx].batt_border);
-  spr.drawLine(x + 29, y + 5, x + 29, y + 10, theme[themeIdx].batt_border);
-  spr.drawLine(x + 30, y + 6, x + 30, y + 9, theme[themeIdx].batt_border);
+  spr.drawRoundRect(x, y + 1, 28, 14, 3, TH.batt_border);
+  spr.drawLine(x + 29, y + 5, x + 29, y + 10, TH.batt_border);
+  spr.drawLine(x + 30, y + 6, x + 30, y + 9, TH.batt_border);
 
   spr.setTextDatum(TR_DATUM);
-  spr.setTextColor(theme[themeIdx].batt_voltage, theme[themeIdx].bg);
+  spr.setTextColor(TH.batt_voltage, TH.bg);
 
 #if THEME_EDITOR
-  spr.drawRoundRect(x - 31, y + 1, 28, 14, 3, theme[themeIdx].batt_border);
-  spr.drawLine(x - 31 + 29, y + 5, x - 31 + 29, y + 10, theme[themeIdx].batt_border);
-  spr.drawLine(x - 31 + 30, y + 6, x - 31 + 30, y + 9, theme[themeIdx].batt_border);
+  spr.drawRoundRect(x - 31, y + 1, 28, 14, 3, TH.batt_border);
+  spr.drawLine(x - 31 + 29, y + 5, x - 31 + 29, y + 10, TH.batt_border);
+  spr.drawLine(x - 31 + 30, y + 6, x - 31 + 30, y + 9, TH.batt_border);
 
-  spr.fillRoundRect(x - 31 + 2, y + 3, 18, 10, 2, theme[themeIdx].batt_full);
-  spr.fillRoundRect(x - 31 + 2, y + 3, 12, 10, 2, theme[themeIdx].batt_low);
+  spr.fillRoundRect(x - 31 + 2, y + 3, 18, 10, 2, TH.batt_full);
+  spr.fillRoundRect(x - 31 + 2, y + 3, 12, 10, 2, TH.batt_low);
   spr.drawString("4.0V", x - 31 - 3, y, 2);
 
   batteryVolts = 4.5;
@@ -105,17 +105,17 @@ void drawBattery(int x, int y)
   // If the average voltage is greater than 4.3V, show ligtning on the display
   if(batteryVolts > 4.3)
   {
-    spr.fillRoundRect(x + 2, y + 3, 24, 10, 2, theme[themeIdx].batt_charge);
-    spr.drawLine(x + 9 + 8, y + 1, x + 9 + 6, y + 1 + 5, theme[themeIdx].bg);
-    spr.drawLine(x + 9 + 6, y + 1 + 5, x + 9 + 10, y + 1 + 5, theme[themeIdx].bg);
-    spr.drawLine(x + 9 + 11, y + 1 + 6, x + 9 + 4, y + 1 + 13, theme[themeIdx].bg);
-    spr.drawLine(x + 9 + 2, y + 1 + 13, x + 9 + 4, y + 1 + 8, theme[themeIdx].bg);
-    spr.drawLine(x + 9 + 4, y + 1 + 8, x + 9 + 0, y + 1 + 8, theme[themeIdx].bg);
-    spr.drawLine(x + 9 - 1, y + 1 + 7, x + 9 + 6, y + 1 + 0, theme[themeIdx].bg);
-    spr.fillTriangle(x + 9 + 7, y + 1, x + 9 + 4, y + 1 + 6, x + 9, y + 1 + 7, theme[themeIdx].batt_icon);
-    spr.fillTriangle(x + 9 + 5, y + 1 + 6, x + 9 + 10, y + 1 + 6, x + 9 + 3, y + 1 + 13, theme[themeIdx].batt_icon);
-    spr.fillRect(x + 9 + 1, y + 1 + 6, 9, 2, theme[themeIdx].batt_icon);
-    spr.drawPixel(x + 9 + 3, y + 1 + 12, theme[themeIdx].batt_icon);
+    spr.fillRoundRect(x + 2, y + 3, 24, 10, 2, TH.batt_charge);
+    spr.drawLine(x + 9 + 8, y + 1, x + 9 + 6, y + 1 + 5, TH.bg);
+    spr.drawLine(x + 9 + 6, y + 1 + 5, x + 9 + 10, y + 1 + 5, TH.bg);
+    spr.drawLine(x + 9 + 11, y + 1 + 6, x + 9 + 4, y + 1 + 13, TH.bg);
+    spr.drawLine(x + 9 + 2, y + 1 + 13, x + 9 + 4, y + 1 + 8, TH.bg);
+    spr.drawLine(x + 9 + 4, y + 1 + 8, x + 9 + 0, y + 1 + 8, TH.bg);
+    spr.drawLine(x + 9 - 1, y + 1 + 7, x + 9 + 6, y + 1 + 0, TH.bg);
+    spr.fillTriangle(x + 9 + 7, y + 1, x + 9 + 4, y + 1 + 6, x + 9, y + 1 + 7, TH.batt_icon);
+    spr.fillTriangle(x + 9 + 5, y + 1 + 6, x + 9 + 10, y + 1 + 6, x + 9 + 3, y + 1 + 13, TH.batt_icon);
+    spr.fillRect(x + 9 + 1, y + 1 + 6, 9, 2, TH.batt_icon);
+    spr.drawPixel(x + 9 + 3, y + 1 + 12, TH.batt_icon);
   }
   else
   {
@@ -130,20 +130,20 @@ void drawBattery(int x, int y)
     switch(batteryState)
     {
       case 0:
-        color = theme[themeIdx].batt_low;
+        color = TH.batt_low;
         level = 6;
         break;
       case 1:
-        color = theme[themeIdx].batt_full;
+        color = TH.batt_full;
         level = 12;
         break;
       case 2:
-        color = theme[themeIdx].batt_full;
+        color = TH.batt_full;
         level = 18;
         break;
       case 3:
       default:
-        color = theme[themeIdx].batt_full;
+        color = TH.batt_full;
         level = 24;
         break;
     }

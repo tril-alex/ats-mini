@@ -4,12 +4,12 @@
 #if USE_REMOTE
 
 // @@@ FIXME: These should not be force-exported!!!
-extern "C" volatile int encoderCount;
-extern "C" bool pb1_released;
+extern volatile int encoderCount;
+extern bool pb1_released;
 
-uint32_t remoteTimer = millis();
-uint8_t remoteSeqnum = 0;
-bool remoteLogOn = false;
+static uint32_t remoteTimer = millis();
+static uint8_t remoteSeqnum = 0;
+static bool remoteLogOn = false;
 
 //
 // Capture current screen image to the remote
@@ -187,10 +187,10 @@ bool remoteDoCommand(char key)
       doBrt(-1);
       break;
     case 'O':
-      displayOff();
+      displayOn(false);
       break;
     case 'o':
-      displayOn();
+      displayOn(true);
       break;
     case 'C':
       remoteCaptureScreen();

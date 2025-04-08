@@ -16,8 +16,8 @@ HEADERS = \
 	patch_init.h
 
 SRC = \
-	$(INO) Rotary.cpp Draw.cpp Menu.cpp Station.cpp Battery.cpp \
-	Storage.cpp Themes.cpp Remote.cpp
+	$(INO) Utils.cpp Rotary.cpp Draw.cpp Menu.cpp Station.cpp \
+	Battery.cpp Storage.cpp Themes.cpp Remote.cpp
 
 all: build
 

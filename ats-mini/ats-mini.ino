@@ -11,7 +11,6 @@
 #include "Menu.h"
 #include "Storage.h"
 #include "Themes.h"
-#include "patch_init.h"          // SSB patch for whole SSBRX initialization string
 
 // SI473/5 and UI
 #define MIN_ELAPSED_TIME         5  // 300
@@ -30,9 +29,6 @@
 // =================================
 // CONSTANTS AND VARIABLES
 // =================================
-
-// SI4732/5 patch
-const uint16_t size_content = sizeof ssb_patch_content; // see patch_init.h
 
 bool bfoOn = false;
 bool ssbLoaded = false;
@@ -97,8 +93,6 @@ bool pb1_released = false;              // Push button released
 bool pb1_short_released = false;        // Push button short released
 bool pb1_long_released = false;         // Push button long released
 
-bool display_on = true;                 // Display state
-
 // Status bar icon flags
 bool screen_toggle = false;             // Toggle when drawsprite is called
 
@@ -130,30 +124,17 @@ uint8_t rssi = 0;
 uint8_t snr = 0;
 uint8_t volume = DEFAULT_VOLUME;
 
-// Devices class declarations
-// G8PTN: Corrected mapping based on rotary library
-Rotary encoder = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);
-
-
-TFT_eSPI tft = TFT_eSPI();
+//
+// Devices
+//
+Rotary encoder  = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);
+TFT_eSPI tft    = TFT_eSPI();
 TFT_eSprite spr = TFT_eSprite(&tft);
-
 SI4735 rx;
 
-const char *getVersion()
-{
-  static char versionString[25] = "\0";
-
-  if(!versionString[0])
-    sprintf(versionString, "F/W: v%1.1d.%2.2d %s",
-      APP_VERSION / 100,
-      APP_VERSION % 100,
-      __DATE__
-    );
-
-  return(versionString);
-}
-
+//
+// Hardware initialization and setup
+//
 void setup()
 {
   // Enable Serial. G8PTN: Added
@@ -179,12 +160,12 @@ void setup()
   // TFT display setup
   tft.begin();
   tft.setRotation(3);
-  tft.fillScreen(theme[themeIdx].bg);
-  spr.createSprite(320,170);
+  tft.fillScreen(TH.bg);
+  spr.createSprite(320, 170);
   spr.setTextDatum(MC_DATUM);
   spr.setSwapBytes(true);
   spr.setFreeFont(&Orbitron_Light_24);
-  spr.setTextColor(theme[themeIdx].text, theme[themeIdx].bg);
+  spr.setTextColor(TH.text, TH.bg);
 
   // TFT display brightness control (PWM)
   // Note: At brightness levels below 100%, switching from the PWM may cause power spikes and/or RFI
@@ -210,7 +191,7 @@ void setup()
 
   if ( si4735Addr == 0 ) {
     tft.setTextSize(2);
-    tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
+    tft.setTextColor(TH.text_warn, TH.bg);
     tft.println("Si4735 not detected");
     while (1);
   }
@@ -262,22 +243,6 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_B), rotaryEncoder, CHANGE);
 }
 
-
-/**
- * Prints a given content on display
- */
-void print(uint8_t col, uint8_t lin, const GFXfont *font, uint8_t textSize, const char *msg) {
-  tft.setCursor(col,lin);
-  tft.setTextSize(textSize);
-  tft.setTextColor(theme[themeIdx].text_warn, theme[themeIdx].bg);
-  tft.println(msg);
-}
-
-void printParam(const char *msg) {
-  tft.fillScreen(theme[themeIdx].bg);
-  print(0,10,NULL,2, msg);
-}
-
 // When no command is selected, the encoder controls the frequency
 void disableCommands()
 {
@@ -316,8 +281,8 @@ void useBand(uint8_t bandIdx)
     rx.setFMDeEmphasis(1);
     rx.RdsInit();
     rx.setRdsConfig(1, 2, 2, 2, 2);
-    rx.setGpioCtl(1,0,0);   // G8PTN: Enable GPIO1 as output
-    rx.setGpio(0,0,0);      // G8PTN: Set GPIO1 = 0
+    rx.setGpioCtl(1, 0, 0);   // G8PTN: Enable GPIO1 as output
+    rx.setGpio(0, 0, 0);      // G8PTN: Set GPIO1 = 0
   } 
   else
   {
@@ -350,9 +315,9 @@ void useBand(uint8_t bandIdx)
     }
 
     // G8PTN: Enable GPIO1 as output
-    rx.setGpioCtl(1,0,0);
+    rx.setGpioCtl(1, 0, 0);
     // G8PTN: Set GPIO1 = 1
-    rx.setGpio(1,0,0);
+    rx.setGpio(1, 0, 0);
     // Consider the range all defined current band
     rx.setSeekAmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
     // Max 10kHz for spacing
@@ -393,15 +358,6 @@ void useBand(uint8_t bandIdx)
   drawScreen();
 }
 
-void loadSSB(uint8_t bandwidth)
-{
-  // You can try rx.setI2CFastModeCustom(700000); or greater value
-  rx.setI2CFastModeCustom(400000);
-  rx.loadPatch(ssb_patch_content, size_content, bandwidth);
-  rx.setI2CFastModeCustom(100000);
-  ssbLoaded = true;
-}
-
 /**
  *  This function is called by the seek function process.
  */
@@ -430,50 +386,6 @@ void doSeek()
   rx.seekStationProgress(showFrequencySeek, checkStopSeeking, seekDirection);   // G8PTN: Added checkStopSeeking
   currentFrequency = rx.getFrequency();
 
-}
-
-uint8_t getStrength() {
-#if THEME_EDITOR
-  return 17;
-#endif
-  if (currentMode != FM) {
-    //dBuV to S point conversion HF
-    if ((rssi <=  1)) return  1;                  // S0
-    if ((rssi >  1) and (rssi <=  2)) return  2;  // S1         // G8PTN: Corrected table
-    if ((rssi >  2) and (rssi <=  3)) return  3;  // S2
-    if ((rssi >  3) and (rssi <=  4)) return  4;  // S3
-    if ((rssi >  4) and (rssi <= 10)) return  5;  // S4
-    if ((rssi > 10) and (rssi <= 16)) return  6;  // S5
-    if ((rssi > 16) and (rssi <= 22)) return  7;  // S6
-    if ((rssi > 22) and (rssi <= 28)) return  8;  // S7
-    if ((rssi > 28) and (rssi <= 34)) return  9;  // S8
-    if ((rssi > 34) and (rssi <= 44)) return 10;  // S9
-    if ((rssi > 44) and (rssi <= 54)) return 11;  // S9 +10
-    if ((rssi > 54) and (rssi <= 64)) return 12;  // S9 +20
-    if ((rssi > 64) and (rssi <= 74)) return 13;  // S9 +30
-    if ((rssi > 74) and (rssi <= 84)) return 14;  // S9 +40
-    if ((rssi > 84) and (rssi <= 94)) return 15;  // S9 +50
-    if  (rssi > 94)                   return 16;  // S9 +60
-    if  (rssi > 95)                   return 17;  //>S9 +60
-  }
-  else
-  {
-    //dBuV to S point conversion FM
-    if  ((rssi <=  1)) return  1;                 // G8PTN: Corrected table
-    if ((rssi >  1) and (rssi <=  2)) return  7;  // S6
-    if ((rssi >  2) and (rssi <=  8)) return  8;  // S7
-    if ((rssi >  8) and (rssi <= 14)) return  9;  // S8
-    if ((rssi > 14) and (rssi <= 24)) return 10;  // S9
-    if ((rssi > 24) and (rssi <= 34)) return 11;  // S9 +10
-    if ((rssi > 34) and (rssi <= 44)) return 12;  // S9 +20
-    if ((rssi > 44) and (rssi <= 54)) return 13;  // S9 +30
-    if ((rssi > 54) and (rssi <= 64)) return 14;  // S9 +40
-    if ((rssi > 64) and (rssi <= 74)) return 15;  // S9 +50
-    if  (rssi > 74)                   return 16;  // S9 +60
-    if  (rssi > 76)                   return 17;  //>S9 +60
-    // newStereoPilot=si4735.getCurrentPilot();
-  }
-  return 1;
 }
 
 /***************************************************************************************
@@ -550,7 +462,6 @@ bool clampSSBBand()
 
     return false;
 }
-
 
 void updateBFO()
 {
@@ -666,25 +577,6 @@ void clock_time()
   }
 }
 
-void displayOff()
-{
-  display_on = false;
-  ledcWrite(PIN_LCD_BL, 0);
-  tft.writecommand(ST7789_DISPOFF);
-  tft.writecommand(ST7789_SLPIN);
-  delay(120);
-}
-
-void displayOn()
-{
-  display_on = true;
-  tft.writecommand(ST7789_SLPOUT);
-  delay(120);
-  tft.writecommand(ST7789_DISPON);
-  ledcWrite(PIN_LCD_BL, currentBrt);
-  drawScreen();
-}
-
 #if THEME_EDITOR
 char readSerialWithEcho() {
   char key;
@@ -737,7 +629,7 @@ void setColorTheme() {
 void getColorTheme() {
   char sb[6];
   Serial.print("Color theme ");
-  Serial.print(theme[themeIdx].name);
+  Serial.print(TH.name);
   Serial.print(": ");
   for (int i=0; i<(sizeof(ColorTheme) - offsetof(ColorTheme, bg)); i += sizeof(uint16_t)) {
     sprintf(sb, "x%02X%02X", ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i + 1], ((char *) &theme[themeIdx])[offsetof(ColorTheme, bg) + i]);
@@ -890,10 +782,13 @@ void doRotate(int8_t dir)
   }
 }
 
+//
+// Main event loop
+//
 void loop()
 {
   // Block encoder rotation when display is off
-  if(encoderCount && !display_on) encoderCount = 0;
+  if(encoderCount && !displayOn()) encoderCount = 0;
 
   // If encoder has been rotated...
   if(encoderCount)
@@ -920,12 +815,12 @@ void loop()
   {
     pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
 
-    if(display_on) displayOff(); else displayOn();
+    displayOn(!displayOn());
     elapsedSleep = millis();
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
-  else if(pb1_short_released && display_on && !seekModePress)
+  else if(pb1_short_released && displayOn() && !seekModePress)
   {
     pb1_released = pb1_short_released = pb1_long_released = false;
 
@@ -947,9 +842,9 @@ void loop()
   {
     pb1_released = pb1_short_released = pb1_long_released = false;
 
-    if(!display_on)
+    if(!displayOn())
     {
-      if(currentSleep) displayOn();
+      if(currentSleep) displayOn(true);
     }
     else if(clickSideBar(currentCmd))
     {
@@ -979,8 +874,8 @@ void loop()
   }
 
   // Display sleep timeout
-  if(currentSleep && display_on && ((millis() - elapsedSleep) > currentSleep * 1000))
-    displayOff();
+  if(currentSleep && displayOn() && ((millis() - elapsedSleep) > currentSleep * 1000))
+    displayOn(false);
 
   // Show RSSI status only if this condition has changed
   if((millis() - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)

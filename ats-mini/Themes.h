@@ -3,6 +3,9 @@
 
 #include "Common.h"
 
+// This is our current theme
+#define TH (theme[themeIdx])
+
 typedef struct
 {
   char *name;
@@ -60,7 +63,6 @@ extern const ColorTheme theme[];
 #endif
 
 extern uint8_t themeIdx;
-
 int getTotalThemes();
 
 #endif // THEMES_H

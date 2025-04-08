@@ -393,7 +393,7 @@ void doBrt(int dir)
 {
   currentBrt = clamp_range(currentBrt, 32*dir, 32, 255);
 
-  if(display_on) ledcWrite(PIN_LCD_BL, currentBrt);
+  if(displayOn()) ledcWrite(PIN_LCD_BL, currentBrt);
 }
 
 static void doSleep(int dir)
@@ -694,48 +694,48 @@ static void drawCommon(uint16_t cmd, int x, int y, int sx)
 {
   spr.setTextDatum(MC_DATUM);
 
-  spr.setTextColor(theme[themeIdx].menu_hdr,theme[themeIdx].menu_bg);
-  spr.fillSmoothRoundRect(1+x,1+y,76+sx,110,4,theme[themeIdx].menu_border);
-  spr.fillSmoothRoundRect(2+x,2+y,74+sx,108,4,theme[themeIdx].menu_bg);
+  spr.setTextColor(TH.menu_hdr, TH.menu_bg);
+  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.menu_border);
+  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.menu_bg);
   
   if(isSettingsMode(cmd)) 
-    spr.drawString(settings[settingsIdx],40+x+(sx/2),12+y,2);
+    spr.drawString(settings[settingsIdx], 40+x+(sx/2), 12+y, 2);
   else
-    spr.drawString(menu[menuIdx],40+x+(sx/2),12+y,2);
+    spr.drawString(menu[menuIdx], 40+x+(sx/2), 12+y, 2);
 
-  spr.drawLine(1+x, 23+y, 76+sx, 23+y, theme[themeIdx].menu_border);
+  spr.drawLine(1+x, 23+y, 76+sx, 23+y, TH.menu_border);
 
   spr.setTextFont(0);
-  spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
-  spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_hl_bg);
+  spr.setTextColor(TH.menu_item, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_hl_bg);
 }
 
 static void drawMenu(int x, int y, int sx)
 {
   spr.setTextDatum(MC_DATUM);
 
-  spr.fillSmoothRoundRect(1+x,1+y,76+sx,110,4,theme[themeIdx].menu_border);
-  spr.fillSmoothRoundRect(2+x,2+y,74+sx,108,4,theme[themeIdx].menu_bg);
-  spr.setTextColor(theme[themeIdx].menu_hdr, theme[themeIdx].menu_bg);
+  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.menu_border);
+  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.menu_bg);
+  spr.setTextColor(TH.menu_hdr, TH.menu_bg);
 
   char label_menu[16];
   sprintf(label_menu, "Menu %2.2d/%2.2d", menuIdx + 1, ITEM_COUNT(menu));
-  spr.drawString(label_menu,40+x+(sx/2),12+y,2);
-  spr.drawLine(1+x, 23+y, 76+sx, 23+y, theme[themeIdx].menu_border);
+  spr.drawString(label_menu, 40+x+(sx/2), 12+y, 2);
+  spr.drawLine(1+x, 23+y, 76+sx, 23+y, TH.menu_border);
 
   spr.setTextFont(0);
-  spr.setTextColor(theme[themeIdx].menu_item, theme[themeIdx].menu_bg);
-  spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_hl_bg);
+  spr.setTextColor(TH.menu_item, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_hl_bg);
 
   int count = ITEM_COUNT(menu);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    spr.drawString(menu[abs((menuIdx+count+i)%count)],40+x+(sx/2),64+y+(i*16),2);
+    spr.drawString(menu[abs((menuIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -743,25 +743,25 @@ static void drawSettings(int x, int y, int sx)
 {
   spr.setTextDatum(MC_DATUM);
 
-  spr.fillSmoothRoundRect(1+x,1+y,76+sx,110,4,theme[themeIdx].menu_border);
-  spr.fillSmoothRoundRect(2+x,2+y,74+sx,108,4,theme[themeIdx].menu_bg);
-  spr.setTextColor(theme[themeIdx].menu_hdr, theme[themeIdx].menu_bg);
-  spr.drawString("Settings",40+x+(sx/2),12+y,2);
-  spr.drawLine(1+x, 23+y, 76+sx, 23+y, theme[themeIdx].menu_border);
+  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.menu_border);
+  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.menu_bg);
+  spr.setTextColor(TH.menu_hdr, TH.menu_bg);
+  spr.drawString("Settings", 40+x+(sx/2), 12+y, 2);
+  spr.drawLine(1+x, 23+y, 76+sx, 23+y, TH.menu_border);
 
   spr.setTextFont(0);
-  spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
-  spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_hl_bg);
+  spr.setTextColor(TH.menu_item, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_hl_bg);
 
   int count = ITEM_COUNT(settings);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    spr.drawString(settings[abs((settingsIdx+count+i)%count)],40+x+(sx/2),64+y+(i*16),2);
+    spr.drawString(settings[abs((settingsIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -773,12 +773,12 @@ static void drawMode(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
     if((currentMode!=FM) || (i==0))
-      spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)],40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -791,14 +791,14 @@ static void drawStep(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
     if(currentMode==FM)
-      spr.drawString(fmStep[abs((fmStepIdx+stepCount+i)%stepCount)].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(fmStep[abs((fmStepIdx+stepCount+i)%stepCount)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
     else
-      spr.drawString(amStep[abs((amStepIdx+stepCount+i)%stepCount)].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(amStep[abs((amStepIdx+stepCount+i)%stepCount)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -810,11 +810,11 @@ static void drawBand(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    spr.drawString(band[abs((bandIdx+count+i)%count)].bandName,40+x+(sx/2),64+y+(i*16),2);
+    spr.drawString(band[abs((bandIdx+count+i)%count)].bandName, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -825,24 +825,24 @@ static void drawBandwidth(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
     if(isSSB())
     {
       int count = ITEM_COUNT(bandwidthSSB);
-      spr.drawString(bandwidthSSB[abs((bwIdxSSB+count+i)%count)].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(bandwidthSSB[abs((bwIdxSSB+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
     }
     else if(currentMode==FM)
     {
       int count = ITEM_COUNT(bandwidthFM);
-      spr.drawString(bandwidthFM[abs((bwIdxFM+count+i)%count)].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(bandwidthFM[abs((bwIdxFM+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
     }
     else
     {
       int count = ITEM_COUNT(bandwidthAM);
-      spr.drawString(bandwidthAM[abs((bwIdxAM+count+i)%count)].desc,40+x+(sx/2),64+y+(i*16),2);
+      spr.drawString(bandwidthAM[abs((bwIdxAM+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
      }
   }
 }
@@ -855,9 +855,9 @@ static void drawTheme(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
-      spr.setTextColor(theme[themeIdx].menu_hl_text,theme[themeIdx].menu_hl_bg);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     else
-      spr.setTextColor(theme[themeIdx].menu_item,theme[themeIdx].menu_bg);
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
     spr.drawString(theme[abs((themeIdx+count+i)%count)].name, 40+x+(sx/2), 64+y+(i*16), 2);
   }
@@ -869,9 +869,9 @@ static void drawVolume(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
-    spr.drawNumber(rx.getVolume(),40+x+(sx/2),66+y,7);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+    spr.drawNumber(rx.getVolume(), 40+x+(sx/2), 66+y, 7);
   }
 }
 
@@ -881,22 +881,22 @@ static void drawAgc(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
     // G8PTN: Read back value is not used
     // rx.getAutomaticGainControl();
     if(!agcNdx && !agcIdx)
     {
       spr.setFreeFont(&Orbitron_Light_24);
-      spr.drawString("AGC",40+x+(sx/2),48+y);
-      spr.drawString("On",40+x+(sx/2),72+y);
+      spr.drawString("AGC", 40+x+(sx/2), 48+y);
+      spr.drawString("On", 40+x+(sx/2), 72+y);
       spr.setTextFont(0);
     }
     else
     {
       char text[16];
       sprintf(text, "%2.2d", agcNdx);
-      spr.drawString(text,40+x+(sx/2),60+y,7);
+      spr.drawString(text, 40+x+(sx/2), 60+y, 7);
     }
   }
 }
@@ -907,11 +907,11 @@ static void drawSoftMuteMaxAtt(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
-    spr.drawString("Max Attn",40+x+(sx/2),32+y,2);
-    spr.drawNumber(softMuteMaxAttIdx,40+x+(sx/2),60+y,4);
-    spr.drawString("dB",40+x+(sx/2),90+y,4);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+    spr.drawString("Max Attn", 40+x+(sx/2), 32+y, 2);
+    spr.drawNumber(softMuteMaxAttIdx, 40+x+(sx/2), 60+y, 4);
+    spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
   }
 }
 
@@ -921,10 +921,10 @@ static void drawCal(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
-    spr.drawNumber(currentCAL,40+x+(sx/2),60+y,4);
-    spr.drawString("Hz",40+x+(sx/2),90+y,4);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+    spr.drawNumber(currentCAL, 40+x+(sx/2), 60+y, 4);
+    spr.drawString("Hz", 40+x+(sx/2), 90+y, 4);
   }
 }
 
@@ -934,11 +934,11 @@ static void drawAvc(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
-    spr.drawString("Max Gain",40+x+(sx/2),32+y,2);
-    spr.drawNumber(currentAVC,40+x+(sx/2),60+y,4);
-    spr.drawString("dB",40+x+(sx/2),90+y,4);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+    spr.drawString("Max Gain", 40+x+(sx/2), 32+y, 2);
+    spr.drawNumber(currentAVC, 40+x+(sx/2), 60+y, 4);
+    spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
   }
 }
 
@@ -948,9 +948,9 @@ static void drawBrt(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
-    spr.drawNumber(currentBrt,40+x+(sx/2),60+y,4);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+    spr.drawNumber(currentBrt, 40+x+(sx/2), 60+y, 4);
   }
 }
 
@@ -960,9 +960,9 @@ static void drawSleep(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    spr.setTextColor(theme[themeIdx].menu_param,theme[themeIdx].menu_bg);
-    spr.fillRoundRect(6+x,24+y+(2*16),66+sx,16,2,theme[themeIdx].menu_bg);
-    spr.drawNumber(currentSleep,40+x+(sx/2),60+y,4);
+    spr.setTextColor(TH.menu_param, TH.menu_bg);
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+    spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
   }
 }
 
@@ -972,35 +972,35 @@ static void drawInfo(int x, int y, int sx)
 
   // Info box
   spr.setTextDatum(ML_DATUM);
-  spr.setTextColor(theme[themeIdx].box_text, theme[themeIdx].box_bg);
-  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, theme[themeIdx].box_border);
-  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, theme[themeIdx].box_bg);
-  spr.drawString("Step:",6+x,64+y+(-3*16),2);
+  spr.setTextColor(TH.box_text, TH.box_bg);
+  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.box_border);
+  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.box_bg);
+  spr.drawString("Step:", 6+x, 64+y+(-3*16), 2);
 
   if(currentMode==FM)
-    spr.drawString(fmStep[fmStepIdx].desc,48+x,64+y+(-3*16),2);
+    spr.drawString(fmStep[fmStepIdx].desc, 48+x, 64+y+(-3*16), 2);
   else
-    spr.drawString(amStep[amStepIdx].desc,48+x,64+y+(-3*16),2);
+    spr.drawString(amStep[amStepIdx].desc, 48+x, 64+y+(-3*16), 2);
 
-  spr.drawString("BW:",6+x,64+y+(-2*16),2);
+  spr.drawString("BW:", 6+x, 64+y+(-2*16), 2);
 
   if(isSSB())
-    spr.drawString(bandwidthSSB[bwIdxSSB].desc,48+x,64+y+(-2*16),2);
+    spr.drawString(bandwidthSSB[bwIdxSSB].desc, 48+x, 64+y+(-2*16), 2);
   else if(currentMode==FM)
-    spr.drawString(bandwidthFM[bwIdxFM].desc,48+x,64+y+(-2*16),2);
+    spr.drawString(bandwidthFM[bwIdxFM].desc, 48+x, 64+y+(-2*16), 2);
   else
-    spr.drawString(bandwidthAM[bwIdxAM].desc,48+x,64+y+(-2*16),2);
+    spr.drawString(bandwidthAM[bwIdxAM].desc, 48+x, 64+y+(-2*16), 2);
 
   if(!agcNdx && !agcIdx)
   {
-    spr.drawString("AGC:",6+x,64+y+(-1*16),2);
-    spr.drawString("On",48+x,64+y+(-1*16),2);
+    spr.drawString("AGC:", 6+x, 64+y+(-1*16), 2);
+    spr.drawString("On", 48+x, 64+y+(-1*16), 2);
   }
   else
   {
     sprintf(text, "%2.2d", agcNdx);
-    spr.drawString("Att:",6+x,64+y+(-1*16),2);
-    spr.drawString(text,48+x,64+y+(-1*16),2);
+    spr.drawString("Att:", 6+x, 64+y+(-1*16), 2);
+    spr.drawString(text, 48+x, 64+y+(-1*16), 2);
   }
 
   spr.drawString("AVC:", 6+x, 64+y + (0*16), 2);
@@ -1015,26 +1015,26 @@ static void drawInfo(int x, int y, int sx)
   spr.drawString(text, 48+x, 64+y + (0*16), 2);
 
   /*
-    spr.drawString("BFO:",6+x,64+y+(2*16),2);
+    spr.drawString("BFO:", 6+x, 64+y+(2*16), 2);
     if (isSSB()) {
     spr.setTextDatum(MR_DATUM);
-    spr.drawString(bfo,74+x,64+y+(2*16),2);
+    spr.drawString(bfo, 74+x, 64+y+(2*16), 2);
     }
-    else spr.drawString("Off",48+x,64+y+(2*16),2);
+    else spr.drawString("Off", 48+x, 64+y+(2*16), 2);
     spr.setTextDatum(MC_DATUM);
   */
 
-  spr.drawString("Vol:",6+x,64+y+(1*16),2);
+  spr.drawString("Vol:", 6+x, 64+y+(1*16), 2);
   if(muted)
   {
     //spr.setTextDatum(MR_DATUM);
-    spr.setTextColor(theme[themeIdx].box_off_text, theme[themeIdx].box_off_bg);
-    spr.drawString("Muted",48+x,64+y+(1*16),2);
+    spr.setTextColor(TH.box_off_text, TH.box_off_bg);
+    spr.drawString("Muted", 48+x, 64+y+(1*16), 2);
   }
   else
   {
-    spr.setTextColor(theme[themeIdx].box_text, theme[themeIdx].box_bg);
-    spr.drawNumber(rx.getVolume(),48+x,64+y+(1*16),2);
+    spr.setTextColor(TH.box_text, TH.box_bg);
+    spr.drawNumber(rx.getVolume(), 48+x, 64+y+(1*16), 2);
   }
 }
 
@@ -1043,7 +1043,7 @@ static void drawInfo(int x, int y, int sx)
 //
 void drawSideBar(uint16_t cmd, int x, int y, int sx)
 {
-  if(!display_on) return;
+  if(!displayOn()) return;
 
   switch(cmd)
   {

@@ -52,11 +52,11 @@ extern SI4735 rx;
 extern TFT_eSprite spr;
 extern TFT_eSPI tft;
 
-extern bool display_on;
 extern bool bfoOn;
 extern bool ssbLoaded;
 extern bool tuning_flag;
 extern bool muted;
+extern uint8_t rssi;
 
 extern uint8_t mute_vol_val;
 extern uint16_t currentFrequency;
@@ -87,13 +87,14 @@ extern const int CALMax;
 
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
+void useBand(uint8_t bandIdx);
+void updateBFO();
+
+// Utils.c
 void loadSSB(uint8_t bandwidth);
 const char *getVersion();
-void useBand(uint8_t bandIdx);
-uint8_t getStrength();
-void updateBFO();
-void displayOff();
-void displayOn();
+int getStrength(int rssi);
+bool displayOn(int x = 2);
 
 // Draw.c
 void drawLoadingSSB();
