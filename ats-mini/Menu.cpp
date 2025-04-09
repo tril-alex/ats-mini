@@ -465,23 +465,12 @@ void doMode(int dir)
     currentMode = wrap_range(currentMode, dir, 0, LAST_ITEM(bandModeDesc));
   while(currentMode==FM);
 
-  if(isSSB())
-  {
-    // When entering SSB mode, load the patch
-    loadSSB(bandwidthSSB[bwIdxSSB].idx);
-  }
-  else
-  {
-    // When exiting SSB mode, update current frequency and BFO
-    currentFrequency += currentBFO / 1000;
-    currentBFO = 0;
-    bfoOn = false;
-    unloadSSB();
-  }
-
-  band[bandIdx].currentFreq = currentFrequency;
+  // Save current band settings
+  band[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
   band[bandIdx].currentStepIdx = amStepIdx;
   band[bandIdx].bandMode = currentMode;
+
+  // Enable the new band
   useBand(bandIdx);
 }
 
@@ -500,19 +489,14 @@ void doSoftMute(int dir)
 
 void doBand(int dir)
 {
-  // Save frequency and mode for the current band
-  band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);
+  // Save current band settings
+  band[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
   band[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
 
-  // Reset BFO when changing band
+  // Change band
   bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(band));
-  currentMode = band[bandIdx].bandMode;
-  currentBFO = 0;
 
-  // Load SSB patch as required
-  if(isSSB()) loadSSB(bandwidthSSB[bwIdxSSB].idx); else unloadSSB();
-
-  // Set new band
+  // Enable the new band
   useBand(bandIdx);
 }
 
@@ -602,10 +586,15 @@ void clickVolume()
 
 void selectBand(uint8_t idx)
 {
+  // Set band, frequency, and mode
   bandIdx = min(idx, LAST_ITEM(band));
   currentFrequency = band[bandIdx].currentFreq;
   currentMode = band[bandIdx].bandMode;
 
+  // Reset BFO
+  currentBFO = 0;
+
+  // Set tuning step
   if(band[bandIdx].bandType==FM_BAND_TYPE)
   {
     fmStepIdx = band[bandIdx].currentStepIdx;
@@ -619,6 +608,7 @@ void selectBand(uint8_t idx)
 
   int bwIdx = band[bandIdx].bandwidthIdx;
 
+  // Set bandwidth
   if(isSSB())
   {
     loadSSB(bandwidthSSB[bwIdxSSB].idx);
@@ -628,13 +618,14 @@ void selectBand(uint8_t idx)
   }
   else if(currentMode==FM)
   {
+    unloadSSB();
     bwIdxFM = min(bwIdx, LAST_ITEM(bandwidthFM));
     rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-    unloadSSB();
     bfoOn = false;
   }
   else
   {
+    unloadSSB();
     bwIdxAM = min(bwIdx, LAST_ITEM(bandwidthAM));
     rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
     bfoOn = false;

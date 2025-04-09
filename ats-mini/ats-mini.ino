@@ -319,26 +319,19 @@ void useBand(uint8_t bandIdx)
     rx.setSeekAmSpacing(5);
   }
 
-  // G8PTN: Added
-  // Call doSoftMute(0), 0 = No incr/decr action (eqivalent to getSoftMute)
-  // This gets softMuteMaxAttIdx based on mode (AM, SSB)
+  // Set softMuteMaxAttIdx based on mode (AM, SSB)
   doSoftMute(0);
-
-  // Call doAgc(0), 0 = No incr/decr action (eqivalent to getAgc)
-  // This gets disableAgc and agcNdx values based on mode (FM, AM , SSB)
+  // Set disableAgc and agcNdx values based on mode (FM, AM , SSB)
   doAgc(0);
-
-  // Call doAvc(0), 0 = No incr/decr action (eqivalent to getAvc)
-  // This gets currentAVC values based on mode (AM, SSB)
+  // Set currentAVC values based on mode (AM, SSB)
   doAvc(0);
-
+  // Wait a bit for things to calm down
   delay(100);
-
+  // Clear signal strength readings
   rssi = 0;
   snr  = 0;
- 
+  // Clear current station name (RDS/CB)
   clearStationName();
-  drawScreen();
 }
 
 /**
