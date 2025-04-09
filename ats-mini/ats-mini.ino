@@ -613,6 +613,8 @@ void doRotate(int8_t dir)
 //
 void loop()
 {
+  bool needRedraw = false;
+
   // Block encoder rotation when display is off
   if(encoderCount && !displayOn()) encoderCount = 0;
 
@@ -634,6 +636,7 @@ void loop()
     encoderCount = 0;
     eepromRequestSave();
     elapsedSleep = elapsedCommand = millis();
+    needRedraw = true;
   }
 
   // Encoder released after LONG PRESS: TOGGLE DISPLAY
@@ -680,18 +683,18 @@ void loop()
     {
       disableCommands();
       drawCommandStatus("VFO ");
-      drawScreen();
+      needRedraw = true;
     }
     else if(bfoOn)
     {
       bfoOn = false;
-      drawScreen();
+      needRedraw = true;
     }
     else
     {
       // Activate menu
       currentCmd = CMD_MENU;
-      drawScreen();
+      needRedraw = true;
     }
 
     // Wait a little more for the button release
@@ -714,7 +717,7 @@ void loop()
     if(rssi!=aux)
     {
       rssi = aux;
-      drawScreen();
+      needRedraw = true;
     }
 
     elapsedRSSI = millis();
@@ -728,12 +731,12 @@ void loop()
       bfoOn = false;
       // showBFO();
       disableCommands();
-      drawScreen();
+      needRedraw = true;
     }
     else if(isModalMode(currentCmd))
     {
       disableCommands();
-      drawScreen();
+      needRedraw = true;
     }
 
     elapsedCommand = millis();
@@ -741,7 +744,7 @@ void loop()
 
   if((millis() - lastRDSCheck) > RDS_CHECK_TIME)
   {
-    if((currentMode == FM) && (snr >= 12) && checkRds()) drawScreen();
+    if((currentMode == FM) && (snr >= 12) && checkRds()) needRedraw = true;
     lastRDSCheck = millis();
   }
 
@@ -762,7 +765,7 @@ void loop()
   if((millis() - background_timer) > BACKGROUND_REFRESH_TIME)
   {
     background_timer = millis();
-    if(!isModalMode(currentCmd)) drawScreen();
+    if(!isModalMode(currentCmd)) needRedraw = true;
   }
 
 #ifdef TUNE_HOLDOFF
@@ -770,7 +773,7 @@ void loop()
   if(tuning_flag && ((millis() - tuning_timer) > TUNE_HOLDOFF_TIME))
   {
     tuning_flag = false;
-    drawScreen();
+    needRedraw = true;
   }
 #endif
 
@@ -783,6 +786,9 @@ void loop()
   // Receive and execute serial command
   if(Serial.available()>0) remoteDoCommand(Serial.read());
 #endif
+
+  // Redraw screen if necessary
+  if(needRedraw) drawScreen();
 
   // Add a small default delay in the main loop
   delay(5);
