@@ -625,6 +625,7 @@ bool doRotate(int8_t dir)
 //
 void loop()
 {
+  uint32_t currentTime = millis();
   bool needRedraw = false;
 
   // Block encoder rotation when display is off
@@ -633,6 +634,8 @@ void loop()
   // If encoder has been rotated...
   if(encoderCount)
   {
+    elapsedSleep = elapsedCommand = currentTime;
+
     // If encoder has been rotated AND pressed...
     if(pb1_pressed && !isModalMode(currentCmd))
     {
@@ -647,7 +650,6 @@ void loop()
     // Clear encoder rotation
     encoderCount = 0;
     eepromRequestSave();
-    elapsedSleep = elapsedCommand = millis();
     needRedraw = true;
   }
 
@@ -655,15 +657,16 @@ void loop()
   else if(pb1_long_pressed && !seekModePress)
   {
     pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
+    elapsedSleep = currentTime;
 
     displayOn(!displayOn());
-    elapsedSleep = millis();
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
   else if(pb1_short_released && displayOn() && !seekModePress)
   {
     pb1_released = pb1_short_released = pb1_long_released = false;
+    elapsedSleep = elapsedCommand = currentTime;
 
     // Open volume control
     clickVolume();
@@ -671,13 +674,13 @@ void loop()
 
     // Wait a little more for the button release
     delay(MIN_ELAPSED_TIME);
-    elapsedSleep = elapsedCommand = millis();
   }
 
   // ???: SELECT MENU ITEM
   else if(pb1_released && !pb1_long_released && !seekModePress)
   {
     pb1_released = pb1_short_released = pb1_long_released = false;
+    elapsedSleep = elapsedCommand = currentTime;
 
     if(!displayOn())
     {
@@ -708,15 +711,14 @@ void loop()
 
     // Wait a little more for the button release
     delay(MIN_ELAPSED_TIME);
-    elapsedSleep = elapsedCommand = millis();
   }
 
   // Display sleep timeout
-  if(currentSleep && displayOn() && ((millis() - elapsedSleep) > currentSleep * 1000))
+  if(currentSleep && displayOn() && ((currentTime - elapsedSleep) > currentSleep * 1000))
     displayOn(false);
 
   // Show RSSI status only if this condition has changed
-  if((millis() - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)
+  if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)
   {
     rx.getCurrentReceivedSignalQuality();
     snr = rx.getCurrentSNR();
@@ -729,11 +731,11 @@ void loop()
       needRedraw = true;
     }
 
-    elapsedRSSI = millis();
+    elapsedRSSI = currentTime;
   }
 
   // Disable commands control
-  if((millis() - elapsedCommand) > ELAPSED_COMMAND)
+  if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
     if(isSSB())
     {
@@ -748,38 +750,38 @@ void loop()
       needRedraw = true;
     }
 
-    elapsedCommand = millis();
+    elapsedCommand = currentTime;
   }
 
-  if((millis() - lastRDSCheck) > RDS_CHECK_TIME)
+  if((currentTime - lastRDSCheck) > RDS_CHECK_TIME)
   {
     if((currentMode == FM) && (snr >= 12) && checkRds()) needRedraw = true;
-    lastRDSCheck = millis();
+    lastRDSCheck = currentTime;
   }
 
   // Tick EEPROM time, saving changes if the occurred and there has
   // been no activity for a while
-  eepromTickTime(millis());
+  eepromTickTime(currentTime);
 
   // Check for button activity
   buttonCheck();
   if(!pb1_pressed && seekModePress)
   {
-    seekModePress = false;
     pb1_released = pb1_short_released = pb1_long_released = false;
+    seekModePress = false;
   }
 
   // Periodically refresh the main screen
   // This covers the case where there is nothing else triggering a refresh
-  if((millis() - background_timer) > BACKGROUND_REFRESH_TIME)
+  if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)
   {
-    background_timer = millis();
     if(!isModalMode(currentCmd)) needRedraw = true;
+    background_timer = currentTime;
   }
 
 #ifdef TUNE_HOLDOFF
   // Check if tuning flag is set
-  if(tuning_flag && ((millis() - tuning_timer) > TUNE_HOLDOFF_TIME))
+  if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))
   {
     tuning_flag = false;
     needRedraw = true;
@@ -791,7 +793,7 @@ void loop()
 
 #ifdef USE_REMOTE
   // Periodically print status to serial
-  remoteTickTime(millis());
+  remoteTickTime(currentTime);
   // Receive and execute serial command
   if(Serial.available()>0) remoteDoCommand(Serial.read());
 #endif
