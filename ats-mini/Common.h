@@ -40,6 +40,23 @@
 #define MAX_CAL       2000   // Maximum range for currentCAL = +/- MAX_CAL
 
 //
+// Data Types
+//
+
+typedef struct
+{
+  const char *bandName;   // Band description
+  uint8_t bandType;       // Band type (FM, MW, or SW)
+  uint8_t bandMode;       // Band mode (FM, AM, LSB, or SSB)
+  uint16_t minimumFreq;   // Minimum frequency of the band
+  uint16_t maximumFreq;   // maximum frequency of the band
+  uint16_t currentFreq;   // Default frequency or current frequency
+  int8_t currentStepIdx;  // Index of stepAM[]: defeult frequency step (see stepAM[])
+  int8_t bandwidthIdx;    // Index of the table bandwidthFM, bandwidthAM or bandwidthSSB;
+  int16_t bandCal;        // Calibration value
+} Band;
+
+//
 // Global Variables
 //
 
@@ -81,7 +98,7 @@ extern const int CALMax;
 
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
-void useBand(uint8_t bandIdx);
+void useBand(const Band *band);
 void updateBFO();
 
 // Utils.c

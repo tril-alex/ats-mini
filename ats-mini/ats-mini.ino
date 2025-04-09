@@ -226,7 +226,7 @@ void setup()
 
   // ** SI4732 STARTUP **
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
-  useBand(bandIdx);
+  selectBand(bandIdx);
 
   // Draw display for the first time
   drawScreen();
@@ -260,19 +260,16 @@ ICACHE_RAM_ATTR void rotaryEncoder()
   }
 }
 
-/**
- * Switch the radio to current band
- */
-void useBand(uint8_t bandIdx)
+//
+// Switch radio to given band
+//
+void useBand(const Band *band)
 {
-  // Set mode, frequency, step, bandwidth
-  selectBand(bandIdx);
-
   if(currentMode==FM)
   {
     // rx.setTuneFrequencyAntennaCapacitor(0);
-    rx.setFM(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq, band[bandIdx].currentFreq, getCurrentStep()->step);
-    rx.setSeekFmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
+    rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
+    rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
     rx.setFMDeEmphasis(1);
     rx.RdsInit();
     rx.setRdsConfig(1, 2, 2, 2, 2);
@@ -287,12 +284,7 @@ void useBand(uint8_t bandIdx)
     if(isSSB())
     {
       // Configure SI4732 for SSB (SI4732 step not used, set to 0)
-      rx.setSSB(
-        band[bandIdx].minimumFreq,
-        band[bandIdx].maximumFreq,
-        band[bandIdx].currentFreq,
-        0, currentMode
-      );
+      rx.setSSB(band->minimumFreq, band->maximumFreq, band->currentFreq, 0, currentMode);
       // G8PTN: Always enabled
       rx.setSSBAutomaticVolumeControl(1);
       // G8PTN: Commented out
@@ -301,12 +293,8 @@ void useBand(uint8_t bandIdx)
     else
     {
       // Setting step to 1kHz
-      rx.setAM(
-        band[bandIdx].minimumFreq,
-        band[bandIdx].maximumFreq,
-        band[bandIdx].currentFreq,
-        band[bandIdx].currentStepIdx >= AmTotalSteps ? 1 : getCurrentStep()->step
-      );
+      int step = band->currentStepIdx>=AmTotalSteps? 1 : getCurrentStep()->step;
+      rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, step);
     }
 
     // G8PTN: Enable GPIO1 as output
@@ -314,7 +302,7 @@ void useBand(uint8_t bandIdx)
     // G8PTN: Set GPIO1 = 1
     rx.setGpio(1, 0, 0);
     // Consider the range all defined current band
-    rx.setSeekAmLimits(band[bandIdx].minimumFreq, band[bandIdx].maximumFreq);
+    rx.setSeekAmLimits(band->minimumFreq, band->maximumFreq);
     // Max 10kHz for spacing
     rx.setSeekAmSpacing(5);
   }

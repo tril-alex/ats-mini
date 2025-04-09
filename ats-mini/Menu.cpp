@@ -471,7 +471,7 @@ void doMode(int dir)
   band[bandIdx].bandMode = currentMode;
 
   // Enable the new band
-  useBand(bandIdx);
+  selectBand(bandIdx);
 }
 
 void doSoftMute(int dir)
@@ -497,7 +497,7 @@ void doBand(int dir)
   bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(band));
 
   // Enable the new band
-  useBand(bandIdx);
+  selectBand(bandIdx);
 }
 
 void doBandwidth(int dir)
@@ -630,6 +630,9 @@ void selectBand(uint8_t idx)
     rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
     bfoOn = false;
   }
+
+  // Switch radio to the selected band
+  useBand(&band[bandIdx]);
 }
 
 //
