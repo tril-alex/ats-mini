@@ -3,8 +3,15 @@
 // SSB patch for whole SSBRX initialization string
 #include "patch_init.h"
 
+// Current mute status, returned by muteOn()
+static bool muted = false;
+
+// Volume level when mute is applied
+static uint8_t mute_vol_val = 0;
+
 // Current display status, returned by displayOn()
 static bool display_on = true;
+
 // Current SSB patch status
 static bool ssbLoaded  = false;
 
@@ -45,6 +52,26 @@ void unloadSSB()
 {
   // Just mark SSB patch as unloaded
   ssbLoaded = false;
+}
+
+//
+// Mute sound on (1) or off (0), or get current status (2)
+//
+bool muteOn(int x)
+{
+  if((x==0) && muted)
+  {
+    rx.setVolume(mute_vol_val);
+    muted = false;
+  }
+  else if((x==1) && !muted)
+  {
+    mute_vol_val = rx.getVolume();
+    rx.setVolume(0);
+    muted = true;
+  }
+
+  return(muted);
 }
 
 //

@@ -294,19 +294,18 @@ static void clickMenu(int cmd)
     case MENU_SETTINGS: currentCmd = CMD_SETTINGS; break;
 
     case MENU_SOFTMUTE:
+      // No soft mute in FM mode
       if(currentMode!=FM) currentCmd = CMD_SOFTMUTEMAXATT;
       break;
 
     case MENU_AVC:
+      // No AVC in FM mode
       if(currentMode!=FM) currentCmd = CMD_AVC;
       break;
 
     case MENU_VOLUME:
-      if(muted)
-      {
-        rx.setVolume(mute_vol_val);
-        muted = false;
-      }
+      // Unmute sound when changing volume
+      muteOn(false);
       currentCmd = CMD_VOLUME;
       break;
 
@@ -319,14 +318,7 @@ static void clickMenu(int cmd)
       break;
 
     case MENU_MUTE:
-      muted = !muted;
-      if(!muted)
-        rx.setVolume(mute_vol_val);
-      else
-      {
-        mute_vol_val = rx.getVolume();
-        rx.setVolume(0);
-      }
+      muteOn(!muteOn());
       break;
 
 #ifdef BFO_MENU_EN
@@ -529,7 +521,7 @@ void doBandwidth(int dir)
 bool doSideBar(uint16_t cmd, int dir)
 {
   // Ignore idle encoder
-  if(!dir) return(true);
+  if(!dir) return(false);
 
   switch(cmd)
   {
@@ -551,9 +543,6 @@ bool doSideBar(uint16_t cmd, int dir)
     default:            return(false);
   }
 
-  // Redraw screen
-  drawScreen();
-
   // Encoder input handled
   return(true);
 }
@@ -567,9 +556,6 @@ bool clickSideBar(uint16_t cmd)
     default:           return(false);
   }
 
-  // Redraw screen
-  drawScreen();
-
   // Encoder input handled
   return(true);
 }
@@ -577,7 +563,6 @@ bool clickSideBar(uint16_t cmd)
 void clickVolume()
 {
   clickMenu(MENU_VOLUME);
-  drawScreen();
 }
 
 //
@@ -639,19 +624,15 @@ void selectBand(uint8_t idx)
 // Draw functions
 //
 
-static void drawCommon(uint16_t cmd, int x, int y, int sx)
+static void drawCommon(const char *title, int x, int y, int sx)
 {
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_hdr, TH.menu_bg);
   spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.menu_border);
   spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.menu_bg);
-  
-  if(isSettingsMode(cmd)) 
-    spr.drawString(settings[settingsIdx], 40+x+(sx/2), 12+y, 2);
-  else
-    spr.drawString(menu[menuIdx], 40+x+(sx/2), 12+y, 2);
 
+  spr.drawString(title, 40+x+(sx/2), 12+y, 2);
   spr.drawLine(1+x, 23+y, 76+sx, 23+y, TH.menu_border);
 
   spr.setTextFont(0);
@@ -716,7 +697,7 @@ static void drawSettings(int x, int y, int sx)
 
 static void drawMode(int x, int y, int sx)
 {
-  drawCommon(CMD_MODE, x, y, sx);
+  drawCommon(menu[MENU_MODE], x, y, sx);
 
   int count = ITEM_COUNT(bandModeDesc);
   for(int i=-2 ; i<3 ; i++)
@@ -735,7 +716,7 @@ static void drawStep(int x, int y, int sx)
 {
   int stepCount = getLastStep() + 1;
 
-  drawCommon(CMD_STEP, x, y, sx);
+  drawCommon(menu[MENU_STEP], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -753,7 +734,7 @@ static void drawStep(int x, int y, int sx)
 
 static void drawBand(int x, int y, int sx)
 {
-  drawCommon(CMD_BAND, x, y, sx);
+  drawCommon(menu[MENU_BAND], x, y, sx);
 
   int count = ITEM_COUNT(band);
   for(int i=-2 ; i<3 ; i++)
@@ -769,7 +750,7 @@ static void drawBand(int x, int y, int sx)
 
 static void drawBandwidth(int x, int y, int sx)
 {
-  drawCommon(CMD_BANDWIDTH, x, y, sx);
+  drawCommon(menu[MENU_BW], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -798,7 +779,7 @@ static void drawBandwidth(int x, int y, int sx)
 
 static void drawTheme(int x, int y, int sx)
 {
-  drawCommon(CMD_THEME, x, y, sx);
+  drawCommon(settings[MENU_THEME], x, y, sx);
 
   int count = getTotalThemes();
   for(int i=-2 ; i<3 ; i++)
@@ -814,7 +795,7 @@ static void drawTheme(int x, int y, int sx)
 
 static void drawVolume(int x, int y, int sx)
 {
-  drawCommon(CMD_VOLUME, x, y, sx);
+  drawCommon(menu[MENU_VOLUME], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -826,7 +807,7 @@ static void drawVolume(int x, int y, int sx)
 
 static void drawAgc(int x, int y, int sx)
 {
-  drawCommon(CMD_AGC, x, y, sx);
+  drawCommon(menu[MENU_AGC_ATT], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -852,7 +833,7 @@ static void drawAgc(int x, int y, int sx)
 
 static void drawSoftMuteMaxAtt(int x, int y, int sx)
 {
-  drawCommon(CMD_SOFTMUTEMAXATT, x, y, sx);
+  drawCommon(menu[MENU_SOFTMUTE], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -866,7 +847,7 @@ static void drawSoftMuteMaxAtt(int x, int y, int sx)
 
 static void drawCal(int x, int y, int sx)
 {
-  drawCommon(CMD_CAL, x, y, sx);
+  drawCommon(menu[MENU_CALIBRATION], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -879,7 +860,7 @@ static void drawCal(int x, int y, int sx)
 
 static void drawAvc(int x, int y, int sx)
 {
-  drawCommon(CMD_AVC, x, y, sx);
+  drawCommon(menu[MENU_AVC], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -893,7 +874,7 @@ static void drawAvc(int x, int y, int sx)
 
 static void drawBrt(int x, int y, int sx)
 {
-  drawCommon(CMD_BRT, x, y, sx);
+  drawCommon(settings[MENU_BRIGHTNESS], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -905,7 +886,7 @@ static void drawBrt(int x, int y, int sx)
 
 static void drawSleep(int x, int y, int sx)
 {
-  drawCommon(CMD_SLEEP, x, y, sx);
+  drawCommon(settings[MENU_SLEEP], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -924,15 +905,14 @@ static void drawInfo(int x, int y, int sx)
   spr.setTextColor(TH.box_text, TH.box_bg);
   spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.box_border);
   spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.box_bg);
-  spr.drawString("Step:", 6+x, 64+y+(-3*16), 2);
 
+  spr.drawString("Step:", 6+x, 64+y+(-3*16), 2);
   if(currentMode==FM)
     spr.drawString(fmStep[fmStepIdx].desc, 48+x, 64+y+(-3*16), 2);
   else
     spr.drawString(amStep[amStepIdx].desc, 48+x, 64+y+(-3*16), 2);
 
   spr.drawString("BW:", 6+x, 64+y+(-2*16), 2);
-
   if(isSSB())
     spr.drawString(bandwidthSSB[bwIdxSSB].desc, 48+x, 64+y+(-2*16), 2);
   else if(currentMode==FM)
@@ -974,7 +954,7 @@ static void drawInfo(int x, int y, int sx)
   */
 
   spr.drawString("Vol:", 6+x, 64+y+(1*16), 2);
-  if(muted)
+  if(muteOn())
   {
     //spr.setTextDatum(MR_DATUM);
     spr.setTextColor(TH.box_off_text, TH.box_off_bg);

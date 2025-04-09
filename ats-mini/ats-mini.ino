@@ -31,7 +31,6 @@
 // =================================
 
 bool bfoOn = false;
-bool muted = false;
 int8_t agcIdx = 0;
 uint8_t disableAgc = 0;
 int8_t agcNdx = 0;
@@ -85,9 +84,6 @@ bool pb1_long_released = false;         // Push button long released
 
 // Status bar icon flags
 bool screen_toggle = false;             // Toggle when drawsprite is called
-
-// Firmware controlled mute
-uint8_t mute_vol_val = 0;               // Volume level when mute is applied
 
 // Menu options
 int16_t currentCAL = 0;                 // Calibration offset, +/- 1000Hz in steps of 10Hz
@@ -508,8 +504,10 @@ void clock_time()
 //
 // Handle encoder PRESS + ROTATE
 //
-void doPressAndRotate(int8_t dir)
+bool doPressAndRotate(int8_t dir)
 {
+  bool needRedraw = false;
+
   if(isSSB())
   {
 #ifdef TUNE_HOLDOFF
@@ -518,6 +516,7 @@ void doPressAndRotate(int8_t dir)
     tuning_timer = millis();
 #endif
     doFrequencyTuneSSB(true);
+    needRedraw = true;
   }
   else
   {
@@ -527,14 +526,19 @@ void doPressAndRotate(int8_t dir)
     doSeek();
     // G8PTN: Added to ensure update of currentFreq in table for AM/FM
     band[bandIdx].currentFreq = currentFrequency;
+    needRedraw = true;
   }
+
+  return(needRedraw);
 }
 
 //
 // Handle encoder ROTATE
 //
-void doRotate(int8_t dir)
+bool doRotate(int8_t dir)
 {
+  bool needRedraw = false;
+
   // G8PTN: The manual BFO adjusment is not required with the
   // doFrequencyTuneSSB() method, but leave for debug
   if(bfoOn && isSSB())
@@ -545,6 +549,7 @@ void doRotate(int8_t dir)
     if (currentBFO < -MAX_BFO) currentBFO = -MAX_BFO;
     band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // G8PTN; Calculate frequency value to store in EEPROM
     updateBFO();
+    needRedraw = true;
   }
 
   //
@@ -552,7 +557,8 @@ void doRotate(int8_t dir)
   //
   else if(doSideBar(currentCmd, encoderCount))
   {
-    // Do nothing, everything is done
+    // Side bar changed, need redraw
+    needRedraw = true;
   }
 
   //
@@ -566,6 +572,7 @@ void doRotate(int8_t dir)
     tuning_timer = millis();
 #endif
     doFrequencyTuneSSB();
+    needRedraw = true;
   }
 
   //
@@ -605,7 +612,12 @@ void doRotate(int8_t dir)
    
     // G8PTN: Added to ensure update of currentFreq in table for AM/FM
     band[bandIdx].currentFreq = currentFrequency = rx.getFrequency();
+
+    // Will need a redraw
+    needRedraw = true;
   }
+
+  return(needRedraw);
 }
 
 //
@@ -624,12 +636,12 @@ void loop()
     // If encoder has been rotated AND pressed...
     if(pb1_pressed && !isModalMode(currentCmd))
     {
-      doPressAndRotate(encoderCount);
+      needRedraw |= doPressAndRotate(encoderCount);
       seekModePress = true;
     }
     else
     {
-      doRotate(encoderCount);
+      needRedraw |= doRotate(encoderCount);
     }
 
     // Clear encoder rotation
@@ -653,13 +665,9 @@ void loop()
   {
     pb1_released = pb1_short_released = pb1_long_released = false;
 
-    if(muted)
-    {
-      rx.setVolume(mute_vol_val);
-      muted = false;
-    }
-
+    // Open volume control
     clickVolume();
+    needRedraw = true;
 
     // Wait a little more for the button release
     delay(MIN_ELAPSED_TIME);
@@ -677,7 +685,8 @@ void loop()
     }
     else if(clickSideBar(currentCmd))
     {
-      // Do nothing, command handled
+      // Command handled, redraw screen
+      needRedraw = true;
     }
     else if(isModalMode(currentCmd))
     {

@@ -66,10 +66,8 @@ extern TFT_eSPI tft;
 
 extern bool bfoOn;
 extern bool tuning_flag;
-extern bool muted;
 extern uint8_t rssi;
 
-extern uint8_t mute_vol_val;
 extern uint16_t currentFrequency;
 extern const uint16_t currentBFOStep;
 extern int16_t currentBFO;
@@ -107,6 +105,7 @@ void unloadSSB();
 const char *getVersion();
 int getStrength(int rssi);
 bool displayOn(int x = 2);
+bool muteOn(int x = 2);
 
 // Draw.c
 void drawLoadingSSB();
