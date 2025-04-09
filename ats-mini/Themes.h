@@ -6,7 +6,7 @@
 // This is our current theme
 #define TH (theme[themeIdx])
 
-typedef struct
+typedef struct __attribute__ ((packed))
 {
   char *name;
   uint16_t bg;
