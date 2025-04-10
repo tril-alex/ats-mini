@@ -94,6 +94,11 @@ extern uint8_t disableAgc;
 
 extern const int CALMax;
 
+extern uint8_t time_seconds;
+extern uint8_t time_minutes;
+extern uint8_t time_hours;
+extern bool time_synchronized;
+
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
 void useBand(const Band *band);
@@ -118,6 +123,7 @@ void drawBattery(int x, int y);
 
 // Station.c
 const char *getStationName();
+const char *getRdsTime();
 void clearStationName();
 bool checkRds();
 bool checkCbChannel();

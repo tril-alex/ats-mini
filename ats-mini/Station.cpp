@@ -31,6 +31,15 @@ const char *getStationName()
 #endif
 }
 
+const char *getRdsTime()
+{
+#ifdef THEME_EDITOR
+  return("00:00");
+#else
+  return(bufRdsTime);
+#endif
+}
+
 void clearStationName()
 {
   bufStationName[0] = '\0';
@@ -58,18 +67,40 @@ static bool showRdsMessage(const char *rdsMessage)
 
   return(false);
 }
+#endif
 
 static bool showRdsTime(const char *rdsTime)
 {
-  if(rdsTime && strcmp(bufRdsTime, rdsTime))
+  if(!rdsTime) return(false);
+ 
+  // The standard RDS time format is “HH:MM”.
+  // or sometimes more complex like “DD.MM.YY,HH:MM”.
+  const char *timeField = strstr(rdsTime, ":");
+
+  // If we find a valid time format...
+  if(timeField && (timeField>=rdsTime+2) && timeField[1] && timeField[2])
   {
-    strcpy(bufRdsTime, rdsTime);
-    return(true);
+    // Extract hours and minutes
+    int hours = (timeField[-2] - '0') * 10 + timeField[-1] - '0';
+    int mins  = (timeField[1] - '0') * 10 + timeField[2] - '0';
+ 
+    // If hours and minutes are valid...
+    if(hours>=0 && hours<24 && mins>=0 && mins<60)
+    {
+      // Update internal clock, reset seconds
+      time_hours = hours;
+      time_minutes = mins;
+      time_seconds = 0;
+      // Update display
+      sprintf(bufRdsTime, "%02d:%02dZ", hours, mins);
+      time_synchronized = true;
+      return(true);
+    }
   }
 
+  // No time
   return(false);
 }
-#endif
 
 bool checkRds()
 {
@@ -82,7 +113,7 @@ bool checkRds()
 
     needRedraw |= showRdsStation(rx.getRdsText0A());
 //    needRedraw |= showRdsMessage(rx.getRdsText2A());
-//    needRedraw |= showRdsTime(rx.getRdsTime());
+    needRedraw |= showRdsTime(rx.getRdsTime());
   }
 
   // Return TRUE if any RDS information changes

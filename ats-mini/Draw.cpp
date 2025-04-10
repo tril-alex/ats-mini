@@ -241,11 +241,13 @@ void drawScreen()
   // Clear screen buffer
   spr.fillSprite(TH.bg);
 
-  // Time
-  /* spr.setTextColor(TH.text, TH.bg); */
-  /* spr.setTextDatum(ML_DATUM); */
-  /* spr.drawString(time_disp, clock_datum, 12, 2); */
-  /* spr.setTextColor(TH.text, TH.bg); */
+  // Draw current time
+  char text[16];
+  sprintf(text, "%02d:%02dZ", time_hours, time_minutes);
+  spr.setTextColor(TH.text, TH.bg);
+  spr.setTextDatum(ML_DATUM);
+  spr.drawString(text, batt_offset_x - 10, batt_offset_y + 24, 2);
+  spr.setTextColor(TH.text, TH.bg);
 
   /* // Screen activity icon */
   /* screen_toggle = !screen_toggle; */
@@ -266,9 +268,7 @@ void drawScreen()
   // Set font we are going to use
   spr.setFreeFont(&Orbitron_Light_24);
 
-  //
-  // Band and mode
-  //
+  // Draw band and mode
   drawBandAndMode(
     getCurrentBand()->bandName,
     bandModeDesc[currentMode],

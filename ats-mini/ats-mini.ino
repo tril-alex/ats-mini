@@ -103,7 +103,7 @@ uint8_t time_seconds = 0;
 uint8_t time_minutes = 0;
 uint8_t time_hours = 0;
 char time_disp [16];
-
+bool time_synchronized = false; // Flag to indicate if time has been synchronized with RDS
 //
 // Current parameters
 //
@@ -497,7 +497,7 @@ void clock_time()
     }
 
     // Format for display HH:MM (24 hour format)
-    sprintf(time_disp, "%2.2d:%2.2d", time_hours, time_minutes);
+    sprintf(time_disp, "%02d:%02dZ", time_hours, time_minutes);
   }
 }
 
