@@ -20,7 +20,6 @@ const char *cbChannelNumber[] =
 
 char bufStationName[50] = "";
 char bufMessage[100]    = "";
-char bufRdsTime[32]     = "";
 
 const char *getStationName()
 {
@@ -28,15 +27,6 @@ const char *getStationName()
   return("*STATION*");
 #else
   return(bufStationName);
-#endif
-}
-
-const char *getRdsTime()
-{
-#ifdef THEME_EDITOR
-  return("00:00Z");
-#else
-  return(bufRdsTime);
 #endif
 }
 
@@ -84,18 +74,9 @@ static bool showRdsTime(const char *rdsTime)
     int hours = (timeField[-2] - '0') * 10 + timeField[-1] - '0';
     int mins  = (timeField[1] - '0') * 10 + timeField[2] - '0';
  
-    // If hours and minutes are valid...
+    // If hours and minutes are valid, update clock
     if(hours>=0 && hours<24 && mins>=0 && mins<60)
-    {
-      // Update internal clock, reset seconds
-      time_hours = hours;
-      time_minutes = mins;
-      time_seconds = 0;
-      // Update display
-      sprintf(bufRdsTime, "%02d:%02dZ", hours, mins);
-      time_synchronized = true;
-      return(true);
-    }
+      return(clockSet(hours, mins));
   }
 
   // No time

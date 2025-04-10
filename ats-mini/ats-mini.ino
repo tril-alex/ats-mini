@@ -97,13 +97,6 @@ uint32_t background_timer = millis();   // Background screen refresh timer.
 uint32_t tuning_timer = millis();       // Tuning hold off timer.
 bool tuning_flag = false;               // Flag to indicate tuning
 
-// Time
-uint32_t clock_timer = 0;
-uint8_t time_seconds = 0;
-uint8_t time_minutes = 0;
-uint8_t time_hours = 0;
-char time_disp [16];
-bool time_synchronized = false; // Flag to indicate if time has been synchronized with RDS
 //
 // Current parameters
 //
@@ -477,30 +470,6 @@ void buttonCheck() {
   }
 }
 
-void clock_time()
-{
-  if ((micros() - clock_timer) >= 1000000) {
-    clock_timer = micros();
-    time_seconds++;
-    if (time_seconds >= 60) {
-      time_seconds = 0;
-      time_minutes ++;
-
-      if (time_minutes >= 60) {
-        time_minutes = 0;
-        time_hours++;
-
-        if (time_hours >= 24) {
-          time_hours = 0;
-        }
-      }
-    }
-
-    // Format for display HH:MM (24 hour format)
-    sprintf(time_disp, "%02d:%02dZ", time_hours, time_minutes);
-  }
-}
-
 //
 // Handle encoder PRESS + ROTATE
 //
@@ -789,7 +758,7 @@ void loop()
 #endif
 
   // Run clock
-  clock_time();
+  needRedraw |= clockTick(micros());
 
 #ifdef USE_REMOTE
   // Periodically print status to serial

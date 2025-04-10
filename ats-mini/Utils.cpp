@@ -13,7 +13,14 @@ static uint8_t mute_vol_val = 0;
 static bool display_on = true;
 
 // Current SSB patch status
-static bool ssbLoaded  = false;
+static bool ssbLoaded = false;
+
+// Time
+static uint32_t clockTimer   = micros();
+static uint32_t clockSeconds = 0;
+static uint32_t clockMinutes = 0;
+static uint32_t clockHours   = 0;
+static char     clockText[8] = {0};
 
 //
 // Get firmware version and build time, as a string
@@ -98,6 +105,67 @@ bool displayOn(int x)
   }
 
   return(display_on);
+}
+
+//
+// Set and count time
+//
+
+const char *clockGet()
+{
+#ifdef THEME_EDITOR
+  return("00:00Z");
+#else
+  return(clockText);
+#endif
+}
+
+bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
+{
+  // Verify input before setting clock
+  if(hours < 24 && minutes < 60 && seconds < 60)
+  {
+    clockHours   = hours;
+    clockMinutes = minutes;
+    clockSeconds = seconds;
+    return(true);
+  }
+
+  // Failed
+  return(false);
+}
+
+bool clockTick(uint32_t micros)
+{
+  if(micros - clockTimer >= 1000000)
+  {
+    uint32_t delta;
+
+    delta = (micros - clockTimer) / 1000000;
+    clockTimer += delta * 1000000;
+    clockSeconds += delta;
+
+    if(clockSeconds>=60)
+    {
+      delta = clockSeconds / 60;
+      clockSeconds -= delta * 60;
+      clockMinutes += delta;
+
+      if(clockMinutes>=60)
+      {
+        delta = clockMinutes / 60;
+        clockMinutes -= delta * 60;
+        clockHours = (clockHours + delta) % 24;
+      }
+
+      // Format clock for display and ask for screen update
+      sprintf(clockText, "%02d:%02dZ", clockHours, clockMinutes);
+      return(true);
+    }
+  }
+
+  // Minutes/hours have not ticked, no screen update
+  return(false);
 }
 
 //

@@ -94,11 +94,6 @@ extern uint8_t disableAgc;
 
 extern const int CALMax;
 
-extern uint8_t time_seconds;
-extern uint8_t time_minutes;
-extern uint8_t time_hours;
-extern bool time_synchronized;
-
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
 void useBand(const Band *band);
@@ -111,6 +106,9 @@ const char *getVersion();
 int getStrength(int rssi);
 bool displayOn(int x = 2);
 bool muteOn(int x = 2);
+const char *clockGet();
+bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
+bool clockTick(uint32_t micros);
 
 // Draw.c
 void drawLoadingSSB();
