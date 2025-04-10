@@ -277,6 +277,45 @@ const ColorTheme theme[] =
     0x07AD, // scale_text
     0x5CF2, // scale_pointer
     0x2364, // scale_line
+  },
+
+  {
+    "Space",
+    0x0004, // bg
+    0x3FE0, // text
+    0xD69A, // text_muted
+    0xF800, // text_warn
+    0xD69A, // smeter_icon
+    0x07E0, // smeter_bar
+    0xF800, // smeter_bar_plus
+    0xF800, // save_icon
+    0xD69A, // batt_voltage
+    0xD69A, // batt_border
+    0x07E0, // batt_full
+    0xF800, // batt_low
+    0x001F, // batt_charge
+    0xFFE0, // batt_icon
+    0xD69A, // band_text
+    0xD69A, // mode_text
+    0xD69A, // mode_border
+    0x0004, // box_bg
+    0xD69A, // box_border
+    0xD69A, // box_text
+    0xF800, // box_off_bg
+    0xBEDF, // box_off_text
+    0x0004, // menu_bg
+    0xF800, // menu_border
+    0x3FE0, // menu_hdr
+    0xBEDF, // menu_item
+    0x105B, // menu_hl_bg
+    0xBEDF, // menu_hl_text
+    0xBEDF, // menu_param
+    0x3FE0, // freq_text
+    0xD69A, // funit_text
+    0xD69A, // rds_text
+    0x3FE0, // scale_text
+    0xF800, // scale_pointer
+    0xC638, // scale_line
   }
 };
 
