@@ -21,3 +21,9 @@ Some of the units have a smaller speaker. You can install a bigger one (1511) th
 ## Hi-Z match circuit
 
 [ Micro Pocket SSB Receiver - NEW FIRMWARE + Hi-Z CIRCUIT Mod](https://youtu.be/BzrOE9BFpyU?feature=shared&t=916)
+
+## Headphone amplifier
+
+* https://t.me/talkradio/174172/184530
+
+Note: a new hardware revision with the LM4809 headphone amplifier has been spotted, see https://forum.vcfm.ru/viewtopic.php?f=9&t=2395&start=60#p187797
