@@ -34,7 +34,7 @@ const char *getStationName()
 const char *getRdsTime()
 {
 #ifdef THEME_EDITOR
-  return("00:00");
+  return("00:00Z");
 #else
   return(bufRdsTime);
 #endif
