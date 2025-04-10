@@ -16,7 +16,8 @@ static bool display_on = true;
 static bool ssbLoaded = false;
 
 // Time
-static uint32_t clockTimer   = micros();
+static bool clockHasBeenSet  = false;
+static uint32_t clockTimer   = 0;
 static uint32_t clockSeconds = 0;
 static uint32_t clockMinutes = 0;
 static uint32_t clockHours   = 0;
@@ -114,9 +115,9 @@ bool displayOn(int x)
 const char *clockGet()
 {
 #ifdef THEME_EDITOR
-  return("00:00Z");
+  return("00:00");
 #else
-  return(clockText);
+  return(clockHasBeenSet? clockText : "");
 #endif
 }
 
@@ -125,6 +126,8 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
   // Verify input before setting clock
   if(hours < 24 && minutes < 60 && seconds < 60)
   {
+    clockHasBeenSet = true;
+    clockTimer   = micros();
     clockHours   = hours;
     clockMinutes = minutes;
     clockSeconds = seconds;
@@ -135,13 +138,14 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
   return(false);
 }
 
-bool clockTick(uint32_t micros)
+bool clockTickTime()
 {
-  if(micros - clockTimer >= 1000000)
+  // Need to set the clock first, then accumulate one second of time
+  if(clockHasBeenSet && (micros() - clockTimer >= 1000000))
   {
     uint32_t delta;
 
-    delta = (micros - clockTimer) / 1000000;
+    delta = (micros() - clockTimer) / 1000000;
     clockTimer += delta * 1000000;
     clockSeconds += delta;
 
@@ -159,12 +163,12 @@ bool clockTick(uint32_t micros)
       }
 
       // Format clock for display and ask for screen update
-      sprintf(clockText, "%02d:%02dZ", clockHours, clockMinutes);
+      sprintf(clockText, "%02d:%02d", clockHours, clockMinutes);
       return(true);
     }
   }
 
-  // Minutes/hours have not ticked, no screen update
+  // No screen update
   return(false);
 }
 

@@ -730,7 +730,7 @@ void loop()
 
   // Tick EEPROM time, saving changes if the occurred and there has
   // been no activity for a while
-  eepromTickTime(currentTime);
+  eepromTickTime();
 
   // Check for button activity
   buttonCheck();
@@ -758,11 +758,11 @@ void loop()
 #endif
 
   // Run clock
-  needRedraw |= clockTick(micros());
+  needRedraw |= clockTickTime();
 
 #ifdef USE_REMOTE
   // Periodically print status to serial
-  remoteTickTime(currentTime);
+  remoteTickTime();
   // Receive and execute serial command
   if(Serial.available()>0) remoteDoCommand(Serial.read());
 #endif

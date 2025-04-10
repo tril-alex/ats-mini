@@ -108,7 +108,7 @@ bool displayOn(int x = 2);
 bool muteOn(int x = 2);
 const char *clockGet();
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
-bool clockTick(uint32_t micros);
+bool clockTickTime();
 
 // Draw.c
 void drawLoadingSSB();
@@ -128,7 +128,7 @@ bool checkCbChannel();
 
 #ifdef USE_REMOTE
 // Remote.c
-void remoteTickTime(uint32_t millis);
+void remoteTickTime();
 bool remoteDoCommand(char key);
 #endif // USE_REMOTE
 

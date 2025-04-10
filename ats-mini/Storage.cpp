@@ -15,7 +15,7 @@
 // Flag indicating EEPROM write request
 static bool showEepromFlag = false;
 static bool itIsTimeToSave = false;
-static long storeTime = millis();
+static uint32_t storeTime = millis();
 
 // To store any change into the EEPROM, we need at least STORE_TIME
 // milliseconds of inactivity.
@@ -25,13 +25,13 @@ void eepromRequestSave()
   itIsTimeToSave = true;
 }
 
-void eepromTickTime(uint32_t millis)
+void eepromTickTime()
 {
   // Save the current frequency only if it has changed
-  if(itIsTimeToSave && ((millis - storeTime) > STORE_TIME))
+  if(itIsTimeToSave && ((millis() - storeTime) > STORE_TIME))
   {
     eepromSaveConfig();
-    storeTime = millis;
+    storeTime = millis();
     itIsTimeToSave = false;
   }
 }

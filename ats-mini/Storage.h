@@ -1,7 +1,7 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-void eepromTickTime(uint32_t millis);
+void eepromTickTime();
 void eepromRequestSave();
 void eepromInvalidate();
 bool eepromVerify();

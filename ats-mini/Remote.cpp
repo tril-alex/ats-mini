@@ -117,12 +117,12 @@ void remotePrintStatus()
 //
 // Tick remote time, periodically printing status
 //
-void remoteTickTime(uint32_t millis)
+void remoteTickTime()
 {
-  if(millis - remoteTimer >= 500 && remoteLogOn)
+  if(remoteLogOn && (millis() - remoteTimer >= 500))
   {
     // Mark time and increment diagnostic sequence number
-    remoteTimer = millis;
+    remoteTimer = millis();
     remoteSeqnum++;
     // Show status
     remotePrintStatus();
