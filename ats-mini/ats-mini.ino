@@ -154,7 +154,11 @@ void setup()
   // TFT display brightness control (PWM)
   // Note: At brightness levels below 100%, switching from the PWM may cause power spikes and/or RFI
   ledcAttach(PIN_LCD_BL, 16000, 8);  // Pin assignment, 16kHz, 8-bit
-  ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%)
+//  ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%
+  ledcWrite(PIN_LCD_BL, 0);          // Turn brightness off for now
+
+  // Turn display off for now
+  displayOn(false);
 
   // Press and hold Encoder button to force an EEPROM reset
   // Note: EEPROM reset is recommended after firmware updates
@@ -172,12 +176,13 @@ void setup()
   rx.setI2CFastModeCustom(100000);
 
   int16_t si4735Addr = rx.getDeviceI2CAddress(RESET_PIN); // Looks for the I2C bus address and set it.  Returns 0 if error
-
-  if ( si4735Addr == 0 ) {
+  if(!si4735Addr)
+  {
     tft.setTextSize(2);
     tft.setTextColor(TH.text_warn, TH.bg);
     tft.println("Si4735 not detected");
-    while (1);
+    displayOn(true);
+    while(1);
   }
 
   rx.setup(RESET_PIN, MW_BAND_TYPE);
@@ -217,7 +222,8 @@ void setup()
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
   selectBand(bandIdx);
 
-  // Draw display for the first time
+  // Enable and draw display for the first time
+  displayOn(true);
   drawScreen();
 
   // Interrupt actions for Rotary encoder
@@ -627,8 +633,7 @@ void loop()
   {
     pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
     elapsedSleep = currentTime;
-
-    displayOn(!displayOn());
+    needRedraw |= displayOn(!displayOn());
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
@@ -653,7 +658,11 @@ void loop()
 
     if(!displayOn())
     {
-      if(currentSleep) displayOn(true);
+      if(currentSleep)
+      {
+        displayOn(true);
+        needRedraw = true;
+      }
     }
     else if(clickSideBar(currentCmd))
     {
@@ -764,7 +773,8 @@ void loop()
   // Periodically print status to serial
   remoteTickTime();
   // Receive and execute serial command
-  if(Serial.available()>0) remoteDoCommand(Serial.read());
+  if(Serial.available()>0)
+    needRedraw |= remoteDoCommand(Serial.read());
 #endif
 
   // Redraw screen if necessary

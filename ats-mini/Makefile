@@ -21,7 +21,7 @@ OPTIONS = \
 	--warnings all
 
 HEADERS = \
-	Common.h Themes.h Menu.h Storage.h User_Setup.h Rotary.h \
+	Common.h Themes.h Menu.h Storage.h tft_setup.h Rotary.h \
 	patch_init.h
 
 SRC = \

@@ -102,7 +102,6 @@ bool displayOn(int x)
     delay(120);
     tft.writecommand(ST7789_DISPON);
     ledcWrite(PIN_LCD_BL, currentBrt);
-    drawScreen();
   }
 
   return(display_on);
@@ -163,7 +162,7 @@ bool clockTickTime()
       }
 
       // Format clock for display and ask for screen update
-      sprintf(clockText, "%02d:%02d", clockHours, clockMinutes);
+      sprintf(clockText, "%02ld:%02ld", clockHours, clockMinutes);
       return(true);
     }
   }
