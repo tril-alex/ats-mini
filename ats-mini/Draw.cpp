@@ -243,8 +243,8 @@ void drawScreen()
 
   // Draw current time
   spr.setTextColor(TH.text, TH.bg);
-  spr.setTextDatum(ML_DATUM);
-  spr.drawString(clockGet(), batt_offset_x - 8, batt_offset_y + 24, 2);
+  spr.setTextDatum(MR_DATUM);
+  spr.drawString(clockGet(), 319, batt_offset_y + 24, 2);
   spr.setTextColor(TH.text, TH.bg);
 
   /* // Screen activity icon */
