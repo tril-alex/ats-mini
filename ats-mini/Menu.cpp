@@ -60,7 +60,7 @@ Band *getCurrentBand() { return(&band[bandIdx]); }
 #define MENU_AVC          8
 #define MENU_CALIBRATION  9
 #define MENU_SETTINGS    10
-#ifdef BFO_MENU_EN
+#ifdef BFO_DEBUG_MENU
 #define MENU_BFO         11
 #endif
 
@@ -79,7 +79,7 @@ const char *menu[] =
   "AVC",
   "Calibration",
   "Settings",
-#ifdef BFO_MENU_EN
+#ifdef BFO_DEBUG_MENU
   "BFO",
 #endif
 };
@@ -321,7 +321,7 @@ static void clickMenu(int cmd)
       muteOn(!muteOn());
       break;
 
-#ifdef BFO_MENU_EN
+#ifdef BFO_DEBUG_MENU
     case MENU_BFO:
       if(isSSB()) bfoOn = true;
       break;

@@ -126,10 +126,10 @@ void clearStationName();
 bool checkRds();
 bool checkCbChannel();
 
-#ifdef USE_REMOTE
+#ifndef DISABLE_REMOTE
 // Remote.c
 void remoteTickTime();
 bool remoteDoCommand(char key);
-#endif // USE_REMOTE
+#endif
 
 #endif // COMMON_H

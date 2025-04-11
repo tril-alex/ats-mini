@@ -485,7 +485,7 @@ bool doPressAndRotate(int8_t dir)
 
   if(isSSB())
   {
-#ifdef TUNE_HOLDOFF
+#ifndef DISABLE_HOLDOFF
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -541,7 +541,7 @@ bool doRotate(int8_t dir)
   //
   else if(isSSB())
   {
-#ifdef TUNE_HOLDOFF
+#ifndef DISABLE_HOLDOFF
     // Tuning timer to hold off (SSB) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -555,7 +555,7 @@ bool doRotate(int8_t dir)
   //
   else
   {
-#ifdef TUNE_HOLDOFF
+#ifndef DISABLE_HOLDOFF
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -757,7 +757,7 @@ void loop()
     background_timer = currentTime;
   }
 
-#ifdef TUNE_HOLDOFF
+#ifndef DISABLE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))
   {
@@ -769,7 +769,7 @@ void loop()
   // Run clock
   needRedraw |= clockTickTime();
 
-#ifdef USE_REMOTE
+#ifndef DISABLE_REMOTE
   // Periodically print status to serial
   remoteTickTime();
   // Receive and execute serial command

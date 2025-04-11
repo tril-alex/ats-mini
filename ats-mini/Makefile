@@ -8,13 +8,16 @@ PORT	= /dev/cu.usbmodem1101
 
 DEBUG_LEVEL = 0
 
-# USE_REMOTE   : Enable serial port control and monitoring
-# TUNE_HOLDOFF : Hold off display updates while tuning
-# BFO_MENU_EN  : Add BFO menu option for debugging
-# THEME_EDITOR : Enable setting and printing of theme colors
+# DISABLE_REMOTE  : Disable serial port control and monitoring
+# DISABLE_HOLDOFF : Hold off display updates while tuning
+# BFO_DEBUG_MENU  : Add BFO menu option for debugging
+# THEME_EDITOR    : Enable setting and printing of theme colors
 DEFINES = \
 	-DDEBUG=$(DEBUG_LEVEL) \
-	-DUSE_REMOTE -DNO_THEME_EDITOR -DTUNE_HOLDOFF -DNO_BFO_MENU_EN
+	-DNO_DISABLE_HOLDOFF \
+	-DNO_DISABLE_REMOTE \
+	-DNO_THEME_EDITOR \
+	-DNO_BFO_DEBUG_MENU
 
 OPTIONS = \
 	--build-property "build.extra_flags=$(DEFINES)" \

@@ -2,7 +2,7 @@
 #include "Themes.h"
 #include "Menu.h"
 
-#ifdef USE_REMOTE
+#ifndef DISABLE_REMOTE
 
 // @@@ FIXME: These should not be force-exported!!!
 extern volatile int encoderCount;
@@ -218,4 +218,4 @@ bool remoteDoCommand(char key)
   return(true);
 }
 
-#endif // USE_REMOTE
+#endif // !DISABLE_REMOTE
