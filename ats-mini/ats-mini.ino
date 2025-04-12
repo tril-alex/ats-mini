@@ -317,157 +317,173 @@ void useBand(const Band *band)
   clearStationName();
 }
 
-/**
- *  This function is called by the seek function process.
- */
+// This function is called by the seek function process.
 bool checkStopSeeking()
 {
   // Returns true if the user rotates the encoder
   return(seekStop); 
 }
 
-/**
- *  This function is called by the seek function process.
- */
+// This function is called by the seek function process.
 void showFrequencySeek(uint16_t freq)
 {
   currentFrequency = freq;
   drawScreen();
 }
 
-/**
- *  Find a station. The direction is based on the last encoder move clockwise or counterclockwise
- */
+// Find a station. The direction is based on the last encoder move
+// clockwise or counterclockwise
 void doSeek()
 {
-  if (isSSB()) return; // It does not work for SSB mode
+  // It does not work for SSB mode
+  if(isSSB()) return;
 
   rx.seekStationProgress(showFrequencySeek, checkStopSeeking, seekDirection);   // G8PTN: Added checkStopSeeking
   currentFrequency = rx.getFrequency();
-
 }
 
-/***************************************************************************************
-** Description:   In SSB mode tuning uses VFO and BFO
-**                - Algorithm from ATS-20_EX Goshante firmware
-***************************************************************************************/
-// Tuning algorithm
-void doFrequencyTuneSSB(bool fast = false) {
-    int step = encoderCount == 1 ? getSteps(fast) : getSteps(fast) * -1;
-    int newBFO = currentBFO + step;
-    int redundant = 0;
+// In SSB mode tuning uses VFO and BFO
+// (tuning algorithm from ATS-20_EX Goshante firmware)
+void doFrequencyTuneSSB(bool fast = false)
+{
+  int step = encoderCount == 1 ? getSteps(fast) : getSteps(fast) * -1;
+  int newBFO = currentBFO + step;
+  int redundant = 0;
 
-    if (newBFO > MAX_BFO) {
-        redundant = (newBFO / MAX_BFO) * MAX_BFO;
-        currentFrequency += redundant / 1000;
-        newBFO -= redundant;
-    } else if (newBFO < -MAX_BFO) {
-        redundant = ((abs(newBFO) / MAX_BFO) * MAX_BFO);
-        currentFrequency -= redundant / 1000;
-        newBFO += redundant;
-    }
+  if(newBFO > MAX_BFO)
+  {
+    redundant = (newBFO / MAX_BFO) * MAX_BFO;
+    currentFrequency += redundant / 1000;
+    newBFO -= redundant;
+  }
+  else if(newBFO < -MAX_BFO)
+  {
+    redundant = ((abs(newBFO) / MAX_BFO) * MAX_BFO);
+    currentFrequency -= redundant / 1000;
+    newBFO += redundant;
+  }
 
-    currentBFO = newBFO;
-    updateBFO();
+  currentBFO = newBFO;
+  updateBFO();
 
-    if (redundant != 0) {
-        clampSSBBand();                                   // G8PTN: Added
-        rx.setFrequency(currentFrequency);
-        //agcSetFunc(); //Re-apply to remove noize        // G8PTN: Commented out
-        currentFrequency = rx.getFrequency();
-    }
-
-    band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // Update band table currentFreq
-
+  if(redundant != 0)
+  {
     clampSSBBand();
+    rx.setFrequency(currentFrequency);
+    //Re-apply to remove noise
+    //agcSetFunc();
+    currentFrequency = rx.getFrequency();
+  }
+
+  // Update band table currentFreq
+  band[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
+  clampSSBBand();
 }
 
 // Clamp SSB tuning to band limits
 bool clampSSBBand()
 {
-    uint16_t freq = currentFrequency + (currentBFO / 1000);
+  uint16_t freq = currentFrequency + currentBFO / 1000;
 
-    // Special case to cover SSB frequency negative!
-    bool SsbFreqNeg = false;
-    if (currentFrequency & 0x8000)
-      SsbFreqNeg = true;
+  // Priority to minimum check to cover SSB frequency negative
+  bool update = false;
+  if(freq < band[bandIdx].minimumFreq || (currentFrequency & 0x8000))
+  {
+    currentFrequency = band[bandIdx].maximumFreq;
+    update = true;
+  }
+  else if(freq > band[bandIdx].maximumFreq)
+  {
+    currentFrequency = band[bandIdx].minimumFreq;
+    update = true;
+  }
 
-    // Priority to minimum check to cover SSB frequency negative
-    bool upd = false;
-    if (freq < band[bandIdx].minimumFreq || SsbFreqNeg)
-    {
-        currentFrequency = band[bandIdx].maximumFreq;
-        upd = true;
-    }
-    else if (freq > band[bandIdx].maximumFreq)
-    {
-        currentFrequency = band[bandIdx].minimumFreq;
-        upd = true;
-    }
+  if(update)
+  {
+    // Update band table currentFreq
+    band[bandIdx].currentFreq = currentFrequency;
+    rx.setFrequency(currentFrequency);
+    currentBFO = 0;
+    updateBFO();
+    return(true);
+  }
 
-    if (upd)
-    {
-        band[bandIdx].currentFreq = currentFrequency;    // Update band table currentFreq
-        rx.setFrequency(currentFrequency);
-        currentBFO = 0;
-        updateBFO();
-        return true;
-    }
-
-    return false;
+  return(false);
 }
 
 void updateBFO()
 {
-    // To move frequency forward, need to move the BFO backwards, so multiply by -1
-    currentCAL = getCurrentBand()->bandCal;
-    rx.setSSBBfo((currentBFO + currentCAL) * -1);
+  // To move frequency forward, need to move the BFO backwards,
+  // so multiply by -1
+  currentCAL = getCurrentBand()->bandCal;
+  rx.setSSBBfo(-(currentBFO + currentCAL));
 }
 
-void buttonCheck() {
-  // G8PTN: Added
-  // Push button detection
-  // Only execute every 10 ms
-  if ((millis() - pb1_time) > 10) {
+void buttonCheck()
+{
+  // Push button detection, only execute every 10 ms
+  if((millis() - pb1_time) > 10)
+  {
     pb1_time = millis();
-    pb1_current = digitalRead(ENCODER_PUSH_BUTTON);        // Read pin value
-    if (pb1_last != pb1_current) {                         // Start debounce timer
+
+    // Read pin value
+    pb1_current = digitalRead(ENCODER_PUSH_BUTTON);
+
+    // Start debounce timer
+    if(pb1_last != pb1_current)
+    {
       pb1_edge_time = millis();
       pb1_last = pb1_current;
     }
 
-    if ((millis() - pb1_edge_time) > CLICK_TIME) {         // Debounced
-      if (pb1_stable == HIGH && pb1_last == LOW) {         // button is pressed
+    // Debounced
+    if((millis() - pb1_edge_time) > CLICK_TIME)
+    {
+      // If button is pressed...
+      if(pb1_stable == HIGH && pb1_last == LOW)
+      {
         pb1_pressed_time = pb1_edge_time;
         pb1_short_pressed_time = pb1_long_pressed_time = 0;
         pb1_stable = pb1_last;
-        pb1_pressed = true;                                // Set flags
+        pb1_pressed = true;
         pb1_short_pressed = false;
         pb1_long_pressed = false;
         pb1_released = false;
         pb1_short_released = false;
         pb1_long_released = false;
-      } else if (pb1_stable == LOW && pb1_last == LOW) {   // button is still pressed
+      }
+      // If button is still pressed...
+      else if(pb1_stable == LOW && pb1_last == LOW)
+      {
         long pb1_press_duration = millis() - pb1_pressed_time;
-        if (pb1_press_duration > SHORT_PRESS_TIME && (pb1_short_pressed_time - pb1_pressed_time) != SHORT_PRESS_TIME) {
+        if(pb1_press_duration > SHORT_PRESS_TIME && (pb1_short_pressed_time - pb1_pressed_time) != SHORT_PRESS_TIME)
+        {
           pb1_short_pressed = true;
           pb1_short_pressed_time = pb1_pressed_time + SHORT_PRESS_TIME;
         }
-        if (pb1_press_duration > LONG_PRESS_TIME && (pb1_long_pressed_time - pb1_pressed_time) != LONG_PRESS_TIME) {
+        if(pb1_press_duration > LONG_PRESS_TIME && (pb1_long_pressed_time - pb1_pressed_time) != LONG_PRESS_TIME)
+        {
           pb1_short_pressed = false;
           pb1_long_pressed = true;
           pb1_long_pressed_time = pb1_pressed_time + LONG_PRESS_TIME;
         }
-      } else if (pb1_stable == LOW && pb1_last == HIGH) {  // button is released
+      }
+      // If button is released...
+      else if(pb1_stable == LOW && pb1_last == HIGH)
+      { 
         pb1_released_time = pb1_edge_time;
         pb1_stable = pb1_last;
         pb1_released = true;
         pb1_pressed = pb1_short_pressed = pb1_long_pressed = false;
+
         long pb1_press_duration = pb1_released_time - pb1_pressed_time;
-        if (pb1_press_duration > LONG_PRESS_TIME) {
+        if(pb1_press_duration > LONG_PRESS_TIME)
+        {
           pb1_short_released = false;
           pb1_long_released = true;
-        } else if (pb1_press_duration > SHORT_PRESS_TIME) {
+        }
+        else if(pb1_press_duration > SHORT_PRESS_TIME)
+        {
           pb1_short_released = true;
           pb1_long_released = false;
         }
@@ -773,8 +789,7 @@ void loop()
   // Periodically print status to serial
   remoteTickTime();
   // Receive and execute serial command
-  if(Serial.available()>0)
-    needRedraw |= remoteDoCommand(Serial.read());
+  if(Serial.available()>0) needRedraw |= remoteDoCommand(Serial.read());
 #endif
 
   // Redraw screen if necessary
