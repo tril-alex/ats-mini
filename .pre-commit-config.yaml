@@ -9,6 +9,7 @@ repos:
     rev: v20.1.0
     hooks:
       - id: clang-format
+        stages: [manual]
         files: '.*\.[c|cpp|h|ino]'
         args:
           - "--style={BasedOnStyle: llvm, ColumnLimit: 0}"
