@@ -10,14 +10,12 @@ DEBUG_LEVEL = 0
 
 # DISABLE_REMOTE  : Disable serial port control and monitoring
 # DISABLE_HOLDOFF : Hold off display updates while tuning
-# BFO_DEBUG_MENU  : Add BFO menu option for debugging
 # THEME_EDITOR    : Enable setting and printing of theme colors
 DEFINES = \
 	-DDEBUG=$(DEBUG_LEVEL) \
 	-DNO_DISABLE_HOLDOFF \
 	-DNO_DISABLE_REMOTE \
-	-DNO_THEME_EDITOR \
-	-DNO_BFO_DEBUG_MENU
+	-DNO_THEME_EDITOR
 
 OPTIONS = \
 	--build-property "build.extra_flags=$(DEFINES)" \

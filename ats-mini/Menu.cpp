@@ -60,9 +60,6 @@ Band *getCurrentBand() { return(&band[bandIdx]); }
 #define MENU_AVC          8
 #define MENU_CALIBRATION  9
 #define MENU_SETTINGS    10
-#ifdef BFO_DEBUG_MENU
-#define MENU_BFO         11
-#endif
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -79,9 +76,6 @@ const char *menu[] =
   "AVC",
   "Calibration",
   "Settings",
-#ifdef BFO_DEBUG_MENU
-  "BFO",
-#endif
 };
 
 //
@@ -316,12 +310,6 @@ static void clickMenu(int cmd)
     case MENU_MUTE:
       muteOn(!muteOn());
       break;
-
-#ifdef BFO_DEBUG_MENU
-    case MENU_BFO:
-      if(isSSB()) bfoOn = true;
-      break;
-#endif
   }
 }
 
@@ -605,14 +593,12 @@ void selectBand(uint8_t idx)
     unloadSSB();
     bwIdxFM = min(bwIdx, LAST_ITEM(bandwidthFM));
     rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-    bfoOn = false;
   }
   else
   {
     unloadSSB();
     bwIdxAM = min(bwIdx, LAST_ITEM(bandwidthAM));
     rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
-    bfoOn = false;
   }
 
   // Switch radio to the selected band

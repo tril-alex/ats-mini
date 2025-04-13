@@ -290,9 +290,6 @@ void drawScreen()
   // @@@ FIXME: Frequency display (above) intersects the side bar!
   drawSideBar(currentCmd, menu_offset_x, menu_offset_y, menu_delta_x);
 
-  // Draw BFO value
-  if(bfoOn) drawBFO(currentBFO, 10, 158);
-
   // Draw S-meter
   drawSMeter(getStrength(rssi), meter_offset_x, meter_offset_y);
 

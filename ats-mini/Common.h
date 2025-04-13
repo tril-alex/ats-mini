@@ -64,7 +64,6 @@ extern SI4735 rx;
 extern TFT_eSprite spr;
 extern TFT_eSPI tft;
 
-extern bool bfoOn;
 extern bool tuning_flag;
 extern uint8_t rssi;
 

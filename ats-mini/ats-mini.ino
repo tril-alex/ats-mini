@@ -30,7 +30,6 @@
 // CONSTANTS AND VARIABLES
 // =================================
 
-bool bfoOn = false;
 int8_t agcIdx = 0;
 uint8_t disableAgc = 0;
 int8_t agcNdx = 0;
@@ -232,7 +231,6 @@ void setup()
 void disableCommands()
 {
   currentCmd = CMD_NONE;
-  bfoOn = false;
 }
 
 //
@@ -527,18 +525,10 @@ bool doRotate(int8_t dir)
 {
   bool needRedraw = false;
 
-  // G8PTN: The manual BFO adjusment is not required with the
-  // doFrequencyTuneSSB() method, but leave for debug
-  if(bfoOn && isSSB())
-  {
-    updateBFO(currentBFO + dir * 10);
-    needRedraw = true;
-  }
-
   //
   // Side bar menus / settings
   //
-  else if(doSideBar(currentCmd, encoderCount))
+  if(doSideBar(currentCmd, encoderCount))
   {
     // Side bar changed, need redraw
     needRedraw = true;
@@ -670,11 +660,6 @@ void loop()
       drawCommandStatus("VFO ");
       needRedraw = true;
     }
-    else if(bfoOn)
-    {
-      bfoOn = false;
-      needRedraw = true;
-    }
     else
     {
       // Activate menu
@@ -710,14 +695,7 @@ void loop()
   // Disable commands control
   if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
-    if(isSSB())
-    {
-      bfoOn = false;
-      // showBFO();
-      disableCommands();
-      needRedraw = true;
-    }
-    else if(isModalMode(currentCmd))
+    if(isModalMode(currentCmd))
     {
       disableCommands();
       needRedraw = true;
