@@ -8,7 +8,7 @@
 
 typedef struct __attribute__ ((packed))
 {
-  char *name;
+  const char *name;
   uint16_t bg;
   uint16_t text;
   uint16_t text_muted;

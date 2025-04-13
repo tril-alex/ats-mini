@@ -137,10 +137,10 @@ bool remoteDoCommand(char key)
   switch(key)
   {
     case 'U': // Encoder Up
-      encoderCount++;
+      encoderCount = 1;
       break;
     case 'D': // Encoder Down
-      encoderCount--;
+      encoderCount = -1;
       break;
     case 'P': // Encoder Push Button
       pb1_released = true;

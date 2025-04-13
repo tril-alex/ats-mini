@@ -116,15 +116,15 @@ SI4735 rx;
 //
 void setup()
 {
-  // Enable Serial. G8PTN: Added
+  // Enable serial port
   Serial.begin(115200);
 
-  // Audio Amplifier Enable. G8PTN: Added
+  // Enable audio amplifier
   // Initally disable the audio amplifier until the SI4732 has been setup
   pinMode(PIN_AMP_EN, OUTPUT);
   digitalWrite(PIN_AMP_EN, LOW);
 
-  // SI4732 VDD Enable
+  // Enable SI4732 VDD
   pinMode(PIN_POWER_ON, OUTPUT);
   digitalWrite(PIN_POWER_ON, HIGH);
 
@@ -343,8 +343,29 @@ void doSeek()
 }
 
 //
-// In SSB mode tuning uses VFO and BFO
-// (tuning algorithm from ATS-20_EX Goshante firmware)
+// Tune to a new frequency, keep same BFO (hopefully 0)
+//
+void updateFrequency(int newFreq)
+{    
+  Band *band = getCurrentBand();
+
+  // Do not let new frequency exceed band limits
+  newFreq = newFreq<band->minimumFreq? band->maximumFreq
+          : newFreq>band->maximumFreq? band->minimumFreq
+          : newFreq;
+   
+  // Set new frequency
+  rx.setFrequency(newFreq);
+
+  // Update current frequency
+  currentFrequency = rx.getFrequency();
+
+  // Save current band frequency
+  band->currentFreq = currentFrequency + currentBFO / 1000;
+}
+
+//
+// Tune using BFO, using algorithm from Goshante's ATS-20_EX firmware
 //
 void updateBFO(int newBFO)
 {
@@ -363,7 +384,7 @@ void updateBFO(int newBFO)
     // Correct new BFO
     newBFO -= fCorrect;
 
-    // Do not let new frequency exceed band bounds
+    // Do not let new frequency exceed band limits
     if(newFreq < band->minimumFreq)
     {
       newFreq = band->maximumFreq;
@@ -552,28 +573,15 @@ bool doRotate(int8_t dir)
     uint16_t step = getCurrentStep()->step;
     uint16_t stepAdjust = currentFrequency % step;
     step = !stepAdjust? step : dir>0? step - stepAdjust : stepAdjust;
-    currentFrequency += step * dir;
-    
-    // Check band limits
-    uint16_t bMin = band[bandIdx].minimumFreq;
-    uint16_t bMax = band[bandIdx].maximumFreq;
-    currentFrequency =
-      (currentMode==AM) && (currentFrequency&0x8000)? bMax // Negative in AM
-    : currentFrequency < bMin? bMax                        // Lower bound
-    : currentFrequency > bMax? bMin                        // Upper bound
-    : currentFrequency;
-   
-    // Set new frequency
-    rx.setFrequency(currentFrequency);
-   
+
+    // Tune to a new frequency
+    updateFrequency(currentFrequency + step * dir);
+
     // Clear FM RDS information
     if(currentMode==FM) clearStationName();
    
     // Check current CB channel
     if(isCB()) checkCbChannel();
-   
-    // G8PTN: Added to ensure update of currentFreq in table for AM/FM
-    band[bandIdx].currentFreq = currentFrequency = rx.getFrequency();
 
     // Will need a redraw
     needRedraw = true;
