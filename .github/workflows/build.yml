@@ -39,6 +39,9 @@ jobs:
           fetch-tags: true
           ref: "${{ github.event.inputs.revision || github.ref }}"
 
+      - name: Pre-commit
+        uses: pre-commit/action@v3
+
       - name: Get version slug
         id: slug
         run: |
