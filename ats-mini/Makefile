@@ -6,7 +6,7 @@ INO	= ats-mini.ino
 ELF	= ./build/$(FQBN)/$(INO).elf
 PORT	?= /dev/cu.usbmodem1101
 
-DEBUG_LEVEL = 0
+DEBUG_LEVEL ?= 0
 
 # DISABLE_REMOTE  : Disable serial port control and monitoring
 # DISABLE_HOLDOFF : Hold off display updates while tuning
