@@ -237,18 +237,21 @@ void disableCommands()
   bfoOn = false;
 }
 
-/**
- * Reads encoder via interrupt
- * Use Rotary.h and  Rotary.cpp implementation to process encoder via interrupt
- * if you do not add ICACHE_RAM_ATTR declaration, the system will reboot during attachInterrupt call.
- * With ICACHE_RAM_ATTR macro you put the function on the RAM.
- */
+//
+// Reads encoder via interrupt
+// Uses Rotary.h and Rotary.cpp implementation to process encoder via
+// interrupt. If you do not add ICACHE_RAM_ATTR declaration, the system
+// will reboot during attachInterrupt call. The ICACHE_RAM_ATTR macro
+// places this function into RAM.
+//
 ICACHE_RAM_ATTR void rotaryEncoder()
-{ // rotary encoder events
+{
+  // Rotary encoder events
   uint8_t encoderStatus = encoder.process();
-  if (encoderStatus) {
-    encoderCount = (encoderStatus == DIR_CW) ? 1 : -1;
-    seekStop = true;  // G8PTN: Added flag
+  if(encoderStatus)
+  {
+    encoderCount = encoderStatus==DIR_CW? 1 : -1;
+    seekStop = true;
   }
 }
 
@@ -345,10 +348,9 @@ void doSeek()
 // In SSB mode tuning uses VFO and BFO
 // (tuning algorithm from ATS-20_EX Goshante firmware)
 //
-void doFrequencyTuneSSB(bool fast = false)
+void doFrequencyTuneSSB(int8_t dir, bool fast = false)
 {
-  int step = encoderCount == 1 ? getSteps(fast) : getSteps(fast) * -1;
-  int newBFO = currentBFO + step;
+  int newBFO = currentBFO + dir * getSteps(fast);
   int redundant = 0;
 
   if(newBFO > MAX_BFO)
@@ -359,15 +361,14 @@ void doFrequencyTuneSSB(bool fast = false)
   }
   else if(newBFO < -MAX_BFO)
   {
-    redundant = ((abs(newBFO) / MAX_BFO) * MAX_BFO);
+    redundant = (-newBFO / MAX_BFO) * MAX_BFO;
     currentFrequency -= redundant / 1000;
     newBFO += redundant;
   }
 
-  currentBFO = newBFO;
-  updateBFO();
+  updateBFO(newBFO);
 
-  if(redundant != 0)
+  if(redundant!=0)
   {
     clampSSBBand();
     rx.setFrequency(currentFrequency);
@@ -406,18 +407,19 @@ bool clampSSBBand()
     // Update band table currentFreq
     band[bandIdx].currentFreq = currentFrequency;
     rx.setFrequency(currentFrequency);
-    currentBFO = 0;
-    updateBFO();
+    updateBFO(0);
     return(true);
   }
 
   return(false);
 }
 
-void updateBFO()
+void updateBFO(int16_t newBFO)
 {
+  // Update current BFO
+  currentBFO = newBFO;
   // To move frequency forward, need to move the BFO backwards
-  rx.setSSBBfo(-(currentBFO + getCurrentBand()->bandCal));
+  rx.setSSBBfo(-(newBFO + getCurrentBand()->bandCal));
 }
 
 void buttonCheck()
@@ -507,7 +509,7 @@ bool doPressAndRotate(int8_t dir)
     tuning_flag = true;
     tuning_timer = millis();
 #endif
-    doFrequencyTuneSSB(true);
+    doFrequencyTuneSSB(dir, true);
     needRedraw = true;
   }
   else
@@ -535,12 +537,10 @@ bool doRotate(int8_t dir)
   // doFrequencyTuneSSB() method, but leave for debug
   if(bfoOn && isSSB())
   {
-    currentBFO = (encoderCount == 1) ? (currentBFO + currentBFOStep) : (currentBFO - currentBFOStep);
-    // G8PTN: Clamp range to +/- MAX_BFO (as per doFrequencyTuneSSB)
-    if (currentBFO >  MAX_BFO) currentBFO =  MAX_BFO;
-    if (currentBFO < -MAX_BFO) currentBFO = -MAX_BFO;
-    band[bandIdx].currentFreq = currentFrequency + (currentBFO / 1000);     // G8PTN; Calculate frequency value to store in EEPROM
-    updateBFO();
+    int newBFO = currentBFO + currentBFOStep * dir;
+    newBFO = newBFO>MAX_BFO? MAX_BFO : newBFO<-MAX_BFO? -MAX_BFO : newBFO;
+    band[bandIdx].currentFreq = currentFrequency + newBFO / 1000;
+    updateBFO(newBFO);
     needRedraw = true;
   }
 
@@ -563,7 +563,7 @@ bool doRotate(int8_t dir)
     tuning_flag = true;
     tuning_timer = millis();
 #endif
-    doFrequencyTuneSSB();
+    doFrequencyTuneSSB(dir);
     needRedraw = true;
   }
 

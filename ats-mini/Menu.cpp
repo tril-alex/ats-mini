@@ -377,7 +377,7 @@ static void doCal(int dir)
 
   // If in SSB mode set the SI4732/5 BFO value
   // This adjusts the BFO while in the calibration menu
-  if(isSSB()) updateBFO();
+  if(isSSB()) updateBFO(currentBFO);
 }
 
 void doBrt(int dir)
@@ -598,7 +598,7 @@ void selectBand(uint8_t idx)
     loadSSB(bandwidthSSB[bwIdxSSB].idx);
     bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
     setSsbBandwidth(bwIdxSSB);
-    updateBFO();
+    updateBFO(currentBFO);
   }
   else if(currentMode==FM)
   {

@@ -95,7 +95,7 @@ extern const int CALMax;
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
 void useBand(const Band *band);
-void updateBFO();
+void updateBFO(int16_t newBFO);
 
 // Utils.c
 void loadSSB(uint8_t bandwidth);
