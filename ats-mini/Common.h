@@ -69,7 +69,6 @@ extern bool tuning_flag;
 extern uint8_t rssi;
 
 extern uint16_t currentFrequency;
-extern const uint16_t currentBFOStep;
 extern int16_t currentBFO;
 extern uint8_t currentMode;
 extern uint16_t currentCmd;
@@ -95,7 +94,7 @@ extern const int CALMax;
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
 void useBand(const Band *band);
-void updateBFO(int16_t newBFO);
+void updateBFO(int newBFO);
 
 // Utils.c
 void loadSSB(uint8_t bandwidth);

@@ -50,8 +50,6 @@ long elapsedCommand = millis();
 volatile int encoderCount = 0;
 uint16_t currentFrequency;
 
-const uint16_t currentBFOStep = 10;
-
 // AGC/ATTN index per mode (FM/AM/SSB)
 int8_t FmAgcIdx = 0;                    // Default FM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 27 = ATTN 0 to 26
 int8_t AmAgcIdx = 0;                    // Default AM  AGCON  : Range = 0 to 37, 0 = AGCON, 1 - 37 = ATTN 0 to 36
@@ -348,78 +346,53 @@ void doSeek()
 // In SSB mode tuning uses VFO and BFO
 // (tuning algorithm from ATS-20_EX Goshante firmware)
 //
-void doFrequencyTuneSSB(int8_t dir, bool fast = false)
+void updateBFO(int newBFO)
 {
-  int newBFO = currentBFO + dir * getSteps(fast);
-  int redundant = 0;
+  Band *band = getCurrentBand();
 
-  if(newBFO > MAX_BFO)
-  {
-    redundant = (newBFO / MAX_BFO) * MAX_BFO;
-    currentFrequency += redundant / 1000;
-    newBFO -= redundant;
-  }
-  else if(newBFO < -MAX_BFO)
-  {
-    redundant = (-newBFO / MAX_BFO) * MAX_BFO;
-    currentFrequency -= redundant / 1000;
-    newBFO += redundant;
-  }
+  // No BFO outside SSB modes
+  if(!isSSB()) newBFO = 0;
 
-  updateBFO(newBFO);
-
-  if(redundant!=0)
+  // If new BFO exceeds allowed bounds...
+  if(newBFO > MAX_BFO || newBFO < -MAX_BFO)
   {
-    clampSSBBand();
-    rx.setFrequency(currentFrequency);
+    // Compute correction and new frequency
+    int fCorrect = (newBFO / MAX_BFO) * MAX_BFO;
+    int newFreq  = currentFrequency + fCorrect / 1000;
+
+    // Correct new BFO
+    newBFO -= fCorrect;
+
+    // Do not let new frequency exceed band bounds
+    if(newFreq < band->minimumFreq)
+    {
+      newFreq = band->maximumFreq;
+      newBFO  = 0;
+    }
+    else if(newFreq > band->maximumFreq)
+    {
+      newFreq = band->minimumFreq;
+      newBFO  = 0;
+    }
+
+    // Apply new frequency
+    rx.setFrequency(newFreq);
+
     //Re-apply to remove noise
     //agcSetFunc();
+
+    // Update current frequency
     currentFrequency = rx.getFrequency();
   }
 
-  // Update band table currentFreq
-  band[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
-  clampSSBBand();
-}
-
-//
-// Clamp SSB tuning to band limits
-//
-bool clampSSBBand()
-{
-  uint16_t freq = currentFrequency + currentBFO / 1000;
-
-  // Priority to minimum check to cover SSB frequency negative
-  bool update = false;
-  if(freq < band[bandIdx].minimumFreq || (currentFrequency & 0x8000))
-  {
-    currentFrequency = band[bandIdx].maximumFreq;
-    update = true;
-  }
-  else if(freq > band[bandIdx].maximumFreq)
-  {
-    currentFrequency = band[bandIdx].minimumFreq;
-    update = true;
-  }
-
-  if(update)
-  {
-    // Update band table currentFreq
-    band[bandIdx].currentFreq = currentFrequency;
-    rx.setFrequency(currentFrequency);
-    updateBFO(0);
-    return(true);
-  }
-
-  return(false);
-}
-
-void updateBFO(int16_t newBFO)
-{
   // Update current BFO
   currentBFO = newBFO;
+
   // To move frequency forward, need to move the BFO backwards
-  rx.setSSBBfo(-(newBFO + getCurrentBand()->bandCal));
+  rx.setSSBBfo(-(currentBFO + band->bandCal));
+
+  // Save current band frequency, w.r.t. new BFO value
+  band->currentFreq = currentFrequency + currentBFO / 1000;
 }
 
 void buttonCheck()
@@ -509,7 +482,7 @@ bool doPressAndRotate(int8_t dir)
     tuning_flag = true;
     tuning_timer = millis();
 #endif
-    doFrequencyTuneSSB(dir, true);
+    updateBFO(currentBFO + dir * getSteps(true));
     needRedraw = true;
   }
   else
@@ -537,10 +510,7 @@ bool doRotate(int8_t dir)
   // doFrequencyTuneSSB() method, but leave for debug
   if(bfoOn && isSSB())
   {
-    int newBFO = currentBFO + currentBFOStep * dir;
-    newBFO = newBFO>MAX_BFO? MAX_BFO : newBFO<-MAX_BFO? -MAX_BFO : newBFO;
-    band[bandIdx].currentFreq = currentFrequency + newBFO / 1000;
-    updateBFO(newBFO);
+    updateBFO(currentBFO + dir * 10);
     needRedraw = true;
   }
 
@@ -563,7 +533,7 @@ bool doRotate(int8_t dir)
     tuning_flag = true;
     tuning_timer = millis();
 #endif
-    doFrequencyTuneSSB(dir);
+    updateBFO(currentBFO + dir * getSteps(false));
     needRedraw = true;
   }
 
