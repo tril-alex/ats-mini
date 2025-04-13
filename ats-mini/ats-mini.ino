@@ -250,6 +250,11 @@ ICACHE_RAM_ATTR void rotaryEncoder()
 //
 void useBand(const Band *band)
 {
+  // Set current frequency and mode, reset BFO
+  currentFrequency = band->currentFreq;
+  currentMode = band->bandMode;
+  currentBFO = 0;
+
   if(currentMode==FM)
   {
     // rx.setTuneFrequencyAntennaCapacitor(0);

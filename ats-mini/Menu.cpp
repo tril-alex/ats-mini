@@ -558,13 +558,9 @@ void clickVolume()
 
 void selectBand(uint8_t idx)
 {
-  // Set band, frequency, and mode
+  // Set band and mode
   bandIdx = min(idx, LAST_ITEM(band));
-  currentFrequency = band[bandIdx].currentFreq;
   currentMode = band[bandIdx].bandMode;
-
-  // Reset BFO
-  currentBFO = 0;
 
   // Set tuning step
   if(band[bandIdx].bandType==FM_BAND_TYPE)
@@ -580,13 +576,12 @@ void selectBand(uint8_t idx)
 
   int bwIdx = band[bandIdx].bandwidthIdx;
 
-  // Set bandwidth
+  // Load SSB patch as needed and set bandwidth
   if(isSSB())
   {
     loadSSB(bandwidthSSB[bwIdxSSB].idx);
     bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
     setSsbBandwidth(bwIdxSSB);
-    updateBFO(currentBFO);
   }
   else if(currentMode==FM)
   {
