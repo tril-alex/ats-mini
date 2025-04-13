@@ -335,28 +335,6 @@ void doSeek()
 }
 
 //
-// Tune to a new frequency, keep same BFO (hopefully 0)
-//
-void updateFrequency(int newFreq)
-{    
-  Band *band = getCurrentBand();
-
-  // Do not let new frequency exceed band limits
-  newFreq = newFreq<band->minimumFreq? band->maximumFreq
-          : newFreq>band->maximumFreq? band->minimumFreq
-          : newFreq;
-   
-  // Set new frequency
-  rx.setFrequency(newFreq);
-
-  // Update current frequency
-  currentFrequency = rx.getFrequency();
-
-  // Save current band frequency
-  band->currentFreq = currentFrequency + currentBFO / 1000;
-}
-
-//
 // Tune using BFO, using algorithm from Goshante's ATS-20_EX firmware
 //
 void updateBFO(int newBFO)
@@ -405,6 +383,31 @@ void updateBFO(int newBFO)
   rx.setSSBBfo(-(currentBFO + band->bandCal));
 
   // Save current band frequency, w.r.t. new BFO value
+  band->currentFreq = currentFrequency + currentBFO / 1000;
+}
+
+//
+// Tune to a new frequency, resetting BFO if present
+//
+void updateFrequency(int newFreq)
+{    
+  Band *band = getCurrentBand();
+
+  // Do not let new frequency exceed band limits
+  newFreq = newFreq<band->minimumFreq? band->maximumFreq
+          : newFreq>band->maximumFreq? band->minimumFreq
+          : newFreq;
+   
+  // Set new frequency
+  rx.setFrequency(newFreq);
+
+  // Clear BFO, if present
+  if(currentBFO) updateBFO(0);
+
+  // Update current frequency
+  currentFrequency = rx.getFrequency();
+
+  // Save current band frequency
   band->currentFreq = currentFrequency + currentBFO / 1000;
 }
 
