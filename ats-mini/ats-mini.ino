@@ -101,7 +101,6 @@ bool tuning_flag = false;               // Flag to indicate tuning
 uint16_t currentCmd  = CMD_NONE;
 uint8_t  currentMode = FM;
 int16_t  currentBFO  = 0;
-uint8_t  volume      = DEFAULT_VOLUME;
 
 uint8_t  rssi = 0;
 uint8_t  snr  = 0;
@@ -211,7 +210,7 @@ void setup()
     // Save default configuration to EEPROM
     eepromSaveConfig();
     // Set initial volume after EEPROM reset
-    rx.setVolume(volume);
+    rx.setVolume(DEFAULT_VOLUME);
     // Set initial brightness after EEPROM reset
     ledcWrite(PIN_LCD_BL, currentBrt);
   }
