@@ -40,7 +40,7 @@ jobs:
           ref: "${{ github.event.inputs.revision || github.ref }}"
 
       - name: Pre-commit
-        uses: pre-commit/action@v3
+        uses: pre-commit/action@v3.0.1
 
       - name: Get version slug
         id: slug
