@@ -73,8 +73,6 @@ extern const uint16_t currentBFOStep;
 extern int16_t currentBFO;
 extern uint8_t currentMode;
 extern uint16_t currentCmd;
-extern int16_t currentCAL;
-extern int8_t currentAVC;
 extern uint16_t currentBrt;
 extern uint16_t currentSleep;
 extern uint8_t AmTotalSteps;

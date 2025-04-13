@@ -86,9 +86,7 @@ bool pb1_long_released = false;         // Push button long released
 bool screen_toggle = false;             // Toggle when drawsprite is called
 
 // Menu options
-int16_t currentCAL = 0;                 // Calibration offset, +/- 1000Hz in steps of 10Hz
 uint16_t currentBrt = 128;              // Display brightness, range = 32 to 255 in steps of 32
-int8_t currentAVC = 48;                 // Selected AVC, range = 12 to 90 in steps of 2
 uint16_t currentSleep = 30;             // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
 
@@ -331,8 +329,10 @@ void showFrequencySeek(uint16_t freq)
   drawScreen();
 }
 
+//
 // Find a station. The direction is based on the last encoder move
 // clockwise or counterclockwise
+//
 void doSeek()
 {
   // It does not work for SSB mode
@@ -342,8 +342,10 @@ void doSeek()
   currentFrequency = rx.getFrequency();
 }
 
+//
 // In SSB mode tuning uses VFO and BFO
 // (tuning algorithm from ATS-20_EX Goshante firmware)
+//
 void doFrequencyTuneSSB(bool fast = false)
 {
   int step = encoderCount == 1 ? getSteps(fast) : getSteps(fast) * -1;
@@ -380,7 +382,9 @@ void doFrequencyTuneSSB(bool fast = false)
   clampSSBBand();
 }
 
+//
 // Clamp SSB tuning to band limits
+//
 bool clampSSBBand()
 {
   uint16_t freq = currentFrequency + currentBFO / 1000;
@@ -413,10 +417,8 @@ bool clampSSBBand()
 
 void updateBFO()
 {
-  // To move frequency forward, need to move the BFO backwards,
-  // so multiply by -1
-  currentCAL = getCurrentBand()->bandCal;
-  rx.setSSBBfo(-(currentBFO + currentCAL));
+  // To move frequency forward, need to move the BFO backwards
+  rx.setSSBBfo(-(currentBFO + getCurrentBand()->bandCal));
 }
 
 void buttonCheck()
@@ -716,12 +718,12 @@ void loop()
   {
     rx.getCurrentReceivedSignalQuality();
     snr = rx.getCurrentSNR();
-    int aux = rx.getCurrentRSSI();
 
     // G8PTN: Based on 1.2s update, always allow S-Meter
-    if(rssi!=aux)
+    int newRssi = rx.getCurrentRSSI();
+    if(newRssi != rssi)
     {
-      rssi = aux;
+      rssi = newRssi;
       needRedraw = true;
     }
 

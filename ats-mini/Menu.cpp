@@ -310,11 +310,7 @@ static void clickMenu(int cmd)
       break;
 
     case MENU_CALIBRATION:
-      if(isSSB())
-      {
-        currentCmd = CMD_CAL;
-        currentCAL = band[bandIdx].bandCal;
-      }
+      if(isSSB()) currentCmd = CMD_CAL;
       break;
 
     case MENU_MUTE:
@@ -364,17 +360,20 @@ void doAvc(int dir)
   if(currentCmd==FM) return;
 
   if(isSSB())
-    currentAVC = SsbAvcIdx = wrap_range(SsbAvcIdx, 2*dir, 12, 90);
+  {
+    SsbAvcIdx = wrap_range(SsbAvcIdx, 2*dir, 12, 90);
+    rx.setAvcAmMaxGain(SsbAvcIdx);
+  }
   else
-    currentAVC = AmAvcIdx = wrap_range(AmAvcIdx, 2*dir, 12, 90);
-
-  // Configure SI4732/5
-  rx.setAvcAmMaxGain(currentAVC);
+  {
+    AmAvcIdx = wrap_range(AmAvcIdx, 2*dir, 12, 90);
+    rx.setAvcAmMaxGain(AmAvcIdx);
+  }
 }
 
 static void doCal(int dir)
 {
-  band[bandIdx].bandCal = currentCAL = clamp_range(band[bandIdx].bandCal, 10*dir, -MAX_CAL, MAX_CAL);
+  band[bandIdx].bandCal = clamp_range(band[bandIdx].bandCal, 10*dir, -MAX_CAL, MAX_CAL);
 
   // If in SSB mode set the SI4732/5 BFO value
   // This adjusts the BFO while in the calibration menu
@@ -797,12 +796,9 @@ static void drawVolume(int x, int y, int sx)
 {
   drawCommon(menu[MENU_VOLUME], x, y, sx);
 
-  for(int i=-2 ; i<3 ; i++)
-  {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-    spr.drawNumber(rx.getVolume(), 40+x+(sx/2), 66+y, 7);
-  }
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawNumber(rx.getVolume(), 40+x+(sx/2), 66+y, 7);
 }
 
 static void drawAgc(int x, int y, int sx)
@@ -835,39 +831,36 @@ static void drawSoftMuteMaxAtt(int x, int y, int sx)
 {
   drawCommon(menu[MENU_SOFTMUTE], x, y, sx);
 
-  for(int i=-2 ; i<3 ; i++)
-  {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-    spr.drawString("Max Attn", 40+x+(sx/2), 32+y, 2);
-    spr.drawNumber(softMuteMaxAttIdx, 40+x+(sx/2), 60+y, 4);
-    spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
-  }
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawString("Max Attn", 40+x+(sx/2), 32+y, 2);
+  spr.drawNumber(softMuteMaxAttIdx, 40+x+(sx/2), 60+y, 4);
+  spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
 }
 
 static void drawCal(int x, int y, int sx)
 {
   drawCommon(menu[MENU_CALIBRATION], x, y, sx);
 
-  for(int i=-2 ; i<3 ; i++)
-  {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-    spr.drawNumber(currentCAL, 40+x+(sx/2), 60+y, 4);
-    spr.drawString("Hz", 40+x+(sx/2), 90+y, 4);
-  }
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawNumber(getCurrentBand()->bandCal, 40+x+(sx/2), 60+y, 4);
+  spr.drawString("Hz", 40+x+(sx/2), 90+y, 4);
 }
 
 static void drawAvc(int x, int y, int sx)
 {
   drawCommon(menu[MENU_AVC], x, y, sx);
 
-  for(int i=-2 ; i<3 ; i++)
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawString("Max Gain", 40+x+(sx/2), 32+y, 2);
+
+  // Only show AVC for AM and SSB modes
+  if(currentCmd!=FM)
   {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-    spr.drawString("Max Gain", 40+x+(sx/2), 32+y, 2);
-    spr.drawNumber(currentAVC, 40+x+(sx/2), 60+y, 4);
+    int currentAvc = isSSB()? SsbAvcIdx : AmAvcIdx;
+    spr.drawNumber(currentAvc, 40+x+(sx/2), 60+y, 4);
     spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
   }
 }
@@ -876,24 +869,18 @@ static void drawBrt(int x, int y, int sx)
 {
   drawCommon(settings[MENU_BRIGHTNESS], x, y, sx);
 
-  for(int i=-2 ; i<3 ; i++)
-  {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-    spr.drawNumber(currentBrt, 40+x+(sx/2), 60+y, 4);
-  }
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawNumber(currentBrt, 40+x+(sx/2), 60+y, 4);
 }
 
 static void drawSleep(int x, int y, int sx)
 {
   drawCommon(settings[MENU_SLEEP], x, y, sx);
 
-  for(int i=-2 ; i<3 ; i++)
-  {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-    spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
-  }
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
 }
 
 static void drawInfo(int x, int y, int sx)
