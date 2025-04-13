@@ -1,11 +1,11 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
--   repo: https://github.com/pre-commit/mirrors-clang-format
+  - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v20.1.0
     hooks:
       - id: clang-format
@@ -14,3 +14,7 @@ repos:
         args:
           - "--style={BasedOnStyle: llvm, ColumnLimit: 0}"
         exclude: ats-mini/patch_init.h
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint

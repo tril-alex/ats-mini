@@ -42,7 +42,7 @@ jobs:
       - name: Get version slug
         id: slug
         run: |
-          echo "slug=$(git describe --tags --match 'v?.??' --always --dirty || echo v0.00)" >> $GITHUB_OUTPUT
+          echo "slug=$(git describe --tags --match 'v?.??' --always --dirty || echo v0.00)" >> "$GITHUB_OUTPUT"
 
       - name: Compile firmware
         uses: arduino/compile-sketches@v1
@@ -94,7 +94,7 @@ jobs:
           name: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}
           path: artifact
       - name: Archive the build artifact
-        run: cd "artifact" && zip -9 -r "../${FILENAME}" *
+        run: cd "artifact" && zip -9 -r "../${FILENAME}" ./*
         env:
           FILENAME: ${{ github.event.repository.name }}-${{ needs.build.outputs.slug }}.zip
       - name: Create release
@@ -102,8 +102,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SLUG: ${{ needs.build.outputs.slug }}
         run: >-
-          cat artifact/ats-mini/CHANGELOG.md |
-          python -c 'import os,re,sys; t=sys.stdin.read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
+          python -c 'import os,re; t=open("artifact/ats-mini/CHANGELOG.md").read(); r=re.search(f"""(^## {os.environ["SLUG"][1:].replace(".", "\\.")} .*?)(?=^## \\d|\\Z)""", t, re.MULTILINE | re.DOTALL); print(r.group(0) if r else "")' |
           gh release create "$SLUG" --repo '${{ github.repository }}' --notes-file -
       - name: Upload release artifact
         env:
