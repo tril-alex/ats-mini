@@ -4,18 +4,28 @@ PROFILE	= esp32s3
 FQBN	= esp32.esp32.esp32s3
 INO	= ats-mini.ino
 ELF	= ./build/$(FQBN)/$(INO).elf
-PORT	= /dev/cu.usbmodem1101
+PORT	?= /dev/cu.usbmodem1101
 
-DEBUG_LEVEL = 0
+DEBUG_LEVEL ?= 0
 
+#
 # DISABLE_REMOTE  : Disable serial port control and monitoring
 # DISABLE_HOLDOFF : Hold off display updates while tuning
 # THEME_EDITOR    : Enable setting and printing of theme colors
-DEFINES = \
-	-DDEBUG=$(DEBUG_LEVEL) \
-	-DNO_DISABLE_HOLDOFF \
-	-DNO_DISABLE_REMOTE \
-	-DNO_THEME_EDITOR
+#
+DEFINES = -DDEBUG=$(DEBUG_LEVEL)
+
+ifdef DISABLE_REMOTE
+	DEFINES += -DDISABLE_REMOTE
+endif
+
+ifdef DISABLE_HOLDOFF
+	DEFINES += -DDISABLE_HOLDOFF
+endif
+
+ifdef THEME_EDITOR
+	DEFINES += -DTHEME_EDITOR
+endif
 
 OPTIONS = \
 	--build-property "build.extra_flags=$(DEFINES)" \

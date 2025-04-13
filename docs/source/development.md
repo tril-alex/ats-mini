@@ -9,6 +9,28 @@
 2. Go to the repository root folder
 3. Compile and flash the firmware
 
-``` shell
+```shell
 arduino-cli compile --clean -e -p COM_PORT -u ats-mini
+```
+
+## Compile-time options
+
+The available options are:
+
+* `DISABLE_REMOTE` - disable remote control over the USB-serial port
+* `THEME_EDITOR` - enable the color theme editor
+* `DISABLE_HOLDOFF` - disable delayed screen update while tuning
+
+To set an option, add the `--build-property` command line argument like this:
+
+```shell
+arduino-cli compile --build-property "build.extra_flags=-DTHEME_EDITOR -DDISABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
+```
+
+## Using the make command
+
+You can do all of the above using the `make` command as well:
+
+```shell
+THEME_EDITOR=1 DISABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
 ```
