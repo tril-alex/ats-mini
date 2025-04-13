@@ -39,7 +39,7 @@ Band band[] =
   {"CB ", SW_BAND_TYPE, AM,  26000, 30000, 27135, 0, 4, 0},
   {"10M", SW_BAND_TYPE, USB, 28000, 30000, 28400, 0, 4, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
-  {"ALL", SW_BAND_TYPE, AM,    150, 30000, 15000, 0, 4, 0} 
+  {"ALL", SW_BAND_TYPE, AM,    150, 30000, 15000, 0, 4, 0}
 };
 
 int getTotalBands() { return(ITEM_COUNT(band)); }
@@ -114,10 +114,10 @@ uint8_t SsbTotalSteps   = 5; // SSB sub 1kHz steps
 int fmStepIdx = 1;
 Step fmStep[] =
 {
-  {   5, "50k"  }, 
+  {   5, "50k"  },
   {  10, "100k" },
   {  20, "200k" },
-  { 100, "1M"   },  
+  { 100, "1M"   },
 };
 
 volatile int8_t amStepIdx = 3;
@@ -233,7 +233,7 @@ Bandwidth bandwidthFM[] =
 
 void setSsbBandwidth(int idx)
 {
-  // Set Audio 
+  // Set Audio
   rx.setSSBAudioBandwidth(bandwidthSSB[idx].idx);
 
   // If audio bandwidth selected is about 2 kHz or below, it is

@@ -147,7 +147,7 @@ static void drawScale(uint32_t freq)
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text, TH.bg);
 
-  // Start drawing frequencies from the left 
+  // Start drawing frequencies from the left
   freq = freq/10 - 20;
 
   // Get band edges

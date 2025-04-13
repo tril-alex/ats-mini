@@ -15,7 +15,7 @@
 
 // State machine used for battery state of charge (SOC) detection with
 // hysteresis (Default = Illegal state)
-static uint8_t batteryState = 255; 
+static uint8_t batteryState = 255;
 
 // Current battery voltage
 static float batteryVolts = 4.0;

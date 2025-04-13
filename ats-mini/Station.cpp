@@ -62,7 +62,7 @@ static bool showRdsMessage(const char *rdsMessage)
 static bool showRdsTime(const char *rdsTime)
 {
   if(!rdsTime) return(false);
- 
+
   // The standard RDS time format is “HH:MM”.
   // or sometimes more complex like “DD.MM.YY,HH:MM”.
   const char *timeField = strstr(rdsTime, ":");
@@ -73,7 +73,7 @@ static bool showRdsTime(const char *rdsTime)
     // Extract hours and minutes
     int hours = (timeField[-2] - '0') * 10 + timeField[-1] - '0';
     int mins  = (timeField[1] - '0') * 10 + timeField[2] - '0';
- 
+
     // If hours and minutes are valid, update clock
     if(hours>=0 && hours<24 && mins>=0 && mins<60)
       return(clockSet(hours, mins));

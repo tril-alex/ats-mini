@@ -200,7 +200,7 @@ void setup()
   if(eepromVerify())
   {
     // Load configuration from EEPROM
-    eepromLoadConfig(); 
+    eepromLoadConfig();
   }
   else
   {
@@ -265,7 +265,7 @@ void useBand(const Band *band)
     rx.setRdsConfig(1, 2, 2, 2, 2);
     rx.setGpioCtl(1, 0, 0);   // G8PTN: Enable GPIO1 as output
     rx.setGpio(0, 0, 0);      // G8PTN: Set GPIO1 = 0
-  } 
+  }
   else
   {
     // Set the tuning capacitor for SW or MW/LW
@@ -316,7 +316,7 @@ void useBand(const Band *band)
 bool checkStopSeeking()
 {
   // Returns true if the user rotates the encoder
-  return(seekStop); 
+  return(seekStop);
 }
 
 // This function is called by the seek function process.
@@ -395,14 +395,14 @@ void updateBFO(int newBFO)
 // Tune to a new frequency, resetting BFO if present
 //
 void updateFrequency(int newFreq)
-{    
+{
   Band *band = getCurrentBand();
 
   // Do not let new frequency exceed band limits
   newFreq = newFreq<band->minimumFreq? band->maximumFreq
           : newFreq>band->maximumFreq? band->minimumFreq
           : newFreq;
-   
+
   // Set new frequency
   rx.setFrequency(newFreq);
 
@@ -467,7 +467,7 @@ void buttonCheck()
       }
       // If button is released...
       else if(pb1_stable == LOW && pb1_last == HIGH)
-      { 
+      {
         pb1_released_time = pb1_edge_time;
         pb1_stable = pb1_last;
         pb1_released = true;
@@ -571,7 +571,7 @@ bool doRotate(int8_t dir)
 
     // Clear FM RDS information
     if(currentMode==FM) clearStationName();
-   
+
     // Check current CB channel
     if(isCB()) checkCbChannel();
 
