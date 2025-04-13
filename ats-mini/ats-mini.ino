@@ -227,12 +227,6 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_B), rotaryEncoder, CHANGE);
 }
 
-// When no command is selected, the encoder controls the frequency
-void disableCommands()
-{
-  currentCmd = CMD_NONE;
-}
-
 //
 // Reads encoder via interrupt
 // Uses Rotary.h and Rotary.cpp implementation to process encoder via
@@ -656,7 +650,7 @@ void loop()
     }
     else if(isModalMode(currentCmd))
     {
-      disableCommands();
+      currentCmd = CMD_NONE;
       drawCommandStatus("VFO ");
       needRedraw = true;
     }
@@ -697,7 +691,7 @@ void loop()
   {
     if(isModalMode(currentCmd))
     {
-      disableCommands();
+      currentCmd = CMD_NONE;
       needRedraw = true;
     }
 
