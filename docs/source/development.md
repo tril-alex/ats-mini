@@ -19,12 +19,12 @@ The available options are:
 
 * `DISABLE_REMOTE` - disable remote control over the USB-serial port
 * `THEME_EDITOR` - enable the color theme editor
-* `DISABLE_HOLDOFF` - disable delayed screen update while tuning
+* `ENABLE_HOLDOFF` - enable delayed screen update while tuning
 
 To set an option, add the `--build-property` command line argument like this:
 
 ```shell
-arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -DDISABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
+arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -DENABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
 ```
 
 ## Using the make command
@@ -32,5 +32,5 @@ arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -D
 You can do all of the above using the `make` command as well:
 
 ```shell
-THEME_EDITOR=1 DISABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
+THEME_EDITOR=1 ENABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
 ```

@@ -44,7 +44,7 @@ static void drawAbout()
   spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 33 + 16 * 5, 2);
   spr.drawString("Marat Fayzullin", 2, 33 + 16 * 6, 2);
 
-#ifndef DISABLE_HOLDOFF
+#ifdef ENABLE_HOLDOFF
   // Update if not tuning
   if(!tuning_flag) spr.pushSprite(0, 0);
 #else
@@ -312,7 +312,7 @@ void drawScreen()
   // Draw tuner scale
   drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
 
-#ifndef DISABLE_HOLDOFF
+#ifdef ENABLE_HOLDOFF
   // Update if not tuning
   if(!tuning_flag)
   {

@@ -498,7 +498,7 @@ bool doPressAndRotate(int8_t dir)
 
   if(isSSB())
   {
-#ifndef DISABLE_HOLDOFF
+#ifdef ENABLE_HOLDOFF
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -541,7 +541,7 @@ bool doRotate(int8_t dir)
   //
   else if(isSSB())
   {
-#ifndef DISABLE_HOLDOFF
+#ifdef ENABLE_HOLDOFF
     // Tuning timer to hold off (SSB) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -555,7 +555,7 @@ bool doRotate(int8_t dir)
   //
   else
   {
-#ifndef DISABLE_HOLDOFF
+#ifdef ENABLE_HOLDOFF
     // Tuning timer to hold off (FM/AM) display updates
     tuning_flag = true;
     tuning_timer = millis();
@@ -732,7 +732,7 @@ void loop()
     background_timer = currentTime;
   }
 
-#ifndef DISABLE_HOLDOFF
+#ifdef ENABLE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))
   {

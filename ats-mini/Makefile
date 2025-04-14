@@ -10,7 +10,7 @@ DEBUG_LEVEL ?= 0
 
 #
 # DISABLE_REMOTE  : Disable serial port control and monitoring
-# DISABLE_HOLDOFF : Hold off display updates while tuning
+# ENABLE_HOLDOFF  : Hold off display updates while tuning
 # THEME_EDITOR    : Enable setting and printing of theme colors
 #
 DEFINES = -DDEBUG=$(DEBUG_LEVEL)
@@ -19,8 +19,8 @@ ifdef DISABLE_REMOTE
 	DEFINES += -DDISABLE_REMOTE
 endif
 
-ifdef DISABLE_HOLDOFF
-	DEFINES += -DDISABLE_HOLDOFF
+ifdef ENABLE_HOLDOFF
+	DEFINES += -DENABLE_HOLDOFF
 endif
 
 ifdef THEME_EDITOR
