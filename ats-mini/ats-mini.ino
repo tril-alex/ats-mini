@@ -658,8 +658,8 @@ void loop()
     }
     else if(isModalMode(currentCmd))
     {
+      // Deactivate menu
       currentCmd = CMD_NONE;
-      drawCommandStatus("VFO ");
       needRedraw = true;
     }
     else

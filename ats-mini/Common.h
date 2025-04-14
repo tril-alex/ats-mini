@@ -108,7 +108,6 @@ bool clockTickTime();
 
 // Draw.c
 void drawLoadingSSB();
-void drawCommandStatus(const char *status);
 void drawScreen();
 
 // Battery.c

@@ -65,16 +65,6 @@ void drawLoadingSSB()
 }
 
 //
-// Show command status message
-//
-void drawCommandStatus(const char *status)
-{
-  if(!displayOn()) return;
-
-  spr.drawString(status, 38, 14, 2);
-}
-
-//
 // Draw band and mode indicators
 //
 static void drawBandAndMode(const char *band, const char *mode, int x, int y)
@@ -181,24 +171,6 @@ static void drawScale(uint32_t freq)
       }
     }
   }
-}
-
-//
-// Draw BFO
-//
-static void drawBFO(int bfo, int x, int y)
-{
-  char text[32];
-
-  if(bfo>0)
-    sprintf(text, "+%4.4d", bfo);
-  else
-    sprintf(text, "%4.4d", bfo);
-
-  spr.setTextDatum(ML_DATUM);
-  spr.setTextColor(TH.text, TH.bg);
-  spr.drawString("BFO:", x, y, 4);
-  spr.drawString(text, x+70, y, 4);
 }
 
 //
