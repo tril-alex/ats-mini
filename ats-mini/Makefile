@@ -28,7 +28,7 @@ ifdef THEME_EDITOR
 endif
 
 OPTIONS = \
-	--build-property "build.extra_flags=$(DEFINES)" \
+	--build-property "compiler.cpp.extra_flags=$(DEFINES)" \
 	--warnings all
 
 HEADERS = \

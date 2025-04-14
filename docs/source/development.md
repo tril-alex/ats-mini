@@ -24,7 +24,7 @@ The available options are:
 To set an option, add the `--build-property` command line argument like this:
 
 ```shell
-arduino-cli compile --build-property "build.extra_flags=-DTHEME_EDITOR -DDISABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
+arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -DDISABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
 ```
 
 ## Using the make command
