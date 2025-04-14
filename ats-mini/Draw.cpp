@@ -4,28 +4,25 @@
 #include "Menu.h"
 
 // Display position control
-#define menu_offset_x    0    // Menu horizontal offset
-#define menu_offset_y   20    // Menu vertical offset
-#define menu_delta_x    10    // Menu width delta
-#define meter_offset_x   0    // Meter horizontal offset
-#define meter_offset_y   0    // Meter vertical offset
-#define save_offset_x   87    // EEPROM save icon horizontal offset
-#define save_offset_y    0    // EEPROM save icon vertical offset
-#define freq_offset_x  250    // Frequency horizontal offset
-#define freq_offset_y   65    // Frequency vertical offset
-#define funit_offset_x 255    // Frequency Unit horizontal offset
-#define funit_offset_y  48    // Frequency Unit vertical offset
-#define band_offset_x  150    // Band horizontal offset
-#define band_offset_y    3    // Band vertical offset
-// #define mode_offset_x   95    // Mode horizontal offset
-// #define mode_offset_y  114    // Mode vertical offset
-#define vol_offset_x   120    // Volume horizontal offset
-#define vol_offset_y   150    // Volume vertical offset
-#define rds_offset_x   165    // RDS horizontal offset
-#define rds_offset_y    94    // RDS vertical offset
-#define batt_offset_x  288    // Battery meter x offset
-#define batt_offset_y    0    // Battery meter y offset
-#define clock_datum     90    // Clock x offset
+#define MENU_OFFSET_X    0    // Menu horizontal offset
+#define MENU_OFFSET_Y   20    // Menu vertical offset
+#define MENU_DELTA_X    10    // Menu width delta
+#define METER_OFFSET_X   0    // Meter horizontal offset
+#define METER_OFFSET_Y   0    // Meter vertical offset
+#define SAVE_OFFSET_X   87    // EEPROM save icon horizontal offset
+#define SAVE_OFFSET_Y    0    // EEPROM save icon vertical offset
+#define FREQ_OFFSET_X  250    // Frequency horizontal offset
+#define FREQ_OFFSET_Y   65    // Frequency vertical offset
+#define FUNIT_OFFSET_X 255    // Frequency Unit horizontal offset
+#define FUNIT_OFFSET_Y  48    // Frequency Unit vertical offset
+#define BAND_OFFSET_X  150    // Band horizontal offset
+#define BAND_OFFSET_Y    3    // Band vertical offset
+// #define MODE_OFFSET_X   95    // Mode horizontal offset
+// #define MODE_OFFSET_Y  114    // Mode vertical offset
+#define RDS_OFFSET_X   165    // RDS horizontal offset
+#define RDS_OFFSET_Y    94    // RDS vertical offset
+#define BATT_OFFSET_X  288    // Battery meter x offset
+#define BATT_OFFSET_Y    0    // Battery meter y offset
 
 //
 // Show ABOUT screen
@@ -244,17 +241,11 @@ void drawScreen()
   // Draw current time
   spr.setTextColor(TH.text, TH.bg);
   spr.setTextDatum(MR_DATUM);
-  spr.drawString(clockGet(), batt_offset_x + 31, batt_offset_y + 24, 2);
+  spr.drawString(clockGet(), BATT_OFFSET_X + 31, BATT_OFFSET_Y + 24, 2);
   spr.setTextColor(TH.text, TH.bg);
 
-  /* // Screen activity icon */
-  /* screen_toggle = !screen_toggle; */
-  /* spr.drawCircle(clock_datum+50, 11, 6, TH.text); */
-  /* if (screen_toggle) spr.fillCircle(clock_datum+50, 11, 5, TH.bg); */
-  /* else               spr.fillCircle(clock_datum+50, 11, 5, TFT_GREEN); */
-
   // Draw EEPROM write request icon
-  drawEepromIndicator(save_offset_x, save_offset_y);
+  drawEepromIndicator(SAVE_OFFSET_X, SAVE_OFFSET_Y);
 
   // About screen is a special case
   if(currentCmd==CMD_ABOUT)
@@ -270,43 +261,43 @@ void drawScreen()
   drawBandAndMode(
     getCurrentBand()->bandName,
     bandModeDesc[currentMode],
-    band_offset_x, band_offset_y
+    BAND_OFFSET_X, BAND_OFFSET_Y
   );
 
 #ifdef THEME_EDITOR
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(TH.text_warn, TH.bg);
-  spr.drawString("WARN", 319, rds_offset_y, 4);
+  spr.drawString("WARN", 319, RDS_OFFSET_Y, 4);
 #endif
 
   // Draw frequency and units
   drawFrequency(
     currentFrequency,
-    freq_offset_x, freq_offset_y,
-    funit_offset_x, funit_offset_y
+    FREQ_OFFSET_X, FREQ_OFFSET_Y,
+    FUNIT_OFFSET_X, FUNIT_OFFSET_Y
   );
 
   // Draw left-side menu/info bar
   // @@@ FIXME: Frequency display (above) intersects the side bar!
-  drawSideBar(currentCmd, menu_offset_x, menu_offset_y, menu_delta_x);
+  drawSideBar(currentCmd, MENU_OFFSET_X, MENU_OFFSET_Y, MENU_DELTA_X);
 
   // Draw S-meter
-  drawSMeter(getStrength(rssi), meter_offset_x, meter_offset_y);
+  drawSMeter(getStrength(rssi), METER_OFFSET_X, METER_OFFSET_Y);
 
   // Draw FM-specific information
   if(currentMode==FM)
   {
     // Indicate FM pilot detection
     if(rx.getCurrentPilot())
-      spr.fillRect(15 + meter_offset_x, 7+meter_offset_y, 4*17, 2, TH.bg);
+      spr.fillRect(15 + METER_OFFSET_X, 7+METER_OFFSET_Y, 4*17, 2, TH.bg);
     // Draw RDS station name
-    drawStationName(getStationName(), rds_offset_x, rds_offset_y);
+    drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
   }
   // Draw CB-specific information
   else if(isCB())
   {
     // Draw CB channel name
-    drawStationName(getStationName(), rds_offset_x, rds_offset_y);
+    drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
   }
 
   // Draw tuner scale
@@ -316,12 +307,12 @@ void drawScreen()
   // Update if not tuning
   if(!tuning_flag)
   {
-    drawBattery(batt_offset_x, batt_offset_y);
+    drawBattery(BATT_OFFSET_X, BATT_OFFSET_Y);
     spr.pushSprite(0, 0);
   }
 #else
   // No hold off
-  drawBattery(batt_offset_x, batt_offset_y);
+  drawBattery(BATT_OFFSET_X, BATT_OFFSET_Y);
   spr.pushSprite(0, 0);
 #endif
 }
