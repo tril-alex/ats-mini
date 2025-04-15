@@ -383,8 +383,8 @@ void updateBFO(int newBFO)
     // Apply new frequency
     rx.setFrequency(newFreq);
 
-    //Re-apply to remove noise
-    //agcSetFunc();
+    // Re-apply to remove noise
+    doAgc(0);
 
     // Update current frequency
     currentFrequency = rx.getFrequency();
