@@ -15,7 +15,7 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 ### Changed
 
-- Make the Night color theme less bright, fix theme length 
+- Make the Night color theme less bright, fix theme length
 
 ## 1.08 (2025-03-25)
 
