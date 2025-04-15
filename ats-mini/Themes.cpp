@@ -1,60 +1,11 @@
-// Theme editor
-#define THEME_EDITOR 0         // Enables setting and printing of theme colors
+#include "Themes.h"
 
-typedef struct __attribute__ ((packed)) {
-  char *name;
-  uint16_t bg;
-  uint16_t text;
-  uint16_t text_muted;
-  uint16_t text_warn;
-
-  uint16_t smeter_icon;
-  uint16_t smeter_bar;
-  uint16_t smeter_bar_plus;
-
-  uint16_t save_icon;
-
-  uint16_t batt_voltage;
-  uint16_t batt_border;
-  uint16_t batt_full;
-  uint16_t batt_low;
-  uint16_t batt_charge;
-  uint16_t batt_icon;
-
-  uint16_t band_text;
-
-  uint16_t mode_text;
-  uint16_t mode_border;
-
-  uint16_t box_bg;
-  uint16_t box_border;
-  uint16_t box_text;
-  uint16_t box_off_bg;
-  uint16_t box_off_text;
-
-  uint16_t menu_bg;
-  uint16_t menu_border;
-  uint16_t menu_hdr;
-  uint16_t menu_item;
-  uint16_t menu_hl_bg;
-  uint16_t menu_hl_text;
-  uint16_t menu_param;
-
-  uint16_t freq_text;
-  uint16_t funit_text;
-
-  uint16_t rds_text;
-
-  uint16_t scale_text;
-  uint16_t scale_pointer;
-  uint16_t scale_line;
-} ColorTheme;
-
-#if THEME_EDITOR
-ColorTheme theme[] = {
+#ifdef THEME_EDITOR
+ColorTheme theme[] =
 #else
-const ColorTheme theme[] = {
+const ColorTheme theme[] =
 #endif
+{
   {
     "Default",
     0x0000, // bg
@@ -326,9 +277,117 @@ const ColorTheme theme[] = {
     0x07AD, // scale_text
     0x5CF2, // scale_pointer
     0x2364, // scale_line
-  }
+  },
 
+  {
+    "Space",
+    0x0004, // bg
+    0x3FE0, // text
+    0xD69A, // text_muted
+    0xF800, // text_warn
+    0xD69A, // smeter_icon
+    0x07E0, // smeter_bar
+    0xF800, // smeter_bar_plus
+    0xF800, // save_icon
+    0xD69A, // batt_voltage
+    0xD69A, // batt_border
+    0x07E0, // batt_full
+    0xF800, // batt_low
+    0x001F, // batt_charge
+    0xFFE0, // batt_icon
+    0xD69A, // band_text
+    0xD69A, // mode_text
+    0xD69A, // mode_border
+    0x0004, // box_bg
+    0xD69A, // box_border
+    0xD69A, // box_text
+    0xF800, // box_off_bg
+    0xBEDF, // box_off_text
+    0x0004, // menu_bg
+    0xF800, // menu_border
+    0x3FE0, // menu_hdr
+    0xBEDF, // menu_item
+    0x105B, // menu_hl_bg
+    0xBEDF, // menu_hl_text
+    0xBEDF, // menu_param
+    0x3FE0, // freq_text
+    0xD69A, // funit_text
+    0xD69A, // rds_text
+    0x3FE0, // scale_text
+    0xF800, // scale_pointer
+    0xC638, // scale_line
+  }
 };
 
-const uint8_t lastTheme = (sizeof theme / sizeof(ColorTheme)) - 1;
 uint8_t themeIdx = 0;
+int getTotalThemes() { return(ITEM_COUNT(theme)); }
+
+#ifdef THEME_EDITOR
+
+static char readSerialWithEcho()
+{
+  char key;
+
+  while(!Serial.available());
+  key = Serial.read();
+  Serial.print(key);
+  return key;
+}
+
+static uint8_t char2nibble(char key)
+{
+  if((key >= '0') && (key <= '9')) return(key - '0');
+  if((key >= 'A') && (key <= 'F')) return(key - 'A' + 10);
+  if((key >= 'a') && (key <= 'f')) return(key - 'a' + 10);
+  return(0);
+}
+
+void setColorTheme()
+{
+  Serial.print("Enter a string of hex colors (x0001x0002...): ");
+
+  uint8_t *p = (uint8_t *)&(theme[themeIdx].bg);
+
+  for(int i=0 ; ; i+=sizeof(uint16_t))
+  {
+    if(i >= sizeof(ColorTheme)-offsetof(ColorTheme, bg))
+    {
+      Serial.println(" Ok");
+      break;
+    }
+
+    if(readSerialWithEcho() != 'x')
+    {
+      Serial.println(" Err");
+      break;
+    }
+
+    p[i + 1]  = char2nibble(readSerialWithEcho()) * 16;
+    p[i + 1] |= char2nibble(readSerialWithEcho());
+    p[i]      = char2nibble(readSerialWithEcho()) * 16;
+    p[i]     |= char2nibble(readSerialWithEcho());
+  }
+
+  // Redraw screen
+  drawScreen();
+}
+
+void getColorTheme()
+{
+  Serial.print("Color theme ");
+  Serial.print(TH.name);
+  Serial.print(": ");
+
+  const uint8_t *p = (uint8_t *)&(theme[themeIdx].bg);
+
+  for(int i=0 ; i<sizeof(ColorTheme)-offsetof(ColorTheme, bg) ; i+=sizeof(uint16_t))
+  {
+    char sb[6];
+    sprintf(sb, "x%02X%02X", p[i+1], p[i]);
+    Serial.print(sb);
+  }
+
+  Serial.println();
+}
+
+#endif // THEME_EDITOR

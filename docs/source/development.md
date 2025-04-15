@@ -15,8 +15,30 @@ A short video tutorial on how to build a custom firmware version:
 2. Go to the repository root folder
 3. Compile and flash the firmware
 
-``` shell
+```shell
 arduino-cli compile --clean -e -p COM_PORT -u ats-mini
+```
+
+## Compile-time options
+
+The available options are:
+
+* `DISABLE_REMOTE` - disable remote control over the USB-serial port
+* `THEME_EDITOR` - enable the color theme editor
+* `ENABLE_HOLDOFF` - enable delayed screen update while tuning
+
+To set an option, add the `--build-property` command line argument like this:
+
+```shell
+arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -DENABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
+```
+
+## Using the make command
+
+You can do all of the above using the `make` command as well:
+
+```shell
+THEME_EDITOR=1 ENABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
 ```
 
 ## Adding a changelog entry
@@ -38,8 +60,8 @@ arduino-cli compile --clean -e -p COM_PORT -u ats-mini
 
 ## Release process
 
-1. Bump the `app_ver` and `app_date` constants in the `ats-mini.ino` file
-2. If the new version has a different EEPROM layout, bump the `app_id` as well (it will force the EEPROM reset)
+1. Bump the `APP_VERSION` constant in the `Common.h` file
+2. If the new version has a different EEPROM layout, bump the `APP_ID` as well (it will force the EEPROM reset)
 3. Generate the CHANGELOG.md by running `uv run towncrier build --version X.XX`
 4. Add and commit the changes with a message like "Release X.XX", then push them to the repository
 5. Once the build is complete, download, flash and test it!

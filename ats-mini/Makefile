@@ -1,17 +1,43 @@
 ARDUINO_CLI := arduino-cli
 
-PROFILE = esp32s3
-FQBN = esp32.esp32.esp32s3
+PROFILE	= esp32s3
+FQBN	= esp32.esp32.esp32s3
+INO	= ats-mini.ino
+ELF	= ./build/$(FQBN)/$(INO).elf
+PORT	?= /dev/cu.usbmodem1101
 
-DEBUG_LEVEL =
-BUILD_PROPERY = --build-property "build.extra_flags=-DDEBUG=$(DEBUG_LEVEL)"
+DEBUG_LEVEL ?= 0
 
-PORT := /dev/cu.usbmodem1101
+#
+# DISABLE_REMOTE  : Disable serial port control and monitoring
+# ENABLE_HOLDOFF  : Hold off display updates while tuning
+# THEME_EDITOR    : Enable setting and printing of theme colors
+#
+DEFINES = -DDEBUG=$(DEBUG_LEVEL)
 
-INO = ats-mini.ino
-SRC = $(INO) Rotary.cpp
-HEADERS = User_Setup.h Rotary.h patch_init.h
-ELF = ./build/$(FQBN)/$(INO).elf
+ifdef DISABLE_REMOTE
+	DEFINES += -DDISABLE_REMOTE
+endif
+
+ifdef ENABLE_HOLDOFF
+	DEFINES += -DENABLE_HOLDOFF
+endif
+
+ifdef THEME_EDITOR
+	DEFINES += -DTHEME_EDITOR
+endif
+
+OPTIONS = \
+	--build-property "compiler.cpp.extra_flags=$(DEFINES)" \
+	--warnings all
+
+HEADERS = \
+	Common.h Themes.h Menu.h Storage.h tft_setup.h Rotary.h \
+	patch_init.h
+
+SRC = \
+	$(INO) Utils.cpp Rotary.cpp Draw.cpp Menu.cpp Station.cpp \
+	Battery.cpp Storage.cpp Themes.cpp Remote.cpp
 
 all: build
 
@@ -24,7 +50,7 @@ help:
 build: $(ELF)
 
 $(ELF): $(INO) $(SRC) $(HEADERS)
-	$(ARDUINO_CLI) compile -e -p $(PROFILE) $(BUILD_PROPERY)
+	$(ARDUINO_CLI) compile -e -p $(PROFILE) $(OPTIONS)
 
 upload: build
 	$(ARDUINO_CLI) upload -m $(PROFILE) -p $(PORT)
