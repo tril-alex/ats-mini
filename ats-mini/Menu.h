@@ -41,10 +41,10 @@
 #define CMD_MODE      0x0600 // |
 #define CMD_MENU      0x0700 // |
 #define CMD_SOFTMUTEMAXATT 0x0800
-#define CMD_CAL       0x0900 // |
-#define CMD_AVC       0x0A00 //-+
-#define CMD_SETTINGS  0x0B00 //-SETTINGS MODE starts here
-#define CMD_BRT       0x0C00 // |
+#define CMD_AVC       0x0900 //-+
+#define CMD_SETTINGS  0x0A00 //-SETTINGS MODE starts here
+#define CMD_BRT       0x0B00 // |
+#define CMD_CAL       0x0C00 // |
 #define CMD_SLEEP     0x0D00 // |
 #define CMD_THEME     0x0E00 //-+
 #define CMD_ABOUT     0x0F00

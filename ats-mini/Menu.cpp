@@ -58,8 +58,7 @@ Band *getCurrentBand() { return(&band[bandIdx]); }
 #define MENU_AGC_ATT      6
 #define MENU_SOFTMUTE     7
 #define MENU_AVC          8
-#define MENU_CALIBRATION  9
-#define MENU_SETTINGS    10
+#define MENU_SETTINGS     9
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -74,7 +73,6 @@ const char *menu[] =
   "AGC/ATTN",
   "SoftMute",
   "AVC",
-  "Calibration",
   "Settings",
 };
 
@@ -83,15 +81,17 @@ const char *menu[] =
 //
 
 #define MENU_BRIGHTNESS   0
-#define MENU_SLEEP        1
-#define MENU_THEME        2
-#define MENU_ABOUT        3
+#define MENU_CALIBRATION  1
+#define MENU_SLEEP        2
+#define MENU_THEME        3
+#define MENU_ABOUT        4
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
 const char *settings[] =
 {
   "Brightness",
+  "Calibration",
   "Sleep",
   "Theme",
   "About",
@@ -303,10 +303,6 @@ static void clickMenu(int cmd)
       currentCmd = CMD_VOLUME;
       break;
 
-    case MENU_CALIBRATION:
-      if(isSSB()) currentCmd = CMD_CAL;
-      break;
-
     case MENU_MUTE:
       muteOn(!muteOn());
       break;
@@ -326,6 +322,9 @@ static void clickSettings(int cmd)
   switch(cmd)
   {
     case MENU_BRIGHTNESS: currentCmd = CMD_BRT; break;
+    case MENU_CALIBRATION:
+      if(isSSB()) currentCmd = CMD_CAL;
+      break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP; break;
     case MENU_THEME:      currentCmd = CMD_THEME; break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT; break;
@@ -520,10 +519,10 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_VOLUME:    doVolume(dir);break;
     case CMD_SOFTMUTEMAXATT: doSoftMute(dir);break;
     case CMD_BAND:      doBand(dir);break;
-    case CMD_CAL:       doCal(dir);break;
     case CMD_AVC:       doAvc(dir);break;
     case CMD_SETTINGS:  doSettings(dir);break;
     case CMD_BRT:       doBrt(dir);break;
+    case CMD_CAL:       doCal(dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_THEME:     doTheme(dir);break;
     case CMD_ABOUT:     return(true);

@@ -14,7 +14,7 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 ### Changed
 
-- Major code refactoring: split code into modules, get rid of global variables, etc. Huge thanks to Marat Faizulling for doing the heavy lifting. [#35](https://github.com/esp32-si4732/ats-mini/issues/35)
+- Major code refactoring: split code into modules, get rid of global variables, etc. Huge thanks to Marat Fayzullin for doing the heavy lifting. [#35](https://github.com/esp32-si4732/ats-mini/issues/35)
 - Bump ESP32 Arduino core to 3.2.0
 - Disable delayed screen update by default
 - Remove the Z timezone marker from RDS clock.
