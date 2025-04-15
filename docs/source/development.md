@@ -33,6 +33,12 @@ To set an option, add the `--build-property` command line argument like this:
 arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -DENABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
 ```
 
+## Enabling the pre-commit hooks
+
+1. Install `uv` <https://docs.astral.sh/uv/getting-started/installation/>
+2. Run `uv sync`
+3. run `uv run pre-commit install --install-hooks`
+
 ## Using the make command
 
 You can do all of the above using the `make` command as well:
