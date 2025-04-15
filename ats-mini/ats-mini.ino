@@ -370,13 +370,13 @@ void updateBFO(int newBFO)
   }
 
   // Do not let new frequency exceed band limits
-  int f = newFreq + newBFO / 1000;
-  if(f < band->minimumFreq)
+  int f = newFreq * 1000 + newBFO;
+  if(f < band->minimumFreq * 1000)
   {
     newFreq = band->maximumFreq;
     newBFO  = 0;
   }
-  else if(f > band->maximumFreq)
+  else if(f > band->maximumFreq * 1000)
   {
     newFreq = band->minimumFreq;
     newBFO  = 0;
