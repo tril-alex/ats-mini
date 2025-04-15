@@ -128,46 +128,45 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
 //
 static void drawScale(uint32_t freq)
 {
-  spr.fillTriangle(156, 122, 160, 132, 164, 122, TH.scale_pointer);
-  spr.drawLine(160, 124, 160, 169, TH.scale_pointer);
+  spr.fillTriangle(156, 120, 160, 130, 164, 120, TH.scale_pointer);
+  spr.drawLine(160, 130, 160, 169, TH.scale_pointer);
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text, TH.bg);
 
+  // Scale offset
+  int16_t offset = (freq % 10) / 10.0 * 8;
+
   // Start drawing frequencies from the left
-  freq = freq/10 - 20;
+  freq = freq / 10 - 20;
 
   // Get band edges
   const Band *band = getCurrentBand();
-  uint32_t minFreq = band->minimumFreq/10;
-  uint32_t maxFreq = band->maximumFreq/10;
+  uint32_t minFreq = band->minimumFreq / 10;
+  uint32_t maxFreq = band->maximumFreq / 10;
 
-  for(int i=0 ; i<40 ; i++, freq++)
-  {
-    if(freq>=minFreq && freq<=maxFreq)
-    {
-      uint16_t lineColor = i==20?
-        TH.scale_pointer : TH.scale_line;
+  for (int i = 0; i < 41; i++, freq++) {
+    int16_t x = i * 8 - offset;
+    if (freq >= minFreq && freq <= maxFreq) {
+      uint16_t lineColor =
+          i == 20 && (offset == 0 || ((freq % 5) == 0 && offset == 1))
+              ? TH.scale_pointer
+              : TH.scale_line;
 
-      if((freq%10)==0)
-      {
-        spr.drawLine(i*8, 169, i*8, 150, lineColor);
-        spr.drawLine((i*8)+1, 169, (i*8)+1, 150, lineColor);
-        if(currentMode==FM)
-          spr.drawFloat(freq/10.0, 1, i*8, 140, 2);
-        else if(freq>=100)
-          spr.drawFloat(freq/100.0, 3, i*8, 140, 2);
+      if ((freq % 10) == 0) {
+        spr.drawLine(x, 169, x, 150, lineColor);
+        spr.drawLine(x + 1, 169, x + 1, 150, lineColor);
+        if (currentMode == FM)
+          spr.drawFloat(freq / 10.0, 1, x, 140, 2);
+        else if (freq >= 100)
+          spr.drawFloat(freq / 100.0, 3, x, 140, 2);
         else
-          spr.drawNumber(freq*10, i*8, 140, 2);
-      }
-      else if((freq%5)==0 && (freq%10)!=0)
-      {
-        spr.drawLine(i*8, 169, i*8, 155, lineColor);
-        spr.drawLine((i*8)+1, 169, (i*8)+1, 155, lineColor);
-      }
-      else
-      {
-        spr.drawLine(i*8, 169, i*8, 160, lineColor);
+          spr.drawNumber(freq * 10, x, 140, 2);
+      } else if ((freq % 5) == 0 && (freq % 10) != 0) {
+        spr.drawLine(x, 169, x, 155, lineColor);
+        spr.drawLine(x + 1, 169, x + 1, 155, lineColor);
+      } else {
+        spr.drawLine(x, 169, x, 160, lineColor);
       }
     }
   }
