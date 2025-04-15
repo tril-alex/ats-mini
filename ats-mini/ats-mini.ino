@@ -354,6 +354,7 @@ void doSeek()
 void updateBFO(int newBFO)
 {
   Band *band = getCurrentBand();
+  int newFreq = currentFrequency;
 
   // No BFO outside SSB modes
   if(!isSSB()) newBFO = 0;
@@ -361,31 +362,33 @@ void updateBFO(int newBFO)
   // If new BFO exceeds allowed bounds...
   if(newBFO > MAX_BFO || newBFO < -MAX_BFO)
   {
-    // Compute correction and new frequency
+    // Compute correction
     int fCorrect = (newBFO / MAX_BFO) * MAX_BFO;
-    int newFreq  = currentFrequency + fCorrect / 1000;
+    // Correct new frequency and BFO
+    newFreq += fCorrect / 1000;
+    newBFO  -= fCorrect;
+  }
 
-    // Correct new BFO
-    newBFO -= fCorrect;
+  // Do not let new frequency exceed band limits
+  int f = newFreq + newBFO / 1000;
+  if(f < band->minimumFreq)
+  {
+    newFreq = band->maximumFreq;
+    newBFO  = 0;
+  }
+  else if(f > band->maximumFreq)
+  {
+    newFreq = band->minimumFreq;
+    newBFO  = 0;
+  }
 
-    // Do not let new frequency exceed band limits
-    if(newFreq < band->minimumFreq)
-    {
-      newFreq = band->maximumFreq;
-      newBFO  = 0;
-    }
-    else if(newFreq > band->maximumFreq)
-    {
-      newFreq = band->minimumFreq;
-      newBFO  = 0;
-    }
-
+  // If need to change frequency...
+  if(newFreq != currentFrequency)
+  {
     // Apply new frequency
     rx.setFrequency(newFreq);
-
     // Re-apply to remove noise
     doAgc(0);
-
     // Update current frequency
     currentFrequency = rx.getFrequency();
   }
