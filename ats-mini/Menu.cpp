@@ -19,7 +19,7 @@ int bandIdx = 0;
 
 Band band[] =
 {
-  {"FM ", FM_BAND_TYPE, FM,   6400, 10800, 10390, 1, 0, 0},
+  {"VHF", FM_BAND_TYPE, FM,   6400, 10800, 10390, 1, 0, 0},
   {"MW1", MW_BAND_TYPE, AM,    150,  1720,   810, 3, 4, 0},
   {"MW2", MW_BAND_TYPE, AM,    531,  1701,   783, 2, 4, 0},
   {"MW3", MW_BAND_TYPE, AM,   1700,  3500,  2500, 1, 4, 0},
