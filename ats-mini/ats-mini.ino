@@ -141,7 +141,8 @@ void setup()
 
   // Detect and fix the mirrored & inverted display
   // https://github.com/esp32-si4732/ats-mini/issues/41
-  if (tft.readcommand8(ST7789_RDDID, 3) == 0x93) {
+  if(tft.readcommand8(ST7789_RDDID, 3) == 0x93)
+  {
     tft.invertDisplay(0);
     tft.writecommand(TFT_MADCTL);
     tft.writedata(TFT_MAD_MV | TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
@@ -165,7 +166,19 @@ void setup()
 
   // Press and hold Encoder button to force an EEPROM reset
   // Note: EEPROM reset is recommended after firmware updates
-  if(digitalRead(ENCODER_PUSH_BUTTON)==LOW) eepromInvalidate();
+  if(digitalRead(ENCODER_PUSH_BUTTON)==LOW)
+  {
+    eepromInvalidate();
+
+    tft.setTextSize(2);
+    tft.setTextColor(TH.text, TH.bg);
+    tft.println(getVersion());
+    tft.println();
+    tft.setTextColor(TH.text_warn, TH.bg);
+    tft.print("EEPROM Resetting");
+    displayOn(true);
+    delay(2000);
+  }
 
   // G8PTN: Moved this to later, to avoid interrupt action
   /*
@@ -178,7 +191,8 @@ void setup()
   // If the SI4732 is not detected, then halt with no further processing
   rx.setI2CFastModeCustom(100000);
 
-  int16_t si4735Addr = rx.getDeviceI2CAddress(RESET_PIN); // Looks for the I2C bus address and set it.  Returns 0 if error
+  // Looks for the I2C bus address and set it.  Returns 0 if error
+  int16_t si4735Addr = rx.getDeviceI2CAddress(RESET_PIN);
   if(!si4735Addr)
   {
     tft.setTextSize(2);

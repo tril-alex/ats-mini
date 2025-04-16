@@ -65,17 +65,8 @@ void eepromInvalidate()
   // Use EEPROM.begin(EEPROM_SIZE) before use and EEPROM.end() after
   // use to free up memory and avoid memory leaks
   EEPROM.begin(EEPROM_SIZE);
-
-  tft.setTextSize(2);
-  tft.setTextColor(TH.text, TH.bg);
-  tft.println(getVersion());
-  tft.println();
   EEPROM.write(EEPROM_BASE_ADDR, 0x00);
   EEPROM.commit();
-  tft.setTextColor(TH.text_warn, TH.bg);
-  tft.print("EEPROM Resetting");
-  delay(2000);
-
   EEPROM.end();
 }
 
