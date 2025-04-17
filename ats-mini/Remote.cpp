@@ -39,7 +39,7 @@ void remoteCaptureScreen()
   sprintf(sb, "%08x", (unsigned int)htonl(height));
   Serial.print(sb);
   Serial.print("01001000"); // 1 plane, 16 bpp
-  Serial.print("00000000"); // Compression
+  Serial.print("03000000"); // Compression
   Serial.print("00000000"); // Compressed image size
   Serial.print("00000000"); // X res
   Serial.print("00000000"); // Y res
