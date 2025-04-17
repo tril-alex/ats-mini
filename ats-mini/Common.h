@@ -6,7 +6,7 @@
 #include <SI4735.h>
 
 #define APP_ID        67   // EEPROM ID
-#define APP_VERSION   201  // EEPROM VERSION
+#define APP_VERSION   200  // FIRMWARE VERSION
 
 // Modes
 #define FM            0
