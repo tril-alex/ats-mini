@@ -106,6 +106,7 @@ int getTotalBands();
 Band *getCurrentBand();
 const Step *getCurrentStep();
 int getSteps(bool fast = false);
+const Bandwidth *getCurrentBandwidth();
 
 void doSoftMute(int dir);
 void doAgc(int dir);

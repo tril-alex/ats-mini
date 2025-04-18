@@ -80,38 +80,34 @@ void remotePrintStatus()
   uint16_t tuningCapacitor = rx.getAntennaTuningCapacitor();
 
   // Remote serial
-  Serial.print(APP_VERSION);                  // Firmware version
+  Serial.print(APP_VERSION);
   Serial.print(",");
 
-  Serial.print(currentFrequency);             // Frequency (KHz)
+  Serial.print(currentFrequency);
   Serial.print(",");
-  Serial.print(currentBFO);                   // Frequency (Hz x 1000)
-  Serial.print(",");
-
-  Serial.print(getCurrentBand()->bandName);   // Band
-  Serial.print(",");
-  Serial.print(currentMode);                  // Mode
-  Serial.print(",");
-  Serial.print(getCurrentStep()->step);       // Step (FM/AM/SSB)
-  Serial.print(",");
-  Serial.print(bwIdxFM);                      // Bandwidth (FM)
-  Serial.print(",");
-  Serial.print(bwIdxAM);                      // Bandwidth (AM)
-  Serial.print(",");
-  Serial.print(bwIdxSSB);                     // Bandwidth (SSB)
-  Serial.print(",");
-  Serial.print(agcIdx);                       // AGC/ATTN (FM/AM/SSB)
+  Serial.print(currentBFO + getCurrentBand()->bandCal);
   Serial.print(",");
 
-  Serial.print(remoteVolume);                 // Volume
+  Serial.print(getCurrentBand()->bandName);
   Serial.print(",");
-  Serial.print(remoteRssi);                   // RSSI
+  Serial.print(bandModeDesc[currentMode]);
   Serial.print(",");
-  Serial.print(tuningCapacitor);              // Tuning cappacitor
+  Serial.print(getCurrentStep()->desc);
   Serial.print(",");
-  Serial.print(remoteVoltage);                // V_BAT/2 (ADC average value)
+  Serial.print(getCurrentBandwidth()->desc);
   Serial.print(",");
-  Serial.println(remoteSeqnum);               // Sequence number
+  Serial.print(agcIdx);
+  Serial.print(",");
+
+  Serial.print(remoteVolume);
+  Serial.print(",");
+  Serial.print(remoteRssi);
+  Serial.print(",");
+  Serial.print(tuningCapacitor);
+  Serial.print(",");
+  Serial.print(remoteVoltage);
+  Serial.print(",");
+  Serial.println(remoteSeqnum);
 }
 
 //
@@ -136,13 +132,13 @@ bool remoteDoCommand(char key)
 {
   switch(key)
   {
-    case 'U': // Encoder Up
+    case 'E': // Encoder Up
       encoderCount = 1;
       break;
-    case 'D': // Encoder Down
+    case 'e': // Encoder Down
       encoderCount = -1;
       break;
-    case 'P': // Encoder Push Button
+    case 'p': // Encoder Push Button
       pb1_released = true;
       break;
     case 'B': // Band Up

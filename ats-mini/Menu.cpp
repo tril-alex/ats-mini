@@ -231,6 +231,17 @@ Bandwidth bandwidthFM[] =
   {4, "40k"}
 };
 
+const Bandwidth *getCurrentBandwidth()
+{
+  if (isSSB())
+    return &bandwidthSSB[bwIdxSSB];
+  else if (currentMode == FM)
+    return &bandwidthFM[bwIdxFM];
+  else
+    return &bandwidthAM[bwIdxAM];
+}
+
+
 void setSsbBandwidth(int idx)
 {
   // Set Audio
@@ -880,12 +891,7 @@ static void drawInfo(int x, int y, int sx)
     spr.drawString(amStep[amStepIdx].desc, 48+x, 64+y+(-3*16), 2);
 
   spr.drawString("BW:", 6+x, 64+y+(-2*16), 2);
-  if(isSSB())
-    spr.drawString(bandwidthSSB[bwIdxSSB].desc, 48+x, 64+y+(-2*16), 2);
-  else if(currentMode==FM)
-    spr.drawString(bandwidthFM[bwIdxFM].desc, 48+x, 64+y+(-2*16), 2);
-  else
-    spr.drawString(bandwidthAM[bwIdxAM].desc, 48+x, 64+y+(-2*16), 2);
+  spr.drawString(getCurrentBandwidth()->desc, 48+x, 64+y+(-2*16), 2);
 
   if(!agcNdx && !agcIdx)
   {
