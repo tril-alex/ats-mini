@@ -151,27 +151,33 @@ static void drawScale(uint32_t freq)
   uint32_t minFreq = band->minimumFreq / 10;
   uint32_t maxFreq = band->maximumFreq / 10;
 
-  for (int i = 0; i < 41; i++, freq++) {
+  for(int i=0 ; i<41 ; i++, freq++)
+  {
     int16_t x = i * 8 - offset;
-    if (freq >= minFreq && freq <= maxFreq) {
+    if(freq >= minFreq && freq <= maxFreq)
+    {
       uint16_t lineColor =
-          i == 20 && (offset == 0 || ((freq % 5) == 0 && offset == 1))
-              ? TH.scale_pointer
-              : TH.scale_line;
+        i == 20 && (offset == 0 || ((freq % 5) == 0 && offset == 1)) ?
+          TH.scale_pointer : TH.scale_line;
 
-      if ((freq % 10) == 0) {
+      if((freq % 10) == 0)
+      {
         spr.drawLine(x, 169, x, 150, lineColor);
         spr.drawLine(x + 1, 169, x + 1, 150, lineColor);
-        if (currentMode == FM)
+        if(currentMode == FM)
           spr.drawFloat(freq / 10.0, 1, x, 140, 2);
-        else if (freq >= 100)
+        else if(freq >= 100)
           spr.drawFloat(freq / 100.0, 3, x, 140, 2);
         else
           spr.drawNumber(freq * 10, x, 140, 2);
-      } else if ((freq % 5) == 0 && (freq % 10) != 0) {
+      }
+      else if((freq % 5) == 0 && (freq % 10) != 0)
+      {
         spr.drawLine(x, 169, x, 155, lineColor);
         spr.drawLine(x + 1, 169, x + 1, 155, lineColor);
-      } else {
+      }
+      else
+      {
         spr.drawLine(x, 169, x, 160, lineColor);
       }
     }
