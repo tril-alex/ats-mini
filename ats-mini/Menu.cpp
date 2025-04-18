@@ -21,22 +21,24 @@ int bandIdx = 0;
 Band band[] =
 {
   {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 1, 0, 0},
-  {"MW1",  MW_BAND_TYPE, AM,    150,  1800,   810, 3, 4, 0},
-  {"MW2",  MW_BAND_TYPE, AM,    495,  1701,   783, 2, 4, 0},
-  {"MW3",  MW_BAND_TYPE, AM,   1700,  3500,  2500, 1, 4, 0},
-  {"90M",  SW_BAND_TYPE, AM,   3200,  3400,  3300, 1, 4, 0},
-  {"75M",  SW_BAND_TYPE, AM,   3900,  4000,  3950, 1, 4, 0},
-  {"60M",  SW_BAND_TYPE, AM,   4700,  5100,  4950, 1, 4, 0},
-  {"49M",  SW_BAND_TYPE, AM,   5900,  6200,  6000, 1, 4, 0},
-  {"41M",  SW_BAND_TYPE, AM,   7200,  7500,  7300, 1, 4, 0},
-  {"31M",  SW_BAND_TYPE, AM,   9400,  9900,  9650, 1, 4, 0},
-  {"25M",  SW_BAND_TYPE, AM,  11600, 12100, 11850, 1, 4, 0},
-  {"22M",  SW_BAND_TYPE, AM,  13500, 13900, 13650, 1, 4, 0},
-  {"19M",  SW_BAND_TYPE, AM,  15100, 15900, 15450, 1, 4, 0},
-  {"16M",  SW_BAND_TYPE, AM,  17500, 18100, 17650, 1, 4, 0},
-  {"15M",  SW_BAND_TYPE, AM,  18900, 19100, 18950, 1, 4, 0},
-  {"13M",  SW_BAND_TYPE, AM,  21500, 21900, 21650, 1, 4, 0},
+  // All band. LW, MW and SW (from 150kHz to 30MHz)
+  {"ALL",  SW_BAND_TYPE, AM,    150, 30000, 15000, 0, 4, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0},
+  {"13M",  SW_BAND_TYPE, AM,  21500, 21900, 21650, 1, 4, 0},
+  {"15M",  SW_BAND_TYPE, AM,  18900, 19100, 18950, 1, 4, 0},
+  {"16M",  SW_BAND_TYPE, AM,  17500, 18100, 17650, 1, 4, 0},
+  {"19M",  SW_BAND_TYPE, AM,  15100, 15900, 15450, 1, 4, 0},
+  {"22M",  SW_BAND_TYPE, AM,  13500, 13900, 13650, 1, 4, 0},
+  {"25M",  SW_BAND_TYPE, AM,  11600, 12100, 11850, 1, 4, 0},
+  {"31M",  SW_BAND_TYPE, AM,   9400,  9900,  9650, 1, 4, 0},
+  {"41M",  SW_BAND_TYPE, AM,   7200,  7500,  7300, 1, 4, 0},
+  {"49M",  SW_BAND_TYPE, AM,   5900,  6200,  6000, 1, 4, 0},
+  {"60M",  SW_BAND_TYPE, AM,   4700,  5100,  4950, 1, 4, 0},
+  {"75M",  SW_BAND_TYPE, AM,   3900,  4000,  3950, 1, 4, 0},
+  {"90M",  SW_BAND_TYPE, AM,   3200,  3400,  3300, 1, 4, 0},
+  {"MW3",  MW_BAND_TYPE, AM,   1700,  3500,  2500, 1, 4, 0},
+  {"MW2",  MW_BAND_TYPE, AM,    495,  1701,   783, 2, 4, 0},
+  {"MW1",  MW_BAND_TYPE, AM,    150,  1800,   810, 3, 4, 0},
   {"160M", MW_BAND_TYPE, LSB,  1800,  2000,  1900, 0, 4, 0},
   {"80M",  MW_BAND_TYPE, LSB,  3500,  4000,  3800, 0, 4, 0},
   {"40M",  SW_BAND_TYPE, LSB,  7000,  7300,  7150, 0, 4, 0},
@@ -48,8 +50,6 @@ Band band[] =
   {"10M",  SW_BAND_TYPE, USB, 28000, 29700, 28500, 0, 4, 0},
   // https://www.hfunderground.com/wiki/CB
   {"CB",   SW_BAND_TYPE, AM,  25000, 30000, 27135, 0, 4, 0},
-  // All band. LW, MW and SW (from 150kHz to 30MHz)
-  {"ALL",  SW_BAND_TYPE, AM,    150, 30000, 15000, 0, 4, 0},
 };
 
 int getTotalBands() { return(ITEM_COUNT(band)); }
