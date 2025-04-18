@@ -1,5 +1,10 @@
 # User Manual
 
+## Bands table
+
+| Name | Min frequency | Max frequency | Type | Modes |
+|------|---------------|---------------|------|-------|
+|      |               |               |      |       |
 
 ## Serial interface
 
@@ -35,21 +40,21 @@ Note: To trigger an EEPROM write, issue a <kbd>E</kbd> and <kbd>e</kbd> command 
 
 The following comma separated information is sent out on the serial interface when the monitor (log) mode is enabled:
 
-| Position | Parameter          | Function          | Comments                          |
-|----------|--------------------|-------------------|-----------------------------------|
-| 1        | APP_VERSION        | F/W version       | Example 201, F/W = v2.01          |
-| 2        | currentFrequency   | Frequency         | FM = 10 kHz, AM/SSB = 1 kHz       |
-| 3        | currentBFO+bandCal | BFO               | SSB = Hz                          |
-| 4        | bandName           | Band              | See the [band table](#band-table) |
-| 5        | currentMode        | Mode              | FM/LSB/USB/AM                     |
-| 6        | currentStepIdx     | Step              |                                   |
-| 7        | bwIdx              | Bandwidth         |                                   |
-| 8        | agcIdx             | AGC/Attn          |                                   |
-| 9        | remoteVolume       | Volume            | 0 to 63 (0 = Mute)                |
-| 10       | remoteRssi         | RSSI              | 0 to 127 dBuV                     |
-| 11       | tuningCapacitor    | Antenna Capacitor | 0 - 6143                          |
-| 12       | remoteVoltage      | ADC average value | Voltage = Value x 1.702 / 1000    |
-| 13       | remoteSeqnum       | Sequence number   | 0 to 255 repeating sequence       |
+| Position | Parameter          | Function          | Comments                            |
+|----------|--------------------|-------------------|-------------------------------------|
+| 1        | APP_VERSION        | F/W version       | Example 201, F/W = v2.01            |
+| 2        | currentFrequency   | Frequency         | FM = 10 kHz, AM/SSB = 1 kHz         |
+| 3        | currentBFO+bandCal | BFO               | SSB = Hz                            |
+| 4        | bandName           | Band              | See the [bands table](#bands-table) |
+| 5        | currentMode        | Mode              | FM/LSB/USB/AM                       |
+| 6        | currentStepIdx     | Step              |                                     |
+| 7        | bwIdx              | Bandwidth         |                                     |
+| 8        | agcIdx             | AGC/Attn          |                                     |
+| 9        | remoteVolume       | Volume            | 0 to 63 (0 = Mute)                  |
+| 10       | remoteRssi         | RSSI              | 0 to 127 dBuV                       |
+| 11       | tuningCapacitor    | Antenna Capacitor | 0 - 6143                            |
+| 12       | remoteVoltage      | ADC average value | Voltage = Value x 1.702 / 1000      |
+| 13       | remoteSeqnum       | Sequence number   | 0 to 255 repeating sequence         |
 
 In SSB mode, the "Display" frequency (Hz) = (currentFrequency x 1000) + currentBFO
 
