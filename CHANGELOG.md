@@ -4,6 +4,25 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 2.10 (2025-04-18)
+
+
+### Changed
+
+- Move Calibration to the Settings menu
+- New bands list: more bands, different names and limits, sorted by modulation type for faster switching. WARNING: this change resets the receiver settings!
+- Pixel-wise tuning scale scrolling
+- Simplify remote serial output, change encoder keybindings. Use `E` and `e` to simulate the encoder rotation, `p` to push the button.
+
+
+### Fixed
+
+- Fix the screenshot palette. You can use the following oneliner to make a screenshot: `echo -n C | socat stdio /dev/cu.usbmodem14401,echo=0,raw | xxd -r -p > /tmp/screenshot.bmp` [#40](https://github.com/esp32-si4732/ats-mini/issues/40)
+- Autodetect the display type and invert/mirror the picture if needed [#41](https://github.com/esp32-si4732/ats-mini/issues/41)
+- Fix SSB band limits checks [#46](https://github.com/esp32-si4732/ats-mini/issues/46)
+- Hopefully fix the SSB noise tone issue [#46](https://github.com/esp32-si4732/ats-mini/issues/46)
+- The "EEPROM Resetting" screen is not hidden
+
 ## 2.00 (2025-04-15)
 
 
