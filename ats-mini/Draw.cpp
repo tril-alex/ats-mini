@@ -34,12 +34,23 @@ static void drawAbout()
   spr.setTextColor(TH.text_muted, TH.bg);
   spr.drawString("ESP32-SI4732 Receiver", 0, 0, 4);
   spr.setTextColor(TH.text, TH.bg);
-  spr.drawString(getVersion(), 2, 33, 2);
-  spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 33 + 16, 2);
-  spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 33 + 16 * 3, 2);
-  spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 33 + 16 * 4, 2);
-  spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 33 + 16 * 5, 2);
-  spr.drawString("Marat Fayzullin", 2, 33 + 16 * 6, 2);
+  spr.drawString(getVersion(), 2, 25, 2);
+  spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 25 + 16, 2);
+  spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 70, 2);
+  spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 70 + 16, 2);
+  spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 70 + 16 * 2, 2);
+  spr.drawString("Marat Fayzullin", 2, 70 + 16 * 3, 2);
+
+  char text[64];
+  sprintf(text, "DID: %08lX  DST: %02X%02X%02X%02X%02X",
+    tft.readcommand32(ST7789_RDDID),
+    tft.readcommand8(ST7789_RDDST, 0),
+    tft.readcommand8(ST7789_RDDST, 1),
+    tft.readcommand8(ST7789_RDDST, 2),
+    tft.readcommand8(ST7789_RDDST, 3),
+    tft.readcommand8(ST7789_RDDST, 4)
+  );
+  spr.drawString(text, 2, 144, 2);
 
   for(int i=0 ; i<8 ; i++)
   {
