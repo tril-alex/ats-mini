@@ -41,6 +41,12 @@ static void drawAbout()
   spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 33 + 16 * 5, 2);
   spr.drawString("Marat Fayzullin", 2, 33 + 16 * 6, 2);
 
+  for(int i=0 ; i<8 ; i++)
+  {
+    uint16_t rgb = (i&1? 0x001F:0) | (i&2? 0x07E0:0) | (i&4? 0xF800:0);
+    spr.fillRect(i*40, 160, 40, 20, rgb);
+  }
+
 #ifdef ENABLE_HOLDOFF
   // Update if not tuning
   if(!tuning_flag) spr.pushSprite(0, 0);
