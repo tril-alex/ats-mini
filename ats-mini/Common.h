@@ -5,8 +5,8 @@
 #include <TFT_eSPI.h>
 #include <SI4735.h>
 
-#define APP_ID        67   // EEPROM ID
-#define APP_VERSION   200  // EEPROM VERSION
+#define APP_VERSION    200  // FIRMWARE VERSION
+#define EEPROM_VERSION 68   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
@@ -47,7 +47,7 @@ typedef struct
 {
   const char *bandName;   // Band description
   uint8_t bandType;       // Band type (FM, MW, or SW)
-  uint8_t bandMode;       // Band mode (FM, AM, LSB, or SSB)
+  uint8_t bandMode;       // Band mode (FM, AM, LSB, or USB)
   uint16_t minimumFreq;   // Minimum frequency of the band
   uint16_t maximumFreq;   // maximum frequency of the band
   uint16_t currentFreq;   // Default frequency or current frequency

@@ -57,8 +57,8 @@ void drawEepromIndicator(int x, int y)
   }
 }
 
-// Indirectly forces the reset by setting APP_ID = 0, which gets
-// detected in the subsequent check for APP_ID and APP_VERSION.
+// Indirectly forces the reset by setting EEPROM_VERSION = 0, which gets
+// detected in the subsequent check for EEPROM_VERSION.
 // NOTE: EEPROM reset is recommended after firmware updates!
 void eepromInvalidate()
 {
@@ -70,7 +70,7 @@ void eepromInvalidate()
   EEPROM.end();
 }
 
-// Check EEPROM contents against APP_ID and APP_VERSION
+// Check EEPROM contents against EEPROM_VERSION
 bool eepromVerify()
 {
   uint8_t  appId;
@@ -82,7 +82,7 @@ bool eepromVerify()
   appVer |= EEPROM.read(EEPROM_VER_ADDR + 1);
   EEPROM.end();
 
-  return(appId==APP_ID);
+  return(appId==EEPROM_VERSION);
 }
 
 // Store current receiver configuration into the EEPROM.
@@ -98,7 +98,7 @@ void eepromSaveConfig()
 
   EEPROM.begin(EEPROM_SIZE);
 
-  EEPROM.write(addr++, APP_ID);             // Stores the APP_ID;
+  EEPROM.write(addr++, EEPROM_VERSION);     // Stores the EEPROM_VERSION;
   EEPROM.write(addr++, rx.getVolume());     // Stores the current Volume
   EEPROM.write(addr++, bandIdx);            // Stores the current band
   EEPROM.write(addr++, 0x00);               // G8PTN: Not used (was fmRDS)
