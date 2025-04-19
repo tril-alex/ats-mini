@@ -374,17 +374,12 @@ void setColorTheme()
 
 void getColorTheme()
 {
-  Serial.print("Color theme ");
-  Serial.print(TH.name);
-  Serial.print(": ");
-
+  Serial.printf("Color theme %s: ", TH.name);
   const uint8_t *p = (uint8_t *)&(theme[themeIdx].bg);
 
   for(int i=0 ; i<sizeof(ColorTheme)-offsetof(ColorTheme, bg) ; i+=sizeof(uint16_t))
   {
-    char sb[6];
-    sprintf(sb, "x%02X%02X", p[i+1], p[i]);
-    Serial.print(sb);
+    Serial.printf("x%02X%02X", p[i+1], p[i]);
   }
 
   Serial.println();

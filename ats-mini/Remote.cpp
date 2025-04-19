@@ -19,25 +19,19 @@ void remoteCaptureScreen()
 {
   uint16_t width  = spr.width();
   uint16_t height = spr.height();
-  char sb[9];
 
   // 14 bytes of BMP header
   Serial.println("");
   Serial.print("424d"); // BM
   // Image size
-  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12 + width * height * 2));
-  Serial.print(sb);
+  Serial.printf("%08x", (unsigned int)htonl(14 + 40 + 12 + width * height * 2));
   Serial.print("00000000");
   // Offset to image data
-  sprintf(sb, "%08x", (unsigned int)htonl(14 + 40 + 12));
-  Serial.print(sb);
-
+  Serial.printf("%08x", (unsigned int)htonl(14 + 40 + 12));
   // Image header
   Serial.print("28000000"); // Header size
-  sprintf(sb, "%08x", (unsigned int)htonl(width));
-  Serial.print(sb);
-  sprintf(sb, "%08x", (unsigned int)htonl(height));
-  Serial.print(sb);
+  Serial.printf("%08x", (unsigned int)htonl(width));
+  Serial.printf("%08x", (unsigned int)htonl(height));
   Serial.print("01001000"); // 1 plane, 16 bpp
   Serial.print("03000000"); // Compression
   Serial.print("00000000"); // Compressed image size
@@ -54,10 +48,8 @@ void remoteCaptureScreen()
   {
     for(int x=0 ; x<width ; x++)
     {
-      sprintf(sb, "%04x", htons(spr.readPixel(x, y)));
-      Serial.print(sb);
+      Serial.printf("%04x", htons(spr.readPixel(x, y)));
     }
-
     Serial.println("");
   }
 }
@@ -80,34 +72,21 @@ void remotePrintStatus()
   uint16_t tuningCapacitor = rx.getAntennaTuningCapacitor();
 
   // Remote serial
-  Serial.print(APP_VERSION);
-  Serial.print(",");
-
-  Serial.print(currentFrequency);
-  Serial.print(",");
-  Serial.print(currentBFO + getCurrentBand()->bandCal);
-  Serial.print(",");
-
-  Serial.print(getCurrentBand()->bandName);
-  Serial.print(",");
-  Serial.print(bandModeDesc[currentMode]);
-  Serial.print(",");
-  Serial.print(getCurrentStep()->desc);
-  Serial.print(",");
-  Serial.print(getCurrentBandwidth()->desc);
-  Serial.print(",");
-  Serial.print(agcIdx);
-  Serial.print(",");
-
-  Serial.print(remoteVolume);
-  Serial.print(",");
-  Serial.print(remoteRssi);
-  Serial.print(",");
-  Serial.print(tuningCapacitor);
-  Serial.print(",");
-  Serial.print(remoteVoltage);
-  Serial.print(",");
-  Serial.println(remoteSeqnum);
+  Serial.printf("%u,%u,%d,%s,%s,%s,%s,%hu,%hu,%hu,%hu,%.2f,%hu\r\n",
+                APP_VERSION,
+                currentFrequency,
+                currentBFO + getCurrentBand()->bandCal,
+                getCurrentBand()->bandName,
+                bandModeDesc[currentMode],
+                getCurrentStep()->desc,
+                getCurrentBandwidth()->desc,
+                agcIdx,
+                remoteVolume,
+                remoteRssi,
+                tuningCapacitor,
+                remoteVoltage,
+                remoteSeqnum
+                );
 }
 
 //
@@ -190,6 +169,7 @@ bool remoteDoCommand(char key)
       displayOn(true);
       break;
     case 'C':
+      remoteLogOn = false;
       remoteCaptureScreen();
       break;
     case 't':
