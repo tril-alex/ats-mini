@@ -4,7 +4,14 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: 'changelog/.*\.md'
       - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
+      - id: mixed-line-ending
+        stages: [manual]
+        args:
+          - --fix=lf
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v20.1.0
     hooks:
