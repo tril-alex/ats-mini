@@ -43,7 +43,7 @@ static void drawAbout()
 
   char text[64];
   sprintf(text, "DID: %08lX  DST: %02X%02X%02X%02X%02X",
-    tft.readcommand32(ST7789_RDDID),
+    tft.readcommand32(ST7789_RDDID, 1),
     tft.readcommand8(ST7789_RDDST, 0),
     tft.readcommand8(ST7789_RDDST, 1),
     tft.readcommand8(ST7789_RDDST, 2),
