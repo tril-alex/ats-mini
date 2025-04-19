@@ -9,28 +9,6 @@
 #define SW_BAND_TYPE  2
 #define LW_BAND_TYPE  3
 
-// Bands
-#define BAND_VHF      0
-#define BAND_MW1      1
-#define BAND_MW2      2
-#define BAND_MW3      3
-#define BAND_80M      4
-#define BAND_SW1      5
-#define BAND_SW2      6
-#define BAND_40M      7
-#define BAND_SW3      8
-#define BAND_SW4      9
-#define BAND_SW5      10
-#define BAND_SW6      11
-#define BAND_20M      12
-#define BAND_SW7      13
-#define BAND_SW8      14
-#define BAND_15M      15
-#define BAND_SW9      16
-#define BAND_CB       17
-#define BAND_10M      18
-#define BAND_ALL      19
-
 // Commands
 #define CMD_NONE      0x0000
 #define CMD_BAND      0x0100 //-MENU MODE starts here
@@ -76,8 +54,6 @@ extern int bandIdx;
 extern int8_t bwIdxAM;
 extern int8_t bwIdxFM;
 extern int8_t bwIdxSSB;
-
-static inline bool isCB()  { return(bandIdx==BAND_CB); }
 
 // These are menu commands
 static inline bool isMenuMode(uint16_t cmd)

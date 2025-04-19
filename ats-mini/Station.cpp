@@ -1,5 +1,6 @@
 #include "Common.h"
 
+// CB frequency range
 #define MIN_CB_FREQUENCY 26060
 #define MAX_CB_FREQUENCY 29665
 

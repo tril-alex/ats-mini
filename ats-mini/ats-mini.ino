@@ -211,8 +211,6 @@ void setup()
   // Attached pin to allows SI4732 library to mute audio as required to minimise loud clicks
   rx.setAudioMuteMcuPin(AUDIO_MUTE);
 
-  clearStationName();
-
   delay(300);
 
   // Audio Amplifier Enable. G8PTN: Added
@@ -331,8 +329,12 @@ void useBand(const Band *band)
   // Clear signal strength readings
   rssi = 0;
   snr  = 0;
+
   // Clear current station name (RDS/CB)
   clearStationName();
+
+  // Check current CB channel
+  checkCbChannel();
 }
 
 // This function is called by the seek function process.
@@ -595,11 +597,11 @@ bool doRotate(int8_t dir)
     // Tune to a new frequency
     updateFrequency(currentFrequency + step * dir);
 
-    // Clear FM RDS information
-    if(currentMode==FM) clearStationName();
+    // Clear current station name and information
+    clearStationName();
 
     // Check current CB channel
-    if(isCB()) checkCbChannel();
+    checkCbChannel();
 
     // Will need a redraw
     needRedraw = true;
