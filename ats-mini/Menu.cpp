@@ -40,7 +40,7 @@ Band band[] =
   {"MW2",  MW_BAND_TYPE, AM,    495,  1701,   783, 2, 4, 0},
   {"MW1",  MW_BAND_TYPE, AM,    150,  1800,   810, 3, 4, 0},
   {"160M", MW_BAND_TYPE, LSB,  1800,  2000,  1900, 0, 4, 0},
-  {"80M",  MW_BAND_TYPE, LSB,  3500,  4000,  3800, 0, 4, 0},
+  {"80M",  SW_BAND_TYPE, LSB,  3500,  4000,  3800, 0, 4, 0},
   {"40M",  SW_BAND_TYPE, LSB,  7000,  7300,  7150, 0, 4, 0},
   {"30M",  SW_BAND_TYPE, LSB, 10000, 10200, 10125, 0, 4, 0},
   {"20M",  SW_BAND_TYPE, USB, 14000, 14400, 14100, 0, 4, 0},
