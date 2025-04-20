@@ -421,6 +421,7 @@ static void doSleep(int dir)
 static void doRDSMode(int dir)
 {
   currentRDSMode = wrap_range(currentRDSMode, dir, 0, getTotalRDSModes() - 1);
+  if(~getCurrentRDSMode()->mode & RDS_CT) clockReset();
 }
 
 void doStep(int dir)

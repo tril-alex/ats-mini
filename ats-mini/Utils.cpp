@@ -120,6 +120,14 @@ const char *clockGet()
 #endif
 }
 
+void clockReset()
+{
+  clockHasBeenSet = false;
+  clockText[0] = '\0';
+  clockTimer = 0;
+  clockHours = clockMinutes = clockSeconds = 0;
+}
+
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
 {
   // Verify input before setting clock
