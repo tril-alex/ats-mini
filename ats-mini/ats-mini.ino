@@ -770,7 +770,9 @@ void loop()
 #endif
 
   // Run clock
-  needRedraw |= clockTickTime();
+  if(getCurrentRDSMode()->mode & RDS_CT) {
+    needRedraw |= clockTickTime();
+  }
 
 #ifndef DISABLE_REMOTE
   // Periodically print status to serial

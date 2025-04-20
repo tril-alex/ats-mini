@@ -95,7 +95,9 @@ bool checkRds()
 
     needRedraw |= showRdsStation(rx.getRdsText0A());
 //    needRedraw |= showRdsMessage(rx.getRdsText2A());
-    needRedraw |= showRdsTime(rx.getRdsTime());
+    if(getCurrentRDSMode()->mode & RDS_CT) {
+      needRedraw |= showRdsTime(rx.getRdsTime());
+    }
   }
 
   // Return TRUE if any RDS information changes

@@ -94,7 +94,8 @@ const char *menu[] =
 #define MENU_CALIBRATION  1
 #define MENU_SLEEP        2
 #define MENU_THEME        3
-#define MENU_ABOUT        4
+#define MENU_RDS          4
+#define MENU_ABOUT        5
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -104,6 +105,7 @@ const char *settings[] =
   "Calibration",
   "Sleep",
   "Theme",
+  "RDS",
   "About",
 };
 
@@ -112,6 +114,21 @@ const char *settings[] =
 //
 
 const char *bandModeDesc[] = { "FM", "LSB", "USB", "AM" };
+
+// RDS Menu
+//
+
+uint8_t currentRDSMode = 0;
+
+RDSMode rdsMode[] =
+{
+  { RDS_PS, "PS"},
+  { RDS_PS | RDS_CT, "PS+CT" },
+  // PS+PI PS+RT PS+PI+RT ... ALL
+};
+
+int getTotalRDSModes() { return(ITEM_COUNT(rdsMode)); }
+const RDSMode *getCurrentRDSMode() { return(&rdsMode[currentRDSMode]); }
 
 //
 // Step Menu
@@ -348,6 +365,7 @@ static void clickSettings(int cmd)
       break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP; break;
     case MENU_THEME:      currentCmd = CMD_THEME; break;
+    case MENU_RDS:        currentCmd = CMD_RDS;   break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT; break;
   }
 }
@@ -398,6 +416,11 @@ void doBrt(int dir)
 static void doSleep(int dir)
 {
   currentSleep = clamp_range(currentSleep, 5*dir, 0, 255);
+}
+
+static void doRDSMode(int dir)
+{
+  currentRDSMode = wrap_range(currentRDSMode, dir, 0, getTotalRDSModes() - 1);
 }
 
 void doStep(int dir)
@@ -546,6 +569,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_CAL:       doCal(dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_THEME:     doTheme(dir);break;
+    case CMD_RDS:       doRDSMode(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -793,6 +817,22 @@ static void drawTheme(int x, int y, int sx)
   }
 }
 
+static void drawRDSMode(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_RDS], x, y, sx);
+
+  int count = getTotalRDSModes();
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0)
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    else
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+
+    spr.drawString(rdsMode[abs((currentRDSMode+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
 static void drawVolume(int x, int y, int sx)
 {
   drawCommon(menu[MENU_VOLUME], x, y, sx);
@@ -926,16 +966,6 @@ static void drawInfo(int x, int y, int sx)
 
   spr.drawString(text, 48+x, 64+y + (0*16), 2);
 
-  /*
-    spr.drawString("BFO:", 6+x, 64+y+(2*16), 2);
-    if (isSSB()) {
-    spr.setTextDatum(MR_DATUM);
-    spr.drawString(bfo, 74+x, 64+y+(2*16), 2);
-    }
-    else spr.drawString("Off", 48+x, 64+y+(2*16), 2);
-    spr.setTextDatum(MC_DATUM);
-  */
-
   spr.drawString("Vol:", 6+x, 64+y+(1*16), 2);
   if(muteOn())
   {
@@ -947,6 +977,15 @@ static void drawInfo(int x, int y, int sx)
   {
     spr.setTextColor(TH.box_text, TH.box_bg);
     spr.drawNumber(rx.getVolume(), 48+x, 64+y+(1*16), 2);
+  }
+
+  // Draw current time
+  if(getCurrentRDSMode()->mode & RDS_CT) {
+    const char *time = clockGet();
+    if (time) {
+      spr.drawString("Time:", 6+x, 64+y+(2*16), 2);
+      spr.drawString(time, 48+x, 64+y+(2*16), 2);
+    }
   }
 }
 
@@ -973,6 +1012,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_AVC:       drawAvc(x, y, sx);       break;
     case CMD_BRT:       drawBrt(x, y, sx);       break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
+    case CMD_RDS:       drawRDSMode(x, y, sx);   break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

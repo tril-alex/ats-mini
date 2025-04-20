@@ -116,7 +116,7 @@ const char *clockGet()
 #ifdef THEME_EDITOR
   return("00:00");
 #else
-  return(clockHasBeenSet? clockText : "");
+  return(clockHasBeenSet? clockText : NULL);
 #endif
 }
 

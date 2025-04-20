@@ -24,8 +24,9 @@
 #define CMD_BRT       0x0B00 // |
 #define CMD_CAL       0x0C00 // |
 #define CMD_SLEEP     0x0D00 // |
-#define CMD_THEME     0x0E00 //-+
-#define CMD_ABOUT     0x0F00
+#define CMD_THEME     0x0E00 // |
+#define CMD_RDS       0x0F00 // |
+#define CMD_ABOUT     0x1000 //-SETTINGS MODE ends here
 
 //
 // Data Types

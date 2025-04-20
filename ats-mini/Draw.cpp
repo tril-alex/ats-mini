@@ -229,12 +229,6 @@ void drawScreen()
   // Clear screen buffer
   spr.fillSprite(TH.bg);
 
-  // Draw current time
-  spr.setTextColor(TH.text, TH.bg);
-  spr.setTextDatum(MR_DATUM);
-  spr.drawString(clockGet(), BATT_OFFSET_X + 31, BATT_OFFSET_Y + 24, 2);
-  spr.setTextColor(TH.text, TH.bg);
-
   // Draw EEPROM write request icon
   drawEepromIndicator(SAVE_OFFSET_X, SAVE_OFFSET_Y);
 
