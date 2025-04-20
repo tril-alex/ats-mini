@@ -259,12 +259,12 @@ Bandwidth bandwidthFM[] =
 
 const Bandwidth *getCurrentBandwidth()
 {
-  if (isSSB())
-    return &bandwidthSSB[bwIdxSSB];
-  else if (currentMode == FM)
-    return &bandwidthFM[bwIdxFM];
+  if(isSSB())
+    return(&bandwidthSSB[bwIdxSSB]);
+  else if(currentMode == FM)
+    return(&bandwidthFM[bwIdxFM]);
   else
-    return &bandwidthAM[bwIdxAM];
+    return(&bandwidthAM[bwIdxAM]);
 }
 
 
