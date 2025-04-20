@@ -145,7 +145,7 @@ void setup()
   {
     tft.invertDisplay(0);
     tft.writecommand(TFT_MADCTL);
-    tft.writedata(TFT_MAD_MV | TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_COLOR_ORDER);
+    tft.writedata(TFT_MAD_MV | TFT_MAD_MX | TFT_MAD_MY | TFT_MAD_BGR);
   }
 
   tft.fillScreen(TH.bg);
