@@ -46,8 +46,8 @@ typedef struct
 
 typedef struct
 {
-  uint8_t mode;
-  const char *desc;
+  uint8_t mode;     // Combination of RDS_* values
+  const char *desc; // Mode description
 } RDSMode;
 
 //
