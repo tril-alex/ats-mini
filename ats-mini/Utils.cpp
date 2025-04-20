@@ -131,7 +131,7 @@ void clockReset()
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
 {
   // Verify input before setting clock
-  if(hours < 24 && minutes < 60 && seconds < 60)
+  if(!clockHasBeenSet && hours < 24 && minutes < 60 && seconds < 60)
   {
     clockHasBeenSet = true;
     clockTimer   = micros();

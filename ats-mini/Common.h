@@ -6,7 +6,7 @@
 #include <SI4735.h>
 
 #define APP_VERSION    210  // FIRMWARE VERSION
-#define EEPROM_VERSION 68   // EEPROM VERSION (forces reset)
+#define EEPROM_VERSION 69   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
