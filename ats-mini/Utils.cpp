@@ -138,7 +138,7 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
     clockHours   = hours;
     clockMinutes = minutes;
     clockSeconds = seconds;
-    sprintf(clockText, "%02ld:%02ld", hours, minutes);
+    sprintf(clockText, "%02ld:%02ld", clockHours, clockMinutes);
     return(true);
   }
 

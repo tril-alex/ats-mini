@@ -44,6 +44,12 @@ typedef struct
   const char *desc; // Step description
 } Step;
 
+typedef struct
+{
+  uint8_t mode;
+  const char *desc;
+} RDSMode;
+
 //
 // Global Variables
 //
@@ -84,6 +90,7 @@ Band *getCurrentBand();
 const Step *getCurrentStep();
 int getSteps(bool fast = false);
 const Bandwidth *getCurrentBandwidth();
+uint8_t getRDSMode();
 
 void doSoftMute(int dir);
 void doAgc(int dir);

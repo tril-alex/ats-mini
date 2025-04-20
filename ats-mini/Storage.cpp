@@ -137,7 +137,7 @@ void eepromSaveConfig()
   EEPROM.write(addr++, currentSleep >> 8);       // Stores the current Sleep value (HIGH byte)
   EEPROM.write(addr++, currentSleep & 0XFF);     // Stores the current Sleep value (LOW byte)
   EEPROM.write(addr++, themeIdx);                // Stores the current Theme index value
-  EEPROM.write(addr++, currentRDSMode);          // Stores the current RDS Mode value
+  EEPROM.write(addr++, rdsModeIdx);              // Stores the current RDS Mode value
   EEPROM.commit();
 
   addr = EEPROM_SETP_ADDR;
@@ -196,7 +196,7 @@ void eepromLoadConfig()
   currentSleep   = EEPROM.read(addr++) << 8;     // Reads stored Sleep value (HIGH byte)
   currentSleep  |= EEPROM.read(addr++);          // Reads stored Sleep value (LOW byte)
   themeIdx       = EEPROM.read(addr++);          // Reads stored Theme index value
-  currentRDSMode = EEPROM.read(addr++);          // Reads stored RDS Mode value
+  rdsModeIdx     = EEPROM.read(addr++);          // Reads stored RDS Mode value
 
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<=getTotalBands() ; i++)

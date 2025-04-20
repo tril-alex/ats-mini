@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Menu.h"
 
 // CB frequency range
 #define MIN_CB_FREQUENCY 26060
@@ -92,12 +93,9 @@ bool checkRds()
 
   if(rx.getRdsReceived() && rx.getRdsSync() && rx.getRdsSyncFound())
   {
-
     needRedraw |= showRdsStation(rx.getRdsText0A());
 //    needRedraw |= showRdsMessage(rx.getRdsText2A());
-    if(getCurrentRDSMode()->mode & RDS_CT) {
-      needRedraw |= showRdsTime(rx.getRdsTime());
-    }
+    needRedraw |= (getRDSMode() & RDS_CT) && showRdsTime(rx.getRdsTime());
   }
 
   // Return TRUE if any RDS information changes

@@ -60,12 +60,6 @@ typedef struct
   int16_t bandCal;        // Calibration value
 } Band;
 
-typedef struct
-{
-  uint8_t mode;
-  const char *desc;
-} RDSMode;
-
 //
 // Global Variables
 //
@@ -83,7 +77,6 @@ extern uint8_t currentMode;
 extern uint16_t currentCmd;
 extern uint16_t currentBrt;
 extern uint16_t currentSleep;
-extern uint8_t currentRDSMode;
 extern uint8_t AmTotalSteps;
 
 extern int8_t FmAgcIdx;
@@ -93,6 +86,7 @@ extern int8_t AmAvcIdx;
 extern int8_t SsbAvcIdx;
 extern int8_t AmSoftMuteIdx;
 extern int8_t SsbSoftMuteIdx;
+extern uint8_t rdsModeIdx;
 
 extern int8_t agcIdx;
 extern int8_t agcNdx;
@@ -132,9 +126,6 @@ const char *getRdsTime();
 void clearStationName();
 bool checkRds();
 bool checkCbChannel();
-
-// Menu.cpp
-const RDSMode *getCurrentRDSMode();
 
 #ifndef DISABLE_REMOTE
 // Remote.c
