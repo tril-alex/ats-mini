@@ -1,0 +1,1 @@
+New Magenta color theme

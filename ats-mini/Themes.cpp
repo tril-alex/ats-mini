@@ -316,7 +316,46 @@ const ColorTheme theme[] =
     0x3FE0, // scale_text
     0xF800, // scale_pointer
     0xC638, // scale_line
-  }
+  },
+
+  {
+    "Magenta",
+    0xA12B, // bg
+    0xFFFF, // text
+    0xFD95, // text_muted
+    0xFD00, // text_warn
+    0xC638, // smeter_icon
+    0xFD95, // smeter_bar
+    0x7007, // smeter_bar_plus
+    0x5005, // save_icon
+    0xC638, // batt_voltage
+    0xC638, // batt_border
+    0xFD95, // batt_full
+    0x7007, // batt_low
+    0xFD95, // batt_charge
+    0xFFE0, // batt_icon
+    0xC638, // band_text
+    0xC638, // mode_text
+    0xC638, // mode_border
+    0xA12B, // box_bg
+    0xC638, // box_border
+    0xC638, // box_text
+    0x7007, // box_off_bg
+    0xFD95, // box_off_text
+    0xA12B, // menu_bg
+    0x5005, // menu_border
+    0xFFFF, // menu_hdr
+    0xBEDF, // menu_item
+    0x5005, // menu_hl_bg
+    0xBEDF, // menu_hl_text
+    0xBEDF, // menu_param
+    0xFFFF, // freq_text
+    0xC638, // funit_text
+    0xFD95, // rds_text
+    0xFFFF, // scale_text
+    0x5005, // scale_pointer
+    0xC638, // scale_line
+  },
 };
 
 uint8_t themeIdx = 0;
