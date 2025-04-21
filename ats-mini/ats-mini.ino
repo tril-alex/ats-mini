@@ -276,7 +276,7 @@ void useBand(const Band *band)
   currentMode = band->bandMode;
   currentBFO = 0;
 
-  if(currentMode==FM)
+  if(band->bandMode==FM)
   {
     // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
@@ -292,7 +292,13 @@ void useBand(const Band *band)
     // Set the tuning capacitor for SW or MW/LW
     // rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
 
-    if(isSSB())
+    if(band->bandMode==AM)
+    {
+      // Setting step to 1kHz
+      int step = band->currentStepIdx>=AmTotalSteps? 1 : getCurrentStep()->step;
+      rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, step);
+    }
+    else
     {
       // Configure SI4732 for SSB (SI4732 step not used, set to 0)
       rx.setSSB(band->minimumFreq, band->maximumFreq, band->currentFreq, 0, currentMode);
@@ -300,12 +306,6 @@ void useBand(const Band *band)
       rx.setSSBAutomaticVolumeControl(1);
       // G8PTN: Commented out
       //rx.setSsbSoftMuteMaxAttenuation(softMuteMaxAttIdx);
-    }
-    else
-    {
-      // Setting step to 1kHz
-      int step = band->currentStepIdx>=AmTotalSteps? 1 : getCurrentStep()->step;
-      rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, step);
     }
 
     // G8PTN: Enable GPIO1 as output
@@ -329,6 +329,9 @@ void useBand(const Band *band)
   // Clear signal strength readings
   rssi = 0;
   snr  = 0;
+
+  // Make sure we apply frequency, BFO, calibration
+  updateFrequency(currentFrequency);
 
   // Clear current station name (RDS/CB)
   clearStationName();
