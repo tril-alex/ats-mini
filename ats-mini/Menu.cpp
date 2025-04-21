@@ -972,6 +972,7 @@ static void drawInfo(int x, int y, int sx)
     //spr.setTextDatum(MR_DATUM);
     spr.setTextColor(TH.box_off_text, TH.box_off_bg);
     spr.drawString("Muted", 48+x, 64+y+(1*16), 2);
+    spr.setTextColor(TH.box_text, TH.box_bg);
   }
   else
   {

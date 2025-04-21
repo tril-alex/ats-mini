@@ -17,6 +17,7 @@
 #define MIN_ELAPSED_RSSI_TIME  200  // RSSI check uses IN_ELAPSED_RSSI_TIME * 6 = 1.2s
 #define ELAPSED_COMMAND      10000  // time to turn off the last command controlled by encoder. Time to goes back to the VFO control // G8PTN: Increased time and corrected comment
 #define DEFAULT_VOLUME          35  // change it for your favorite sound volume
+#define DEFAULT_SLEEP            0  // Default sleep interval, range = 0 (off) to 255 in steps of 5
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
 #define CLICK_TIME              50
@@ -84,7 +85,7 @@ bool screen_toggle = false;             // Toggle when drawsprite is called
 
 // Menu options
 uint16_t currentBrt = 128;              // Display brightness, range = 32 to 255 in steps of 32
-uint16_t currentSleep = 30;             // Display sleep timeout, range = 0 to 255 in steps of 5
+uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
 
 // Background screen refresh

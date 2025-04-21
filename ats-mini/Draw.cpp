@@ -270,8 +270,10 @@ void drawScreen()
   drawSMeter(getStrength(rssi), METER_OFFSET_X, METER_OFFSET_Y);
 
   // Indicate FM pilot detection
+#ifndef THEME_EDITOR
   if((currentMode==FM) && rx.getCurrentPilot())
-    spr.fillRect(15 + METER_OFFSET_X, 7+METER_OFFSET_Y, 4*17, 2, TH.bg);
+#endif
+    spr.fillRect(15 + METER_OFFSET_X, 7+METER_OFFSET_Y, 4*17-2, 2, TH.bg);
 
   // Show station or channel name, if present
   if(*getStationName())
