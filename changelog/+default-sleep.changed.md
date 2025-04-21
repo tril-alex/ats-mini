@@ -1,0 +1,1 @@
+Set the default sleep timeout to 0 (disabled)
