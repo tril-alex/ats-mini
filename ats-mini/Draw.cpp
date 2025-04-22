@@ -95,6 +95,23 @@ static void drawBandAndMode(const char *band, const char *mode, int x, int y)
 }
 
 //
+// Draw radio text
+//
+static void drawRadioText(int y, int ymax)
+{
+  const char *rt = getRadioText();
+
+  // Draw potentially multi-line radio text
+  spr.setTextDatum(TC_DATUM);
+  for(; *rt && (y<ymax) ; y+=15, rt+=strlen(rt)+1)
+    spr.drawString(rt, 160, y, 2);
+
+  // Show program info if we have it and there is enough space
+  if((y<ymax) && *getProgramInfo())
+    spr.drawString(getProgramInfo(), 160, y, 2);
+}
+
+//
 // Draw frequency
 //
 static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
@@ -114,7 +131,7 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
     if(piCode)
     {
       char text[8];
-      sprintf(text, "PI:%04X", piCode);
+      sprintf(text, "PI: %04X", piCode);
       spr.drawString(text, ux, uy+22, 2);
     }
   }
@@ -287,19 +304,11 @@ void drawScreen()
   if(*getStationName())
     drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
 
-  // If there is station or program info...
-  if(*getStationInfo() || *getProgramInfo())
-  {
-    // Draw station and program info
-    spr.setTextDatum(TC_DATUM);
-    spr.drawString(getStationInfo(), 160, 135, 2);
-    spr.drawString(getProgramInfo(), 169, 150, 2);
-  }
+  // Show radio text if present, else show frequency scale
+  if(*getRadioText() || *getProgramInfo())
+    drawRadioText(135, 160);
   else
-  {
-    // Draw tuner scale
     drawScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency);
-  }
 
 #ifdef ENABLE_HOLDOFF
   // Update if not tuning

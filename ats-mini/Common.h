@@ -19,6 +19,7 @@
 #define RDS_CT        0b00000010  // Time
 #define RDS_PI        0b00000100  // PI code
 #define RDS_RT        0b00001000  // Radio text
+#define RDS_PT        0b00010000  // Program type
 
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
@@ -130,7 +131,7 @@ void drawBattery(int x, int y);
 
 // Station.c
 const char *getStationName();
-const char *getStationInfo();
+const char *getRadioText();
 const char *getProgramInfo();
 const char *getRdsTime();
 uint16_t getRdsPiCode();

@@ -34,8 +34,23 @@ static const char *cbChannelNumber[] =
   "40",
 };
 
+//
+// RDS program types
+//
+const char *rdsProgramTypes[32] =
+{
+  "None", "News", "Information", "Sports",
+  "Talk", "Rock", "Classic Rock", "Adult Hits",
+  "Soft Rock", "Top 40", "Country", "Oldies",
+  "Soft", "Nostalgia", "Jazz", "Classical",
+  "R & B", "Soft R & B", "Foreign Language", "Religious Music",
+  "Religious Talk", "Personality", "Public", "College",
+  0, 0, 0, 0,
+  0, "Weather", "TEST", "! ALERT !"
+};
+
 static char bufStationName[50]  = "";
-static char bufStationInfo[100] = "";
+static char bufRadioText[100]   = "";
 static char bufProgramInfo[100] = "";
 static uint16_t piCode = 0x0000;
 
@@ -48,9 +63,9 @@ const char *getStationName()
 #endif
 }
 
-const char *getStationInfo()
+const char *getRadioText()
 {
-  return(getRDSMode() & RDS_RT? bufStationInfo : "");
+  return(getRDSMode() & RDS_RT? bufRadioText : "");
 }
 
 const char *getProgramInfo()
@@ -66,8 +81,9 @@ uint16_t getRdsPiCode()
 void clearStationInfo()
 {
   bufStationName[0] = '\0';
-  bufStationInfo[0] = '\0';
   bufProgramInfo[0] = '\0';
+  bufRadioText[0]   = '\0'; // Multiline!
+  bufRadioText[1]   = '\0';
   piCode = 0x0000;
 }
 
@@ -82,11 +98,29 @@ static bool showStationName(const char *stationName)
   return(false);
 }
 
-static bool showStationInfo(const char *stationInfo)
+static bool showRadioText(const char *radioText)
 {
-  if(stationInfo && strcmp(bufStationInfo, stationInfo))
+  int i, j;
+
+  if(radioText && strcmp(bufRadioText, radioText))
   {
-    strcpy(bufStationInfo, stationInfo);
+    // Terminate at 0x0D, split into lines by 0x0A
+    for(i=j=0 ; (i<64) && radioText[i] && radioText[i]!=0x0D ; i++)
+      if((radioText[i]==0x0A) || ((radioText[i]==' ') && (j>=32)))
+      {
+        bufRadioText[i] = '\0';
+        j = 0;
+      }
+      else
+      {
+        bufRadioText[i] = radioText[i];
+        j++;
+      }
+
+    // Terminate multitline text with two zeros
+    bufRadioText[i] = '\0';
+    bufRadioText[i+1] = '\0';
+
     return(true);
   }
 
@@ -102,6 +136,17 @@ static bool showProgramInfo(const char *programInfo)
   }
 
   return(false);
+}
+
+static bool showRdsProgramType(uint8_t rdsProgramType)
+{
+  // Filter out invalid or non-existant RDS program types
+  const char *text = 
+    rdsProgramType >= ITEM_COUNT(rdsProgramTypes)? ""
+  : !rdsProgramTypes[rdsProgramType]? ""
+  : rdsProgramTypes[rdsProgramType];
+
+  return(showProgramInfo(text));
 }
 
 static bool showRdsPiCode(uint16_t rdsPiCode)
@@ -149,10 +194,10 @@ bool checkRds()
   if(rx.getRdsReceived() && rx.getRdsSync() && rx.getRdsSyncFound())
   {
     needRedraw |= (mode & RDS_PS) && showStationName(rx.getRdsStationName());
-    needRedraw |= (mode & RDS_RT) && showStationInfo(rx.getRdsStationInformation());
-    needRedraw |= (mode & RDS_RT) && showProgramInfo(rx.getRdsProgramInformation());
+    needRedraw |= (mode & RDS_RT) && showRadioText(rx.getRdsVersionCode()? rx.getRdsText2B() : rx.getRdsText2A());
     needRedraw |= (mode & RDS_PI) && showRdsPiCode(rx.getRdsPI());
     needRedraw |= (mode & RDS_CT) && showRdsTime(rx.getRdsTime());
+    needRedraw |= (mode & RDS_PT) && showRdsProgramType(rx.getRdsProgramType());
   }
 
   // Return TRUE if any RDS information changes
