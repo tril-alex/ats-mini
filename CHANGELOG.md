@@ -4,6 +4,29 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 2.11 (2025-04-22)
+
+
+### Added
+
+- Added named frequencies database with FT8 and SSTV frequencies as samples.
+- New Magenta color theme
+
+
+### Changed
+
+- Make RDS clock optional, move it to the info panel. To enable it, set `Settings->RDS` to `PS+CT`. Also clock is synchronized only once until the receiver or RDS CT is turned on and off (this helps to avoid getting wrong time from incorrectly configured FM stations).  WARNING: this firmware resets the receiver settings! [#39](https://github.com/esp32-si4732/ats-mini/issues/39)
+- Added DID/DST registers display to About screen.
+- Added RGB color bar to About screen.
+- Set the default sleep timeout to 0 (disabled)
+
+
+### Fixed
+
+- Use BGR color order on the GC9307 display type [#41](https://github.com/esp32-si4732/ats-mini/issues/41)
+- Fixed display of CB channels. [#51](https://github.com/esp32-si4732/ats-mini/issues/51)
+- SSB calibration wasn't applied when changing bands or modes. Now it is. [#53](https://github.com/esp32-si4732/ats-mini/issues/53)
+
 ## 2.10 (2025-04-18)
 
 
