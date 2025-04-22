@@ -141,7 +141,7 @@ static bool showProgramInfo(const char *programInfo)
 static bool showRdsProgramType(uint8_t rdsProgramType)
 {
   // Filter out invalid or non-existant RDS program types
-  const char *text = 
+  const char *text =
     rdsProgramType >= ITEM_COUNT(rdsProgramTypes)? ""
   : !rdsProgramTypes[rdsProgramType]? ""
   : rdsProgramTypes[rdsProgramType];
