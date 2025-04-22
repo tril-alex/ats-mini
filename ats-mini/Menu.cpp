@@ -124,6 +124,10 @@ RDSMode rdsMode[] =
 {
   { RDS_PS, "PS"},
   { RDS_PS | RDS_CT, "PS+CT" },
+  { RDS_PS | RDS_PI, "PS+PI" },
+  { RDS_PS | RDS_PI | RDS_CT, "PS+PI+CT" },
+  { RDS_PS | RDS_PI | RDS_RT, "PS+PI+RT" },
+  { RDS_PS | RDS_PI | RDS_RT | RDS_CT, "ALL" },
   // PS+PI PS+RT PS+PI+RT ... ALL
 };
 
