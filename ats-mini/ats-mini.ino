@@ -2,12 +2,10 @@
 // INCLUDE FILES
 // =================================
 
-#include <Wire.h>
-#include <TFT_eSPI.h>            // https://github.com/Xinyuan-LilyGO/T-Display-S3#quick-start
-#include "EEPROM.h"
-#include <SI4735.h>
-#include "Rotary.h"              // Disabled half-step mode
 #include "Common.h"
+#include <Wire.h>
+#include "EEPROM.h"
+#include "Rotary.h"              // Disabled half-step mode
 #include "Menu.h"
 #include "Storage.h"
 #include "Themes.h"
@@ -109,7 +107,7 @@ uint8_t  snr  = 0;
 Rotary encoder  = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);
 TFT_eSPI tft    = TFT_eSPI();
 TFT_eSprite spr = TFT_eSprite(&tft);
-SI4735 rx;
+SI4735_fixed rx;
 
 //
 // Hardware initialization and setup

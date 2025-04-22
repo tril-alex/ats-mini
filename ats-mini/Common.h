@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <TFT_eSPI.h>
-#include <SI4735.h>
+#include <SI4735-fixed.h>
 
 #define APP_VERSION    211  // FIRMWARE VERSION
 #define EEPROM_VERSION 69   // EEPROM VERSION (forces reset)
@@ -73,7 +73,7 @@ typedef struct
 // Global Variables
 //
 
-extern SI4735 rx;
+extern SI4735_fixed rx;
 extern TFT_eSprite spr;
 extern TFT_eSPI tft;
 
