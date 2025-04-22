@@ -336,8 +336,8 @@ void useBand(const Band *band)
   // Clear current station info (RDS/CB)
   clearStationInfo();
 
-  // Check current CB channel
-  checkCbChannel();
+  // Check for named frequencies
+  identifyFrequency(currentFrequency + currentBFO / 1000);
 }
 
 // This function is called by the seek function process.
@@ -556,29 +556,23 @@ bool doPressAndRotate(int8_t dir)
 //
 bool doRotate(int8_t dir)
 {
-  bool needRedraw = false;
-
   //
   // Side bar menus / settings
   //
-  if(doSideBar(currentCmd, encoderCount))
-  {
-    // Side bar changed, need redraw
-    needRedraw = true;
-  }
+  if(doSideBar(currentCmd, encoderCount)) return(true);
 
   //
   // SSB tuning
   //
-  else if(isSSB())
+  if(isSSB())
   {
 #ifdef ENABLE_HOLDOFF
     // Tuning timer to hold off (SSB) display updates
     tuning_flag = true;
     tuning_timer = millis();
 #endif
+
     updateBFO(currentBFO + dir * getSteps(false));
-    needRedraw = true;
   }
 
   //
@@ -599,18 +593,16 @@ bool doRotate(int8_t dir)
 
     // Tune to a new frequency
     updateFrequency(currentFrequency + step * dir);
-
-    // Clear current station name and information
-    clearStationInfo();
-
-    // Check current CB channel
-    checkCbChannel();
-
-    // Will need a redraw
-    needRedraw = true;
   }
 
-  return(needRedraw);
+  // Clear current station name and information
+  clearStationInfo();
+
+  // Check for named frequencies
+  identifyFrequency(currentFrequency + currentBFO / 1000);
+
+  // Will need a redraw
+  return(true);
 }
 
 //

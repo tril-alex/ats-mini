@@ -62,6 +62,12 @@ typedef struct
   int16_t bandCal;        // Calibration value
 } Band;
 
+typedef struct
+{
+  uint16_t freq;          // Frequency
+  const char *name;       // Frequency name
+} NamedFreq;
+
 //
 // Global Variables
 //
@@ -130,7 +136,7 @@ const char *getRdsTime();
 uint16_t getRdsPiCode();
 void clearStationInfo();
 bool checkRds();
-bool checkCbChannel();
+bool identifyFrequency(uint16_t freq);
 
 #ifndef DISABLE_REMOTE
 // Remote.c

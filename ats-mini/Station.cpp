@@ -5,6 +5,20 @@
 #define MIN_CB_FREQUENCY 26060
 #define MAX_CB_FREQUENCY 29665
 
+//
+// Named frequencies, sorted by increasing frequency!
+//
+static const NamedFreq namedFrequencies[] =
+{
+  {  1840, "FT8"  }, {  3573, "FT8"  }, {  5357, "FT8"  }, {  7074, "FT8" },
+  {  7165, "SSTV" }, {  7171, "SSTV" }, { 10136, "FT8"  }, { 14074, "FT8" },
+  { 14230, "SSTV" }, { 18100, "FT8"  }, { 21074, "FT8"  }, { 24915, "FT8" },
+  { 27700, "SSTV" }, { 28074, "FT8"  }, { 28680, "SSTV" },
+};
+
+//
+// CB channel mappings
+//
 static const char *cbChannelNumber[] =
 {
   "1",  "2",  "3",  "41",
@@ -145,17 +159,17 @@ bool checkRds()
   return(needRedraw);
 }
 
-bool checkCbChannel()
+static const char *findCBChannelByFreq(uint16_t freq)
 {
   const int column_step = 450; // In kHz
   const int row_step    = 10;
   const int max_columns = 8;   // A-H
   const int max_rows    = 45;
+  static char buf[50];
 
-  if(currentFrequency<MIN_CB_FREQUENCY || currentFrequency>MAX_CB_FREQUENCY)
-    return(showStationName(""));
+  if(freq<MIN_CB_FREQUENCY || freq>MAX_CB_FREQUENCY) return(0);
 
-  int offset = currentFrequency - MIN_CB_FREQUENCY;
+  int offset = freq - MIN_CB_FREQUENCY;
   char type  = 'R';
   if((offset%10) == 5)
   {
@@ -165,14 +179,40 @@ bool checkCbChannel()
 
   int column_index = offset / column_step;
   int remainder    = offset % column_step;
-  if((column_index>=max_columns) || (remainder%row_step))
-    return(showStationName(""));
+  if((column_index>=max_columns) || (remainder%row_step)) return(0);
 
   int row_number = remainder / row_step;
-  if((row_number>=max_rows) || (row_number<0))
-    return(showStationName(""));
+  if((row_number>=max_rows) || (row_number<0)) return(0);
 
-  char buf[50];
   sprintf(buf, "%c%s%c", 'A' + column_index, cbChannelNumber[row_number], type);
-  return(showStationName(buf));
+  return(buf);
+}
+
+static const char *findNameByFreq(uint16_t freq, const NamedFreq *db, uint16_t dbSize)
+{
+  int r, l;
+
+  for(l=0, r=dbSize-1 ; l <= r ; )
+  {
+    int m = (l + r) >> 1;
+    if(db[m].freq < freq)      l = m + 1;
+    else if(db[m].freq > freq) r = m - 1;
+    else return(db[m].name);
+  }
+
+  return(0);
+}
+
+bool identifyFrequency(uint16_t freq)
+{
+  const char *name;
+
+  // Try list of named frequencies first
+  name = findNameByFreq(freq, namedFrequencies, ITEM_COUNT(namedFrequencies));
+
+  // Try CB channel names
+  name = name? name : findCBChannelByFreq(freq);
+
+  // Done
+  return(showStationName(name? name : ""));
 }
