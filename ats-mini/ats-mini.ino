@@ -307,6 +307,8 @@ void useBand(const Band *band)
       rx.setSSBAutomaticVolumeControl(1);
       // G8PTN: Commented out
       //rx.setSsbSoftMuteMaxAttenuation(softMuteMaxAttIdx);
+      // To move frequency forward, need to move the BFO backwards
+      rx.setSSBBfo(-(currentBFO + band->bandCal));
     }
 
     // G8PTN: Enable GPIO1 as output
@@ -330,9 +332,6 @@ void useBand(const Band *band)
   // Clear signal strength readings
   rssi = 0;
   snr  = 0;
-
-  // Make sure we apply frequency, BFO, calibration
-  updateFrequency(currentFrequency);
 
   // Clear current station info (RDS/CB)
   clearStationInfo();
