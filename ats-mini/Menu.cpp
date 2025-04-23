@@ -132,7 +132,8 @@ RDSMode rdsMode[] =
   { RDS_PS | RDS_PI, "PS+PI" },
   { RDS_PS | RDS_PI | RDS_CT, "PS+PI+CT" },
   { RDS_PS | RDS_PI | RDS_RT | RDS_PT, "PS+PI+RT" },
-  { RDS_PS | RDS_PI | RDS_RT | RDS_PT | RDS_CT, "ALL" },
+  { RDS_PS | RDS_PI | RDS_RT | RDS_PT | RDS_CT, "ALL (EU)" },
+  { RDS_PS | RDS_PI | RDS_RT | RDS_PT | RDS_CT | RDS_RBDS, "ALL (US)" },
 };
 
 uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }

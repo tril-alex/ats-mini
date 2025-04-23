@@ -210,7 +210,7 @@ bool checkRds()
     needRedraw |= (mode & RDS_RT) && showRadioText(rx.getRdsVersionCode()? rx.getRdsText2B() : rx.getRdsText2A());
     needRedraw |= (mode & RDS_PI) && showRdsPiCode(rx.getRdsPI());
     needRedraw |= (mode & RDS_CT) && showRdsTime(rx.getRdsTime());
-    needRedraw |= (mode & RDS_PT) && showRdsProgramType(rx.getRdsProgramType());
+    needRedraw |= (mode & RDS_PT) && showRdsProgramType(rx.getRdsProgramType(), !!(mode & RDS_RBDS));
   }
 
   // Return TRUE if any RDS information changes

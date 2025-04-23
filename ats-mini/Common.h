@@ -20,6 +20,7 @@
 #define RDS_PI        0b00000100  // PI code
 #define RDS_RT        0b00001000  // Radio text
 #define RDS_PT        0b00010000  // Program type
+#define RDS_RBDS      0b00100000  // Use US PTYs
 
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
