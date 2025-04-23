@@ -39,13 +39,25 @@ static const char *cbChannelNumber[] =
 //
 const char *rdsProgramTypes[32] =
 {
-  "None", "News", "Information", "Sports",
+  0, "News", "Current Affairs", "Information",
+  "Sport", "Education", "Drama", "Culture",
+  "Science", "Varied", "Pop Music", "Rock Music",
+  "Easy Listening", "Light Classical", "Serious Classical", "Other Music",
+  "Weather", "Finance", "Children's Program", "Social Affairs",
+  "Religion", "Phone-In", "Travel", "Leisure",
+  "Jazz Music", "Country Music", "National Music", "Oldies Music",
+  "Folk Music", "Documentary", "TEST", "! ALERT !"
+};
+
+const char *rbdsProgramTypes[32] =
+{
+  0, "News", "Information", "Sports",
   "Talk", "Rock", "Classic Rock", "Adult Hits",
   "Soft Rock", "Top 40", "Country", "Oldies",
-  "Soft", "Nostalgia", "Jazz", "Classical",
+  "Soft Music", "Nostalgia", "Jazz", "Classical",
   "R & B", "Soft R & B", "Foreign Language", "Religious Music",
   "Religious Talk", "Personality", "Public", "College",
-  0, 0, 0, 0,
+  "Spanish Talk", "Spanish Music", "Hip Hop", 0,
   0, "Weather", "TEST", "! ALERT !"
 };
 
@@ -138,15 +150,16 @@ static bool showProgramInfo(const char *programInfo)
   return(false);
 }
 
-static bool showRdsProgramType(uint8_t rdsProgramType)
+static bool showRdsProgramType(uint8_t pgmType, bool useRBDS = false)
 {
-  // Filter out invalid or non-existant RDS program types
+  // Use US-based RBDS system if requested
   const char *text =
-    rdsProgramType >= ITEM_COUNT(rdsProgramTypes)? ""
-  : !rdsProgramTypes[rdsProgramType]? ""
-  : rdsProgramTypes[rdsProgramType];
+    useRBDS?
+      (pgmType<ITEM_COUNT(rbdsProgramTypes)? rbdsProgramTypes[pgmType] : 0)
+    : (pgmType<ITEM_COUNT(rdsProgramTypes)? rdsProgramTypes[pgmType] : 0);
 
-  return(showProgramInfo(text));
+  // Filter out invalid or non-existant RDS program types
+  return(showProgramInfo(text? text:""));
 }
 
 static bool showRdsPiCode(uint16_t rdsPiCode)
