@@ -103,24 +103,20 @@ void remoteTickTime()
 //
 // Recognize and execute given remote command
 //
-RemoteEvent remoteDoCommand(char key)
+int remoteDoCommand(char key)
 {
-  RemoteEvent event = {
-    .encoderClick = false,
-    .encoderCount = 0,
-    .status = false
-  };
+  int event = 0;
 
   switch(key)
   {
     case 'R': // Rotate Encoder Clockwise
-      event.encoderCount = 1;
+      event |= 1 << REMOTE_DIRECTION;
       break;
     case 'r': // Rotate Encoder Counterclockwise
-      event.encoderCount = -1;
+      event |= -1 << REMOTE_DIRECTION;
       break;
     case 'e': // Encoder Push Button
-      event.encoderClick = true;
+      event |= REMOTE_CLICK;
       break;
     case 'B': // Band Up
       doBand(1);
@@ -193,8 +189,7 @@ RemoteEvent remoteDoCommand(char key)
   }
 
   // Command recognized
-  event.status = true;
-  return(event);
+  return(event | REMOTE_CHANGED);
 }
 
 #endif // !DISABLE_REMOTE

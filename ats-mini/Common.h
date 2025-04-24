@@ -142,14 +142,11 @@ bool identifyFrequency(uint16_t freq);
 
 #ifndef DISABLE_REMOTE
 // Remote.c
-typedef struct RemoteEvent {
-  bool encoderClick;
-  int encoderCount;
-  bool status;
-};
-
+#define REMOTE_CHANGED   1
+#define REMOTE_CLICK     2
+#define REMOTE_DIRECTION 8
 void remoteTickTime();
-RemoteEvent remoteDoCommand(char key);
+int remoteDoCommand(char key);
 #endif
 
 #endif // COMMON_H

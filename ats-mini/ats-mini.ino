@@ -528,10 +528,11 @@ void loop()
   remoteTickTime();
   // Receive and execute serial command
   if(Serial.available()>0) {
-    RemoteEvent revent = remoteDoCommand(Serial.read());
-    needRedraw |= revent.status;
-    encoderCount = revent.encoderCount ? revent.encoderCount : encoderCount;
-    pb1st.wasClicked = revent.encoderClick || pb1st.wasClicked;
+    int revent = remoteDoCommand(Serial.read());
+    needRedraw |= !!(revent & 1);
+    pb1st.wasClicked |= !!(revent & 2);
+    int direction = revent >> 8;
+    encoderCount = direction ? direction : encoderCount;
   }
 #endif
 
