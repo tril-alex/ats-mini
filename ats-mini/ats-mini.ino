@@ -523,6 +523,18 @@ void loop()
 
   ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW);
 
+#ifndef DISABLE_REMOTE
+  // Periodically print status to serial
+  remoteTickTime();
+  // Receive and execute serial command
+  if(Serial.available()>0) {
+    RemoteEvent revent = remoteDoCommand(Serial.read());
+    needRedraw |= revent.status;
+    encoderCount = revent.encoderCount ? revent.encoderCount : encoderCount;
+    pb1st.wasClicked = revent.encoderClick || pb1st.wasClicked;
+  }
+#endif
+
   // Block encoder rotation when display is off
   if(encoderCount && !displayOn()) encoderCount = 0;
 
@@ -673,13 +685,6 @@ void loop()
 
   // Run clock
   needRedraw |= clockTickTime();
-
-#ifndef DISABLE_REMOTE
-  // Periodically print status to serial
-  remoteTickTime();
-  // Receive and execute serial command
-  if(Serial.available()>0) needRedraw |= remoteDoCommand(Serial.read());
-#endif
 
   // Redraw screen if necessary
   if(needRedraw) drawScreen();

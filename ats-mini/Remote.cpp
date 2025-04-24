@@ -4,9 +4,6 @@
 
 #ifndef DISABLE_REMOTE
 
-// @@@ FIXME: These should not be force-exported!!!
-extern volatile int encoderCount;
-
 static uint32_t remoteTimer = millis();
 static uint8_t remoteSeqnum = 0;
 static bool remoteLogOn = false;
@@ -106,18 +103,24 @@ void remoteTickTime()
 //
 // Recognize and execute given remote command
 //
-bool remoteDoCommand(char key)
+RemoteEvent remoteDoCommand(char key)
 {
+  RemoteEvent event = {
+    .encoderClick = false,
+    .encoderCount = 0,
+    .status = false
+  };
+
   switch(key)
   {
     case 'R': // Rotate Encoder Clockwise
-      encoderCount = 1;
+      event.encoderCount = 1;
       break;
     case 'r': // Rotate Encoder Counterclockwise
-      encoderCount = -1;
+      event.encoderCount = -1;
       break;
     case 'e': // Encoder Push Button
-      // pb1_released = true; // FIXME
+      event.encoderClick = true;
       break;
     case 'B': // Band Up
       doBand(1);
@@ -186,11 +189,12 @@ bool remoteDoCommand(char key)
 
     default:
       // Command not recognized
-      return(false);
+      return(event);
   }
 
   // Command recognized
-  return(true);
+  event.status = true;
+  return(event);
 }
 
 #endif // !DISABLE_REMOTE
