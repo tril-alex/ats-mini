@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include "EEPROM.h"
 #include "Rotary.h"              // Disabled half-step mode
+#include "Button.h"
 #include "Menu.h"
 #include "Storage.h"
 #include "Themes.h"
@@ -18,9 +19,6 @@
 #define DEFAULT_SLEEP            0  // Default sleep interval, range = 0 (off) to 255 in steps of 5
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
-#define CLICK_TIME              50
-#define SHORT_PRESS_TIME       500
-#define LONG_PRESS_TIME        2000
 
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
 #define TUNE_HOLDOFF_TIME         90    // Timer to hold off display whilst tuning
@@ -61,23 +59,6 @@ int8_t SsbAvcIdx = 48;                  // Default SSB = 48, range = 12 to 90 in
 int8_t AmSoftMuteIdx = 4;               // Default AM  = 4, range = 0 to 32
 int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
 
-// Button checking
-unsigned long pb1_time = 0;             // Push button timer
-unsigned long pb1_edge_time = 0;        // Push button edge time
-unsigned long pb1_pressed_time = 0;     // Push button pressed time
-unsigned long pb1_short_pressed_time = 0; // Push button short pressed time
-unsigned long pb1_long_pressed_time = 0;// Push button long pressed time
-unsigned long pb1_released_time = 0;    // Push button released time
-int pb1_current = HIGH;                 // Push button current state
-int pb1_stable = HIGH;                  // Push button stable state
-int pb1_last = HIGH;                    // Push button last state (after debounce)
-bool pb1_pressed = false;               // Push button pressed
-bool pb1_short_pressed = false;         // Push button short pressed
-bool pb1_long_pressed = false;          // Push button long pressed
-bool pb1_released = false;              // Push button released
-bool pb1_short_released = false;        // Push button short released
-bool pb1_long_released = false;         // Push button long released
-
 // Status bar icon flags
 bool screen_toggle = false;             // Toggle when drawsprite is called
 
@@ -105,6 +86,7 @@ uint8_t  snr  = 0;
 // Devices
 //
 Rotary encoder  = Rotary(ENCODER_PIN_B, ENCODER_PIN_A);
+ButtonTracker pb1 = ButtonTracker();
 TFT_eSPI tft    = TFT_eSPI();
 TFT_eSprite spr = TFT_eSprite(&tft);
 SI4735_fixed rx;
@@ -445,78 +427,6 @@ void updateFrequency(int newFreq)
   band->currentFreq = currentFrequency + currentBFO / 1000;
 }
 
-void buttonCheck()
-{
-  // Push button detection, only execute every 10 ms
-  if((millis() - pb1_time) > 10)
-  {
-    pb1_time = millis();
-
-    // Read pin value
-    pb1_current = digitalRead(ENCODER_PUSH_BUTTON);
-
-    // Start debounce timer
-    if(pb1_last != pb1_current)
-    {
-      pb1_edge_time = millis();
-      pb1_last = pb1_current;
-    }
-
-    // Debounced
-    if((millis() - pb1_edge_time) > CLICK_TIME)
-    {
-      // If button is pressed...
-      if(pb1_stable == HIGH && pb1_last == LOW)
-      {
-        pb1_pressed_time = pb1_edge_time;
-        pb1_short_pressed_time = pb1_long_pressed_time = 0;
-        pb1_stable = pb1_last;
-        pb1_pressed = true;
-        pb1_short_pressed = false;
-        pb1_long_pressed = false;
-        pb1_released = false;
-        pb1_short_released = false;
-        pb1_long_released = false;
-      }
-      // If button is still pressed...
-      else if(pb1_stable == LOW && pb1_last == LOW)
-      {
-        long pb1_press_duration = millis() - pb1_pressed_time;
-        if(pb1_press_duration > SHORT_PRESS_TIME && (pb1_short_pressed_time - pb1_pressed_time) != SHORT_PRESS_TIME)
-        {
-          pb1_short_pressed = true;
-          pb1_short_pressed_time = pb1_pressed_time + SHORT_PRESS_TIME;
-        }
-        if(pb1_press_duration > LONG_PRESS_TIME && (pb1_long_pressed_time - pb1_pressed_time) != LONG_PRESS_TIME)
-        {
-          pb1_short_pressed = false;
-          pb1_long_pressed = true;
-          pb1_long_pressed_time = pb1_pressed_time + LONG_PRESS_TIME;
-        }
-      }
-      // If button is released...
-      else if(pb1_stable == LOW && pb1_last == HIGH)
-      {
-        pb1_released_time = pb1_edge_time;
-        pb1_stable = pb1_last;
-        pb1_released = true;
-        pb1_pressed = pb1_short_pressed = pb1_long_pressed = false;
-
-        long pb1_press_duration = pb1_released_time - pb1_pressed_time;
-        if(pb1_press_duration > LONG_PRESS_TIME)
-        {
-          pb1_short_released = false;
-          pb1_long_released = true;
-        }
-        else if(pb1_press_duration > SHORT_PRESS_TIME)
-        {
-          pb1_short_released = true;
-          pb1_long_released = false;
-        }
-      }
-    }
-  }
-}
 
 //
 // Handle encoder PRESS + ROTATE
@@ -611,6 +521,8 @@ void loop()
   uint32_t currentTime = millis();
   bool needRedraw = false;
 
+  ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW);
+
   // Block encoder rotation when display is off
   if(encoderCount && !displayOn()) encoderCount = 0;
 
@@ -620,7 +532,7 @@ void loop()
     elapsedSleep = elapsedCommand = currentTime;
 
     // If encoder has been rotated AND pressed...
-    if(pb1_pressed && !isModalMode(currentCmd))
+    if(pb1st.isPressed && !isModalMode(currentCmd))
     {
       needRedraw |= doPressAndRotate(encoderCount);
       seekModePress = true;
@@ -636,18 +548,18 @@ void loop()
     needRedraw = true;
   }
 
-  // Encoder released after LONG PRESS: TOGGLE DISPLAY
-  else if(pb1_long_pressed && !seekModePress)
+  // Encoder is being LONG PRESSED: TOGGLE DISPLAY
+  else if(pb1st.isLongPressed && !seekModePress)
   {
-    pb1_long_pressed = pb1_short_pressed = pb1_pressed = false;
     elapsedSleep = currentTime;
     needRedraw |= displayOn(!displayOn());
+    // Wait till the button is released
+    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(10);
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
-  else if(pb1_short_released && displayOn() && !seekModePress)
+  else if(pb1st.wasShortPressed && displayOn() && !seekModePress)
   {
-    pb1_released = pb1_short_released = pb1_long_released = false;
     elapsedSleep = elapsedCommand = currentTime;
 
     // Open volume control
@@ -658,10 +570,9 @@ void loop()
     delay(MIN_ELAPSED_TIME);
   }
 
-  // ???: SELECT MENU ITEM
-  else if(pb1_released && !pb1_long_released && !seekModePress)
+  // Encoder short click: SELECT MENU ITEM
+  else if(pb1st.wasClicked && !seekModePress)
   {
-    pb1_released = pb1_short_released = pb1_long_released = false;
     elapsedSleep = elapsedCommand = currentTime;
 
     if(!displayOn())
@@ -738,10 +649,8 @@ void loop()
   eepromTickTime();
 
   // Check for button activity
-  buttonCheck();
-  if(!pb1_pressed && seekModePress)
+  if(!pb1st.isPressed && seekModePress)
   {
-    pb1_released = pb1_short_released = pb1_long_released = false;
     seekModePress = false;
   }
 

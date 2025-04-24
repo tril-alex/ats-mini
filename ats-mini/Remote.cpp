@@ -6,7 +6,6 @@
 
 // @@@ FIXME: These should not be force-exported!!!
 extern volatile int encoderCount;
-extern bool pb1_released;
 
 static uint32_t remoteTimer = millis();
 static uint8_t remoteSeqnum = 0;
@@ -111,14 +110,14 @@ bool remoteDoCommand(char key)
 {
   switch(key)
   {
-    case 'E': // Encoder Up
+    case 'R': // Rotate Encoder Clockwise
       encoderCount = 1;
       break;
-    case 'e': // Encoder Down
+    case 'r': // Rotate Encoder Counterclockwise
       encoderCount = -1;
       break;
-    case 'p': // Encoder Push Button
-      pb1_released = true;
+    case 'e': // Encoder Push Button
+      // pb1_released = true; // FIXME
       break;
     case 'B': // Band Up
       doBand(1);

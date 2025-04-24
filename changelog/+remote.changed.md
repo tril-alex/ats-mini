@@ -1,0 +1,1 @@
+Remote encoder keys changed. Use `R` and `r` to rotate it and `e` to click.

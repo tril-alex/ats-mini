@@ -21,33 +21,33 @@ Controls are implemented through the knob. The knob has quick press, long press,
 
 A USB-serial interface is available to control and monitor the receiver. A list of commands:
 
-| Button       | Function           | Comments                                                                                   |
-|--------------|--------------------|--------------------------------------------------------------------------------------------|
-| <kbd>E</kbd> | Encoder Up         | Tune the frequency up, scroll the menu, etc                                                |
-| <kbd>e</kbd> | Encoder Down       | Tune the frequency down, scroll the menu, etc                                              |
-| <kbd>p</kbd> | Encoder Button     | The <kbd>p</kbd> emulates a single push and can not be used for EEPROM reset or long press |
-| <kbd>V</kbd> | Volume Up          |                                                                                            |
-| <kbd>v</kbd> | Volume Down        |                                                                                            |
-| <kbd>B</kbd> | Next Band          |                                                                                            |
-| <kbd>b</kbd> | Previous Band      |                                                                                            |
-| <kbd>M</kbd> | Next Mode          | Next modulation                                                                            |
-| <kbd>m</kbd> | Previous Mode      | Previous modulation                                                                        |
-| <kbd>S</kbd> | Next step          |                                                                                            |
-| <kbd>s</kbd> | Previous step      |                                                                                            |
-| <kbd>W</kbd> | Next Bandwidth     |                                                                                            |
-| <kbd>w</kbd> | Previous Bandwidth |                                                                                            |
-| <kbd>A</kbd> | AGC/Att Up         | Automatic Gain Control or Attenuator up                                                    |
-| <kbd>a</kbd> | AGC/Att Down       | Automatic Gain Control or Attenuator down                                                  |
-| <kbd>L</kbd> | Backlight Up       |                                                                                            |
-| <kbd>l</kbd> | Backlight Down     |                                                                                            |
-| <kbd>O</kbd> | Sleep On           |                                                                                            |
-| <kbd>o</kbd> | Sleep Off          |                                                                                            |
-| <kbd>t</kbd> | Toggle Log         | Toggle the receiver monitor (log) on and off                                               |
-| <kbd>C</kbd> | Screenshot         | Capture a screenshot and print it as a BMP image in HEX format                             |
-| <kbd>@</kbd> | Get Theme          | Print the current color theme as a list of HEX numbers                                     |
-| <kbd>!</kbd> | Set Theme          | Set the current color theme as a list of HEX numbers (effective until a power cycle)       |
+| Button       | Function            | Comments                                                                                   |
+|--------------|---------------------|--------------------------------------------------------------------------------------------|
+| <kbd>R</kbd> | Rotate Encoder Up   | Tune the frequency up, scroll the menu, etc                                                |
+| <kbd>r</kbd> | Rotate Encoder Down | Tune the frequency down, scroll the menu, etc                                              |
+| <kbd>e</kbd> | Encoder Button      | The <kbd>p</kbd> emulates a single push and can not be used for EEPROM reset or long press |
+| <kbd>V</kbd> | Volume Up           |                                                                                            |
+| <kbd>v</kbd> | Volume Down         |                                                                                            |
+| <kbd>B</kbd> | Next Band           |                                                                                            |
+| <kbd>b</kbd> | Previous Band       |                                                                                            |
+| <kbd>M</kbd> | Next Mode           | Next modulation                                                                            |
+| <kbd>m</kbd> | Previous Mode       | Previous modulation                                                                        |
+| <kbd>S</kbd> | Next step           |                                                                                            |
+| <kbd>s</kbd> | Previous step       |                                                                                            |
+| <kbd>W</kbd> | Next Bandwidth      |                                                                                            |
+| <kbd>w</kbd> | Previous Bandwidth  |                                                                                            |
+| <kbd>A</kbd> | AGC/Att Up          | Automatic Gain Control or Attenuator up                                                    |
+| <kbd>a</kbd> | AGC/Att Down        | Automatic Gain Control or Attenuator down                                                  |
+| <kbd>L</kbd> | Backlight Up        |                                                                                            |
+| <kbd>l</kbd> | Backlight Down      |                                                                                            |
+| <kbd>O</kbd> | Sleep On            |                                                                                            |
+| <kbd>o</kbd> | Sleep Off           |                                                                                            |
+| <kbd>t</kbd> | Toggle Log          | Toggle the receiver monitor (log) on and off                                               |
+| <kbd>C</kbd> | Screenshot          | Capture a screenshot and print it as a BMP image in HEX format                             |
+| <kbd>@</kbd> | Get Theme           | Print the current color theme as a list of HEX numbers                                     |
+| <kbd>!</kbd> | Set Theme           | Set the current color theme as a list of HEX numbers (effective until a power cycle)       |
 
-Note: To trigger an EEPROM write, issue a <kbd>E</kbd> and <kbd>e</kbd> command whilst in VFO mode. The write occurs after 10 seconds.
+Note: To trigger an EEPROM write, issue a <kbd>R</kbd> and <kbd>r</kbd> command whilst in VFO mode. The write occurs after 10 seconds.
 
 The following comma separated information is sent out on the serial interface when the monitor (log) mode is enabled:
 
