@@ -110,7 +110,7 @@ static bool showStationName(const char *stationName)
   return(false);
 }
 
-static bool showRadioText(const char *radioText)
+static bool showRadioText(const char *radioText, uint8_t width = 40)
 {
   int i, j;
 
@@ -118,7 +118,7 @@ static bool showRadioText(const char *radioText)
   {
     // Terminate at 0x0D, split into lines by 0x0A
     for(i=j=0 ; (i<64) && radioText[i] && radioText[i]!=0x0D ; i++)
-      if((radioText[i]==0x0A) || ((radioText[i]==' ') && (j>=32)))
+      if((radioText[i]==0x0A) || ((radioText[i]==' ') && (j>=width)))
       {
         bufRadioText[i] = '\0';
         j = 0;
