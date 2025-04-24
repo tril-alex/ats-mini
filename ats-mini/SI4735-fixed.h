@@ -12,6 +12,13 @@ class SI4735_fixed: public SI4735
         return 0x0000;
     }
 
+    // Fixing SI4735::getRdsProgramType() bug where it only returns three lower bits
+    uint8_t getRdsProgramTypeX(void)
+    {
+      uint16_t blockB = (currentRdsStatus.resp.BLOCKBH << 8) + currentRdsStatus.resp.BLOCKBL;
+      return (blockB >> 5) & 0x1F;
+    }
+
     // Fixing SI4735::getRdsText2A() which does not follow version bit
     char *getRdsText2A(void)
     {

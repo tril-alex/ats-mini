@@ -130,7 +130,7 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
     uint16_t piCode = getRdsPiCode();
     if(piCode)
     {
-      char text[8];
+      char text[16];
       sprintf(text, "PI: %04X", piCode);
       spr.drawString(text, ux, uy+22, 2);
     }
