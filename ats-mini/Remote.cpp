@@ -68,10 +68,11 @@ void remotePrintStatus()
   uint16_t tuningCapacitor = rx.getAntennaTuningCapacitor();
 
   // Remote serial
-  Serial.printf("%u,%u,%d,%s,%s,%s,%s,%hu,%hu,%hu,%hu,%.2f,%hu\r\n",
+  Serial.printf("%u,%u,%d,%d,%s,%s,%s,%s,%hu,%hu,%hu,%hu,%.2f,%hu\r\n",
                 APP_VERSION,
                 currentFrequency,
-                currentBFO + getCurrentBand()->bandCal,
+                currentBFO,
+                getCurrentBand()->bandCal,
                 getCurrentBand()->bandName,
                 bandModeDesc[currentMode],
                 getCurrentStep()->desc,
@@ -165,6 +166,12 @@ int remoteDoCommand(char key)
       break;
     case 'o':
       displayOn(true);
+      break;
+    case 'I':
+      doCal(1);
+      break;
+    case 'i':
+      doCal(-1);
       break;
     case 'C':
       remoteLogOn = false;

@@ -98,6 +98,7 @@ void doAvc(int dir);
 void doBandwidth(int dir);
 void doVolume(int dir);
 void doBrt(int dir);
+void doCal(int dir);
 void doStep(int dir);
 void doMode(int dir);
 void doBand(int dir);

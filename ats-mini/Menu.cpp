@@ -405,7 +405,7 @@ void doAvc(int dir)
   }
 }
 
-static void doCal(int dir)
+void doCal(int dir)
 {
   band[bandIdx].bandCal = clamp_range(band[bandIdx].bandCal, 10*dir, -MAX_CAL, MAX_CAL);
 
