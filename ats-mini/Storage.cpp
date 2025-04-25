@@ -114,7 +114,7 @@ void eepromSaveConfig()
   //   must be disabled otherwise band[bandIdx].currentFreq = 0 (where bandIdx = 0; by default) on EEPROM reset
   //band[bandIdx].currentFreq = currentFrequency;
 
-  for(int i=0 ; i<=getTotalBands() ; i++)
+  for(int i=0 ; i<getTotalBands() ; i++)
   {
     EEPROM.write(addr++, (band[i].currentFreq >> 8));   // Stores the current Frequency HIGH byte for the band
     EEPROM.write(addr++, (band[i].currentFreq & 0xFF)); // Stores the current Frequency LOW byte for the band
@@ -141,7 +141,7 @@ void eepromSaveConfig()
   EEPROM.commit();
 
   addr = EEPROM_SETP_ADDR;
-  for(int i=0 ; i<=getTotalBands() ; i++)
+  for(int i=0 ; i<getTotalBands() ; i++)
   {
     EEPROM.write(addr++, (band[i].bandCal >> 8));   // Stores the current Calibration value (HIGH byte) for the band
     EEPROM.write(addr++, (band[i].bandCal & 0XFF)); // Stores the current Calibration value (LOW byte) for the band
@@ -175,7 +175,7 @@ void eepromLoadConfig()
   currentBFO  = EEPROM.read(addr++) << 8;        // G8PTN: Reads stored BFO value (HIGH byte)
   currentBFO |= EEPROM.read(addr++);             // G8PTN: Reads stored BFO value (HIGH byte)
 
-  for(int i=0 ; i<=getTotalBands() ; i++)
+  for(int i=0 ; i<getTotalBands() ; i++)
   {
     band[i].currentFreq    = EEPROM.read(addr++) << 8;
     band[i].currentFreq   |= EEPROM.read(addr++);
@@ -199,7 +199,7 @@ void eepromLoadConfig()
   rdsModeIdx     = EEPROM.read(addr++);          // Reads stored RDS Mode value
 
   addr = EEPROM_SETP_ADDR;
-  for(int i=0 ; i<=getTotalBands() ; i++)
+  for(int i=0 ; i<getTotalBands() ; i++)
   {
     band[i].bandCal  = EEPROM.read(addr++) << 8; // Reads stored Calibration value (HIGH byte) per band
     band[i].bandCal |= EEPROM.read(addr++);      // Reads stored Calibration value (LOW byte) per band

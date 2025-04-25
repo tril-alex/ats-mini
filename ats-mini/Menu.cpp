@@ -907,7 +907,7 @@ static void drawAvc(int x, int y, int sx)
   spr.drawString("Max Gain", 40+x+(sx/2), 32+y, 2);
 
   // Only show AVC for AM and SSB modes
-  if(currentCmd!=FM)
+  if(currentMode!=FM)
   {
     int currentAvc = isSSB()? SsbAvcIdx : AmAvcIdx;
     spr.drawNumber(currentAvc, 40+x+(sx/2), 60+y, 4);
