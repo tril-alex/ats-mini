@@ -964,29 +964,40 @@ static void drawInfo(int x, int y, int sx)
     spr.drawString(text, 48+x, 64+y+(-1*16), 2);
   }
 
-  spr.drawString("AVC:", 6+x, 64+y + (0*16), 2);
-
-  if(currentMode==FM)
-    sprintf(text, "n/a");
-  else if(isSSB())
-    sprintf(text, "%2.2ddB", SsbAvcIdx);
-  else
-    sprintf(text, "%2.2ddB", AmAvcIdx);
-
-  spr.drawString(text, 48+x, 64+y + (0*16), 2);
-
-  spr.drawString("Vol:", 6+x, 64+y+(1*16), 2);
+  spr.drawString("Vol:", 6+x, 64+y+(0*16), 2);
   if(muteOn())
   {
     //spr.setTextDatum(MR_DATUM);
     spr.setTextColor(TH.box_off_text, TH.box_off_bg);
-    spr.drawString("Muted", 48+x, 64+y+(1*16), 2);
+    spr.drawString("Muted", 48+x, 64+y+(0*16), 2);
     spr.setTextColor(TH.box_text, TH.box_bg);
   }
   else
   {
     spr.setTextColor(TH.box_text, TH.box_bg);
-    spr.drawNumber(rx.getVolume(), 48+x, 64+y+(1*16), 2);
+    spr.drawNumber(rx.getVolume(), 48+x, 64+y+(0*16), 2);
+  }
+
+  // Draw RDS PI code, if present
+  uint16_t piCode = getRdsPiCode();
+  if(piCode && currentMode == FM)
+  {
+    sprintf(text, "%04X", piCode);
+    spr.drawString("PI:", 6+x, 64+y + (1*16), 2);
+    spr.drawString(text, 48+x, 64+y + (1*16), 2);
+  }
+  else
+  {
+    spr.drawString("AVC:", 6+x, 64+y + (1*16), 2);
+
+    if(currentMode==FM)
+      sprintf(text, "n/a");
+    else if(isSSB())
+      sprintf(text, "%2.2ddB", SsbAvcIdx);
+    else
+      sprintf(text, "%2.2ddB", AmAvcIdx);
+
+    spr.drawString(text, 48+x, 64+y + (1*16), 2);
   }
 
   // Draw current time

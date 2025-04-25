@@ -126,14 +126,6 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
     spr.setTextDatum(ML_DATUM);
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("MHz", ux, uy);
-    // Draw RDS PI code, if present
-    uint16_t piCode = getRdsPiCode();
-    if(piCode)
-    {
-      char text[16];
-      sprintf(text, "PI: %04X", piCode);
-      spr.drawString(text, ux, uy+22, 2);
-    }
   }
   else
   {
