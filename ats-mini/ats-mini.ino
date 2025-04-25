@@ -32,7 +32,6 @@ uint8_t disableAgc = 0;
 int8_t agcNdx = 0;
 int8_t softMuteMaxAttIdx = 4;
 
-uint8_t seekDirection = 1;
 bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary encoder detection
 bool seekModePress = false;   // Seek happened during long press
 
@@ -335,19 +334,6 @@ void showFrequencySeek(uint16_t freq)
 }
 
 //
-// Find a station. The direction is based on the last encoder move
-// clockwise or counterclockwise
-//
-void doSeek()
-{
-  // It does not work for SSB mode
-  if(isSSB()) return;
-
-  rx.seekStationProgress(showFrequencySeek, checkStopSeeking, seekDirection);   // G8PTN: Added checkStopSeeking
-  currentFrequency = rx.getFrequency();
-}
-
-//
 // Tune using BFO, using algorithm from Goshante's ATS-20_EX firmware
 //
 void updateBFO(int newBFO)
@@ -433,8 +419,6 @@ void updateFrequency(int newFreq)
 //
 bool doPressAndRotate(int8_t dir)
 {
-  bool needRedraw = false;
-
   if(isSSB())
   {
 #ifdef ENABLE_HOLDOFF
@@ -442,21 +426,24 @@ bool doPressAndRotate(int8_t dir)
     tuning_flag = true;
     tuning_timer = millis();
 #endif
+
     updateBFO(currentBFO + dir * getSteps(true));
-    needRedraw = true;
   }
   else
   {
-    seekDirection = dir>0? 1 : 0;
     // G8PTN: Flag is set by rotary encoder and cleared on seek entry
     seekStop = false;
-    doSeek();
-    // G8PTN: Added to ensure update of currentFreq in table for AM/FM
-    band[bandIdx].currentFreq = currentFrequency;
-    needRedraw = true;
+    rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
+
+    updateFrequency(rx.getFrequency());
   }
 
-  return(needRedraw);
+  // Clear current station name and information
+  clearStationInfo();
+  // Check for named frequencies
+  identifyFrequency(currentFrequency + currentBFO / 1000);
+  // Will need a redraw
+  return(true);
 }
 
 //
@@ -505,10 +492,8 @@ bool doRotate(int8_t dir)
 
   // Clear current station name and information
   clearStationInfo();
-
   // Check for named frequencies
   identifyFrequency(currentFrequency + currentBFO / 1000);
-
   // Will need a redraw
   return(true);
 }
