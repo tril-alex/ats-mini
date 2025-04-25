@@ -112,31 +112,46 @@ static bool showStationName(const char *stationName)
 
 static bool showRadioText(const char *radioText, uint8_t width = 40)
 {
+  bool changed = false;
   int i, j;
+  char c;
 
-  if(radioText && strcmp(bufRadioText, radioText))
+  // Must have text
+  if(!radioText) return(false);
+
+  // Skip leading whitespace
+  for(i=0 ; (i<64) && radioText[i] && (radioText[i]<=' ') ; i++);
+
+  // Terminate at 0x0D, split into lines by 0x0A
+  for(j=0 ; (i<64) && radioText[i] && (radioText[i]!=0x0D) ; i++)
   {
-    // Terminate at 0x0D, split into lines by 0x0A
-    for(i=j=0 ; (i<64) && radioText[i] && radioText[i]!=0x0D ; i++)
-      if((radioText[i]==0x0A) || ((radioText[i]==' ') && (j>=width)))
-      {
-        bufRadioText[i] = '\0';
-        j = 0;
-      }
-      else
-      {
-        bufRadioText[i] = radioText[i];
-        j++;
-      }
+    if((radioText[i]==0x0A) || ((radioText[i]==' ') && (j>=width)))
+    {
+      c = '\0';
+      j = 0;
+    }
+    else
+    {
+      c = radioText[i];
+      j++;
+    }
 
-    // Terminate multitline text with two zeros
-    bufRadioText[i] = '\0';
-    bufRadioText[i+1] = '\0';
-
-    return(true);
+    changed |= c!=bufRadioText[i];
+    bufRadioText[i] = c;
   }
 
-  return(false);
+  // Skip trailing whitespace
+  while((i>0) && (bufRadioText[i-1]<=' ')) i--;
+
+  // Check the end of the buffer for changes
+  changed |= bufRadioText[i] || bufRadioText[i+1];
+
+  // Terminate multitline text with two zeros
+  bufRadioText[i++] = '\0';
+  bufRadioText[i++] = '\0';
+
+  // Done
+  return(changed);
 }
 
 static bool showProgramInfo(const char *programInfo)
