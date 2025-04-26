@@ -364,8 +364,7 @@ void doCal(int dir)
 
 void doBrt(int dir)
 {
-  currentBrt = clamp_range(currentBrt, 32*dir, 32, 255);
-
+  currentBrt = clamp_range(currentBrt, 5*dir, 10, 255);
   if(displayOn()) ledcWrite(PIN_LCD_BL, currentBrt);
 }
 

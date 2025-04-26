@@ -62,7 +62,7 @@ int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
 bool screen_toggle = false;             // Toggle when drawsprite is called
 
 // Menu options
-uint16_t currentBrt = 128;              // Display brightness, range = 32 to 255 in steps of 32
+uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255 in steps of 5
 uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
 
