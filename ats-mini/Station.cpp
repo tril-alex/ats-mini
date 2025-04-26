@@ -110,7 +110,7 @@ static bool showStationName(const char *stationName)
   return(false);
 }
 
-static bool showRadioText(const char *radioText, uint8_t width = 40)
+static bool showRadioText(const char *radioText, uint8_t width = 32)
 {
   bool changed = false;
   int i, j;
