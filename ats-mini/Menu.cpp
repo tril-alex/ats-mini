@@ -68,12 +68,12 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_BAND         1
 #define MENU_VOLUME       2
 #define MENU_STEP         3
-#define MENU_BW           4
+#define MENU_MEMORY       4
 #define MENU_MUTE         5
-#define MENU_AGC_ATT      6
-#define MENU_SOFTMUTE     7
-#define MENU_AVC          8
-#define MENU_MEMORY       9
+#define MENU_BW           6
+#define MENU_AGC_ATT      7
+#define MENU_SOFTMUTE     8
+#define MENU_AVC          9
 #define MENU_SETTINGS     10
 
 int8_t menuIdx = MENU_VOLUME;
@@ -84,12 +84,12 @@ const char *menu[] =
   "Band",
   "Volume",
   "Step",
-  "Bandwidth",
+  "Memory",
   "Mute",
+  "Bandwidth",
   "AGC/ATTN",
   "SoftMute",
   "AVC",
-  "Memory",
   "Settings",
 };
 
@@ -755,9 +755,7 @@ static void drawMenu(int x, int y, int sx)
   spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.menu_bg);
   spr.setTextColor(TH.menu_hdr, TH.menu_bg);
 
-  char label_menu[16];
-  sprintf(label_menu, "Menu %2.2d/%2.2d", menuIdx + 1, ITEM_COUNT(menu));
-  spr.drawString(label_menu, 40+x+(sx/2), 12+y, 2);
+  spr.drawString("Menu", 40+x+(sx/2), 12+y, 2);
   spr.drawLine(1+x, 23+y, 76+sx, 23+y, TH.menu_border);
 
   spr.setTextFont(0);
@@ -918,7 +916,9 @@ static void drawRDSMode(int x, int y, int sx)
 
 static void drawMemory(int x, int y, int sx)
 {
-  drawCommon(menu[MENU_MEMORY], x, y, sx);
+  char label_memory[16];
+  sprintf(label_memory, "%s %2.2d", menu[MENU_MEMORY], memoryIdx + 1);
+  drawCommon(label_memory, x, y, sx);
 
   int count = ITEM_COUNT(memories);
   for(int i=-2 ; i<3 ; i++)
