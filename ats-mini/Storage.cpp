@@ -10,7 +10,7 @@
 #define EEPROM_BASE_ADDR  0x000
 #define EEPROM_SETM_ADDR  0x080
 #define EEPROM_SET_ADDR   0x100
-#define EEPROM_SETP_ADDR  0x110
+#define EEPROM_SETP_ADDR  0x120
 #define EEPROM_VER_ADDR   0x1F0
 
 // Flag indicating EEPROM write request
@@ -151,6 +151,7 @@ void eepromSaveConfig()
   EEPROM.write(addr++, currentSleep & 0XFF);     // Stores the current Sleep value (LOW byte)
   EEPROM.write(addr++, themeIdx);                // Stores the current Theme index value
   EEPROM.write(addr++, rdsModeIdx);              // Stores the current RDS Mode value
+  EEPROM.write(addr++, sleepModeIdx);            // Stores the current Sleep Mode value
   EEPROM.commit();
 
   addr = EEPROM_SETP_ADDR;
@@ -220,6 +221,7 @@ void eepromLoadConfig()
   currentSleep  |= EEPROM.read(addr++);          // Reads stored Sleep value (LOW byte)
   themeIdx       = EEPROM.read(addr++);          // Reads stored Theme index value
   rdsModeIdx     = EEPROM.read(addr++);          // Reads stored RDS Mode value
+  sleepModeIdx   = EEPROM.read(addr++);          // Reads stored Sleep Mode value
 
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<getTotalBands() ; i++)

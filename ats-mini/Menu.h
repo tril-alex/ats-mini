@@ -24,10 +24,16 @@
 #define CMD_SETTINGS  0x0B00 //-SETTINGS MODE starts here
 #define CMD_BRT       0x0C00 // |
 #define CMD_CAL       0x0D00 // |
-#define CMD_SLEEP     0x0E00 // |
-#define CMD_THEME     0x0F00 // |
-#define CMD_RDS       0x1000 // |
-#define CMD_ABOUT     0x1100 //-SETTINGS MODE ends here
+#define CMD_THEME     0x0E00 // |
+#define CMD_RDS       0x0F00 // |
+#define CMD_SLEEP     0x1000 // |
+#define CMD_SLEEPMODE 0x1100 // |
+#define CMD_ABOUT     0x1200 //-SETTINGS MODE ends here
+
+#define SLEEP_LOCKED   0 // Lock the encoder
+#define SLEEP_UNLOCKED 1 // Do not lock the encoder
+#define SLEEP_LIGHT    2 // ESP32 light sleep
+#define SLEEP_DEEP     3 // ESP32 deep sleep
 
 //
 // Data Types

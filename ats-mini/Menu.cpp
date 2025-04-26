@@ -99,10 +99,11 @@ const char *menu[] =
 
 #define MENU_BRIGHTNESS   0
 #define MENU_CALIBRATION  1
-#define MENU_SLEEP        2
-#define MENU_THEME        3
-#define MENU_RDS          4
-#define MENU_ABOUT        5
+#define MENU_THEME        2
+#define MENU_RDS          3
+#define MENU_SLEEP        4
+#define MENU_SLEEPMODE    5
+#define MENU_ABOUT        6
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -110,9 +111,10 @@ const char *settings[] =
 {
   "Brightness",
   "Calibration",
-  "Sleep",
   "Theme",
   "RDS",
+  "Sleep",
+  "Sleep Mode",
   "About",
 };
 
@@ -149,6 +151,13 @@ RDSMode rdsMode[] =
 };
 
 uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }
+
+//
+// Sleep Mode Menu
+//
+
+uint8_t sleepModeIdx = SLEEP_LOCKED;
+const char *sleepModeDesc[] = { "Locked", "Unlocked", "Light", "Deep" };
 
 //
 // Step Menu
@@ -372,6 +381,11 @@ void doBrt(int dir)
 static void doSleep(int dir)
 {
   currentSleep = clamp_range(currentSleep, 5*dir, 0, 255);
+}
+
+static void doSleepMode(int dir)
+{
+  sleepModeIdx = wrap_range(sleepModeIdx, dir, 0, LAST_ITEM(sleepModeDesc));
 }
 
 static void doRDSMode(int dir)
@@ -622,10 +636,11 @@ static void clickSettings(int cmd)
     case MENU_CALIBRATION:
       if(isSSB()) currentCmd = CMD_CAL;
       break;
-    case MENU_SLEEP:      currentCmd = CMD_SLEEP; break;
-    case MENU_THEME:      currentCmd = CMD_THEME; break;
-    case MENU_RDS:        currentCmd = CMD_RDS;   break;
-    case MENU_ABOUT:      currentCmd = CMD_ABOUT; break;
+    case MENU_THEME:      currentCmd = CMD_THEME;     break;
+    case MENU_RDS:        currentCmd = CMD_RDS;       break;
+    case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
+    case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
+    case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
   }
 }
 
@@ -648,10 +663,11 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_SETTINGS:  doSettings(dir);break;
     case CMD_BRT:       doBrt(dir);break;
     case CMD_CAL:       doCal(dir);break;
-    case CMD_SLEEP:     doSleep(dir);break;
     case CMD_THEME:     doTheme(dir);break;
     case CMD_RDS:       doRDSMode(dir);break;
     case CMD_MEMORY:    doMemory(dir);break;
+    case CMD_SLEEP:     doSleep(dir);break;
+    case CMD_SLEEPMODE: doSleepMode(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -879,6 +895,22 @@ static void drawBandwidth(int x, int y, int sx)
       int count = ITEM_COUNT(bandwidthAM);
       spr.drawString(bandwidthAM[abs((bwIdxAM+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
      }
+  }
+}
+
+static void drawSleepMode(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_SLEEPMODE], x, y, sx);
+
+  int count = ITEM_COUNT(sleepModeDesc);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0)
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    else
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+
+    spr.drawString(sleepModeDesc[abs((sleepModeIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -1136,9 +1168,10 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_CAL:       drawCal(x, y, sx);       break;
     case CMD_AVC:       drawAvc(x, y, sx);       break;
     case CMD_BRT:       drawBrt(x, y, sx);       break;
-    case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_RDS:       drawRDSMode(x, y, sx);   break;
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
+    case CMD_SLEEP:     drawSleep(x, y, sx);     break;
+    case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

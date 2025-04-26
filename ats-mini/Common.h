@@ -95,6 +95,7 @@ extern uint8_t currentMode;
 extern uint16_t currentCmd;
 extern uint16_t currentBrt;
 extern uint16_t currentSleep;
+extern uint8_t sleepModeIdx;
 extern uint8_t AmTotalSteps;
 
 extern int8_t FmAgcIdx;
