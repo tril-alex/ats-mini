@@ -924,25 +924,25 @@ static void drawMemory(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     int j = abs((memoryIdx+count+i)%count);
-    char buf[16];
 
-    if(i)
-      spr.setTextColor(TH.menu_item, TH.menu_bg);
-    else if(!memories[j].freq || !memcmp(&memories[j], &newMemory, sizeof(newMemory)))
-      spr.setTextColor(TH.text_warn, TH.menu_hl_bg);
-    else
+    if(i==0)
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    else
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    // Show memory being added on empty slots
-    const Memory *mem = memories[j].freq || i? &memories[j] : &newMemory;
+    char buf[16];
     const char *text = buf;
 
-    if(!mem->freq)
+    if(i==0 && !memories[j].freq)
+      text = "Add";
+    else if(i==0 && !memcmp(&memories[j], &newMemory, sizeof(newMemory)))
+      text = "Delete";
+    else if(!memories[j].freq)
       text = "- - -";
-    else if(mem->mode==FM)
-      sprintf(buf, "%-.2f %s", mem->freq / 100.0, bandModeDesc[mem->mode]);
+    else if(memories[j].mode==FM)
+      sprintf(buf, "%-.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
     else
-      sprintf(buf, "%-.3f %s", mem->freq / 1000.0, bandModeDesc[mem->mode]);
+      sprintf(buf, "%-.3f %s", memories[j].freq / 1000.0, bandModeDesc[memories[j].mode]);
 
     spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
   }
