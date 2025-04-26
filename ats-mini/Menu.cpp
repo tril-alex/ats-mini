@@ -326,77 +326,6 @@ static inline int clamp_range(int v, int dir, int vMin, int vMax)
 // Encoder input handlers
 //
 
-static void doMenu(int dir)
-{
-  menuIdx = wrap_range(menuIdx, dir, 0, LAST_ITEM(menu));
-}
-
-static void clickMenu(int cmd)
-{
-  // No command yet
-  currentCmd = CMD_NONE;
-
-  switch(cmd)
-  {
-    case MENU_STEP:     currentCmd = CMD_STEP;      break;
-    case MENU_MODE:     currentCmd = CMD_MODE;      break;
-    case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
-    case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
-    case MENU_BAND:     currentCmd = CMD_BAND;      break;
-    case MENU_SETTINGS: currentCmd = CMD_SETTINGS;  break;
-
-    case MENU_MEMORY:
-      currentCmd = CMD_MEMORY;
-      newMemory.freq = currentFrequency + currentBFO / 1000;
-      newMemory.mode = currentMode;
-      newMemory.band = bandIdx;
-      break;
-
-    case MENU_SOFTMUTE:
-      // No soft mute in FM mode
-      if(currentMode!=FM) currentCmd = CMD_SOFTMUTE;
-      break;
-
-    case MENU_AVC:
-      // No AVC in FM mode
-      if(currentMode!=FM) currentCmd = CMD_AVC;
-      break;
-
-    case MENU_VOLUME:
-      // Unmute sound when changing volume
-      muteOn(false);
-      currentCmd = CMD_VOLUME;
-      break;
-
-    case MENU_MUTE:
-      muteOn(!muteOn());
-      break;
-  }
-}
-
-static void doSettings(int dir)
-{
-  settingsIdx = wrap_range(settingsIdx, dir, 0, LAST_ITEM(settings));
-}
-
-static void clickSettings(int cmd)
-{
-  // No command yet
-  currentCmd = CMD_NONE;
-
-  switch(cmd)
-  {
-    case MENU_BRIGHTNESS: currentCmd = CMD_BRT; break;
-    case MENU_CALIBRATION:
-      if(isSSB()) currentCmd = CMD_CAL;
-      break;
-    case MENU_SLEEP:      currentCmd = CMD_SLEEP; break;
-    case MENU_THEME:      currentCmd = CMD_THEME; break;
-    case MENU_RDS:        currentCmd = CMD_RDS;   break;
-    case MENU_ABOUT:      currentCmd = CMD_ABOUT; break;
-  }
-}
-
 void doVolume(int dir)
 {
   if(dir>0) rx.volumeUp(); else if(dir<0) rx.volumeDown();
@@ -494,6 +423,7 @@ static void clickMemory(uint8_t idx)
   else if(!memcmp(&memories[idx], &newMemory, sizeof(newMemory)))
   {
     memories[idx].freq = 0;
+    currentCmd = CMD_NONE;
   }
   // Do nothing, memory slot already activated in doMemory()
   else
@@ -626,6 +556,78 @@ void doBandwidth(int dir)
 //
 // Handle encoder input in menu
 //
+
+static void doMenu(int dir)
+{
+  menuIdx = wrap_range(menuIdx, dir, 0, LAST_ITEM(menu));
+}
+
+static void clickMenu(int cmd)
+{
+  // No command yet
+  currentCmd = CMD_NONE;
+
+  switch(cmd)
+  {
+    case MENU_STEP:     currentCmd = CMD_STEP;      break;
+    case MENU_MODE:     currentCmd = CMD_MODE;      break;
+    case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
+    case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
+    case MENU_BAND:     currentCmd = CMD_BAND;      break;
+    case MENU_SETTINGS: currentCmd = CMD_SETTINGS;  break;
+
+    case MENU_MEMORY:
+      currentCmd = CMD_MEMORY;
+      newMemory.freq = currentFrequency + currentBFO / 1000;
+      newMemory.mode = currentMode;
+      newMemory.band = bandIdx;
+      doMemory(0);
+      break;
+
+    case MENU_SOFTMUTE:
+      // No soft mute in FM mode
+      if(currentMode!=FM) currentCmd = CMD_SOFTMUTE;
+      break;
+
+    case MENU_AVC:
+      // No AVC in FM mode
+      if(currentMode!=FM) currentCmd = CMD_AVC;
+      break;
+
+    case MENU_VOLUME:
+      // Unmute sound when changing volume
+      muteOn(false);
+      currentCmd = CMD_VOLUME;
+      break;
+
+    case MENU_MUTE:
+      muteOn(!muteOn());
+      break;
+  }
+}
+
+static void doSettings(int dir)
+{
+  settingsIdx = wrap_range(settingsIdx, dir, 0, LAST_ITEM(settings));
+}
+
+static void clickSettings(int cmd)
+{
+  // No command yet
+  currentCmd = CMD_NONE;
+
+  switch(cmd)
+  {
+    case MENU_BRIGHTNESS: currentCmd = CMD_BRT; break;
+    case MENU_CALIBRATION:
+      if(isSSB()) currentCmd = CMD_CAL;
+      break;
+    case MENU_SLEEP:      currentCmd = CMD_SLEEP; break;
+    case MENU_THEME:      currentCmd = CMD_THEME; break;
+    case MENU_RDS:        currentCmd = CMD_RDS;   break;
+    case MENU_ABOUT:      currentCmd = CMD_ABOUT; break;
+  }
+}
 
 bool doSideBar(uint16_t cmd, int dir)
 {
@@ -921,21 +923,26 @@ static void drawMemory(int x, int y, int sx)
   int count = ITEM_COUNT(memories);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
-      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
-      spr.setTextColor(TH.menu_item, TH.menu_bg);
-
-    char buf[16];
     int j = abs((memoryIdx+count+i)%count);
+    char buf[16];
+
+    if(i)
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    else if(!memories[j].freq || !memcmp(&memories[j], &newMemory, sizeof(newMemory)))
+      spr.setTextColor(TH.text_warn, TH.menu_hl_bg);
+    else
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+
+    // Show memory being added on empty slots
+    const Memory *mem = memories[j].freq || i? &memories[j] : &newMemory;
     const char *text = buf;
 
-    if(!memories[j].freq)
+    if(!mem->freq)
       text = "- - -";
-    else if(memories[j].mode==FM)
-      sprintf(buf, "%-.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
+    else if(mem->mode==FM)
+      sprintf(buf, "%-.2f %s", mem->freq / 100.0, bandModeDesc[mem->mode]);
     else
-      sprintf(buf, "%-.3f %s", memories[j].freq / 1000.0, bandModeDesc[memories[j].mode]);
+      sprintf(buf, "%-.3f %s", mem->freq / 1000.0, bandModeDesc[mem->mode]);
 
     spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
   }
