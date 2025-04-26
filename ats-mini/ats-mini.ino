@@ -508,7 +508,7 @@ void loop()
 #endif
 
   // Block encoder rotation when display is off
-  if(encoderCount && !displayOn()) encoderCount = 0;
+  if(encoderCount && !displayOn() && sleepModeIdx == SLEEP_LOCKED) encoderCount = 0;
 
   // If encoder has been rotated...
   if(encoderCount)
@@ -542,7 +542,7 @@ void loop()
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
-  else if(pb1st.wasShortPressed && displayOn() && !seekModePress)
+  else if(pb1st.wasShortPressed && (displayOn() || sleepModeIdx == SLEEP_UNLOCKED) && !seekModePress)
   {
     elapsedSleep = elapsedCommand = currentTime;
 
