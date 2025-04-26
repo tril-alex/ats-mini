@@ -9,8 +9,8 @@ static bool muted = false;
 // Volume level when mute is applied
 static uint8_t mute_vol_val = 0;
 
-// Current display status, returned by displayOn()
-static bool display_on = true;
+// Current sleep status, returned by sleepOn()
+static bool sleep_on = false;
 
 // Current SSB patch status
 static bool ssbLoaded = false;
@@ -85,28 +85,28 @@ bool muteOn(int x)
 }
 
 //
-// Turn display on (1) or off (0), or get current status (2)
+// Turn sleep on (1) or off (0), or get current status (2)
 //
-bool displayOn(int x)
+bool sleepOn(int x)
 {
-  if((x==0) && display_on)
+  if((x==1) && !sleep_on)
   {
-    display_on = false;
+    sleep_on = true;
     ledcWrite(PIN_LCD_BL, 0);
     tft.writecommand(ST7789_DISPOFF);
     tft.writecommand(ST7789_SLPIN);
     delay(120);
   }
-  else if((x==1) && !display_on)
+  else if((x==0) && sleep_on)
   {
-    display_on = true;
+    sleep_on = false;
     tft.writecommand(ST7789_SLPOUT);
     delay(120);
     tft.writecommand(ST7789_DISPON);
     ledcWrite(PIN_LCD_BL, currentBrt);
   }
 
-  return(display_on);
+  return(sleep_on);
 }
 
 //

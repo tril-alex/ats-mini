@@ -124,7 +124,7 @@ void loadSSB(uint8_t bandwidth, bool draw = true);
 void unloadSSB();
 const char *getVersion();
 int getStrength(int rssi);
-bool displayOn(int x = 2);
+bool sleepOn(int x = 2);
 bool muteOn(int x = 2);
 const char *clockGet();
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);

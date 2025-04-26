@@ -69,7 +69,7 @@ static void drawAbout()
 //
 void drawLoadingSSB()
 {
-  if(!displayOn()) return;
+  if(sleepOn()) return;
 
   spr.setTextDatum(MC_DATUM);
   spr.fillSmoothRoundRect(80, 40, 160, 40, 4, TH.text);
@@ -242,7 +242,7 @@ static void drawStationName(const char *name, int x, int y)
 //
 void drawScreen()
 {
-  if(!displayOn()) return;
+  if(sleepOn()) return;
 
   // Clear screen buffer
   spr.fillSprite(TH.bg);

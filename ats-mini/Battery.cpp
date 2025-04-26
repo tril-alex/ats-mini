@@ -70,7 +70,7 @@ float batteryMonitor()
 //
 void drawBattery(int x, int y)
 {
-  if(!displayOn()) return;
+  if(sleepOn()) return;
 
   // Measure battery voltage and status
   batteryMonitor();

@@ -161,10 +161,10 @@ int remoteDoCommand(char key)
       doBrt(-1);
       break;
     case 'O':
-      displayOn(false);
+      sleepOn(true);
       break;
     case 'o':
-      displayOn(true);
+      sleepOn(false);
       break;
     case 'I':
       doCal(1);

@@ -508,7 +508,7 @@ void loop()
 #endif
 
   // Block encoder rotation when display is off
-  if(encoderCount && !displayOn() && sleepModeIdx == SLEEP_LOCKED) encoderCount = 0;
+  if(encoderCount && sleepOn() && sleepModeIdx == SLEEP_LOCKED) encoderCount = 0;
 
   // If encoder has been rotated...
   if(encoderCount)
@@ -536,13 +536,13 @@ void loop()
   else if(pb1st.isLongPressed && !seekModePress)
   {
     elapsedSleep = currentTime;
-    needRedraw |= displayOn(!displayOn());
+    needRedraw |= !sleepOn(!sleepOn());
     // Wait till the button is released
     while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(10);
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
-  else if(pb1st.wasShortPressed && (displayOn() || sleepModeIdx == SLEEP_UNLOCKED) && !seekModePress)
+  else if(pb1st.wasShortPressed && (!sleepOn() || sleepModeIdx == SLEEP_UNLOCKED) && !seekModePress)
   {
     elapsedSleep = elapsedCommand = currentTime;
 
@@ -559,11 +559,11 @@ void loop()
   {
     elapsedSleep = elapsedCommand = currentTime;
 
-    if(!displayOn())
+    if(sleepOn())
     {
       if(currentSleep)
       {
-        displayOn(true);
+        sleepOn(false);
         needRedraw = true;
       }
     }
@@ -590,8 +590,8 @@ void loop()
   }
 
   // Display sleep timeout
-  if(currentSleep && displayOn() && ((currentTime - elapsedSleep) > currentSleep * 1000))
-    displayOn(false);
+  if(currentSleep && !sleepOn() && ((currentTime - elapsedSleep) > currentSleep * 1000))
+    sleepOn(true);
 
   // Show RSSI status only if this condition has changed
   if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)

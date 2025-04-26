@@ -374,8 +374,9 @@ void doCal(int dir)
 
 void doBrt(int dir)
 {
+
   currentBrt = clamp_range(currentBrt, 5*dir, 10, 255);
-  if(displayOn()) ledcWrite(PIN_LCD_BL, currentBrt);
+  if(!sleepOn()) ledcWrite(PIN_LCD_BL, currentBrt);
 }
 
 static void doSleep(int dir)
@@ -1151,7 +1152,7 @@ static void drawInfo(int x, int y, int sx)
 //
 void drawSideBar(uint16_t cmd, int x, int y, int sx)
 {
-  if(!displayOn()) return;
+  if(sleepOn()) return;
 
   switch(cmd)
   {
