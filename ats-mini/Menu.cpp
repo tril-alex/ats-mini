@@ -941,7 +941,7 @@ static void drawMemory(int x, int y, int sx)
     else if(memories[j].mode==FM)
       sprintf(buf, "%-.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
     else
-      sprintf(buf, "%-.3f %s", memories[j].freq / 1000.0, bandModeDesc[memories[j].mode]);
+      sprintf(buf, "%-5d %s", memories[j].freq, bandModeDesc[memories[j].mode]);
 
     spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
   }
