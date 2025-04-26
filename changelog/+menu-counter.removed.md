@@ -1,0 +1,1 @@
+Remove the main menu counter.
