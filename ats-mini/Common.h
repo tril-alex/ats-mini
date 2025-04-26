@@ -88,6 +88,7 @@ extern TFT_eSPI tft;
 extern bool tuning_flag;
 extern uint8_t rssi;
 
+extern uint8_t volume;
 extern uint16_t currentFrequency;
 extern int16_t currentBFO;
 extern uint8_t currentMode;
@@ -118,7 +119,7 @@ void useBand(const Band *band);
 void updateBFO(int newBFO);
 
 // Utils.c
-void loadSSB(uint8_t bandwidth);
+void loadSSB(uint8_t bandwidth, bool draw = true);
 void unloadSSB();
 const char *getVersion();
 int getStrength(int rssi);

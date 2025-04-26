@@ -64,7 +64,7 @@ The following comma separated information is sent out on the serial interface wh
 | 7        | currentStepIdx   | Step              |                                     |
 | 8        | bwIdx            | Bandwidth         |                                     |
 | 9        | agcIdx           | AGC/Attn          |                                     |
-| 10       | remoteVolume     | Volume            | 0 to 63 (0 = Mute)                  |
+| 10       | volume           | Volume            | 0 to 63 (0 = Mute)                  |
 | 11       | remoteRssi       | RSSI              | 0 to 127 dBuV                       |
 | 12       | tuningCapacitor  | Antenna Capacitor | 0 - 6143                            |
 | 13       | remoteVoltage    | ADC average value | Voltage = Value x 1.702 / 1000      |

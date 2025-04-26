@@ -329,6 +329,7 @@ static inline int clamp_range(int v, int dir, int vMin, int vMax)
 void doVolume(int dir)
 {
   if(dir>0) rx.volumeUp(); else if(dir<0) rx.volumeDown();
+  volume = rx.getVolume();
 }
 
 static void doTheme(int dir)
@@ -682,7 +683,7 @@ void clickVolume()
 // Selecting given band
 //
 
-void selectBand(uint8_t idx)
+void selectBand(uint8_t idx, bool drawLoadingSSB)
 {
   // Set band and mode
   bandIdx = min(idx, LAST_ITEM(bands));
@@ -705,7 +706,7 @@ void selectBand(uint8_t idx)
   // Load SSB patch as needed and set bandwidth
   if(isSSB())
   {
-    loadSSB(bandwidthSSB[bwIdxSSB].idx);
+    loadSSB(bandwidthSSB[bwIdxSSB].idx, drawLoadingSSB);
     bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
     setSsbBandwidth(bwIdxSSB);
   }
@@ -953,7 +954,7 @@ static void drawVolume(int x, int y, int sx)
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
-  spr.drawNumber(rx.getVolume(), 40+x+(sx/2), 66+y, 7);
+  spr.drawNumber(volume, 40+x+(sx/2), 66+y, 7);
 }
 
 static void drawAgc(int x, int y, int sx)
@@ -1080,7 +1081,7 @@ static void drawInfo(int x, int y, int sx)
   else
   {
     spr.setTextColor(TH.box_text, TH.box_bg);
-    spr.drawNumber(rx.getVolume(), 48+x, 64+y+(0*16), 2);
+    spr.drawNumber(volume, 48+x, 64+y+(0*16), 2);
   }
 
   // Draw RDS PI code, if present
