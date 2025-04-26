@@ -66,6 +66,13 @@ typedef struct
 
 typedef struct
 {
+  uint16_t freq;           // Frequency
+  uint8_t  band;           // Band
+  uint8_t  mode;           // Modulation
+} Memory;
+
+typedef struct
+{
   uint16_t freq;          // Frequency
   const char *name;       // Frequency name
 } NamedFreq;
@@ -121,6 +128,7 @@ const char *clockGet();
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
 void clockReset();
 bool clockTickTime();
+bool isMemoryInBand(const Band *band, const Memory *memory);
 
 // Draw.c
 void drawLoadingSSB();

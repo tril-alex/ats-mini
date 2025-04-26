@@ -18,15 +18,16 @@
 #define CMD_STEP      0x0500 // |
 #define CMD_MODE      0x0600 // |
 #define CMD_MENU      0x0700 // |
-#define CMD_SOFTMUTEMAXATT 0x0800
-#define CMD_AVC       0x0900 //-+
-#define CMD_SETTINGS  0x0A00 //-SETTINGS MODE starts here
-#define CMD_BRT       0x0B00 // |
-#define CMD_CAL       0x0C00 // |
-#define CMD_SLEEP     0x0D00 // |
-#define CMD_THEME     0x0E00 // |
-#define CMD_RDS       0x0F00 // |
-#define CMD_ABOUT     0x1000 //-SETTINGS MODE ends here
+#define CMD_SOFTMUTE  0x0800 // |
+#define CMD_AVC       0x0900 // |
+#define CMD_MEMORY    0x0A00 //-+
+#define CMD_SETTINGS  0x0B00 //-SETTINGS MODE starts here
+#define CMD_BRT       0x0C00 // |
+#define CMD_CAL       0x0D00 // |
+#define CMD_SLEEP     0x0E00 // |
+#define CMD_THEME     0x0F00 // |
+#define CMD_RDS       0x1000 // |
+#define CMD_ABOUT     0x1100 //-SETTINGS MODE ends here
 
 //
 // Data Types
@@ -54,7 +55,8 @@ typedef struct
 // Global Variables
 //
 
-extern Band band[];
+extern Band bands[];
+extern Memory memories[];
 extern const char *bandModeDesc[];
 
 extern int bandIdx;
@@ -86,6 +88,7 @@ bool clickSideBar(uint16_t cmd);
 void clickVolume();
 void selectBand(uint8_t idx);
 int getTotalBands();
+int getTotalMemories();
 Band *getCurrentBand();
 const Step *getCurrentStep();
 int getSteps(bool fast = false);

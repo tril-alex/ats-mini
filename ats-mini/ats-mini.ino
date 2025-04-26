@@ -270,7 +270,7 @@ void useBand(const Band *band)
   else
   {
     // Set the tuning capacitor for SW or MW/LW
-    // rx.setTuneFrequencyAntennaCapacitor((band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) ? 0 : 1);
+    // rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
 
     if(band->bandMode==AM)
     {

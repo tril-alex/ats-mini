@@ -181,6 +181,18 @@ bool clockTickTime()
 }
 
 //
+// Check if given memory entry belongs to given band
+//
+bool isMemoryInBand(const Band *band, const Memory *memory)
+{
+  if(memory->freq<band->minimumFreq) return(false);
+  if(memory->freq>band->maximumFreq) return(false);
+  if(memory->mode==FM && band->bandMode!=FM) return(false);
+  if(memory->mode!=FM && band->bandMode==FM) return(false);
+  return(true);
+}
+
+//
 // Get S-level signal strength from RSSI value
 //
 int getStrength(int rssi)

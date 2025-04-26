@@ -18,7 +18,7 @@
 int bandIdx = 0;
 
 // Band limits are expanded to align with the nearest tuning scale mark
-Band band[] =
+Band bands[] =
 {
   {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 1, 0, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
@@ -57,8 +57,8 @@ Band band[] =
   {"CB",   SW_BAND_TYPE, AM,  25000, 30000, 27135, 0, 4, 0},
 };
 
-int getTotalBands() { return(ITEM_COUNT(band)); }
-Band *getCurrentBand() { return(&band[bandIdx]); }
+int getTotalBands() { return(ITEM_COUNT(bands)); }
+Band *getCurrentBand() { return(&bands[bandIdx]); }
 
 //
 // Main Menu
@@ -73,7 +73,8 @@ Band *getCurrentBand() { return(&band[bandIdx]); }
 #define MENU_AGC_ATT      6
 #define MENU_SOFTMUTE     7
 #define MENU_AVC          8
-#define MENU_SETTINGS     9
+#define MENU_MEMORY       9
+#define MENU_SETTINGS     10
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -88,6 +89,7 @@ const char *menu[] =
   "AGC/ATTN",
   "SoftMute",
   "AVC",
+  "Memory",
   "Settings",
 };
 
@@ -119,6 +121,16 @@ const char *settings[] =
 //
 
 const char *bandModeDesc[] = { "FM", "LSB", "USB", "AM" };
+
+//
+// Memory Menu
+//
+
+uint8_t memoryIdx = 0;
+Memory memories[32];
+Memory newMemory;
+
+int getTotalMemories() { return(ITEM_COUNT(memories)); }
 
 //
 // RDS Menu
@@ -200,7 +212,7 @@ int getLastStep()
   else if(currentMode==FM)
     return(LAST_ITEM(fmStep));
   // G8PTN; Added in place of check in doStep() for LW/MW step limit
-  else if(band[bandIdx].bandType == LW_BAND_TYPE || band[bandIdx].bandType == MW_BAND_TYPE)
+  else if(bands[bandIdx].bandType == LW_BAND_TYPE || bands[bandIdx].bandType == MW_BAND_TYPE)
     return(AmTotalStepsSsb);
   else
     return(AmTotalSteps - 1);
@@ -326,16 +338,23 @@ static void clickMenu(int cmd)
 
   switch(cmd)
   {
-    case MENU_STEP:     currentCmd = CMD_STEP; break;
-    case MENU_MODE:     currentCmd = CMD_MODE; break;
+    case MENU_STEP:     currentCmd = CMD_STEP;      break;
+    case MENU_MODE:     currentCmd = CMD_MODE;      break;
     case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
-    case MENU_AGC_ATT:  currentCmd = CMD_AGC; break;
-    case MENU_BAND:     currentCmd = CMD_BAND; break;
-    case MENU_SETTINGS: currentCmd = CMD_SETTINGS; break;
+    case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
+    case MENU_BAND:     currentCmd = CMD_BAND;      break;
+    case MENU_SETTINGS: currentCmd = CMD_SETTINGS;  break;
+
+    case MENU_MEMORY:
+      currentCmd = CMD_MEMORY;
+      newMemory.freq = currentFrequency + currentBFO / 1000;
+      newMemory.mode = currentMode;
+      newMemory.band = bandIdx;
+      break;
 
     case MENU_SOFTMUTE:
       // No soft mute in FM mode
-      if(currentMode!=FM) currentCmd = CMD_SOFTMUTEMAXATT;
+      if(currentMode!=FM) currentCmd = CMD_SOFTMUTE;
       break;
 
     case MENU_AVC:
@@ -407,7 +426,7 @@ void doAvc(int dir)
 
 void doCal(int dir)
 {
-  band[bandIdx].bandCal = clamp_range(band[bandIdx].bandCal, 10*dir, -MAX_CAL, MAX_CAL);
+  bands[bandIdx].bandCal = clamp_range(bands[bandIdx].bandCal, 10*dir, -MAX_CAL, MAX_CAL);
 
   // If in SSB mode set the SI4732/5 BFO value
   // This adjusts the BFO while in the calibration menu
@@ -432,6 +451,57 @@ static void doRDSMode(int dir)
   if(!(getRDSMode() & RDS_CT)) clockReset();
 }
 
+bool tuneToMemory(const Memory *memory)
+{
+  // Must have frequency
+  if(!memory->freq) return(false);
+  // Must have valid band index
+  if(memory->band>=getTotalBands()) return(false);
+  // Band must contain frequency and modulation
+  if(!isMemoryInBand(&bands[memory->band], memory)) return(false);
+
+  // Save current band settings
+  bands[bandIdx].currentFreq    = currentFrequency + currentBFO / 1000;
+  bands[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
+
+  // Load frequency and modulation from memory slot
+  bands[memory->band].currentFreq = memory->freq;
+  bands[memory->band].bandMode    = memory->mode;
+
+  // Enable the new band
+  selectBand(memory->band);
+  return(true);
+}
+
+static void doMemory(int dir)
+{
+  memoryIdx = wrap_range(memoryIdx, dir, 0, LAST_ITEM(memories));
+  if(!tuneToMemory(&memories[memoryIdx])) tuneToMemory(&newMemory);
+}
+
+static void clickMemory(uint8_t idx)
+{
+  // Must have a valid index
+  if(idx>LAST_ITEM(memories)) return;
+
+  // If clicking on an empty memory slot, save to it
+  if(!memories[idx].freq)
+  {
+    memories[idx] = newMemory;
+    currentCmd = CMD_NONE;
+  }
+  // If clicking on the same memory slot, delete it
+  else if(!memcmp(&memories[idx], &newMemory, sizeof(newMemory)))
+  {
+    memories[idx].freq = 0;
+  }
+  // Do nothing, memory slot already activated in doMemory()
+  else
+  {
+    currentCmd = CMD_NONE;
+  }
+}
+
 void doStep(int dir)
 {
   int lastStep = getLastStep();
@@ -439,7 +509,7 @@ void doStep(int dir)
   if(currentMode==FM)
   {
     fmStepIdx = wrap_range(fmStepIdx, dir, 0, lastStep);
-    band[bandIdx].currentStepIdx = fmStepIdx;
+    bands[bandIdx].currentStepIdx = fmStepIdx;
     rx.setFrequencyStep(fmStep[fmStepIdx].step);
   }
   else
@@ -450,7 +520,7 @@ void doStep(int dir)
     if(isSSB() && amStepIdx>=AmTotalStepsSsb && amStepIdx<AmTotalSteps)
       amStepIdx = dir>0? AmTotalSteps : AmTotalStepsSsb-1;
 
-    band[bandIdx].currentStepIdx = amStepIdx;
+    bands[bandIdx].currentStepIdx = amStepIdx;
 
     // ?????
     if(!isSSB() || (amStepIdx<AmTotalSteps))
@@ -486,7 +556,7 @@ void doAgc(int dir)
 void doMode(int dir)
 {
   // This is our current mode for the current band
-  currentMode = band[bandIdx].bandMode;
+  currentMode = bands[bandIdx].bandMode;
 
   // Cannot change away from FM mode
   if(currentMode==FM) return;
@@ -497,9 +567,9 @@ void doMode(int dir)
   while(currentMode==FM);
 
   // Save current band settings
-  band[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
-  band[bandIdx].currentStepIdx = amStepIdx;
-  band[bandIdx].bandMode = currentMode;
+  bands[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
+  bands[bandIdx].currentStepIdx = amStepIdx;
+  bands[bandIdx].bandMode = currentMode;
 
   // Enable the new band
   selectBand(bandIdx);
@@ -521,11 +591,11 @@ void doSoftMute(int dir)
 void doBand(int dir)
 {
   // Save current band settings
-  band[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
-  band[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
+  bands[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
+  bands[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
 
   // Change band
-  bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(band));
+  bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(bands));
 
   // Enable the new band
   selectBand(bandIdx);
@@ -537,19 +607,19 @@ void doBandwidth(int dir)
   {
     bwIdxSSB = wrap_range(bwIdxSSB, dir, 0, LAST_ITEM(bandwidthSSB));
     setSsbBandwidth(bwIdxSSB);
-    band[bandIdx].bandwidthIdx = bwIdxSSB;
+    bands[bandIdx].bandwidthIdx = bwIdxSSB;
   }
   else if(currentMode==AM)
   {
     bwIdxAM = wrap_range(bwIdxAM, dir, 0, LAST_ITEM(bandwidthAM));
     rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
-    band[bandIdx].bandwidthIdx = bwIdxAM;
+    bands[bandIdx].bandwidthIdx = bwIdxAM;
   }
   else
   {
     bwIdxFM = wrap_range(bwIdxFM, dir, 0, LAST_ITEM(bandwidthFM));
     rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-    band[bandIdx].bandwidthIdx = bwIdxFM;
+    bands[bandIdx].bandwidthIdx = bwIdxFM;
   }
 }
 
@@ -570,7 +640,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_AGC:       doAgc(dir);break;
     case CMD_BANDWIDTH: doBandwidth(dir);break;
     case CMD_VOLUME:    doVolume(dir);break;
-    case CMD_SOFTMUTEMAXATT: doSoftMute(dir);break;
+    case CMD_SOFTMUTE:  doSoftMute(dir);break;
     case CMD_BAND:      doBand(dir);break;
     case CMD_AVC:       doAvc(dir);break;
     case CMD_SETTINGS:  doSettings(dir);break;
@@ -579,6 +649,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_THEME:     doTheme(dir);break;
     case CMD_RDS:       doRDSMode(dir);break;
+    case CMD_MEMORY:    doMemory(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -593,6 +664,7 @@ bool clickSideBar(uint16_t cmd)
   {
     case CMD_MENU:     clickMenu(menuIdx);break;
     case CMD_SETTINGS: clickSettings(settingsIdx);break;
+    case CMD_MEMORY:   clickMemory(memoryIdx);break;
     default:           return(false);
   }
 
@@ -612,22 +684,22 @@ void clickVolume()
 void selectBand(uint8_t idx)
 {
   // Set band and mode
-  bandIdx = min(idx, LAST_ITEM(band));
-  currentMode = band[bandIdx].bandMode;
+  bandIdx = min(idx, LAST_ITEM(bands));
+  currentMode = bands[bandIdx].bandMode;
 
   // Set tuning step
-  if(band[bandIdx].bandType==FM_BAND_TYPE)
+  if(bands[bandIdx].bandType==FM_BAND_TYPE)
   {
-    fmStepIdx = band[bandIdx].currentStepIdx;
+    fmStepIdx = bands[bandIdx].currentStepIdx;
     rx.setFrequencyStep(fmStep[fmStepIdx].step);
   }
   else
   {
-    amStepIdx = band[bandIdx].currentStepIdx;
+    amStepIdx = bands[bandIdx].currentStepIdx;
     rx.setFrequencyStep(amStep[amStepIdx].step);
   }
 
-  int bwIdx = band[bandIdx].bandwidthIdx;
+  int bwIdx = bands[bandIdx].bandwidthIdx;
 
   // Load SSB patch as needed and set bandwidth
   if(isSSB())
@@ -650,7 +722,7 @@ void selectBand(uint8_t idx)
   }
 
   // Switch radio to the selected band
-  useBand(&band[bandIdx]);
+  useBand(&bands[bandIdx]);
 }
 
 //
@@ -769,7 +841,7 @@ static void drawBand(int x, int y, int sx)
 {
   drawCommon(menu[MENU_BAND], x, y, sx);
 
-  int count = ITEM_COUNT(band);
+  int count = ITEM_COUNT(bands);
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0)
@@ -777,7 +849,7 @@ static void drawBand(int x, int y, int sx)
     else
       spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    spr.drawString(band[abs((bandIdx+count+i)%count)].bandName, 40+x+(sx/2), 64+y+(i*16), 2);
+    spr.drawString(bands[abs((bandIdx+count+i)%count)].bandName, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -839,6 +911,33 @@ static void drawRDSMode(int x, int y, int sx)
       spr.setTextColor(TH.menu_item, TH.menu_bg);
 
     spr.drawString(rdsMode[abs((rdsModeIdx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
+static void drawMemory(int x, int y, int sx)
+{
+  drawCommon(menu[MENU_MEMORY], x, y, sx);
+
+  int count = ITEM_COUNT(memories);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0)
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    else
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+
+    char buf[16];
+    int j = abs((memoryIdx+count+i)%count);
+    const char *text = buf;
+
+    if(!memories[j].freq)
+      text = "- - -";
+    else if(memories[j].mode==FM)
+      sprintf(buf, "%-.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
+    else
+      sprintf(buf, "%-.3f %s", memories[j].freq / 1000.0, bandModeDesc[memories[j].mode]);
+
+    spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -1026,12 +1125,13 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_THEME:     drawTheme(x, y, sx);     break;
     case CMD_VOLUME:    drawVolume(x, y, sx);    break;
     case CMD_AGC:       drawAgc(x, y, sx);       break;
-    case CMD_SOFTMUTEMAXATT: drawSoftMuteMaxAtt(x, y, sx);break;
+    case CMD_SOFTMUTE:  drawSoftMuteMaxAtt(x, y, sx);break;
     case CMD_CAL:       drawCal(x, y, sx);       break;
     case CMD_AVC:       drawAvc(x, y, sx);       break;
     case CMD_BRT:       drawBrt(x, y, sx);       break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_RDS:       drawRDSMode(x, y, sx);   break;
+    case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     default:            drawInfo(x, y, sx);      break;
   }
 }
