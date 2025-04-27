@@ -895,7 +895,7 @@ static void drawBandwidth(int x, int y, int sx)
     {
       int count = ITEM_COUNT(bandwidthAM);
       spr.drawString(bandwidthAM[abs((bwIdxAM+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-     }
+    }
   }
 }
 
@@ -973,9 +973,9 @@ static void drawMemory(int x, int y, int sx)
     else if(!memories[j].freq)
       text = "- - -";
     else if(memories[j].mode==FM)
-      sprintf(buf, "%-.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
+      sprintf(buf, "%3.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
     else
-      sprintf(buf, "%-5d %s", memories[j].freq, bandModeDesc[memories[j].mode]);
+      sprintf(buf, "%5d %s", memories[j].freq, bandModeDesc[memories[j].mode]);
 
     spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
   }
