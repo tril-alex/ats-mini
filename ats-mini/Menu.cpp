@@ -212,7 +212,7 @@ static const Step amSteps[] =
 };
 
 static const Step *steps[4] = { fmSteps, ssbSteps, ssbSteps, amSteps };
-uint8_t stepIdx[4] = { 1, 4, 4, 3 };
+static uint8_t stepIdx[4] = { 1, 4, 4, 3 };
 
 const Step *getCurrentStep(bool fast)
 {
@@ -220,7 +220,7 @@ const Step *getCurrentStep(bool fast)
   return(&steps[currentMode][fast && isSSB()? ssbFastSteps[idx]:idx]);
 }
 
-int getLastStep(int mode)
+static int getLastStep(int mode)
 {
   switch(mode)
   {
@@ -272,14 +272,14 @@ static const Bandwidth *bandwidths[4] =
   fmBandwidths, ssbBandwidths, ssbBandwidths, amBandwidths
 };
 
-uint8_t bwIdx[4] = { 0, 4, 4, 4 };
+static uint8_t bwIdx[4] = { 0, 4, 4, 4 };
 
 const Bandwidth *getCurrentBandwidth()
 {
   return(&bandwidths[currentMode][bwIdx[currentMode]]);
 }
 
-int getLastBandwidth(int mode)
+static int getLastBandwidth(int mode)
 {
   switch(mode)
   {
@@ -292,7 +292,7 @@ int getLastBandwidth(int mode)
   return(0);
 }
 
-void setBandwidth()
+static void setBandwidth()
 {
   uint8_t idx = getCurrentBandwidth()->idx;
 
