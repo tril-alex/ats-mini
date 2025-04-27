@@ -72,8 +72,8 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_MUTE         5
 #define MENU_BW           6
 #define MENU_AGC_ATT      7
-#define MENU_SOFTMUTE     8
-#define MENU_AVC          9
+#define MENU_AVC          8
+#define MENU_SOFTMUTE     9
 #define MENU_SETTINGS     10
 
 int8_t menuIdx = MENU_VOLUME;
@@ -88,8 +88,8 @@ static const char *menu[] =
   "Mute",
   "Bandwidth",
   "AGC/ATTN",
-  "SoftMute",
   "AVC",
+  "SoftMute",
   "Settings",
 };
 
