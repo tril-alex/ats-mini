@@ -157,7 +157,7 @@ uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }
 //
 
 uint8_t sleepModeIdx = SLEEP_LOCKED;
-const char *sleepModeDesc[] = { "Locked", "Unlocked", "Light", "Deep" };
+const char *sleepModeDesc[] = { "Locked", "Unlocked" }; //  "Light", "Deep"
 
 //
 // Step Menu

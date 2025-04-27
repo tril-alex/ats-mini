@@ -1,0 +1,1 @@
+Add `Settings->Sleep Mode`. Controls whether the encoder is locked or not during sleep. Unlocked mode allows tuning (and setting the volume) with less self-induced noise.
