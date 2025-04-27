@@ -103,6 +103,7 @@ static void drawRadioText(int y, int ymax)
 
   // Draw potentially multi-line radio text
   spr.setTextDatum(TC_DATUM);
+  spr.setTextColor(TH.rds_text, TH.bg);
   for(; *rt && (y<ymax) ; y+=15, rt+=strlen(rt)+1)
     spr.drawString(rt, 160, y, 2);
 
