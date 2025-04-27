@@ -16,7 +16,7 @@
 
 ## Controls
 
-Controls are implemented through the knob:
+Controls are implemented through the encoder knob:
 
 | Gesture                | Result                                                                                      |
 |------------------------|---------------------------------------------------------------------------------------------|
@@ -32,16 +32,16 @@ Controls are implemented through the knob:
 The menu can be invoked by clicking the encoder button and is closed automatically after a couple of seconds.
 
 * **Mode** - FM (only available on the VHF band); LSB, USB, AM (available on other bands). The receiver doesn't support the NFM mode (on any band, including the CB) due to limitations of the SI4732 chip.
-* **Band** - list of [Bands](#bands-table).
+* **Band** - List of [Bands](#bands-table).
 * **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
-* **Step** - tuning step (not every step is available on every band and mode).
+* **Step** - Tuning step (not every step is available on every band and mode).
 * **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by twisting the encoder.
-* **Mute** - mute/unmute
-* **Bandwidth** - selects the bandwidth of the channel filter.
+* **Mute** - Mute/unmute.
+* **Bandwidth** - Selects the bandwidth of the channel filter.
 * **AGC/ATTN** - Automatic Gain Control (on/off) or Attennuation level.
-* **AVC** - sets the maximum gain for automatic volume control.
-* **SoftMute** - sets softmute max attenuation (only applicable for AM/SSB).
-* **Settings** - settings submenu.
+* **AVC** - Sets the maximum gain for automatic volume control.
+* **SoftMute** - Sets softmute max attenuation (only applicable for AM/SSB).
+* **Settings** - Settings submenu.
 
 ## Settings menu
 
