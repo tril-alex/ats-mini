@@ -260,9 +260,7 @@ void useBand(const Band *band)
 
     if(band->bandMode==AM)
     {
-      // Setting step to 1kHz
-      int step = band->currentStepIdx>=AmTotalSteps? 1 : getCurrentStep()->step;
-      rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, step);
+      rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
     }
     else
     {
@@ -413,7 +411,7 @@ bool doPressAndRotate(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getSteps(true));
+    updateBFO(currentBFO + dir * getCurrentStep(true)->step);
   }
   else
   {
@@ -453,7 +451,7 @@ bool doRotate(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getSteps(false));
+    updateBFO(currentBFO + dir * getCurrentStep(false)->step);
   }
 
   //

@@ -78,7 +78,7 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 
 int8_t menuIdx = MENU_VOLUME;
 
-const char *menu[] =
+static const char *menu[] =
 {
   "Mode",
   "Band",
@@ -107,7 +107,7 @@ const char *menu[] =
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
-const char *settings[] =
+static const char *settings[] =
 {
   "Brightness",
   "Calibration",
@@ -139,7 +139,7 @@ int getTotalMemories() { return(ITEM_COUNT(memories)); }
 //
 
 uint8_t rdsModeIdx = 0;
-RDSMode rdsMode[] =
+static const RDSMode rdsMode[] =
 {
   { RDS_PS, "PS"},
   { RDS_PS | RDS_CT, "PS+CT" },
@@ -157,18 +157,14 @@ uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }
 //
 
 uint8_t sleepModeIdx = SLEEP_LOCKED;
-const char *sleepModeDesc[] = { "Locked", "Unlocked" }; //  "Light", "Deep"
+static const char *sleepModeDesc[] = { "Locked", "Unlocked" }; //  "Light", "Deep"
 
 //
 // Step Menu
 //
 
-uint8_t AmTotalSteps    = 7; // Total AM steps
-uint8_t AmTotalStepsSsb = 4; // G8PTN: Original : AM(LW/MW) 1k, 5k, 9k, 10k, 50k        : SSB 1k, 5k, 9k, 10k
-uint8_t SsbTotalSteps   = 5; // SSB sub 1kHz steps
-
-int fmStepIdx = 1;
-Step fmStep[] =
+// FM (kHz * 10)
+static const Step fmSteps[] =
 {
   {   5, "50k"  },
   {  10, "100k" },
@@ -176,78 +172,65 @@ Step fmStep[] =
   { 100, "1M"   },
 };
 
-volatile int8_t amStepIdx = 3;
-Step amStep[] =
+// SSB (Hz)
+static const Step ssbSteps[] =
 {
-  {    1, "1k"   },  // 0   AM/SSB   (kHz)
-  {    5, "5k"   },  // 1   AM/SSB   (kHz)
-  {    9, "9k"   },  // 2   AM/SSB   (kHz)
-  {   10, "10k"  },  // 3   AM/SSB   (kHz)
-  {   50, "50k"  },  // 4   AM       (kHz)
-  {  100, "100k" },  // 5   AM       (kHz)
-  { 1000, "1M"   },  // 6   AM       (kHz)
-  {   10, "10Hz" },  // 7   SSB      (Hz)
-  {   25, "25Hz" },  // 8   SSB      (Hz)
-  {   50, "50Hz" },  // 9   SSB      (Hz)
-  {  100, "0.1k" },  // 10  SSB      (Hz)
-  {  500, "0.5k" },  // 11  SSB      (Hz)
+  {    10, "10"  },
+  {    25, "25"  },
+  {    50, "50"  },
+  {   100, "100" },
+  {   500, "500" },
+  {  1000, "1k"  },
+  {  5000, "5k"  },
+  {  9000, "9k"  },
+  { 10000, "10k" },
 };
 
-int ssbFastStep[] =
+static const uint8_t ssbFastSteps[] =
 {
-  1,   // 0->1 (1kHz -> 5kHz)
-  3,   // 1->3 (5kHz -> 10kHz)
-  2,   // 2->2 (9kHz -> 9kHz)
-  3,   // 3->3 (10kHz -> 10kHz)
-  4,   // 4->4 (50kHz -> 50kHz) n/a
-  5,   // 5->5 (100kHz -> 100kHz) n/a
-  6,   // 6->6 (1MHz -> 1MHz) n/a
-  10,  // 7->10 (10Hz -> 100Hz)
-  10,  // 8->10 (25Hz -> 100Hz)
-  11,  // 9->11 (50Hz -> 500Hz)
-  0,   // 10->0 (100Hz -> 1kHz)
-  1,   // 11->1 (500Hz -> 5kHz)
+  3, //  10Hz -> 100Hz
+  3, //  25Hz -> 100Hz
+  4, //  50Hz -> 500Hz
+  5, // 100Hz -> 1kHz
+  6, // 500Hz -> 5kHz
+  6, //  1kHz -> 5kHz
+  8, //  5kHz -> 10kHz
+  7, //  9kHz -> 9kHz
+  8, // 10kHz -> 10kHz
 };
 
-const Step *getCurrentStep()
+// AM (kHz)
+static const Step amSteps[] =
 {
-  return(currentMode==FM?  &fmStep[fmStepIdx] : &amStep[amStepIdx]);
+  {    1, "1k"   },
+  {    5, "5k"   },
+  {    9, "9k"   },
+  {   10, "10k"  },
+  {   50, "50k"  },
+  {  100, "100k" },
+  { 1000, "1M"   },
+};
+
+static const Step *steps[4] = { fmSteps, ssbSteps, ssbSteps, amSteps };
+uint8_t stepIdx[4] = { 0, 0, 0, 0 };
+
+const Step *getCurrentStep(bool fast)
+{
+  uint8_t idx = stepIdx[currentMode];
+  return(&steps[currentMode][fast && isSSB()? ssbFastSteps[idx]:idx]);
 }
 
-int getLastStep()
+int getLastStep(int mode)
 {
-  if(isSSB())
-    return(AmTotalSteps + SsbTotalSteps - 1);
-  else if(currentMode==FM)
-    return(LAST_ITEM(fmStep));
-  // G8PTN; Added in place of check in doStep() for LW/MW step limit
-  else if(bands[bandIdx].bandType == LW_BAND_TYPE || bands[bandIdx].bandType == MW_BAND_TYPE)
-    return(AmTotalStepsSsb);
-  else
-    return(AmTotalSteps - 1);
-}
+  switch(mode)
+  {
+    case FM:  return(LAST_ITEM(fmSteps));
+    case LSB: return(LAST_ITEM(ssbSteps));
+    case USB: return(LAST_ITEM(ssbSteps));
+    case AM:  return(LAST_ITEM(amSteps));
+  }
 
-// @@@ FIXME: This function is only used for SSB tuning!
-int getSteps(bool fast)
-{
-  if(isSSB())
-  {
-    // SSB: Return in Hz used for VFO + BFO tuning
-    int i = fast? ssbFastStep[amStepIdx] : amStepIdx;
-    return(amStep[i].step * (i>=AmTotalSteps? 1 : 1000));
-  }
-  else if(currentMode==FM)
-  {
-    return(fmStep[fmStepIdx].step);
-  }
-  else
-  {
-    // AM: Set to 0kHz if step is from the SSB Hz values
-    // @@@ FIXME!!!
-    if(amStepIdx>=AmTotalSteps) amStepIdx = 0;
-    // AM: Return value in KHz for SI4732 step
-    return(amStep[amStepIdx].step);
-  }
+  return(0);
 }
 
 //
@@ -255,7 +238,7 @@ int getSteps(bool fast)
 //
 
 int8_t bwIdxSSB = 4;
-Bandwidth bandwidthSSB[] =
+static const Bandwidth bandwidthSSB[] =
 {
   {4, "0.5k"},
   {5, "1.0k"},
@@ -266,7 +249,7 @@ Bandwidth bandwidthSSB[] =
 };
 
 int8_t bwIdxAM = 4;
-Bandwidth bandwidthAM[] =
+static const Bandwidth bandwidthAM[] =
 {
   {4, "1.0k"},
   {5, "1.8k"},
@@ -278,7 +261,7 @@ Bandwidth bandwidthAM[] =
 };
 
 int8_t bwIdxFM = 0;
-Bandwidth bandwidthFM[] =
+static const Bandwidth bandwidthFM[] =
 {
   {0, "Auto"}, // Automatic - default
   {1, "110k"}, // Force wide (110 kHz) channel filter.
@@ -296,7 +279,6 @@ const Bandwidth *getCurrentBandwidth()
   else
     return(&bandwidthAM[bwIdxAM]);
 }
-
 
 void setSsbBandwidth(int idx)
 {
@@ -406,7 +388,7 @@ bool tuneToMemory(const Memory *memory)
 
   // Save current band settings
   bands[bandIdx].currentFreq    = currentFrequency + currentBFO / 1000;
-  bands[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
+  bands[bandIdx].currentStepIdx = stepIdx[currentMode];
 
   // Load frequency and modulation from memory slot
   bands[memory->band].currentFreq = memory->freq;
@@ -449,31 +431,15 @@ static void clickMemory(uint8_t idx)
 
 void doStep(int dir)
 {
-  int lastStep = getLastStep();
+  uint8_t idx = stepIdx[currentMode];
 
-  if(currentMode==FM)
-  {
-    fmStepIdx = wrap_range(fmStepIdx, dir, 0, lastStep);
-    bands[bandIdx].currentStepIdx = fmStepIdx;
-    rx.setFrequencyStep(fmStep[fmStepIdx].step);
-  }
-  else
-  {
-    amStepIdx = wrap_range(amStepIdx, dir, 0, lastStep);
+  idx = wrap_range(idx, dir, 0, getLastStep(currentMode));
+  bands[bandIdx].currentStepIdx = stepIdx[currentMode] = idx;
 
-    // SSB step limit
-    if(isSSB() && amStepIdx>=AmTotalStepsSsb && amStepIdx<AmTotalSteps)
-      amStepIdx = dir>0? AmTotalSteps : AmTotalStepsSsb-1;
+  rx.setFrequencyStep(steps[currentMode][idx].step);
 
-    bands[bandIdx].currentStepIdx = amStepIdx;
-
-    // ?????
-    if(!isSSB() || (amStepIdx<AmTotalSteps))
-      rx.setFrequencyStep(amStep[amStepIdx].step);
-
-    // Max 10kHz for spacing
-    rx.setSeekAmSpacing(5);
-  }
+  // Max 10kHz for spacing
+  if(currentMode!=FM) rx.setSeekAmSpacing(5);
 }
 
 void doAgc(int dir)
@@ -513,7 +479,7 @@ void doMode(int dir)
 
   // Save current band settings
   bands[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
-  bands[bandIdx].currentStepIdx = amStepIdx;
+  bands[bandIdx].currentStepIdx = stepIdx[currentMode];
   bands[bandIdx].bandMode = currentMode;
 
   // Enable the new band
@@ -537,7 +503,8 @@ void doBand(int dir)
 {
   // Save current band settings
   bands[bandIdx].currentFreq = currentFrequency + currentBFO / 1000;
-  bands[bandIdx].currentStepIdx = currentMode==FM? fmStepIdx:amStepIdx;
+  bands[bandIdx].currentStepIdx = stepIdx[currentMode];
+  bands[bandIdx].bandMode = currentMode;
 
   // Change band
   bandIdx = wrap_range(bandIdx, dir, 0, LAST_ITEM(bands));
@@ -707,16 +674,8 @@ void selectBand(uint8_t idx, bool drawLoadingSSB)
   currentMode = bands[bandIdx].bandMode;
 
   // Set tuning step
-  if(bands[bandIdx].bandType==FM_BAND_TYPE)
-  {
-    fmStepIdx = bands[bandIdx].currentStepIdx;
-    rx.setFrequencyStep(fmStep[fmStepIdx].step);
-  }
-  else
-  {
-    amStepIdx = bands[bandIdx].currentStepIdx;
-    rx.setFrequencyStep(amStep[amStepIdx].step);
-  }
+  stepIdx[currentMode] = bands[bandIdx].currentStepIdx;
+  rx.setFrequencyStep(getCurrentStep()->step);
 
   int bwIdx = bands[bandIdx].bandwidthIdx;
 
@@ -836,7 +795,8 @@ static void drawMode(int x, int y, int sx)
 
 static void drawStep(int x, int y, int sx)
 {
-  int stepCount = getLastStep() + 1;
+  int count = getLastStep(currentMode) + 1;
+  int idx   = stepIdx[currentMode] + count;
 
   drawCommon(menu[MENU_STEP], x, y, sx);
 
@@ -847,10 +807,7 @@ static void drawStep(int x, int y, int sx)
     else
       spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    if(currentMode==FM)
-      spr.drawString(fmStep[abs((fmStepIdx+stepCount+i)%stepCount)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-    else
-      spr.drawString(amStep[abs((amStepIdx+stepCount+i)%stepCount)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
+    spr.drawString(steps[currentMode][abs((idx+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -1083,10 +1040,7 @@ static void drawInfo(int x, int y, int sx)
   spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.box_bg);
 
   spr.drawString("Step:", 6+x, 64+y+(-3*16), 2);
-  if(currentMode==FM)
-    spr.drawString(fmStep[fmStepIdx].desc, 48+x, 64+y+(-3*16), 2);
-  else
-    spr.drawString(amStep[amStepIdx].desc, 48+x, 64+y+(-3*16), 2);
+  spr.drawString(getCurrentStep()->desc, 48+x, 64+y+(-3*16), 2);
 
   spr.drawString("BW:", 6+x, 64+y+(-2*16), 2);
   spr.drawString(getCurrentBandwidth()->desc, 48+x, 64+y+(-2*16), 2);
