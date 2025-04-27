@@ -64,11 +64,7 @@ typedef struct
 extern Band bands[];
 extern Memory memories[];
 extern const char *bandModeDesc[];
-
 extern int bandIdx;
-extern int8_t bwIdxAM;
-extern int8_t bwIdxFM;
-extern int8_t bwIdxSSB;
 
 // These are menu commands
 static inline bool isMenuMode(uint16_t cmd)

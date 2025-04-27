@@ -212,7 +212,7 @@ static const Step amSteps[] =
 };
 
 static const Step *steps[4] = { fmSteps, ssbSteps, ssbSteps, amSteps };
-uint8_t stepIdx[4] = { 0, 0, 0, 0 };
+uint8_t stepIdx[4] = { 1, 4, 4, 3 };
 
 const Step *getCurrentStep(bool fast)
 {
@@ -237,60 +237,82 @@ int getLastStep(int mode)
 // Bandwidth Menu
 //
 
-int8_t bwIdxSSB = 4;
-static const Bandwidth bandwidthSSB[] =
+static const Bandwidth fmBandwidths[] =
 {
-  {4, "0.5k"},
-  {5, "1.0k"},
-  {0, "1.2k"},
-  {1, "2.2k"},
-  {2, "3.0k"},
-  {3, "4.0k"}
+  { 0, "Auto" }, // Automatic - default
+  { 1, "110k" }, // Force wide (110 kHz) channel filter.
+  { 2, "84k"  },
+  { 3, "60k"  },
+  { 4, "40k"  }
 };
 
-int8_t bwIdxAM = 4;
-static const Bandwidth bandwidthAM[] =
+static const Bandwidth ssbBandwidths[] =
 {
-  {4, "1.0k"},
-  {5, "1.8k"},
-  {3, "2.0k"},
-  {6, "2.5k"},
-  {2, "3.0k"},
-  {1, "4.0k"},
-  {0, "6.0k"}
+  { 4, "0.5k" },
+  { 5, "1.0k" },
+  { 0, "1.2k" },
+  { 1, "2.2k" },
+  { 2, "3.0k" },
+  { 3, "4.0k" }
 };
 
-int8_t bwIdxFM = 0;
-static const Bandwidth bandwidthFM[] =
+static const Bandwidth amBandwidths[] =
 {
-  {0, "Auto"}, // Automatic - default
-  {1, "110k"}, // Force wide (110 kHz) channel filter.
-  {2, "84k"},
-  {3, "60k"},
-  {4, "40k"}
+  { 4, "1.0k" },
+  { 5, "1.8k" },
+  { 3, "2.0k" },
+  { 6, "2.5k" },
+  { 2, "3.0k" },
+  { 1, "4.0k" },
+  { 0, "6.0k" }
 };
+
+static const Bandwidth *bandwidths[4] =
+{
+  fmBandwidths, ssbBandwidths, ssbBandwidths, amBandwidths
+};
+
+uint8_t bwIdx[4] = { 0, 4, 4, 4 };
 
 const Bandwidth *getCurrentBandwidth()
 {
-  if(isSSB())
-    return(&bandwidthSSB[bwIdxSSB]);
-  else if(currentMode == FM)
-    return(&bandwidthFM[bwIdxFM]);
-  else
-    return(&bandwidthAM[bwIdxAM]);
+  return(&bandwidths[currentMode][bwIdx[currentMode]]);
 }
 
-void setSsbBandwidth(int idx)
+int getLastBandwidth(int mode)
 {
-  // Set Audio
-  rx.setSSBAudioBandwidth(bandwidthSSB[idx].idx);
+  switch(mode)
+  {
+    case FM:  return(LAST_ITEM(fmBandwidths));
+    case LSB: return(LAST_ITEM(ssbBandwidths));
+    case USB: return(LAST_ITEM(ssbBandwidths));
+    case AM:  return(LAST_ITEM(amBandwidths));
+  }
 
-  // If audio bandwidth selected is about 2 kHz or below, it is
-  // recommended to set Sideband Cutoff Filter to 0.
-  if(bandwidthSSB[idx].idx==0 || bandwidthSSB[idx].idx==4 || bandwidthSSB[idx].idx==5)
-    rx.setSSBSidebandCutoffFilter(0);
-  else
-    rx.setSSBSidebandCutoffFilter(1);
+  return(0);
+}
+
+void setBandwidth()
+{
+  uint8_t idx = getCurrentBandwidth()->idx;
+
+  switch(currentMode)
+  {
+    case FM:
+      rx.setFmBandwidth(idx);
+      break;
+    case AM:
+      rx.setBandwidth(idx, 1);
+      break;
+    case LSB:
+    case USB:
+      // Set Audio
+      rx.setSSBAudioBandwidth(idx);
+      // If audio bandwidth selected is about 2 kHz or below, it is
+      // recommended to set Sideband Cutoff Filter to 0.
+      rx.setSSBSidebandCutoffFilter(idx==0 || idx==4 || idx==5? 0 : 1);
+      break;
+  }
 }
 
 //
@@ -515,24 +537,11 @@ void doBand(int dir)
 
 void doBandwidth(int dir)
 {
-  if(isSSB())
-  {
-    bwIdxSSB = wrap_range(bwIdxSSB, dir, 0, LAST_ITEM(bandwidthSSB));
-    setSsbBandwidth(bwIdxSSB);
-    bands[bandIdx].bandwidthIdx = bwIdxSSB;
-  }
-  else if(currentMode==AM)
-  {
-    bwIdxAM = wrap_range(bwIdxAM, dir, 0, LAST_ITEM(bandwidthAM));
-    rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
-    bands[bandIdx].bandwidthIdx = bwIdxAM;
-  }
-  else
-  {
-    bwIdxFM = wrap_range(bwIdxFM, dir, 0, LAST_ITEM(bandwidthFM));
-    rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-    bands[bandIdx].bandwidthIdx = bwIdxFM;
-  }
+  uint8_t idx = bwIdx[currentMode];
+
+  idx = wrap_range(idx, dir, 0, getLastBandwidth(currentMode));
+  bands[bandIdx].bandwidthIdx = bwIdx[currentMode] = idx;
+  setBandwidth();
 }
 
 //
@@ -677,27 +686,14 @@ void selectBand(uint8_t idx, bool drawLoadingSSB)
   stepIdx[currentMode] = bands[bandIdx].currentStepIdx;
   rx.setFrequencyStep(getCurrentStep()->step);
 
-  int bwIdx = bands[bandIdx].bandwidthIdx;
-
-  // Load SSB patch as needed and set bandwidth
+  // Load SSB patch as needed
   if(isSSB())
-  {
-    loadSSB(bandwidthSSB[bwIdxSSB].idx, drawLoadingSSB);
-    bwIdxSSB = min(bwIdx, LAST_ITEM(bandwidthSSB));
-    setSsbBandwidth(bwIdxSSB);
-  }
-  else if(currentMode==FM)
-  {
-    unloadSSB();
-    bwIdxFM = min(bwIdx, LAST_ITEM(bandwidthFM));
-    rx.setFmBandwidth(bandwidthFM[bwIdxFM].idx);
-  }
+    loadSSB(getCurrentBandwidth()->idx, drawLoadingSSB);
   else
-  {
     unloadSSB();
-    bwIdxAM = min(bwIdx, LAST_ITEM(bandwidthAM));
-    rx.setBandwidth(bandwidthAM[bwIdxAM].idx, 1);
-  }
+
+  // Set bandwidth for the current mode
+  setBandwidth();
 
   // Switch radio to the selected band
   useBand(&bands[bandIdx]);
@@ -829,6 +825,9 @@ static void drawBand(int x, int y, int sx)
 
 static void drawBandwidth(int x, int y, int sx)
 {
+  int count = getLastBandwidth(currentMode) + 1;
+  int idx   = bwIdx[currentMode] + count;
+
   drawCommon(menu[MENU_BW], x, y, sx);
 
   for(int i=-2 ; i<3 ; i++)
@@ -838,21 +837,7 @@ static void drawBandwidth(int x, int y, int sx)
     else
       spr.setTextColor(TH.menu_item, TH.menu_bg);
 
-    if(isSSB())
-    {
-      int count = ITEM_COUNT(bandwidthSSB);
-      spr.drawString(bandwidthSSB[abs((bwIdxSSB+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-    }
-    else if(currentMode==FM)
-    {
-      int count = ITEM_COUNT(bandwidthFM);
-      spr.drawString(bandwidthFM[abs((bwIdxFM+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-    }
-    else
-    {
-      int count = ITEM_COUNT(bandwidthAM);
-      spr.drawString(bandwidthAM[abs((bwIdxAM+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-    }
+    spr.drawString(bandwidths[currentMode][abs((idx+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 

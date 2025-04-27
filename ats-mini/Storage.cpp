@@ -113,7 +113,7 @@ void eepromSaveConfig()
   // - Updated main code to ensure that this should occur as required with frequency, band or mode changes
   // - The EEPROM reset code now calls saveAllReceiverInformation(), which is the correct action, this line
   //   must be disabled otherwise bands[bandIdx].currentFreq = 0 (where bandIdx = 0; by default) on EEPROM reset
-  //band[bandIdx].currentFreq = currentFrequency;
+  //bands[bandIdx].currentFreq = currentFrequency;
 
   // Store current band settings
   for(int i=0 ; i<getTotalBands() ; i++)
