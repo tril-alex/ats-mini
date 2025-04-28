@@ -94,7 +94,7 @@ A USB-serial interface is available to control and monitor the receiver. A list 
 |--------------|---------------------|--------------------------------------------------------------------------------------------|
 | <kbd>R</kbd> | Rotate Encoder Up   | Tune the frequency up, scroll the menu, etc                                                |
 | <kbd>r</kbd> | Rotate Encoder Down | Tune the frequency down, scroll the menu, etc                                              |
-| <kbd>e</kbd> | Encoder Button      | The <kbd>p</kbd> emulates a single push and can not be used for EEPROM reset or long press |
+| <kbd>e</kbd> | Encoder Button      | The <kbd>e</kbd> emulates a single push and can not be used for EEPROM reset or long press |
 | <kbd>V</kbd> | Volume Up           |                                                                                            |
 | <kbd>v</kbd> | Volume Down         |                                                                                            |
 | <kbd>B</kbd> | Next Band           |                                                                                            |
