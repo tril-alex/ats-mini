@@ -8,6 +8,10 @@ Before proceeding, please check whether the receiver board has [BOOT & RESET but
 
 ## Firmware files
 
+```{hint}
+The firmware releases are available on [GitHub](https://github.com/esp32-si4732/ats-mini/releases).
+```
+
 A firmware archive contains the following files:
 
 1. `CHANGELOG.md` - a text file that describes what's new in each firmware version
