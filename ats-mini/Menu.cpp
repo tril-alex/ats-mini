@@ -166,6 +166,7 @@ static const char *sleepModeDesc[] = { "Locked", "Unlocked" }; //  "Light", "Dee
 // FM (kHz * 10)
 static const Step fmSteps[] =
 {
+  {   1, "10k"  },
   {   5, "50k"  },
   {  10, "100k" },
   {  20, "200k" },
@@ -212,7 +213,7 @@ static const Step amSteps[] =
 };
 
 static const Step *steps[4] = { fmSteps, ssbSteps, ssbSteps, amSteps };
-static uint8_t stepIdx[4] = { 1, 4, 4, 3 };
+static uint8_t stepIdx[4] = { 2, 4, 4, 3 };
 
 const Step *getCurrentStep(bool fast)
 {
