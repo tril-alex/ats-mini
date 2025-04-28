@@ -35,10 +35,10 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Band** - List of [Bands](#bands-table).
 * **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
 * **Step** - Tuning step (not every step is available on every band and mode).
-* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by twisting the encoder.
+* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder.
 * **Mute** - Mute/unmute.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
-* **AGC/ATTN** - Automatic Gain Control (on/off) or Attennuation level.
+* **AGC/ATTN** - Automatic Gain Control (on/off) or Attenuation level.
 * **AVC** - Sets the maximum gain for automatic volume control.
 * **SoftMute** - Sets softmute max attenuation (only applicable for AM/SSB).
 * **Settings** - Settings submenu.
