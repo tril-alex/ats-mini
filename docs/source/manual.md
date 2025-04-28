@@ -23,7 +23,7 @@ Controls are implemented through the encoder knob:
 | Rotate                 | Tunes frequency, navigates menu, adjusts parameters.                                        |
 | Click (<0.5 sec)       | Opens menu, selects.                                                                        |
 | Short press (>0.5 sec) | Volume shortcut.                                                                            |
-| Long press (>2 sec)    | Screen on/off.                                                                              |
+| Long press (>2 sec)    | Sleep on/off.                                                                               |
 | Press and rotate       | Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to exit the scan mode. |
 
 
@@ -45,19 +45,46 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 
 ## Settings menu
 
-* **Brightness**
-* **Calibration**
-* **Theme**
-* **RDS**
-* **Sleep**
-* **Sleep Mode**
-* **About**
+* **Brightness** - Display brightness level.
+* **Calibration** - SSB calibration offset (-2000...2000, per band).
+* **Theme** - Color theme.
+* **RDS** - Radio Data System options: PS - radio station name, CT - time, RT - text, PTY - genre, ALL (EU/US) - everything. Note that the time can be transmitted either in UTC or in local timezone, as well as be completely bogus. The clock is synchronized only once, so you can pick the right time source (switch the receiver power off and on to resync it again).
+* **Sleep** - Automatic sleep interval in seconds (0 - disabled).
+* **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode.
+* **About** - Informational screen.
 
 ## Bands table
 
-| Name | Min frequency | Max frequency | Type | Modes |
-|------|---------------|---------------|------|-------|
-|      |               |               |      |       |
+| Name | Min frequency | Max frequency | Default mode |
+|------|---------------|---------------|--------------|
+| VHF  | 64 MHz        | 108 MHz       | FM           |
+| ALL  | 150 kHz       | 30000 kHz     | AM           |
+| 11M  | 25600 kHz     | 26100 kHz     | AM           |
+| 13M  | 21500 kHz     | 21900 kHz     | AM           |
+| 15M  | 18900 kHz     | 19100 kHz     | AM           |
+| 16M  | 17500 kHz     | 18100 kHz     | AM           |
+| 19M  | 15100 kHz     | 15900 kHz     | AM           |
+| 22M  | 13500 kHz     | 13900 kHz     | AM           |
+| 25M  | 11000 kHz     | 13000 kHz     | AM           |
+| 31M  | 9000 kHz      | 11000 kHz     | AM           |
+| 41M  | 7000 kHz      | 9000 kHz      | AM           |
+| 49M  | 5000 kHz      | 7000 kHz      | AM           |
+| 60M  | 4000 kHz      | 5100 kHz      | AM           |
+| 75M  | 3900 kHz      | 4000 kHz      | AM           |
+| 90M  | 3200 kHz      | 3400 kHz      | AM           |
+| MW3  | 1700 kHz      | 3500 kHz      | AM           |
+| MW2  | 495 kHz       | 1701 kHz      | AM           |
+| MW1  | 150 kHz       | 1800 kHz      | AM           |
+| 160M | 1800 kHz      | 2000 kHz      | LSB          |
+| 80M  | 3500 kHz      | 4000 kHz      | LSB          |
+| 40M  | 7000 kHz      | 7300 kHz      | LSB          |
+| 30M  | 10000 kHz     | 10200 kHz     | LSB          |
+| 20M  | 14000 kHz     | 14400 kHz     | USB          |
+| 17M  | 18000 kHz     | 18200 kHz     | USB          |
+| 15M  | 21000 kHz     | 21500 kHz     | USB          |
+| 12M  | 24800 kHz     | 25000 kHz     | USB          |
+| 10M  | 28000 kHz     | 29700 kHz     | USB          |
+| CB   | 25000 kHz     | 30000 kHz     | AM           |
 
 ## Serial interface
 
