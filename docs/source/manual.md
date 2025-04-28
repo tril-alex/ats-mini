@@ -1,15 +1,57 @@
 # User Manual
 
+## Main screen
+
+![](_static/screenshot-main.png)
+
+* **RSSI meter** (top left corner), also serves as a mono/stereo indicator in FM mode (one/two rows).
+* **Settings save icon** (right after the RSSI meter). The settings are saved after 10 seconds of inactivity.
+* **Battery status** (top right corner). It doesn't show the voltage when charged, see [#36](https://github.com/esp32-si4732/ats-mini/issues/36#issuecomment-2778356143). The only indication that the battery is charging is the hardware LED on the bottom of the receiver, which turns ON during charging.
+* **Band name and modulation** (VHF & FM, top center). See the [Bands table](#bands-table) for more details.
+* **Info panel** (the box on the left side), also **Menu**. The parameters are explained in the [Menu](#menu) section.
+* **Frequency** (center of the screen).
+* **FM station name** (RDS PS) or **frequency name** (right below the frequency).
+* **Tuning scale** (bottom of the screen). Can be replaced with additional RDS fields (RT, PTY) when extended RDS is enabled.
+
+
 ## Controls
 
-Controls are implemented through the knob. The knob has quick press, long press, press and twist, and press and hold.
+Controls are implemented through the encoder knob:
 
-| Gesture         | Result              |
-|-----------------|---------------------|
-| Click           | Opens menu, selects |
-| Long press      | Volume              |
-| Press and hold  | Screen on/off       |
-| Press and twist | Scan up or down     |
+| Gesture                | Result                                                                                      |
+|------------------------|---------------------------------------------------------------------------------------------|
+| Rotate                 | Tunes frequency, navigates menu, adjusts parameters.                                        |
+| Click (<0.5 sec)       | Opens menu, selects.                                                                        |
+| Short press (>0.5 sec) | Volume shortcut.                                                                            |
+| Long press (>2 sec)    | Screen on/off.                                                                              |
+| Press and rotate       | Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to exit the scan mode. |
+
+
+## Menu
+
+The menu can be invoked by clicking the encoder button and is closed automatically after a couple of seconds.
+
+* **Mode** - FM (only available on the VHF band); LSB, USB, AM (available on other bands). The receiver doesn't support the NFM mode (on any band, including the CB) due to limitations of the SI4732 chip.
+* **Band** - List of [Bands](#bands-table).
+* **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
+* **Step** - Tuning step (not every step is available on every band and mode).
+* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by twisting the encoder.
+* **Mute** - Mute/unmute.
+* **Bandwidth** - Selects the bandwidth of the channel filter.
+* **AGC/ATTN** - Automatic Gain Control (on/off) or Attennuation level.
+* **AVC** - Sets the maximum gain for automatic volume control.
+* **SoftMute** - Sets softmute max attenuation (only applicable for AM/SSB).
+* **Settings** - Settings submenu.
+
+## Settings menu
+
+* **Brightness**
+* **Calibration**
+* **Theme**
+* **RDS**
+* **Sleep**
+* **Sleep Mode**
+* **About**
 
 ## Bands table
 
