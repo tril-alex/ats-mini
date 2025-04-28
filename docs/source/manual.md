@@ -38,9 +38,9 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder.
 * **Mute** - Mute/unmute.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
-* **AGC/ATTN** - Automatic Gain Control (on/off) or Attenuation level.
-* **AVC** - Sets the maximum gain for automatic volume control.
-* **SoftMute** - Sets softmute max attenuation (only applicable for AM/SSB).
+* **AGC/ATTN** - Automatic Gain Control (on/off) or Attenuation level. The attenuator is not applicable to SSB mode.
+* **AVC** - Sets the maximum gain for automatic volume control (not applicable to FM mode).
+* **SoftMute** - Sets softmute max attenuation (only applicable to AM/SSB).
 * **Settings** - Settings submenu.
 
 ## Settings menu
