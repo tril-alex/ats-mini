@@ -57,9 +57,9 @@ typedef struct
   uint8_t bandType;       // Band type (FM, MW, or SW)
   uint8_t bandMode;       // Band mode (FM, AM, LSB, or USB)
   uint16_t minimumFreq;   // Minimum frequency of the band
-  uint16_t maximumFreq;   // maximum frequency of the band
+  uint16_t maximumFreq;   // Maximum frequency of the band
   uint16_t currentFreq;   // Default frequency or current frequency
-  int8_t currentStepIdx;  // Index of stepAM[]: defeult frequency step (see stepAM[])
+  int8_t currentStepIdx;  // Default frequency step
   int8_t bandwidthIdx;    // Index of the table bandwidthFM, bandwidthAM or bandwidthSSB;
   int16_t bandCal;        // Calibration value
 } Band;
