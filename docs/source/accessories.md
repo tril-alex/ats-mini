@@ -2,10 +2,6 @@
 
 ## Better encoder knobs
 
-* A 3D-printed knob <https://www.thingiverse.com/thing:6966471>
-
----
-
 ![](_static/encoder-knob.jpg)
 
 20x13mm 6mm flower shaft ([aliexpress.com](https://www.aliexpress.com/item/1005007003511755.html), [aliexpress.ru](https://aliexpress.ru/item/1005007003511755.html)):
@@ -17,6 +13,11 @@
 20x15mm 6mm round shaft with a hex screw ([aliexpress.com](https://www.aliexpress.com/item/4001336156837.html), [aliexpress.ru](https://aliexpress.ru/item/32749281108.html)):
 
 ![](_static/encoder-knobs-20x15.jpg)
+
+---
+
+* 3D-printed knobs: [1](https://www.thingiverse.com/thing:6966471), [2](https://cults3d.com/en/3d-model/gadget/ats-mini-si4732-radio-knob)
+* Also check out the [Knob Zone](https://www.ebay.co.uk/str/knobzone).
 
 ## Tiny antenna
 
@@ -30,3 +31,8 @@ The SRH805S SMA-M antenna supports 144/430/1200MHz and is not really suitable fo
 * <https://www.thingiverse.com/thing:6968102>
 * <https://www.thingiverse.com/thing:6997758>
 * <https://3dtoday.ru/3d-models/gadgets/aksessuary/skameecka-dlya-kitaiskogo-radiopriemnika-malysarik>
+
+## Cases
+
+* <https://cults3d.com/en/3d-model/gadget/ats-mini-shell-knob-switch-mrhu-2>
+* <https://makerworld.com/en/models/785921-esp32s3-si4732-receivershou-yin-ji-wai-ke>
