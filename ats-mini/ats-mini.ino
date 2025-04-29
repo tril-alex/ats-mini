@@ -2,6 +2,7 @@
 // INCLUDE FILES
 // =================================
 
+#include "driver/rtc_io.h"
 #include "Common.h"
 #include <Wire.h>
 #include "EEPROM.h"
@@ -96,8 +97,29 @@ SI4735_fixed rx;
 //
 void setup()
 {
+  // True if wakeup from deep sleep
+  bool wakeup_deep = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0;
+
   // Enable serial port
   Serial.begin(115200);
+
+  Serial.println(wakeup_deep);
+
+  if (wakeup_deep) {
+    rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+    rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+    rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
+  }
+
+  // Encoder pins. Enable internal pull-ups
+  pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
+  pinMode(ENCODER_PIN_A, INPUT_PULLUP);
+  pinMode(ENCODER_PIN_B, INPUT_PULLUP);
+
+  // Prevent the EEPROM reset and possible encoder click
+  if (wakeup_deep) {
+    while (digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
+  }
 
   // Enable audio amplifier
   // Initally disable the audio amplifier until the SI4732 has been setup
@@ -107,11 +129,6 @@ void setup()
   // Enable SI4732 VDD
   pinMode(PIN_POWER_ON, OUTPUT);
   digitalWrite(PIN_POWER_ON, HIGH);
-
-  // Encoder pins. Enable internal pull-ups
-  pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
-  pinMode(ENCODER_PIN_A, INPUT_PULLUP);
-  pinMode(ENCODER_PIN_B, INPUT_PULLUP);
 
   // The line below may be necessary to setup I2C pins on ESP32
   Wire.begin(ESP32_I2C_SDA, ESP32_I2C_SCL);
@@ -153,7 +170,7 @@ void setup()
     tft.println();
     tft.setTextColor(TH.text_warn, TH.bg);
     tft.print("EEPROM Resetting");
-    delay(2000);
+    while(digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
   }
 
   // Check for SI4732 connected on I2C interface
@@ -534,9 +551,7 @@ void loop()
   else if(pb1st.isLongPressed && !seekModePress)
   {
     elapsedSleep = currentTime;
-    needRedraw |= !sleepOn(!sleepOn());
-    // Wait till the button is released
-    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(10);
+    sleepOn(!sleepOn());
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME

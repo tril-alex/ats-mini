@@ -22,6 +22,12 @@
 #define RDS_PT        0b00010000  // Program type
 #define RDS_RBDS      0b00100000  // Use US PTYs
 
+// Sleep modes
+#define SLEEP_LOCKED   0 // Lock the encoder
+#define SLEEP_UNLOCKED 1 // Do not lock the encoder
+#define SLEEP_LIGHT    2 // ESP32 light sleep
+#define SLEEP_DEEP     3 // ESP32 deep sleep
+
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
 #define RESET_PIN     16            // GPIO16   SI4732/5 Reset

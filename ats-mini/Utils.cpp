@@ -1,7 +1,12 @@
+#include "driver/rtc_io.h"
 #include "Common.h"
+#include "Button.h"
+#include "Storage.h"
 
 // SSB patch for whole SSBRX initialization string
 #include "patch_init.h"
+
+extern ButtonTracker pb1;
 
 // Current mute status, returned by muteOn()
 static bool muted = false;
@@ -93,9 +98,43 @@ bool sleepOn(int x)
   {
     sleep_on = true;
     ledcWrite(PIN_LCD_BL, 0);
+    spr.fillSprite(TFT_BLACK);
+    spr.pushSprite(0, 0);
     tft.writecommand(ST7789_DISPOFF);
     tft.writecommand(ST7789_SLPIN);
     delay(120);
+    // Wait till the button is released to prevent immediate wakeup
+    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
+
+    switch(sleepModeIdx) {
+    case SLEEP_LIGHT:
+      esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
+      rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
+      rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+      esp_light_sleep_start();
+      // Waking up here
+      rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+      rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+      rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
+      pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
+      sleepOn(false);
+      break;
+    case SLEEP_DEEP:
+      eepromSaveConfig();
+      esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
+      rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
+      rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+      rtc_gpio_hold_en((gpio_num_t)PIN_AMP_EN);
+      rtc_gpio_hold_en((gpio_num_t)PIN_POWER_ON);
+      rtc_gpio_hold_en((gpio_num_t)RESET_PIN);
+      gpio_deep_sleep_hold_en();
+      esp_deep_sleep_start();
+      // Waking up in setup()
+      break;
+    default:
+      // Normal flow
+      break;
+    }
   }
   else if((x==0) && sleep_on)
   {
@@ -103,7 +142,11 @@ bool sleepOn(int x)
     tft.writecommand(ST7789_SLPOUT);
     delay(120);
     tft.writecommand(ST7789_DISPON);
+    drawScreen();
     ledcWrite(PIN_LCD_BL, currentBrt);
+    // Wait till the button is released to prevent the main loop clicks
+    while (digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
+    pb1 = ButtonTracker(); // Clear the button state
   }
 
   return(sleep_on);
