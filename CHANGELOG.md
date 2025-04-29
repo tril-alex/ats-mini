@@ -4,6 +4,33 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 2.12 (2025-04-29)
+
+
+### Removed
+
+- Remove the main menu counter.
+
+
+### Added
+
+- Added RDS radio text, program type, and PI code. Can be enabled via Settings->RDS. [#9](https://github.com/esp32-si4732/ats-mini/issues/9)
+- Memory menu to store favorite stations. Press the encoder on an empty slot to store the current frequency and mode, rotate the encoder to select a slot. WARNING: this firmware version resets the receiver settings. [#56](https://github.com/esp32-si4732/ats-mini/issues/56)
+- Add `I` and `i` hotkeys to tweak the calibration value. Add separate BFO and calibration fields to the remote log. [#60](https://github.com/esp32-si4732/ats-mini/issues/60)
+- Add 10kHz step for WFM mode
+- Add `Settings->Sleep Mode`. Controls whether the encoder is locked or not during sleep. Unlocked mode allows tuning (and setting the volume) with less self-induced noise.
+
+
+### Changed
+
+- Remote encoder keys changed. Use `R` and `r` to rotate it and `e` to click.
+
+
+### Fixed
+
+- Get rid of 1M and other AM steps in LSB/USB steps menu [#15](https://github.com/esp32-si4732/ats-mini/issues/15)
+- Extend the 25, 31, 41, 49, and 60 meter bands. [#50](https://github.com/esp32-si4732/ats-mini/issues/50)
+
 ## 2.11 (2025-04-22)
 
 
