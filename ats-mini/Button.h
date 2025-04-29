@@ -1,9 +1,9 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#define DEBOUNCE_TIME          50
-#define SHORT_PRESS_TIME       500
-#define LONG_PRESS_TIME        2000
+#define DEBOUNCE_INTERVAL    50
+#define SHORT_PRESS_INTERVAL 500
+#define LONG_PRESS_INTERVAL  2000
 
 class ButtonTracker {
   public:
@@ -14,8 +14,9 @@ class ButtonTracker {
       bool isLongPressed;   // Still pressed after >2s
     };
 
-    ButtonTracker();
-    State update(bool currentState);
+  ButtonTracker();
+  void reset();
+  State update(bool currentState, unsigned int debounceInterval = DEBOUNCE_INTERVAL);
 
   private:
     bool lastState; // Last raw input state

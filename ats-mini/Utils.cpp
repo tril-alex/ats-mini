@@ -1,7 +1,6 @@
 #include "driver/rtc_io.h"
 #include "Common.h"
 #include "Button.h"
-#include "Storage.h"
 
 // SSB patch for whole SSBRX initialization string
 #include "patch_init.h"
@@ -102,38 +101,34 @@ bool sleepOn(int x)
     spr.pushSprite(0, 0);
     tft.writecommand(ST7789_DISPOFF);
     tft.writecommand(ST7789_SLPIN);
-    delay(120);
     // Wait till the button is released to prevent immediate wakeup
     while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
 
-    switch(sleepModeIdx) {
-    case SLEEP_LIGHT:
-      esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
-      rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
-      rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-      esp_light_sleep_start();
-      // Waking up here
+    if (sleepModeIdx == SLEEP_LIGHT) {
+      while (true) {
+        esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
+        rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
+        rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
+        esp_light_sleep_start();
+        // Waking up here
+        if (currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+        // Wait for a long press, otherwise enter the sleep again
+        pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
+        bool wasLongPressed = false;
+        while (true) {
+          ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
+          wasLongPressed |= pb1st.isLongPressed;
+          if (wasLongPressed || !pb1st.isPressed) break;
+          delay(100);
+        }
+        if (wasLongPressed) break;
+      }
+      // Reenable the pin as well as the display
       rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
       rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
       rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
       pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
       sleepOn(false);
-      break;
-    case SLEEP_DEEP:
-      eepromSaveConfig();
-      esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
-      rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
-      rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-      rtc_gpio_hold_en((gpio_num_t)PIN_AMP_EN);
-      rtc_gpio_hold_en((gpio_num_t)PIN_POWER_ON);
-      rtc_gpio_hold_en((gpio_num_t)RESET_PIN);
-      gpio_deep_sleep_hold_en();
-      esp_deep_sleep_start();
-      // Waking up in setup()
-      break;
-    default:
-      // Normal flow
-      break;
     }
   }
   else if((x==0) && sleep_on)
@@ -145,8 +140,8 @@ bool sleepOn(int x)
     drawScreen();
     ledcWrite(PIN_LCD_BL, currentBrt);
     // Wait till the button is released to prevent the main loop clicks
-    while (digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
-    pb1 = ButtonTracker(); // Clear the button state
+    pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
+    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed) delay(100);
   }
 
   return(sleep_on);

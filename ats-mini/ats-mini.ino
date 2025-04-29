@@ -2,7 +2,6 @@
 // INCLUDE FILES
 // =================================
 
-#include "driver/rtc_io.h"
 #include "Common.h"
 #include <Wire.h>
 #include "EEPROM.h"
@@ -97,29 +96,13 @@ SI4735_fixed rx;
 //
 void setup()
 {
-  // True if wakeup from deep sleep
-  bool wakeup_deep = esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0;
-
   // Enable serial port
   Serial.begin(115200);
-
-  Serial.println(wakeup_deep);
-
-  if (wakeup_deep) {
-    rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-    rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
-    rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
-  }
 
   // Encoder pins. Enable internal pull-ups
   pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
   pinMode(ENCODER_PIN_A, INPUT_PULLUP);
   pinMode(ENCODER_PIN_B, INPUT_PULLUP);
-
-  // Prevent the EEPROM reset and possible encoder click
-  if (wakeup_deep) {
-    while (digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
-  }
 
   // Enable audio amplifier
   // Initally disable the audio amplifier until the SI4732 has been setup
@@ -550,8 +533,9 @@ void loop()
   // Encoder is being LONG PRESSED: TOGGLE DISPLAY
   else if(pb1st.isLongPressed && !seekModePress)
   {
-    elapsedSleep = currentTime;
     sleepOn(!sleepOn());
+    // CPU sleep can take long time, renew the timestamps
+    elapsedSleep = elapsedCommand = currentTime = millis();
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
@@ -603,8 +587,11 @@ void loop()
   }
 
   // Display sleep timeout
-  if(currentSleep && !sleepOn() && ((currentTime - elapsedSleep) > currentSleep * 1000))
+  if(currentSleep && !sleepOn() && ((currentTime - elapsedSleep) > currentSleep * 1000)) {
     sleepOn(true);
+    // CPU sleep can take long time, renew the timestamps
+    elapsedSleep = elapsedCommand = currentTime = millis();
+  }
 
   // Show RSSI status only if this condition has changed
   if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)

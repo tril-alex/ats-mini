@@ -26,7 +26,6 @@
 #define SLEEP_LOCKED   0 // Lock the encoder
 #define SLEEP_UNLOCKED 1 // Do not lock the encoder
 #define SLEEP_LIGHT    2 // ESP32 light sleep
-#define SLEEP_DEEP     3 // ESP32 deep sleep
 
 // SI4732/5 PINs
 #define PIN_POWER_ON  15            // GPIO15   External LDO regulator enable (1 = Enable)
