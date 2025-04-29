@@ -8,7 +8,7 @@ The original schematics, BOM and Gerber files can be found at <https://oshwhub.c
 
 ## Datasheets
 
-* [ESP32-S3-WROOM-1](https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf) - MCU SoC
+* ESP32-S3-WROOM-1 [1](https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf), [2](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf) - MCU SoC
 * SI4732-A10 [1](https://static.chipdip.ru/lib/035/DOC047035840.pdf), [2](https://www.skyworksinc.com/-/media/Skyworks/SL/documents/public/application-notes/AN383.pdf), [3](https://www.skyworksinc.com/-/media/Skyworks/SL/documents/public/application-notes/AN332.pdf), [4](https://aitendo3.sakura.ne.jp/aitendo_data/product_img/ic/radio/SI4732-A10/AN332.pdf), [5](https://github.com/pu2clr/SI4735/issues/2#issuecomment-703077550) - broadcast radio receiver
 * [ST7789](https://www.buydisplay.com/download/ic/ST7789.pdf) - LCD controller (also see the [GC9307-XL](https://github.com/G8PTN/ATS_MINI/issues/1#issuecomment-2766901527) caveat)
 * [GC9307](https://www.display-wiki.com/_media/knowledge_center/gc9307.pdf) - LCD controller
