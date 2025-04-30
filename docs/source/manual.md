@@ -10,7 +10,7 @@
 * **Band name and modulation** (VHF & FM, top center). See the [Bands table](#bands-table) for more details.
 * **Info panel** (the box on the left side), also **Menu**. The parameters are explained in the [Menu](#menu) section.
 * **Frequency** (center of the screen).
-* **FM station name** (RDS PS) or **frequency name** (right below the frequency).
+* **FM station name** (RDS PS) or **frequency name** (right below the frequency). A frequency name appears for some popular frequencies like FT8, SSTV or CB channels.
 * **Tuning scale** (bottom of the screen). Can be replaced with additional RDS fields (RT, PTY) when extended RDS is enabled.
 
 
