@@ -18,13 +18,13 @@
 
 Controls are implemented through the encoder knob:
 
-| Gesture                | Result                                                                                      |
-|------------------------|---------------------------------------------------------------------------------------------|
-| Rotate                 | Tunes frequency, navigates menu, adjusts parameters.                                        |
-| Click (<0.5 sec)       | Opens menu, selects.                                                                        |
-| Short press (>0.5 sec) | Volume shortcut.                                                                            |
-| Long press (>2 sec)    | Sleep on/off.                                                                               |
-| Press and rotate       | Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to exit the scan mode. |
+| Gesture                | Result                                                                                 |
+|------------------------|----------------------------------------------------------------------------------------|
+| Rotate                 | Tunes frequency, navigates menu, adjusts parameters.                                   |
+| Click (<0.5 sec)       | Opens menu, selects.                                                                   |
+| Short press (>0.5 sec) | Volume shortcut.                                                                       |
+| Long press (>2 sec)    | Sleep on/off.                                                                          |
+| Press and rotate       | Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan. |
 
 
 ## Menu
@@ -35,6 +35,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Band** - List of [Bands](#bands-table).
 * **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
 * **Step** - Tuning step (not every step is available on every band and mode).
+* **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan.
 * **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder.
 * **Mute** - Mute/unmute.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
@@ -45,7 +46,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 
 ## Settings menu
 
-* **Brightness** - Display brightness level. The minimal one draws about 80mA of the battery power, the default one about 100mA, the max level about 120mA.
+* **Brightness** - Display brightness level (10...255). The minimal one draws about 80mA of the battery power, the default one about 100mA, the max level about 120mA.
 * **Calibration** - SSB calibration offset (-2000...2000, per band).
 * **Theme** - Color theme.
 * **RDS** - Radio Data System options: PS - radio station name, CT - time, RT - text, PTY - genre, ALL (EU/US) - everything. Note that the time can be transmitted either in UTC or in local timezone, as well as be completely bogus. The clock is synchronized only once, so you can pick the right time source (switch the receiver power off and on to resync it again).

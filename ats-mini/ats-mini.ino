@@ -403,7 +403,7 @@ void updateFrequency(int newFreq)
 //
 // Handle encoder PRESS + ROTATE
 //
-bool doPressAndRotate(int8_t dir)
+bool doSeek(int8_t dir)
 {
   if(isSSB())
   {
@@ -518,7 +518,7 @@ void loop()
     // If encoder has been rotated AND pressed...
     if(pb1st.isPressed && !isModalMode(currentCmd))
     {
-      needRedraw |= doPressAndRotate(encoderCount);
+      needRedraw |= doSeek(encoderCount);
       seekModePress = true;
     }
     else

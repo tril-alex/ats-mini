@@ -20,15 +20,16 @@
 #define CMD_MENU      0x0700 // |
 #define CMD_SOFTMUTE  0x0800 // |
 #define CMD_AVC       0x0900 // |
-#define CMD_MEMORY    0x0A00 //-+
-#define CMD_SETTINGS  0x0B00 //-SETTINGS MODE starts here
-#define CMD_BRT       0x0C00 // |
-#define CMD_CAL       0x0D00 // |
-#define CMD_THEME     0x0E00 // |
-#define CMD_RDS       0x0F00 // |
-#define CMD_SLEEP     0x1000 // |
-#define CMD_SLEEPMODE 0x1100 // |
-#define CMD_ABOUT     0x1200 //-SETTINGS MODE ends here
+#define CMD_MEMORY    0x0A00 // |
+#define CMD_SEEK      0x0B00 //-+
+#define CMD_SETTINGS  0x0C00 //-SETTINGS MODE starts here
+#define CMD_BRT       0x0D00 // |
+#define CMD_CAL       0x0E00 // |
+#define CMD_THEME     0x0F00 // |
+#define CMD_RDS       0x1000 // |
+#define CMD_SLEEP     0x1100 // |
+#define CMD_SLEEPMODE 0x1200 // |
+#define CMD_ABOUT     0x1300 //-SETTINGS MODE ends here
 
 //
 // Data Types
