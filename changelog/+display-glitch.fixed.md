@@ -1,0 +1,1 @@
+Get rid of the short display blink that shows some visual garbage at power on.

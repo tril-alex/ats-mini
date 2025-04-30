@@ -116,6 +116,11 @@ void setup()
   // The line below may be necessary to setup I2C pins on ESP32
   Wire.begin(ESP32_I2C_SDA, ESP32_I2C_SCL);
 
+  // TFT display brightness control (PWM)
+  // Note: At brightness levels below 100%, switching from the PWM may cause power spikes and/or RFI
+  ledcAttach(PIN_LCD_BL, 16000, 8);  // Pin assignment, 16kHz, 8-bit
+  ledcWrite(PIN_LCD_BL, 0);          // Default value 0%
+
   // TFT display setup
   tft.begin();
   tft.setRotation(3);
@@ -136,17 +141,13 @@ void setup()
   spr.setFreeFont(&Orbitron_Light_24);
   spr.setTextColor(TH.text, TH.bg);
 
-  // TFT display brightness control (PWM)
-  // Note: At brightness levels below 100%, switching from the PWM may cause power spikes and/or RFI
-  ledcAttach(PIN_LCD_BL, 16000, 8);  // Pin assignment, 16kHz, 8-bit
-  ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%
-
   // Press and hold Encoder button to force an EEPROM reset
   // Note: EEPROM reset is recommended after firmware updates
   if(digitalRead(ENCODER_PUSH_BUTTON)==LOW)
   {
     eepromInvalidate();
 
+    ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
     tft.setTextSize(2);
     tft.setTextColor(TH.text, TH.bg);
     tft.println(getVersion());
@@ -164,6 +165,7 @@ void setup()
   int16_t si4735Addr = rx.getDeviceI2CAddress(RESET_PIN);
   if(!si4735Addr)
   {
+    ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
     tft.setTextSize(2);
     tft.setTextColor(TH.text_warn, TH.bg);
     tft.println("Si4732 not detected");
@@ -199,13 +201,13 @@ void setup()
 
   // ** SI4732 STARTUP **
   // Uses values from EEPROM (Last stored or defaults after EEPROM reset)
-  ledcWrite(PIN_LCD_BL, currentBrt);
   selectBand(bandIdx, false);
   delay(50);
   rx.setVolume(volume);
 
   // Draw display for the first time
   drawScreen();
+  ledcWrite(PIN_LCD_BL, currentBrt);
 
   // Interrupt actions for Rotary encoder
   // Note: Moved to end of setup to avoid inital interrupt actions
