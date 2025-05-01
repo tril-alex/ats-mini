@@ -507,14 +507,12 @@ void loop()
   }
 #endif
 
-  // Block encoder rotation when display is off
+  // Block encoder rotation when in the locked sleep mode
   if(encoderCount && sleepOn() && sleepModeIdx == SLEEP_LOCKED) encoderCount = 0;
 
   // If encoder has been rotated...
   if(encoderCount)
   {
-    elapsedSleep = elapsedCommand = currentTime;
-
     // If encoder has been rotated AND pressed...
     if(pb1st.isPressed && !isModalMode(currentCmd))
     {
@@ -524,6 +522,9 @@ void loop()
     else
     {
       needRedraw |= doRotate(encoderCount);
+      // Seek can take long time, renew the timestamp
+      if(currentCmd == CMD_SEEK) currentTime = millis();
+      elapsedSleep = elapsedCommand = currentTime;
     }
 
     // Clear encoder rotation
