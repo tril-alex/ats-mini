@@ -1,1 +1,0 @@
-CPU sleep mode (light sleep) to reduce the power consumption even more.

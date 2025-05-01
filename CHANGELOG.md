@@ -4,6 +4,24 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 2.13 (2025-05-01)
+
+
+### Added
+
+- Add Seek menu - automatic scan on AM/FM, faster tuning step on SSB. [#26](https://github.com/esp32-si4732/ats-mini/issues/26)
+- CPU sleep mode (light sleep) to reduce the power consumption even more.
+
+
+### Changed
+
+- Increase seek timeout from 8 seconds to 10 minutes.
+
+
+### Fixed
+
+- Get rid of the short display blink that shows some visual garbage at power on.
+
 ## 2.12 (2025-04-29)
 
 
