@@ -1,0 +1,1 @@
+Increase seek timeout from 8 seconds to 10 minutes.

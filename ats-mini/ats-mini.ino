@@ -19,7 +19,7 @@
 #define DEFAULT_SLEEP            0  // Default sleep interval, range = 0 (off) to 255 in steps of 5
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
-
+#define SEEK_TIMEOUT        600000  // Max seek timeout (ms)
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
 #define TUNE_HOLDOFF_TIME         90    // Timer to hold off display whilst tuning
 
@@ -204,6 +204,7 @@ void setup()
   selectBand(bandIdx, false);
   delay(50);
   rx.setVolume(volume);
+  rx.setMaxSeekTime(SEEK_TIMEOUT);
 
   // Draw display for the first time
   drawScreen();
