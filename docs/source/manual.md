@@ -54,6 +54,16 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on and default brightness the power consumption is about 100mA, Locked/Unlocked modes draw about 70mA, the CPU sleep mode draws about 40mA.
 * **About** - Informational screen.
 
+## Reset
+
+To reset the receiver settings (current band, frequency, favorite stations, etc):
+
+1. Switch off the receiver
+2. Press and hold the encoder
+3. Turn on the receiver
+4. Release the encoder after the `EEPROM Resetting` message appears
+
+
 ## Bands table
 
 | Name | Min frequency | Max frequency | Default mode |
