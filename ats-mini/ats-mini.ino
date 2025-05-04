@@ -33,7 +33,7 @@ int8_t agcNdx = 0;
 int8_t softMuteMaxAttIdx = 4;
 
 bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary encoder detection
-bool seekModePress = false;   // Seek happened during long press
+bool pushAndRotate = false;   // Push and rotate is active, ignore the long press
 
 long elapsedRSSI = millis();
 long elapsedButton = millis();
@@ -517,10 +517,10 @@ void loop()
   if(encoderCount)
   {
     // If encoder has been rotated AND pressed...
-    if(pb1st.isPressed && !isModalMode(currentCmd))
+    if(pb1st.isPressed && currentCmd == CMD_NONE)
     {
       needRedraw |= doSeek(encoderCount);
-      seekModePress = true;
+      pushAndRotate = true;
     }
     else
     {
@@ -537,7 +537,7 @@ void loop()
   }
 
   // Encoder is being LONG PRESSED: TOGGLE DISPLAY
-  else if(pb1st.isLongPressed && !seekModePress)
+  else if(pb1st.isLongPressed && !pushAndRotate)
   {
     sleepOn(!sleepOn());
     // CPU sleep can take long time, renew the timestamps
@@ -545,7 +545,7 @@ void loop()
   }
 
   // Encoder released after SHORT PRESS: CHANGE VOLUME
-  else if(pb1st.wasShortPressed && (!sleepOn() || sleepModeIdx == SLEEP_UNLOCKED) && !seekModePress)
+  else if(pb1st.wasShortPressed && (!sleepOn() || sleepModeIdx == SLEEP_UNLOCKED) && !pushAndRotate)
   {
     elapsedSleep = elapsedCommand = currentTime;
 
@@ -558,7 +558,7 @@ void loop()
   }
 
   // Encoder short click: SELECT MENU ITEM
-  else if(pb1st.wasClicked && !seekModePress)
+  else if(pb1st.wasClicked && !pushAndRotate)
   {
     elapsedSleep = elapsedCommand = currentTime;
 
@@ -575,9 +575,9 @@ void loop()
       // Command handled, redraw screen
       needRedraw = true;
     }
-    else if(isModalMode(currentCmd))
+    else if(currentCmd != CMD_NONE)
     {
-      // Deactivate menu
+      // Deactivate modal mode
       currentCmd = CMD_NONE;
       needRedraw = true;
     }
@@ -619,7 +619,7 @@ void loop()
   // Disable commands control
   if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
-    if(isModalMode(currentCmd))
+    if(currentCmd != CMD_NONE)
     {
       currentCmd = CMD_NONE;
       needRedraw = true;
@@ -639,16 +639,16 @@ void loop()
   eepromTickTime();
 
   // Check for button activity
-  if(!pb1st.isPressed && seekModePress)
+  if(!pb1st.isPressed && pushAndRotate)
   {
-    seekModePress = false;
+    pushAndRotate = false;
   }
 
   // Periodically refresh the main screen
   // This covers the case where there is nothing else triggering a refresh
   if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)
   {
-    if(!isModalMode(currentCmd)) needRedraw = true;
+    if(currentCmd == CMD_NONE) needRedraw = true;
     background_timer = currentTime;
   }
 
