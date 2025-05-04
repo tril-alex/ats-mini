@@ -105,9 +105,10 @@ static const char *menu[] =
 #define MENU_CALIBRATION  1
 #define MENU_THEME        2
 #define MENU_RDS          3
-#define MENU_SLEEP        4
-#define MENU_SLEEPMODE    5
-#define MENU_ABOUT        6
+#define MENU_ZOOM         4
+#define MENU_SLEEP        5
+#define MENU_SLEEPMODE    6
+#define MENU_ABOUT        7
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -117,6 +118,7 @@ static const char *settings[] =
   "Calibration",
   "Theme",
   "RDS",
+  "Zoom menu",
   "Sleep",
   "Sleep Mode",
   "About",
@@ -404,6 +406,11 @@ static void doRDSMode(int dir)
   if(!(getRDSMode() & RDS_CT)) clockReset();
 }
 
+static void doZoom(int dir)
+{
+  zoomMenu = !zoomMenu;
+}
+
 bool tuneToMemory(const Memory *memory)
 {
   // Must have frequency
@@ -621,6 +628,7 @@ static void clickSettings(int cmd)
       break;
     case MENU_THEME:      currentCmd = CMD_THEME;     break;
     case MENU_RDS:        currentCmd = CMD_RDS;       break;
+    case MENU_ZOOM:       currentCmd = CMD_ZOOM;      break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
@@ -652,6 +660,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_MEMORY:    doMemory(dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_SLEEPMODE: doSleepMode(dir);break;
+    case CMD_ZOOM:      doZoom(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -744,11 +753,13 @@ static void drawMenu(int x, int y, int sx)
   int count = ITEM_COUNT(menu);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(menu[abs((menuIdx+count+i)%count)]);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
-
+    }
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(menu[abs((menuIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -770,11 +781,14 @@ static void drawSettings(int x, int y, int sx)
   int count = ITEM_COUNT(settings);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(settings[abs((settingsIdx+count+i)%count)]);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(settings[abs((settingsIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -786,13 +800,16 @@ static void drawMode(int x, int y, int sx)
   int count = ITEM_COUNT(bandModeDesc);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(bandModeDesc[abs((currentMode+count+i)%count)]);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     if((currentMode!=FM) || (i==0))
-      spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
+     spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -805,11 +822,14 @@ static void drawStep(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(steps[currentMode][abs((idx+i)%count)].desc);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(steps[currentMode][abs((idx+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -817,6 +837,7 @@ static void drawStep(int x, int y, int sx)
 static void drawSeek(int x, int y, int sx)
 {
   drawCommon(menu[MENU_SEEK], x, y, sx);
+  drawZoomedMenu(menu[MENU_SEEK]);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawSmoothArc(40+x+(sx/2), 66+y, 23, 20, 45, 180, TH.menu_param, TH.menu_bg);
   spr.fillTriangle(40+x+(sx/2)-5, 66+y-25, 40+x+(sx/2)+5, 66+y-20, 40+x+(sx/2)-5, 66+y-15, TH.menu_param);
@@ -831,11 +852,14 @@ static void drawBand(int x, int y, int sx)
   int count = ITEM_COUNT(bands);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(bands[abs((bandIdx+count+i)%count)].bandName);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(bands[abs((bandIdx+count+i)%count)].bandName, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -849,11 +873,14 @@ static void drawBandwidth(int x, int y, int sx)
 
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(bandwidths[currentMode][abs((idx+i)%count)].desc);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(bandwidths[currentMode][abs((idx+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -865,11 +892,14 @@ static void drawSleepMode(int x, int y, int sx)
   int count = ITEM_COUNT(sleepModeDesc);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(sleepModeDesc[abs((sleepModeIdx+count+i)%count)]);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(sleepModeDesc[abs((sleepModeIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -881,11 +911,14 @@ static void drawTheme(int x, int y, int sx)
   int count = getTotalThemes();
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(theme[abs((themeIdx+count+i)%count)].name);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(theme[abs((themeIdx+count+i)%count)].name, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -897,11 +930,14 @@ static void drawRDSMode(int x, int y, int sx)
   int count = ITEM_COUNT(rdsMode);
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
+    if(i==0) {
+      drawZoomedMenu(rdsMode[abs((rdsModeIdx+count+i)%count)].desc);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
+    } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
 
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(rdsMode[abs((rdsModeIdx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -916,12 +952,6 @@ static void drawMemory(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     int j = abs((memoryIdx+count+i)%count);
-
-    if(i==0)
-      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    else
-      spr.setTextColor(TH.menu_item, TH.menu_bg);
-
     char buf[16];
     const char *text = buf;
 
@@ -936,6 +966,14 @@ static void drawMemory(int x, int y, int sx)
     else
       sprintf(buf, "%5d %s", memories[j].freq, bandModeDesc[memories[j].mode]);
 
+    if(i==0) {
+      drawZoomedMenu(text);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    spr.setTextDatum(MC_DATUM);
     spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
@@ -943,6 +981,8 @@ static void drawMemory(int x, int y, int sx)
 static void drawVolume(int x, int y, int sx)
 {
   drawCommon(menu[MENU_VOLUME], x, y, sx);
+  drawZoomedMenu(menu[MENU_VOLUME]);
+  spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
@@ -952,6 +992,8 @@ static void drawVolume(int x, int y, int sx)
 static void drawAgc(int x, int y, int sx)
 {
   drawCommon(menu[MENU_AGC_ATT], x, y, sx);
+  drawZoomedMenu(menu[MENU_AGC_ATT]);
+  spr.setTextDatum(MC_DATUM);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -978,6 +1020,8 @@ static void drawAgc(int x, int y, int sx)
 static void drawSoftMuteMaxAtt(int x, int y, int sx)
 {
   drawCommon(menu[MENU_SOFTMUTE], x, y, sx);
+  drawZoomedMenu(menu[MENU_SOFTMUTE]);
+  spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
@@ -989,6 +1033,8 @@ static void drawSoftMuteMaxAtt(int x, int y, int sx)
 static void drawCal(int x, int y, int sx)
 {
   drawCommon(menu[MENU_CALIBRATION], x, y, sx);
+  drawZoomedMenu(menu[MENU_CALIBRATION]);
+  spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
@@ -999,6 +1045,8 @@ static void drawCal(int x, int y, int sx)
 static void drawAvc(int x, int y, int sx)
 {
   drawCommon(menu[MENU_AVC], x, y, sx);
+  drawZoomedMenu(menu[MENU_AVC]);
+  spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
@@ -1016,6 +1064,8 @@ static void drawAvc(int x, int y, int sx)
 static void drawBrt(int x, int y, int sx)
 {
   drawCommon(settings[MENU_BRIGHTNESS], x, y, sx);
+  drawZoomedMenu(menu[MENU_BRIGHTNESS]);
+  spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
@@ -1025,10 +1075,23 @@ static void drawBrt(int x, int y, int sx)
 static void drawSleep(int x, int y, int sx)
 {
   drawCommon(settings[MENU_SLEEP], x, y, sx);
+  drawZoomedMenu(menu[MENU_SLEEP]);
+  spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
+}
+
+static void drawZoom(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_ZOOM], x, y, sx);
+  drawZoomedMenu(settings[MENU_ZOOM]);
+  spr.setTextDatum(MC_DATUM);
+
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+  spr.drawString(zoomMenu ? "On" : "Off", 40+x+(sx/2), 60+y, 4);
 }
 
 static void drawInfo(int x, int y, int sx)
@@ -1130,6 +1193,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
+    case CMD_ZOOM:      drawZoom(x, y, sx);      break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

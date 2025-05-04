@@ -66,6 +66,7 @@ uint8_t volume = DEFAULT_VOLUME;        // Volume, range = 0 (muted) - 63
 uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255 in steps of 5
 uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
+bool zoomMenu = false;                  // Display zoomed menu item
 
 // Background screen refresh
 uint32_t background_timer = millis();   // Background screen refresh timer.

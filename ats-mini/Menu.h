@@ -27,9 +27,10 @@
 #define CMD_CAL       0x0E00 // |
 #define CMD_THEME     0x0F00 // |
 #define CMD_RDS       0x1000 // |
-#define CMD_SLEEP     0x1100 // |
-#define CMD_SLEEPMODE 0x1200 // |
-#define CMD_ABOUT     0x1300 //-SETTINGS MODE ends here
+#define CMD_ZOOM      0x1100 // |
+#define CMD_SLEEP     0x1200 // |
+#define CMD_SLEEPMODE 0x1300 // |
+#define CMD_ABOUT     0x1400 //-SETTINGS MODE ends here
 
 //
 // Data Types

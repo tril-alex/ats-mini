@@ -64,6 +64,21 @@ static void drawAbout()
 #endif
 }
 
+// Draw zoomed menu item
+void drawZoomedMenu(const char *text)
+{
+  if (!zoomMenu) return;
+
+  spr.fillSmoothRoundRect(RDS_OFFSET_X - 70 + 1, RDS_OFFSET_Y - 3 + 1, 148, 26, 4, TH.menu_bg);
+  spr.setTextDatum(TC_DATUM);
+  spr.setTextColor(TH.menu_item, TH.menu_bg);
+  spr.drawString(text, RDS_OFFSET_X + 5, RDS_OFFSET_Y, 4);
+  spr.drawSmoothRoundRect(RDS_OFFSET_X - 70, RDS_OFFSET_Y - 3, 4, 4, 150, 28, TH.menu_border, TH.menu_bg);
+  spr.drawLine(MENU_OFFSET_X + MENU_DELTA_X + 77, MENU_OFFSET_Y + 64, MENU_OFFSET_X + MENU_DELTA_X + 80, MENU_OFFSET_Y + 64, TH.menu_border);
+  spr.drawLine(MENU_OFFSET_X + MENU_DELTA_X + 80, MENU_OFFSET_Y + 64, MENU_OFFSET_X + MENU_DELTA_X + 80, RDS_OFFSET_Y + 14 - 3, TH.menu_border);
+  spr.drawLine(MENU_OFFSET_X + MENU_DELTA_X + 80, RDS_OFFSET_Y + 14 - 3, RDS_OFFSET_X -70, RDS_OFFSET_Y + 14 - 3, TH.menu_border);
+}
+
 //
 // Show "Loading SSB" message
 //
@@ -74,6 +89,7 @@ void drawLoadingSSB()
   spr.setTextDatum(MC_DATUM);
   spr.fillSmoothRoundRect(80, 40, 160, 40, 4, TH.text);
   spr.fillSmoothRoundRect(81, 41, 158, 38, 4, TH.menu_bg);
+  spr.setTextColor(TH.text, TH.menu_bg);
   spr.drawString("Loading SSB", 160, 62, 4);
   spr.pushSprite(0, 0);
 }
@@ -280,6 +296,10 @@ void drawScreen()
     FUNIT_OFFSET_X, FUNIT_OFFSET_Y
   );
 
+  // Show station or channel name, if present
+  if(*getStationName())
+    drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
+
   // Draw left-side menu/info bar
   // @@@ FIXME: Frequency display (above) intersects the side bar!
   drawSideBar(currentCmd, MENU_OFFSET_X, MENU_OFFSET_Y, MENU_DELTA_X);
@@ -292,10 +312,6 @@ void drawScreen()
   if((currentMode==FM) && rx.getCurrentPilot())
 #endif
     spr.fillRect(15 + METER_OFFSET_X, 7+METER_OFFSET_Y, 4*17-2, 2, TH.bg);
-
-  // Show station or channel name, if present
-  if(*getStationName())
-    drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
 
   // Show radio text if present, else show frequency scale
   if(*getRadioText() || *getProgramInfo())
