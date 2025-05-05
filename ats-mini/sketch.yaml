@@ -6,5 +6,8 @@ profiles:
     libraries:
       - PU2CLR SI4735 (2.1.8)
       - TFT_eSPI (2.5.43)
+      - Async TCP (3.4.0)
+      - ESP Async WebServer (3.7.7)
+      - NtpClientLib (2.5.1)
 
 default_profile: esp32s3
