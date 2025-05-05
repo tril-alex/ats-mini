@@ -36,7 +36,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
 * **Step** - Tuning step (not every step is available on every band and mode).
 * **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan.
-* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder.
+* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder. It is also possible to edit the memory slots via [serial port](#serial-interface).
 * **Mute** - Mute/unmute.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
 * **AGC/ATTN** - Automatic Gain Control (on/off) or Attenuation level. The attenuator is not applicable to SSB mode.
@@ -100,7 +100,7 @@ To reset the receiver settings (current band, frequency, favorite stations, etc)
 
 ## Serial interface
 
-A USB-serial interface is available to control and monitor the receiver. A list of commands:
+A USB-serial interface is available to control and monitor the receiver. Use [PyTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or Picocom to connect to the serial port. A list of commands:
 
 | Button       | Function            | Comments                                                                                   |
 |--------------|---------------------|--------------------------------------------------------------------------------------------|
