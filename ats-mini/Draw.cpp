@@ -74,9 +74,6 @@ void drawZoomedMenu(const char *text)
   spr.setTextColor(TH.menu_item, TH.menu_bg);
   spr.drawString(text, RDS_OFFSET_X + 5, RDS_OFFSET_Y, 4);
   spr.drawSmoothRoundRect(RDS_OFFSET_X - 70, RDS_OFFSET_Y - 3, 4, 4, 150, 28, TH.menu_border, TH.menu_bg);
-  spr.drawLine(MENU_OFFSET_X + MENU_DELTA_X + 77, MENU_OFFSET_Y + 64, MENU_OFFSET_X + MENU_DELTA_X + 80, MENU_OFFSET_Y + 64, TH.menu_border);
-  spr.drawLine(MENU_OFFSET_X + MENU_DELTA_X + 80, MENU_OFFSET_Y + 64, MENU_OFFSET_X + MENU_DELTA_X + 80, RDS_OFFSET_Y + 14 - 3, TH.menu_border);
-  spr.drawLine(MENU_OFFSET_X + MENU_DELTA_X + 80, RDS_OFFSET_Y + 14 - 3, RDS_OFFSET_X -70, RDS_OFFSET_Y + 14 - 3, TH.menu_border);
 }
 
 //

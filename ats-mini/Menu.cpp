@@ -118,7 +118,7 @@ static const char *settings[] =
   "Calibration",
   "Theme",
   "RDS",
-  "Zoom menu",
+  "Zoom Menu",
   "Sleep",
   "Sleep Mode",
   "About",
