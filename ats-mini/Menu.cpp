@@ -130,6 +130,8 @@ static const char *settings[] =
 
 const char *bandModeDesc[] = { "FM", "LSB", "USB", "AM" };
 
+int getTotalModes() { return(ITEM_COUNT(bandModeDesc)); }
+
 //
 // Memory Menu
 //

@@ -87,6 +87,7 @@ bool clickSideBar(uint16_t cmd);
 void clickVolume();
 void selectBand(uint8_t idx, bool drawLoadingSSB = true);
 int getTotalBands();
+int getTotalModes();
 int getTotalMemories();
 Band *getCurrentBand();
 const Step *getCurrentStep(bool fast = false);

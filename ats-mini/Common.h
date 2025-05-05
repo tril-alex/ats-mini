@@ -161,9 +161,11 @@ bool identifyFrequency(uint16_t freq);
 // Remote.c
 #define REMOTE_CHANGED   1
 #define REMOTE_CLICK     2
+#define REMOTE_EEPROM    4
 #define REMOTE_DIRECTION 8
 void remoteTickTime();
 int remoteDoCommand(char key);
+char readSerialChar();
 #endif
 
 #endif // COMMON_H

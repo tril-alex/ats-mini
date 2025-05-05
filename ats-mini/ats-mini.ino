@@ -502,10 +502,11 @@ void loop()
   // Receive and execute serial command
   if(Serial.available()>0) {
     int revent = remoteDoCommand(Serial.read());
-    needRedraw |= !!(revent & 1);
-    pb1st.wasClicked |= !!(revent & 2);
-    int direction = revent >> 8;
+    needRedraw |= !!(revent & REMOTE_CHANGED);
+    pb1st.wasClicked |= !!(revent & REMOTE_CLICK);
+    int direction = revent >> REMOTE_DIRECTION;
     encoderCount = direction ? direction : encoderCount;
+    if (revent & REMOTE_EEPROM) eepromRequestSave();
   }
 #endif
 

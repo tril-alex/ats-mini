@@ -363,16 +363,6 @@ int getTotalThemes() { return(ITEM_COUNT(theme)); }
 
 #ifdef THEME_EDITOR
 
-static char readSerialWithEcho()
-{
-  char key;
-
-  while(!Serial.available());
-  key = Serial.read();
-  Serial.print(key);
-  return key;
-}
-
 static uint8_t char2nibble(char key)
 {
   if((key >= '0') && (key <= '9')) return(key - '0');
@@ -395,16 +385,16 @@ void setColorTheme()
       break;
     }
 
-    if(readSerialWithEcho() != 'x')
+    if(readSerial() != 'x')
     {
       Serial.println(" Err");
       break;
     }
 
-    p[i + 1]  = char2nibble(readSerialWithEcho()) * 16;
-    p[i + 1] |= char2nibble(readSerialWithEcho());
-    p[i]      = char2nibble(readSerialWithEcho()) * 16;
-    p[i]     |= char2nibble(readSerialWithEcho());
+    p[i + 1]  = char2nibble(readSerialChar()) * 16;
+    p[i + 1] |= char2nibble(readSerialChar());
+    p[i]      = char2nibble(readSerialChar()) * 16;
+    p[i]     |= char2nibble(readSerialChar());
   }
 
   // Redraw screen

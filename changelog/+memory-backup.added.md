@@ -1,0 +1,1 @@
+Serial commands `$` and `#` to backup and restore memory slots.

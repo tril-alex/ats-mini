@@ -127,6 +127,8 @@ A USB-serial interface is available to control and monitor the receiver. A list 
 | <kbd>o</kbd> | Sleep Off           |                                                                                            |
 | <kbd>t</kbd> | Toggle Log          | Toggle the receiver monitor (log) on and off                                               |
 | <kbd>C</kbd> | Screenshot          | Capture a screenshot and print it as a BMP image in HEX format                             |
+| <kbd>$</kbd> | Show Memory Slots   | Show memory slots in a format suitable for restoring them after the reset                  |
+| <kbd>#</kbd> | Set Memory Slot     | Example `#01,VHF,10790,FM` (slot, band, frequency, mode). Set freq to 0 to clear a slot.   |
 | <kbd>@</kbd> | Get Theme           | Print the current color theme (see [theme editor](development.md#theme-editor))            |
 | <kbd>!</kbd> | Set Theme           | Set the current color theme as a list of HEX numbers (effective until a power cycle)       |
 

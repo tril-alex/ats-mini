@@ -11,7 +11,7 @@ static bool remoteLogOn = false;
 //
 // Capture current screen image to the remote
 //
-void remoteCaptureScreen()
+static void remoteCaptureScreen()
 {
   uint16_t width  = spr.width();
   uint16_t height = spr.height();
@@ -48,6 +48,141 @@ void remoteCaptureScreen()
     }
     Serial.println("");
   }
+}
+
+char readSerialChar()
+{
+  char key;
+
+  while (!Serial.available());
+  key = Serial.read();
+  Serial.print(key);
+  return key;
+}
+
+long int readSerialInteger()
+{
+  long int result = 0;
+  while (true) {
+    char ch = Serial.peek();
+    if (ch == 0xFF) {
+      continue;
+    } else if ((ch >= '0') && (ch <= '9')) {
+      ch = readSerialChar();
+      // Can overflow, but it's ok
+      result = result * 10 + (ch - '0');
+    } else {
+      return result;
+    }
+  }
+}
+
+void readSerialString(char *bufStr, uint8_t bufLen)
+{
+  uint8_t length = 0;
+  while (true) {
+    char ch = Serial.peek();
+    if (ch == 0xFF) {
+      continue;
+    } else if (ch == ',' || ch < ' ') {
+      bufStr[length] = '\0';
+      return;
+    } else {
+      ch = readSerialChar();
+      bufStr[length] = ch;
+      if (++length >= bufLen - 1) {
+        bufStr[length] = '\0';
+        return;
+      }
+    }
+  }
+}
+
+static bool expectNewline()
+{
+  char ch;
+  while ((ch = Serial.peek()) == 0xFF);
+  if (ch == '\r') {
+    Serial.read();
+    return true;
+  }
+  return false;
+}
+
+static bool showError(const char *message)
+{
+  // Consume the remaining input
+  while (Serial.available()) readSerialChar();
+  Serial.printf("\r\nError: %s\r\n", message);
+  return false;
+}
+
+static void remoteGetMemories()
+{
+  for (uint8_t i = 0; i < getTotalMemories(); i++) {
+    if (memories[i].freq) {
+      Serial.printf("#%02d,%s,%d,%s\r\n", i + 1, bands[memories[i].band].bandName, memories[i].freq, bandModeDesc[memories[i].mode]);
+    }
+  }
+}
+
+
+static bool remoteSetMemory()
+{
+  Serial.print('#');
+  Memory mem;
+
+  long int slot = readSerialInteger();
+  if (readSerialChar() != ',')
+    return showError("Expected ','");
+  if (slot < 1 || slot > getTotalMemories())
+    return showError("Invalid memory slot number");
+
+  char band[8];
+  readSerialString(band, 8);
+  if (readSerialChar() != ',')
+    return showError("Expected ','");
+  mem.band = 0xFF;
+  for (int i = 0; i < getTotalBands(); i++) {
+    if (strcmp(bands[i].bandName, band) == 0) {
+      mem.band = i;
+      break;
+    }
+  }
+  if (mem.band == 0xFF)
+    return showError("No such band");
+
+  mem.freq = readSerialInteger();
+  if (readSerialChar() != ',')
+    return showError("Expected ','");
+
+  char mode[4];
+  readSerialString(mode, 4);
+  if (!expectNewline())
+    return showError("Expected newline");
+  Serial.println();
+  mem.mode = 0xFF;
+  for (int i = 0; i < getTotalModes(); i++) {
+    if (strcmp(bandModeDesc[i], mode) == 0) {
+      mem.mode = i;
+      break;
+    }
+  }
+  if (mem.mode == 0xFF)
+    return showError("No such mode");
+
+  if (!isMemoryInBand(&bands[mem.band], &mem)) {
+    if (!mem.freq) {
+      // Clear slot
+      memories[slot-1] = mem;
+      return true;
+    } else {
+      return showError("Invalid frequency or mode");
+    }
+  }
+
+  memories[slot-1] = mem;
+  return true;
 }
 
 //
@@ -111,54 +246,70 @@ int remoteDoCommand(char key)
   {
     case 'R': // Rotate Encoder Clockwise
       event |= 1 << REMOTE_DIRECTION;
+      event |= REMOTE_EEPROM;
       break;
     case 'r': // Rotate Encoder Counterclockwise
       event |= -1 << REMOTE_DIRECTION;
+      event |= REMOTE_EEPROM;
       break;
     case 'e': // Encoder Push Button
       event |= REMOTE_CLICK;
       break;
     case 'B': // Band Up
       doBand(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'b': // Band Down
       doBand(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'M': // Mode Up
       doMode(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'm': // Mode Down
       doMode(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'S': // Step Up
       doStep(1);
+      event |= REMOTE_EEPROM;
       break;
     case 's': // Step Down
       doStep(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'W': // Bandwidth Up
       doBandwidth(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'w': // Bandwidth Down
       doBandwidth(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'A': // AGC/ATTN Up
       doAgc(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'a': // AGC/ATTN Down
       doAgc(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'V': // Volume Up
       doVolume(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'v': // Volume Down
       doVolume(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'L': // Backlight Up
       doBrt(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'l': // Backlight Down
       doBrt(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'O':
       sleepOn(true);
@@ -168,9 +319,11 @@ int remoteDoCommand(char key)
       break;
     case 'I':
       doCal(1);
+      event |= REMOTE_EEPROM;
       break;
     case 'i':
       doCal(-1);
+      event |= REMOTE_EEPROM;
       break;
     case 'C':
       remoteLogOn = false;
@@ -178,6 +331,14 @@ int remoteDoCommand(char key)
       break;
     case 't':
       remoteLogOn = !remoteLogOn;
+      break;
+
+    case '$':
+      remoteGetMemories();
+      break;
+    case '#':
+      if (remoteSetMemory())
+        event |= REMOTE_EEPROM;
       break;
 
 #ifdef THEME_EDITOR
