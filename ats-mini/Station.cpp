@@ -190,7 +190,8 @@ static bool showRdsPiCode(uint16_t rdsPiCode)
 
 static bool showRdsTime(const char *rdsTime)
 {
-  if(!rdsTime) return(false);
+  // If NTP time available, do not use RDS time
+  if(!rdsTime || ntpIsAvailable()) return(false);
 
   // The standard RDS time format is “HH:MM”.
   // or sometimes more complex like “DD.MM.YY,HH:MM”.

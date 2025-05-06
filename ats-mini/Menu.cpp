@@ -678,8 +678,9 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
     case MENU_WIFI:
       wifiInit();
-      webInit();
+      clockReset();
       ntpSyncTime();
+      webInit();
       break;
   }
 }
