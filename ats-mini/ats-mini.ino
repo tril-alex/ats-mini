@@ -487,6 +487,22 @@ bool doRotate(int8_t dir)
 }
 
 //
+// Select digit
+//
+bool doSelectDigit(int8_t dir)
+{
+  return true;
+}
+
+//
+// Entry digit
+//
+bool doEntryDigit(int8_t dir)
+{
+  return true;
+}
+
+//
 // Main event loop
 //
 void loop()
@@ -517,23 +533,31 @@ void loop()
   if(encoderCount)
   {
     // If encoder has been rotated AND pressed...
-    if(pb1st.isPressed && currentCmd == CMD_NONE)
+    if(pb1st.isPressed)
     {
-      needRedraw |= doSeek(encoderCount);
       pushAndRotate = true;
+      if (currentCmd == CMD_NONE) {
+        currentCmd = CMD_FREQ;
+        needRedraw |= doSelectDigit(0);
+      } else if (currentCmd == CMD_FREQ) {
+        needRedraw |= doSelectDigit(encoderCount);
+      }
     }
     else
     {
-      needRedraw |= doRotate(encoderCount);
-      // Seek can take long time, renew the timestamp
-      if(currentCmd == CMD_SEEK) currentTime = millis();
-      elapsedSleep = elapsedCommand = currentTime;
+      if (currentCmd == CMD_FREQ) {
+        needRedraw |= doEntryDigit(encoderCount);
+      } else {
+        needRedraw |= doRotate(encoderCount);
+        // Seek can take long time, renew the timestamp
+        if(currentCmd == CMD_SEEK) currentTime = millis();
+      }
     }
+    elapsedSleep = elapsedCommand = currentTime;
 
     // Clear encoder rotation
     encoderCount = 0;
     eepromRequestSave();
-    needRedraw = true;
   }
 
   // Encoder is being LONG PRESSED: TOGGLE DISPLAY
@@ -557,7 +581,7 @@ void loop()
     delay(MIN_ELAPSED_TIME);
   }
 
-  // Encoder short click: SELECT MENU ITEM
+  // Encoder click: SELECT MENU ITEM
   else if(pb1st.wasClicked && !pushAndRotate)
   {
     elapsedSleep = elapsedCommand = currentTime;

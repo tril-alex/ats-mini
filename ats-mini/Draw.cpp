@@ -128,7 +128,7 @@ static void drawRadioText(int y, int ymax)
 //
 // Draw frequency
 //
-static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
+static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, bool hlDigit)
 {
   struct Rect
   {
@@ -168,9 +168,11 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("MHz", ux, uy);
 
+    if (hlDigit) {
     for (uint8_t i = 0; i < ITEM_COUNT(hlDigitsFM); i++) {
       const struct Rect *r = &hlDigitsFM[i];
       spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, TH.scale_pointer);
+    }
     }
   }
   else
@@ -198,9 +200,11 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy)
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("kHz", ux, uy);
 
+    if (hlDigit) {
     for (uint8_t i = 0; i < ITEM_COUNT(hlDigitsAMSSB); i++) {
       const struct Rect *r = &hlDigitsAMSSB[i];
       spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, TH.scale_pointer);
+    }
     }
   }
 }
@@ -327,7 +331,8 @@ void drawScreen()
   drawFrequency(
     currentFrequency,
     FREQ_OFFSET_X, FREQ_OFFSET_Y,
-    FUNIT_OFFSET_X, FUNIT_OFFSET_Y
+    FUNIT_OFFSET_X, FUNIT_OFFSET_Y,
+    currentCmd == CMD_FREQ
   );
 
   // Show station or channel name, if present
