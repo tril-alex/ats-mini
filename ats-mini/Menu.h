@@ -31,7 +31,8 @@
 #define CMD_ZOOM      0x2500 // |
 #define CMD_SLEEP     0x2600 // |
 #define CMD_SLEEPMODE 0x2700 // |
-#define CMD_ABOUT     0x2800 //-SETTINGS MODE ends here
+#define CMD_WIFI      0x2800 // |
+#define CMD_ABOUT     0x2900 //-+
 
 //
 // Data Types

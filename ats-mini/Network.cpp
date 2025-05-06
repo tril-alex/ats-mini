@@ -4,17 +4,18 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <NTPClient.h>
+#include <Preferences.h>
 
 bool wifiInit();
 void webInit();
-void webSetFreq(AsyncWebServerRequest *request);
-void webSetVol(AsyncWebServerRequest *request);
-void webConfig(AsyncWebServerRequest *request);
-void webConnectWifi(AsyncWebServerRequest *request);
-String webRadioData();
-String webRadioPage();
-String webConfigPage();
-String webChartPage(bool fillChart);
+static void webSetFreq(AsyncWebServerRequest *request);
+static void webSetVol(AsyncWebServerRequest *request);
+static void webSetConfig(AsyncWebServerRequest *request);
+static void webConnectWifi(AsyncWebServerRequest *request);
+static const String webRadioData();
+static const String webRadioPage();
+static const String webConfigPage();
+static const String webChartPage(bool fillChart);
 
 static const char *apSSID    = "ATS-Mini";
 static const char *apPWD     = 0;           // No password
@@ -31,6 +32,9 @@ String chartTimeZone    = "";
 String loginUsername    = "";
 String loginPassword    = "";
 String webLog           = "";
+
+// Network preferences saved here
+Preferences preferences;
 
 // AsyncWebServer object on port 80
 AsyncWebServer server(80);
@@ -52,20 +56,20 @@ bool wifiInit()
   tft.print("AP Mode IP : ");
   tft.println(WiFi.softAPIP().toString());
 
-//  preferences.begin("configData", false);
+  preferences.begin("configData", false);
 
   int wifiCheck = 0;
   for(int j=0 ; (j<3) && (WiFi.status()!=WL_CONNECTED) ; j++)
   {
-    const char *ssid, *password;
+    String ssid, password;
     char text[16];
 
-    sprintf(text, "ssid%d", j+1);
-    ssid = "ssid";//preferences.getString(text, "");
-    sprintf(text, "password%d", j+1);
-    password = "PASSWORD";//preferences.getString(text, "");
+    sprintf(text, "wifissid%d", j+1);
+    ssid = preferences.getString(text, "");
+    sprintf(text, "wifipass%d", j+1);
+    password = preferences.getString(text, "");
 
-    if(*ssid)
+    if(ssid != "")
     {
       WiFi.begin(ssid, password);
       tft.print("Connecting WiFi");
@@ -83,12 +87,12 @@ bool wifiInit()
     }
   }
 
-//  iceCastServerURL   = preferences.getString("icecastserverurl", "");
-//  utcOffsetInSeconds = preferences.getString("utcoffset", "").toInt();
-//  chartTimeZone      = preferences.getString("charttimezone", "");
-//  loginUsername      = preferences.getString("loginusername", "");
-//  loginPassword      = preferences.getString("loginpassword", "");
-//  preferences.end();
+  iceCastServerURL   = preferences.getString("icecastserverurl", "");
+  utcOffsetInSeconds = preferences.getString("utcoffset", "").toInt();
+  chartTimeZone      = preferences.getString("charttimezone", "");
+  loginUsername      = preferences.getString("loginusername", "");
+  loginPassword      = preferences.getString("loginpassword", "");
+  preferences.end();
 
   if(WiFi.status()!=WL_CONNECTED)
   {
@@ -135,7 +139,7 @@ void webInit()
     request->send(200, "text/plain", webRadioData());
   });
   
-  server.on("/configpage", HTTP_ANY, [] (AsyncWebServerRequest *request) {
+  server.on("/config", HTTP_ANY, [] (AsyncWebServerRequest *request) {
     if(!request->authenticate(loginUsername.c_str(), loginPassword.c_str()))
       return request->requestAuthentication();
     request->send(200, "text/html", webConfigPage());
@@ -174,7 +178,7 @@ void webInit()
 
   server.on("/setfrequency", HTTP_ANY, webSetFreq);
   server.on("/setvolume",    HTTP_ANY, webSetVol);
-  server.on("/config",       HTTP_ANY, webConfig);
+  server.on("/setconfig",    HTTP_ANY, webSetConfig);
   server.on("/connectwifi",  HTTP_ANY, webConnectWifi);
 
   // Start web server  
@@ -191,8 +195,35 @@ void webSetVol(AsyncWebServerRequest *request)
   request->send(200);
 }
 
-void webConfig(AsyncWebServerRequest *request)
+void webSetConfig(AsyncWebServerRequest *request)
 {
+  if(request->hasParam("username", true) && request->getParam("username", true)->value() != "")
+  {
+    loginUsername = request->getParam("username", true)->value();
+    loginPassword = request->getParam("password", true)->value();
+
+    preferences.begin("configData", false);
+    preferences.putString("loginusername", loginUsername); 
+    preferences.putString("loginpassword", loginPassword);
+    preferences.end();
+  }
+
+  for(int j=0 ; j<3 ; j++)
+  {
+    char nameSSID[16], namePASS[16];
+
+    sprintf(nameSSID, "wifissid%d", j+1);
+    sprintf(namePASS, "wifipass%d", j+1);
+
+    if(request->hasParam(nameSSID, true) && request->getParam(nameSSID, true)->value() != "")
+    {
+      preferences.begin("configData", false);
+      preferences.putString(nameSSID, request->getParam(nameSSID, true)->value()); 
+      preferences.putString(namePASS, request->getParam(namePASS, true)->value());
+      preferences.end();
+    }
+  }
+    
   request->send(200);
 }
 
@@ -201,22 +232,70 @@ void webConnectWifi(AsyncWebServerRequest *request)
   request->send(200);
 }
 
-String webRadioData()
+const String webRadioData()
 {
   return "";
 }
 
-String webRadioPage()
+const String webRadioPage()
 {
-  return "";
+  return
+    "<!DOCTYPE HTML>"
+    "<HTML>"
+    "<HEAD>"
+      "<TITLE>ATS-Mini Pocket Receiver</TITLE>"
+    "</HEAD>"
+    "<BODY>"
+      "<H1>ATS-Mini Pocket Receiver</H1>"
+    "</BODY>"
+    "</HTML>"
+    ;
 }
 
-String webConfigPage()
+const String webConfigPage()
 {
-  return "";
+  preferences.begin("configData", false);
+  String ssid1 = preferences.getString("wifissid1", "");
+  String pass1 = preferences.getString("wifipass1", "");
+  String ssid2 = preferences.getString("wifissid2", "");
+  String pass2 = preferences.getString("wifipass2", "");
+  String ssid3 = preferences.getString("wifissid3", "");
+  String pass3 = preferences.getString("wifipass3", "");
+  preferences.end();
+
+  return
+    "<!DOCTYPE HTML>"
+    "<HTML>"
+    "<HEAD>"
+      "<TITLE>ATS-Mini Config</TITLE>"
+    "</HEAD>"
+    "<BODY>"
+      "<H1>ATS-Mini Config</H1>"
+      "<FORM ACTION='/setconfig' METHOD='POST'>"
+        "<DIV>"
+          "<LABEL>Username : </LABEL><INPUT TYPE='TEXT' NAME='username' value='" + loginUsername + "'>"
+          "<LABEL>Password : </LABEL><INPUT TYPE='PASSWORD' NAME='password' value='" + loginPassword + "'>"
+        "</DIV>"
+        "<DIV>"
+          "<LABEL>WiFi SSID 1 : </LABEL><INPUT TYPE='TEXT' NAME='wifissid1' value='" + ssid1 + "'>"
+          "<LABEL>WiFi PASS 1 : </LABEL><INPUT TYPE='TEXT' NAME='wifipass1' value='" + pass1 + "'>"
+        "</DIV>"
+        "<DIV>"
+          "<LABEL>WiFi SSID 2 : </LABEL><INPUT TYPE='TEXT' NAME='wifissid2' value='" + ssid2 + "'>"
+          "<LABEL>WiFi PASS 2 : </LABEL><INPUT TYPE='TEXT' NAME='wifipass2' value='" + pass2 + "'>"
+        "</DIV>"
+        "<DIV>"
+          "<LABEL>WiFi SSID 3 : </LABEL><INPUT TYPE='TEXT' NAME='wifissid3' value='" + ssid3 + "'>"
+          "<LABEL>WiFi PASS 3 : </LABEL><INPUT TYPE='TEXT' NAME='wifipass3' value='" + pass3 + "'>"
+        "</DIV>"
+        "<INPUT TYPE='SUBMIT' value='Save Config'>"
+      "</FORM>"
+    "</BODY>"
+    "</HTML>"
+    ;
 }
 
-String webChartPage(bool fillChart)
+const String webChartPage(bool fillChart)
 {
   return "";
 }
