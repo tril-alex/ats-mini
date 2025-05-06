@@ -108,7 +108,8 @@ static const char *menu[] =
 #define MENU_ZOOM         4
 #define MENU_SLEEP        5
 #define MENU_SLEEPMODE    6
-#define MENU_ABOUT        7
+#define MENU_WIFI         7
+#define MENU_ABOUT        8
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -121,6 +122,7 @@ static const char *settings[] =
   "Zoom Menu",
   "Sleep",
   "Sleep Mode",
+  "WiFi",
   "About",
 };
 
@@ -632,6 +634,10 @@ static void clickSettings(int cmd)
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
+    case MENU_WIFI:
+      wifiInit();
+      webInit();
+      break;
   }
 }
 

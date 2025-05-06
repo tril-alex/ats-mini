@@ -157,6 +157,10 @@ void clearStationInfo();
 bool checkRds();
 bool identifyFrequency(uint16_t freq);
 
+// Network.cpp
+bool wifiInit();
+void webInit();
+
 #ifndef DISABLE_REMOTE
 // Remote.c
 #define REMOTE_CHANGED   1
