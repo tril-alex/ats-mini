@@ -41,6 +41,11 @@ AsyncWebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
+bool ntpIsAvailable()
+{
+  return((WiFi.status()==WL_CONNECTED) && ntpClient.isTimeSet());
+}
+
 bool ntpSyncTime()
 {
   if(WiFi.status()==WL_CONNECTED)
@@ -107,27 +112,27 @@ bool wifiInit()
 
   if(WiFi.status()!=WL_CONNECTED)
   {
+    // WiFi connection failed
     tft.println(" No WiFi connection");
+    // Done
     ajaxInterval = 2500;
+    delay(1000);
+    return(false);
   }
   else
   {
+    // WiFi connection succeeded
     tft.println("Connected ");
     tft.print("WiFi IP : ");
     tft.print(WiFi.localIP().toString());
-
-    if(utcOffsetInSeconds)
-    {
-      ntpClient.setTimeOffset(utcOffsetInSeconds);
-      ntpClient.update();      
-    }
-    
+    // Initiate NTP time updates
+    ntpClient.setTimeOffset(utcOffsetInSeconds);
+    ntpClient.update();
+    // Done
     ajaxInterval = 1000;
+    delay(2000);
+    return(true);
   }
-
-  // Done
-  delay(WiFi.status()==WL_CONNECTED? 2000 : 1000);
-  return(WiFi.status()==WL_CONNECTED);
 }
 
 void webInit()

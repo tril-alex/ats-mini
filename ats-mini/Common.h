@@ -140,6 +140,7 @@ bool isMemoryInBand(const Band *band, const Memory *memory);
 
 // Draw.c
 void drawLoadingSSB();
+void drawWiFiStatus(const char *line1, const char *line2 = 0);
 void drawZoomedMenu(const char *text);
 void drawScreen();
 
@@ -160,6 +161,7 @@ bool identifyFrequency(uint16_t freq);
 // Network.cpp
 bool wifiInit();
 void webInit();
+bool ntpIsAvailable();
 bool ntpSyncTime();
 
 #ifndef DISABLE_REMOTE
