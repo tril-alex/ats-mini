@@ -28,7 +28,7 @@ float batteryMonitor()
   int i, j;
 
   // Read ADC multiple times
-  for(i=j=0 ; i<10 ; i++) j += analogRead(VBAT_MON);
+  for(i=j=0 ; i<BATT_ADC_READS ; i++) j += analogRead(VBAT_MON);
 
   // Calculate average voltage with correction factor
   batteryVolts = ((float)j / BATT_ADC_READS) * BATT_ADC_FACTOR / 1000;
