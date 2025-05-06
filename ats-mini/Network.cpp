@@ -43,14 +43,16 @@ NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
 bool ntpSyncTime()
 {
-  if(WiFi.status()!=WL_CONNECTED)
-    return(false);
-  else
+  if(WiFi.status()==WL_CONNECTED)
   {
     ntpClient.setTimeOffset(utcOffsetInSeconds);
     ntpClient.update();
-    return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
+
+    if(ntpClient.isTimeSet())
+      return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
   }
+
+  return(false);
 }
 
 bool wifiInit()
