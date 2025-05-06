@@ -730,6 +730,8 @@ void loop()
   {
     if(currentCmd == CMD_NONE) needRedraw = true;
     background_timer = currentTime;
+    // Also sync time via NTP, if connected
+    needRedraw |= ntpSyncTime();
   }
 
 #ifdef ENABLE_HOLDOFF

@@ -162,6 +162,7 @@ bool identifyFrequency(uint16_t freq);
 // Network.cpp
 bool wifiInit();
 void webInit();
+bool ntpSyncTime();
 
 #ifndef DISABLE_REMOTE
 // Remote.c
