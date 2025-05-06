@@ -4,6 +4,19 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 2.14 (2025-05-06)
+
+
+### Added
+
+- Zoomed menu mode for accessibility purposes (enabled via Settings->Zoom menu). [#71](https://github.com/esp32-si4732/ats-mini/issues/71)
+- Serial commands `$` and `#` to backup and restore memory slots.
+
+
+### Changed
+
+- Extended 75M and 90M band boundaries.
+
 ## 2.13 (2025-05-01)
 
 
