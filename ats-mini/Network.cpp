@@ -61,13 +61,12 @@ bool wifiInit()
   int wifiCheck = 0;
   for(int j=0 ; (j<3) && (WiFi.status()!=WL_CONNECTED) ; j++)
   {
-    String ssid, password;
-    char text[16];
+    char nameSSID[16], namePASS[16];
+    sprintf(nameSSID, "wifissid%d", j+1);
+    sprintf(namePASS, "wifipass%d", j+1);
 
-    sprintf(text, "wifissid%d", j+1);
-    ssid = preferences.getString(text, "");
-    sprintf(text, "wifipass%d", j+1);
-    password = preferences.getString(text, "");
+    String ssid = preferences.getString(nameSSID, "");
+    String password = preferences.getString(namePASS, "");
 
     if(ssid != "")
     {
