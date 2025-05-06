@@ -637,6 +637,7 @@ static void clickSettings(int cmd)
     case MENU_WIFI:
       wifiInit();
       webInit();
+      ntpSyncTime();
       break;
   }
 }
@@ -1165,7 +1166,7 @@ static void drawInfo(int x, int y, int sx)
   }
 
   // Draw current time
-  if((getRDSMode() & RDS_CT) && clockGet())
+  if(clockGet())
   {
     spr.drawString("Time:", 6+x, 64+y+(2*16), 2);
     spr.drawString(clockGet(), 48+x, 64+y+(2*16), 2);
