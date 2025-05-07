@@ -6,6 +6,9 @@
 #include <NTPClient.h>
 #include <Preferences.h>
 
+
+static bool wifiInit();
+static void webInit();
 static void webSetFreq(AsyncWebServerRequest *request);
 static void webSetVol(AsyncWebServerRequest *request);
 static void webSetConfig(AsyncWebServerRequest *request);
@@ -41,23 +44,27 @@ AsyncWebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
+void netInit()
+{
+  wifiInit();
+  clockReset();
+  ntpSyncTime();
+  webInit();
+}
+
 bool ntpIsAvailable()
 {
-  return((WiFi.status()==WL_CONNECTED) && ntpClient.isTimeSet());
+  return(ntpClient.isTimeSet());
 }
 
 bool ntpSyncTime()
 {
-  if(WiFi.status()==WL_CONNECTED)
-  {
-    ntpClient.setTimeOffset(utcOffsetInSeconds);
-    ntpClient.update();
+  if(WiFi.status()==WL_CONNECTED) ntpClient.update();
 
-    if(ntpClient.isTimeSet())
-      return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
-  }
-
-  return(false);
+  if(ntpClient.isTimeSet())
+    return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
+  else
+    return(false);
 }
 
 bool wifiInit()

@@ -99,9 +99,9 @@ void drawWiFiStatus(const char *line1, const char *line2)
   // Draw two lines of network status
   spr.setTextDatum(TC_DATUM);
   spr.setTextColor(TH.rds_text, TH.bg);
-  spr.fillRect(0, 135, 320, 45, TH.bg);
+  spr.fillRect(0, 135, 320, 35, TH.bg);
   if(line1) spr.drawString(line1, 160, 135, 2);
-  if(line2) spr.drawString(line2, 160, 150, 2);
+  if(line2) spr.drawString(line2, 160, 152, 2);
   spr.pushSprite(0, 0);
 }
 
@@ -131,7 +131,7 @@ static void drawRadioText(int y, int ymax)
   // Draw potentially multi-line radio text
   spr.setTextDatum(TC_DATUM);
   spr.setTextColor(TH.rds_text, TH.bg);
-  for(; *rt && (y<ymax) ; y+=15, rt+=strlen(rt)+1)
+  for(; *rt && (y<ymax) ; y+=17, rt+=strlen(rt)+1)
     spr.drawString(rt, 160, y, 2);
 
   // Show program info if we have it and there is enough space

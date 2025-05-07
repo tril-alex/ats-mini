@@ -634,12 +634,7 @@ static void clickSettings(int cmd)
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
-    case MENU_WIFI:
-      wifiInit();
-      clockReset();
-      ntpSyncTime();
-      webInit();
-      break;
+    case MENU_WIFI:       netInit();                  break;
   }
 }
 
