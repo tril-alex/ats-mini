@@ -52,6 +52,12 @@
 #define MAX_BFO       14000  // Maximum range for currentBFO = +/- MAX_BFO
 #define MAX_CAL       2000   // Maximum range for currentCAL = +/- MAX_CAL
 
+// Network connection modes
+#define NET_OFF       0 // Do not connect to the network
+#define NET_AP_ONLY   1 // Create access point, do not connect to network
+#define NET_CONNECT   2 // Connect to the network normally, if possible
+#define NET_SYNC      3 // Connect to sync time, then disconnect
+
 //
 // Data Types
 //
@@ -159,7 +165,8 @@ bool checkRds();
 bool identifyFrequency(uint16_t freq);
 
 // Network.cpp
-void netInit();
+void netInit(uint8_t netMode = NET_CONNECT);
+void netStop();
 bool ntpIsAvailable();
 bool ntpSyncTime();
 

@@ -32,7 +32,7 @@ AsyncWebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
-static bool wifiInit();
+static bool wifiInit(bool connectToNetwork = true);
 static void webInit();
 static void webSetFreq(AsyncWebServerRequest *request);
 static void webSetVol(AsyncWebServerRequest *request);
@@ -43,14 +43,40 @@ static const String webRadioPage();
 static const String webConfigPage();
 
 //
+// Stop WiFi hardware
+//
+void netStop()
+{
+  WiFi.disconnect(true);
+}
+
+//
 // Initialize WiFi network and services
 //
-void netInit()
+void netInit(uint8_t netMode)
 {
-  wifiInit();
-  clockReset();
-  ntpSyncTime();
-  webInit();
+  // Do not initialize WiFi if disabled
+  if(netMode==NET_OFF) return;
+
+  // Initialize WiFi and try connecting to a network
+  if(wifiInit(netMode!=NET_AP_ONLY))
+  {
+    // Get NTP time from the network
+    clockReset();
+    ntpSyncTime();
+  }
+
+  // If only connected to sync...
+  if(netMode==NET_SYNC)
+  {
+    // Drop network connection
+    netStop();
+  }
+  else
+  {
+    // Initialize web server for remote configuration
+    webInit();
+  }
 }
 
 //
@@ -77,7 +103,7 @@ bool ntpSyncTime()
 //
 // Initialize WiFi, connect to an external access point if possible
 //
-bool wifiInit()
+bool wifiInit(bool connectToNetwork)
 {
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
@@ -91,18 +117,32 @@ bool wifiInit()
   String status2 = "Connecting to WiFi network..";
   drawWiFiStatus(status1.c_str(), 0);
 
+  // Get the preferences
   preferences.begin("configData", false);
+  utcOffsetInSeconds = preferences.getString("utcoffset", "").toInt();
+  loginUsername      = preferences.getString("loginusername", "");
+  loginPassword      = preferences.getString("loginpassword", "");
 
+  // If not connecting to the network, remain AP and stop here
+  if(!connectToNetwork)
+  {
+    preferences.end();
+    ajaxInterval = 2500;
+    delay(1000);
+    return(false);
+  }
+
+  // Try connecting to known WiFi networks
   int wifiCheck = 0;
   for(int j=0 ; (j<3) && (WiFi.status()!=WL_CONNECTED) ; j++)
   {
     char nameSSID[16], namePASS[16];
     sprintf(nameSSID, "wifissid%d", j+1);
     sprintf(namePASS, "wifipass%d", j+1);
-
+  
     String ssid = preferences.getString(nameSSID, "");
     String password = preferences.getString(namePASS, "");
-
+  
     if(ssid != "")
     {
       WiFi.begin(ssid, password);
@@ -124,9 +164,7 @@ bool wifiInit()
     }
   }
 
-  utcOffsetInSeconds = preferences.getString("utcoffset", "").toInt();
-  loginUsername      = preferences.getString("loginusername", "");
-  loginPassword      = preferences.getString("loginpassword", "");
+  // Done with preferences
   preferences.end();
 
   if(WiFi.status()!=WL_CONNECTED)
