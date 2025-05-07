@@ -1,3 +1,4 @@
+#include "math.h"
 #include "Common.h"
 #include "Themes.h"
 #include "Menu.h"
@@ -242,6 +243,38 @@ static int getLastStep(int mode)
   return(0);
 }
 
+static int8_t freqInputPos = 0;
+
+static int8_t getDefaultFreqInputPos(int mode, int step)
+{
+  return (int8_t)(log10(step) + 0.5) + (mode == AM ? 3 : 0);
+}
+
+void resetFreqInputPos()
+{
+  freqInputPos = getDefaultFreqInputPos(currentMode, getCurrentStep(false)->step);
+}
+
+uint8_t getFreqInputPos()
+{
+  return freqInputPos;
+}
+
+int getFreqInputStep()
+{
+  return pow(10, freqInputPos - (currentMode == AM ? 3 : 0));
+}
+
+static int8_t getMinFreqInputPos()
+{
+  return getDefaultFreqInputPos(currentMode, steps[currentMode][0].step);
+}
+
+static int8_t getMaxFreqInputPos()
+{
+  return (uint8_t)log10(getCurrentBand()->maximumFreq) + (currentMode != FM ? 3 : 0);
+}
+
 //
 // Bandwidth Menu
 //
@@ -347,6 +380,11 @@ static inline int clamp_range(int v, int dir, int vMin, int vMax)
 //
 // Encoder input handlers
 //
+
+void doSelectDigit(int dir)
+{
+  freqInputPos = clamp_range(freqInputPos, -dir, getMinFreqInputPos(), getMaxFreqInputPos());
+}
 
 void doVolume(int dir)
 {
@@ -715,6 +753,15 @@ void selectBand(uint8_t idx, bool drawLoadingSSB)
 
   // Switch radio to the selected band
   useBand(&bands[bandIdx]);
+
+  // Clear current station info (RDS/CB)
+  clearStationInfo();
+
+  // Check for named frequencies
+  identifyFrequency(currentFrequency + currentBFO / 1000);
+
+  // Set default digit position based on the current step
+  resetFreqInputPos();
 }
 
 //

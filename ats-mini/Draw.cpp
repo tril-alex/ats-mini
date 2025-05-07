@@ -128,7 +128,7 @@ static void drawRadioText(int y, int ymax)
 //
 // Draw frequency
 //
-static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, bool hlDigit)
+static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
   struct Rect
   {
@@ -157,6 +157,9 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, bool hlDi
     { x - 30 - 32 * 4, y + 27, 27, 3 },
   };
 
+  uint16_t hl_color = hl & 0x80 ? TH.batt_icon : TH.scale_pointer; // FIXME add theme colors
+  hl &= 0x7F;
+
   spr.setTextDatum(MR_DATUM);
   spr.setTextColor(TH.freq_text, TH.bg);
 
@@ -168,11 +171,9 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, bool hlDi
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("MHz", ux, uy);
 
-    if (hlDigit) {
-    for (uint8_t i = 0; i < ITEM_COUNT(hlDigitsFM); i++) {
-      const struct Rect *r = &hlDigitsFM[i];
-      spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, TH.scale_pointer);
-    }
+    if (hl >= 0 && hl < ITEM_COUNT(hlDigitsFM)) {
+      const struct Rect *r = &hlDigitsFM[hl];
+      spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, hl_color);
     }
   }
   else
@@ -200,11 +201,9 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, bool hlDi
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("kHz", ux, uy);
 
-    if (hlDigit) {
-    for (uint8_t i = 0; i < ITEM_COUNT(hlDigitsAMSSB); i++) {
-      const struct Rect *r = &hlDigitsAMSSB[i];
-      spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, TH.scale_pointer);
-    }
+    if (hl >= 0 && hl < ITEM_COUNT(hlDigitsAMSSB)) {
+      const struct Rect *r = &hlDigitsAMSSB[hl];
+      spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, hl_color);
     }
   }
 }
@@ -327,12 +326,12 @@ void drawScreen()
   spr.drawString("WARN", 319, RDS_OFFSET_Y, 4);
 #endif
 
-  // Draw frequency and units
+  // Draw frequency, units, and optionally highlight a digit
   drawFrequency(
     currentFrequency,
     FREQ_OFFSET_X, FREQ_OFFSET_Y,
     FUNIT_OFFSET_X, FUNIT_OFFSET_Y,
-    currentCmd == CMD_FREQ
+    currentCmd == CMD_FREQ ? getFreqInputPos() + (pushAndRotate ? 0x80 : 0) : 100
   );
 
   // Show station or channel name, if present

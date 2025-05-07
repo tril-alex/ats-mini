@@ -299,12 +299,6 @@ void useBand(const Band *band)
   // Clear signal strength readings
   rssi = 0;
   snr  = 0;
-
-  // Clear current station info (RDS/CB)
-  clearStationInfo();
-
-  // Check for named frequencies
-  identifyFrequency(currentFrequency + currentBFO / 1000);
 }
 
 // This function is called by the seek function process.
@@ -487,19 +481,43 @@ bool doRotate(int8_t dir)
 }
 
 //
-// Select digit
+// Rotate digit
 //
-bool doSelectDigit(int8_t dir)
+bool doDigit(int8_t dir)
 {
-  return true;
-}
+  // SSB tuning
+  if(isSSB())
+  {
+#ifdef ENABLE_HOLDOFF
+    // Tuning timer to hold off (SSB) display updates
+    tuning_flag = true;
+    tuning_timer = millis();
+#endif
 
-//
-// Entry digit
-//
-bool doEntryDigit(int8_t dir)
-{
-  return true;
+    updateBFO(currentBFO + dir * getFreqInputStep());
+  }
+
+  //
+  // Normal tuning
+  //
+  else
+  {
+#ifdef ENABLE_HOLDOFF
+    // Tuning timer to hold off (FM/AM) display updates
+    tuning_flag = true;
+    tuning_timer = millis();
+#endif
+
+    // Tune to a new frequency
+    updateFrequency(currentFrequency + getFreqInputStep() * dir);
+  }
+
+  // Clear current station name and information
+  clearStationInfo();
+  // Check for named frequencies
+  identifyFrequency(currentFrequency + currentBFO / 1000);
+  // Will need a redraw
+  return(true);
 }
 
 //
@@ -538,15 +556,16 @@ void loop()
       pushAndRotate = true;
       if (currentCmd == CMD_NONE) {
         currentCmd = CMD_FREQ;
-        needRedraw |= doSelectDigit(0);
+        needRedraw = true;
       } else if (currentCmd == CMD_FREQ) {
-        needRedraw |= doSelectDigit(encoderCount);
+        doSelectDigit(encoderCount);
+        needRedraw = true;
       }
     }
     else
     {
       if (currentCmd == CMD_FREQ) {
-        needRedraw |= doEntryDigit(encoderCount);
+        needRedraw |= doDigit(encoderCount);
       } else {
         needRedraw |= doRotate(encoderCount);
         // Seek can take long time, renew the timestamp
@@ -666,6 +685,7 @@ void loop()
   if(!pb1st.isPressed && pushAndRotate)
   {
     pushAndRotate = false;
+    needRedraw = true;
   }
 
   // Periodically refresh the main screen
