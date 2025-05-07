@@ -128,9 +128,11 @@ bool wifiInit()
     // WiFi connection succeeded
     status2 = "IP : " + WiFi.localIP().toString();
     drawWiFiStatus("Connected to WiFi network", status2.c_str());
-    // Initiate NTP time updates
+    // Initiate NTP time updates to happen every 5 minutes
     ntpClient.setTimeOffset(utcOffsetInSeconds);
+    ntpClient.setUpdateInterval(5*60*1000);
     ntpClient.update();
+    clockReset();
     // Done
     ajaxInterval = 1000;
     delay(2000);
@@ -216,15 +218,15 @@ void webSetVol(AsyncWebServerRequest *request)
 
 void webSetConfig(AsyncWebServerRequest *request)
 {
+  preferences.begin("configData", false);
+
   if(request->hasParam("username", true) && request->getParam("username", true)->value() != "")
   {
     loginUsername = request->getParam("username", true)->value();
     loginPassword = request->getParam("password", true)->value();
 
-    preferences.begin("configData", false);
     preferences.putString("loginusername", loginUsername); 
     preferences.putString("loginpassword", loginPassword);
-    preferences.end();
   }
 
   for(int j=0 ; j<3 ; j++)
@@ -236,13 +238,21 @@ void webSetConfig(AsyncWebServerRequest *request)
 
     if(request->hasParam(nameSSID, true) && request->getParam(nameSSID, true)->value() != "")
     {
-      preferences.begin("configData", false);
       preferences.putString(nameSSID, request->getParam(nameSSID, true)->value()); 
       preferences.putString(namePASS, request->getParam(namePASS, true)->value());
-      preferences.end();
     }
   }
-    
+
+  if(request->hasParam("utcoffset", true) && request->getParam("utcoffset", true)->value() != "")
+  {
+    String utcOffset = request->getParam("utcoffset", true)->value();
+    preferences.putString("utcoffset", utcOffset); 
+    utcOffsetInSeconds = utcOffset.toInt();
+    ntpClient.setTimeOffset(utcOffsetInSeconds);
+    clockReset();
+  }
+  
+  preferences.end();
   request->send(200);
 }
 
@@ -269,6 +279,26 @@ const String webRadioPage()
     "</BODY>"
     "</HTML>"
     ;
+}
+
+static const String webUtcOffsetSelector()
+{
+  String result = "";
+
+  for(int j=-5 ; j<=5 ; j++)
+  {
+    int offset = j * 3600;
+    char text[64];
+
+    sprintf(text,
+      "<OPTION VALUE='%d'%s>UTC%d</OPTION>",
+      offset, offset==utcOffsetInSeconds? " SELECTED":"", j
+    );
+
+    result += text;
+  }
+
+  return(result);
 }
 
 const String webConfigPage()
@@ -306,6 +336,10 @@ const String webConfigPage()
         "<DIV>"
           "<LABEL>WiFi SSID 3 : </LABEL><INPUT TYPE='TEXT' NAME='wifissid3' value='" + ssid3 + "'>"
           "<LABEL>WiFi PASS 3 : </LABEL><INPUT TYPE='TEXT' NAME='wifipass3' value='" + pass3 + "'>"
+        "</DIV>"
+        "<DIV>"
+          "<LABEL>Time Zone : </LABEL>"
+          "<SELECT NAME='utcoffset'>" + webUtcOffsetSelector() + "</SELECT>"
         "</DIV>"
         "<INPUT TYPE='SUBMIT' value='Save Config'>"
       "</FORM>"
