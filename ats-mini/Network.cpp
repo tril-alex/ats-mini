@@ -179,8 +179,9 @@ void webInit()
   });
   
   server.on("/config", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    if(!request->authenticate(loginUsername.c_str(), loginPassword.c_str()))
-      return request->requestAuthentication();
+    if(loginUsername != "" && loginPassword != "")
+      if(!request->authenticate(loginUsername.c_str(), loginPassword.c_str()))
+        return request->requestAuthentication();
     request->send(200, "text/html", webConfigPage());
   });
 
