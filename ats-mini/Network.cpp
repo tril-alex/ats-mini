@@ -70,8 +70,9 @@ bool wifiInit()
   IPAddress subnet(255, 255, 255, 0);
   WiFi.softAPConfig(ip, gateway, subnet);
 
-  tft.print("AP Mode IP : ");
-  tft.println(WiFi.softAPIP().toString());
+  String status1 = "AP Mode IP : " + WiFi.softAPIP().toString();
+  String status2 = "Connecting to WiFi network..";
+  drawWiFiStatus(status1.c_str(), 0);
 
   preferences.begin("configData", false);
 
@@ -88,10 +89,13 @@ bool wifiInit()
     if(ssid != "")
     {
       WiFi.begin(ssid, password);
-      tft.print("Connecting WiFi");
       while((WiFi.status()!=WL_CONNECTED) && (wifiCheck<30))
       {
-        if(!(wifiCheck&7)) tft.print(".");
+        if(!(wifiCheck&7))
+        {
+          status2 += ".";
+          drawWiFiStatus(status1.c_str(), status2.c_str());
+        }
         wifiCheck++;
         delay(500);
         if(digitalRead(ENCODER_PUSH_BUTTON)==LOW)
@@ -113,7 +117,7 @@ bool wifiInit()
   if(WiFi.status()!=WL_CONNECTED)
   {
     // WiFi connection failed
-    tft.println(" No WiFi connection");
+    drawWiFiStatus(status1.c_str(), "No WiFi connection");
     // Done
     ajaxInterval = 2500;
     delay(1000);
@@ -122,9 +126,8 @@ bool wifiInit()
   else
   {
     // WiFi connection succeeded
-    tft.println("Connected ");
-    tft.print("WiFi IP : ");
-    tft.print(WiFi.localIP().toString());
+    status2 = "IP : " + WiFi.localIP().toString();
+    drawWiFiStatus("Connected to WiFi network", status2.c_str());
     // Initiate NTP time updates
     ntpClient.setTimeOffset(utcOffsetInSeconds);
     ntpClient.update();

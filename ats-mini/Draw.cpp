@@ -99,8 +99,10 @@ void drawWiFiStatus(const char *line1, const char *line2)
   // Draw two lines of network status
   spr.setTextDatum(TC_DATUM);
   spr.setTextColor(TH.rds_text, TH.bg);
+  spr.fillRect(0, 135, 320, 45, TH.bg);
   if(line1) spr.drawString(line1, 160, 135, 2);
   if(line2) spr.drawString(line2, 160, 150, 2);
+  spr.pushSprite(0, 0);
 }
 
 //
