@@ -291,7 +291,7 @@ static const String webUtcOffsetSelector()
     char text[64];
 
     sprintf(text,
-      "<OPTION VALUE='%d'%s>UTC%d</OPTION>",
+      "<OPTION VALUE='%d'%s>UTC%+d</OPTION>",
       offset, offset==utcOffsetInSeconds? " SELECTED":"", j
     );
 
