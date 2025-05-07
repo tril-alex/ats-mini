@@ -161,8 +161,7 @@ bool checkRds();
 bool identifyFrequency(uint16_t freq);
 
 // Network.cpp
-bool wifiInit();
-void webInit();
+void netInit();
 bool ntpIsAvailable();
 bool ntpSyncTime();
 
