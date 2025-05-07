@@ -6,33 +6,21 @@
 #include <NTPClient.h>
 #include <Preferences.h>
 
-
-static bool wifiInit();
-static void webInit();
-static void webSetFreq(AsyncWebServerRequest *request);
-static void webSetVol(AsyncWebServerRequest *request);
-static void webSetConfig(AsyncWebServerRequest *request);
-static void webConnectWifi(AsyncWebServerRequest *request);
-static const String webRadioData();
-static const String webRadioPage();
-static const String webConfigPage();
-static const String webChartPage(bool fillChart);
-
+//
+// Access Point (AP) mode settings
+//
 static const char *apSSID    = "ATS-Mini";
-static const char *apPWD     = 0;           // No password
-static const int   apChannel = 10;          // WiFi channel number (1..13)
-static const bool  apHideMe  = false;       // TRUE: disable SSID broadcast
+static const char *apPWD     = 0;       // No password
+static const int   apChannel = 10;      // WiFi channel number (1..13)
+static const bool  apHideMe  = false;   // TRUE: disable SSID broadcast
 static const int   apClients = 3;       // Maximum simultaneous connected clients
 
 static uint16_t ajaxInterval = 2500;
 
 // Settings
-int utcOffsetInSeconds  = 0;
-String iceCastServerURL = "";
-String chartTimeZone    = "";
-String loginUsername    = "";
-String loginPassword    = "";
-String webLog           = "";
+int utcOffsetInSeconds = 0;
+String loginUsername   = "";
+String loginPassword   = "";
 
 // Network preferences saved here
 Preferences preferences;
@@ -44,6 +32,19 @@ AsyncWebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
+static bool wifiInit();
+static void webInit();
+static void webSetFreq(AsyncWebServerRequest *request);
+static void webSetVol(AsyncWebServerRequest *request);
+static void webSetConfig(AsyncWebServerRequest *request);
+static void webConnectWifi(AsyncWebServerRequest *request);
+static const String webRadioData();
+static const String webRadioPage();
+static const String webConfigPage();
+
+//
+// Initialize WiFi network and services
+//
 void netInit()
 {
   wifiInit();
@@ -52,11 +53,17 @@ void netInit()
   webInit();
 }
 
+//
+// Returns TRUE if NTP time is available
+//
 bool ntpIsAvailable()
 {
   return(ntpClient.isTimeSet());
 }
 
+//
+// Update NTP time and synchronize clock with NTP time
+//
 bool ntpSyncTime()
 {
   if(WiFi.status()==WL_CONNECTED) ntpClient.update();
@@ -67,6 +74,9 @@ bool ntpSyncTime()
     return(false);
 }
 
+//
+// Initialize WiFi, connect to an external access point if possible
+//
 bool wifiInit()
 {
   WiFi.mode(WIFI_AP_STA);
@@ -114,9 +124,7 @@ bool wifiInit()
     }
   }
 
-  iceCastServerURL   = preferences.getString("icecastserverurl", "");
   utcOffsetInSeconds = preferences.getString("utcoffset", "").toInt();
-  chartTimeZone      = preferences.getString("charttimezone", "");
   loginUsername      = preferences.getString("loginusername", "");
   loginPassword      = preferences.getString("loginpassword", "");
   preferences.end();
@@ -147,6 +155,9 @@ bool wifiInit()
   }
 }
 
+//
+// Initialize internal web server
+//
 void webInit()
 {
   server.on("/", HTTP_ANY, [] (AsyncWebServerRequest *request) {
@@ -183,11 +194,6 @@ void webInit()
     request->send(200, "text/plain", String(rx.getCurrentSNR()));
   });
 
-  server.on("/chart", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    bool fillChart = request->hasParam("fillChart", true) && request->getParam("fillChart", true)->value() == "fill";
-    request->send(200, "text/html", webChartPage(fillChart));
-  });
-
   server.onNotFound([] (AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
   });
@@ -199,10 +205,6 @@ void webInit()
 //  server.on("/logged-out", HTTP_GET, [] (AsyncWebServerRequest *request) {
 //    request->send(200, "text/html", logout_html);
 //  });
-
-  server.on("/weblog", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", webLog);
-  });
 
   server.on("/setfrequency", HTTP_ANY, webSetFreq);
   server.on("/setvolume",    HTTP_ANY, webSetVol);
@@ -353,10 +355,5 @@ const String webConfigPage()
     "</BODY>"
     "</HTML>"
     ;
-}
-
-const String webChartPage(bool fillChart)
-{
-  return "";
 }
   
