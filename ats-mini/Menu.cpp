@@ -1034,8 +1034,8 @@ static void drawSoftMuteMaxAtt(int x, int y, int sx)
 
 static void drawCal(int x, int y, int sx)
 {
-  drawCommon(menu[MENU_CALIBRATION], x, y, sx);
-  drawZoomedMenu(menu[MENU_CALIBRATION]);
+  drawCommon(settings[MENU_CALIBRATION], x, y, sx);
+  drawZoomedMenu(settings[MENU_CALIBRATION]);
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
@@ -1066,7 +1066,7 @@ static void drawAvc(int x, int y, int sx)
 static void drawBrt(int x, int y, int sx)
 {
   drawCommon(settings[MENU_BRIGHTNESS], x, y, sx);
-  drawZoomedMenu(menu[MENU_BRIGHTNESS]);
+  drawZoomedMenu(settings[MENU_BRIGHTNESS]);
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
@@ -1077,7 +1077,7 @@ static void drawBrt(int x, int y, int sx)
 static void drawSleep(int x, int y, int sx)
 {
   drawCommon(settings[MENU_SLEEP], x, y, sx);
-  drawZoomedMenu(menu[MENU_SLEEP]);
+  drawZoomedMenu(settings[MENU_SLEEP]);
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
