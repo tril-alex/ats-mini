@@ -662,7 +662,7 @@ void loop()
   // Disable commands control
   if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
-    if(currentCmd != CMD_NONE)
+    if(currentCmd != CMD_NONE && !pushAndRotate)
     {
       currentCmd = CMD_NONE;
       needRedraw = true;
