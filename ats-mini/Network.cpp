@@ -56,7 +56,11 @@ void netStop()
 void netInit(uint8_t netMode)
 {
   // Do not initialize WiFi if disabled
-  if(netMode==NET_OFF) return;
+  if(netMode==NET_OFF)
+  {
+    netStop();
+    return;
+  }
 
   // Initialize WiFi and try connecting to a network
   if(wifiInit(netMode!=NET_AP_ONLY))

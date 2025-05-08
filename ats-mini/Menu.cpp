@@ -108,7 +108,7 @@ static const char *menu[] =
 #define MENU_ZOOM         4
 #define MENU_SLEEP        5
 #define MENU_SLEEPMODE    6
-#define MENU_WIFI         7
+#define MENU_WIFIMODE     7
 #define MENU_ABOUT        8
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
@@ -165,7 +165,16 @@ uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }
 //
 
 uint8_t sleepModeIdx = SLEEP_LOCKED;
-static const char *sleepModeDesc[] = { "Locked", "Unlocked", "CPU Sleep" };
+static const char *sleepModeDesc[] =
+{ "Locked", "Unlocked", "CPU Sleep" };
+
+//
+// WiFi Mode Menu
+//
+
+uint8_t wifiModeIdx = NET_OFF;
+static const char *wifiModeDesc[] =
+{ "Disabled", "AP Only", "Connect", "Sync Only" };
 
 //
 // Step Menu
@@ -402,6 +411,17 @@ static void doSleepMode(int dir)
   sleepModeIdx = wrap_range(sleepModeIdx, dir, 0, LAST_ITEM(sleepModeDesc));
 }
 
+static void doWiFiMode(int dir)
+{
+  wifiModeIdx = wrap_range(wifiModeIdx, dir, 0, LAST_ITEM(wifiModeDesc));
+}
+
+static void clickWiFiMode(uint8_t mode)
+{
+  currentCmd = CMD_NONE;
+  netInit(mode);
+}
+
 static void doRDSMode(int dir)
 {
   rdsModeIdx = wrap_range(rdsModeIdx, dir, 0, LAST_ITEM(rdsMode));
@@ -633,8 +653,8 @@ static void clickSettings(int cmd)
     case MENU_ZOOM:       currentCmd = CMD_ZOOM;      break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
+    case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
-    case MENU_WIFI:       netInit();                  break;
   }
 }
 
@@ -663,6 +683,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_MEMORY:    doMemory(dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
     case CMD_SLEEPMODE: doSleepMode(dir);break;
+    case CMD_WIFIMODE:  doWiFiMode(dir);break;
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
@@ -679,6 +700,7 @@ bool clickSideBar(uint16_t cmd)
     case CMD_MENU:     clickMenu(menuIdx);break;
     case CMD_SETTINGS: clickSettings(settingsIdx);break;
     case CMD_MEMORY:   clickMemory(memoryIdx);break;
+    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx);break;
     default:           return(false);
   }
 
@@ -904,6 +926,25 @@ static void drawSleepMode(int x, int y, int sx)
 
     spr.setTextDatum(MC_DATUM);
     spr.drawString(sleepModeDesc[abs((sleepModeIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
+static void drawWiFiMode(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_WIFIMODE], x, y, sx);
+
+  int count = ITEM_COUNT(wifiModeDesc);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0) {
+      drawZoomedMenu(wifiModeDesc[abs((wifiModeIdx+count+i)%count)]);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    spr.setTextDatum(MC_DATUM);
+    spr.drawString(wifiModeDesc[abs((wifiModeIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -1196,6 +1237,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
+    case CMD_WIFIMODE:  drawWiFiMode(x, y, sx); break;
     case CMD_ZOOM:      drawZoom(x, y, sx);      break;
     default:            drawInfo(x, y, sx);      break;
   }
