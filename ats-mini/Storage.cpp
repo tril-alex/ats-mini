@@ -102,8 +102,8 @@ void eepromSaveConfig()
   EEPROM.write(addr++, EEPROM_VERSION);     // Stores the EEPROM_VERSION;
   EEPROM.write(addr++, volume);             // Stores the current Volume
   EEPROM.write(addr++, bandIdx);            // Stores the current band
-  EEPROM.write(addr++, 0x00);               // G8PTN: Not used (was fmRDS)
-  EEPROM.write(addr++, currentMode);        // Stores the current Mode (FM / AM / LSB / USB). Now per mode, leave for compatibility
+  EEPROM.write(addr++, wifiModeIdx);        // Stores WiFi connection mode
+  EEPROM.write(addr++, currentMode);        // Stores the current mode (FM / AM / LSB / USB). Now per mode, leave for compatibility
   EEPROM.write(addr++, currentBFOs >> 8);   // G8PTN: Stores the current BFO % 1000 (HIGH byte)
   EEPROM.write(addr++, currentBFOs & 0XFF); // G8PTN: Stores the current BFO % 1000 (LOW byte)
   EEPROM.commit();
@@ -182,12 +182,12 @@ void eepromLoadConfig()
   EEPROM.begin(EEPROM_SIZE);
 
   addr        = EEPROM_BASE_ADDR + 1;
-  volume      = EEPROM.read(addr++);             // Gets the stored volume;
+  volume      = EEPROM.read(addr++);             // Reads stored volume
   bandIdx     = EEPROM.read(addr++);
-                EEPROM.read(addr++);             // G8PTN: Not used
-  currentMode = EEPROM.read(addr++);             // G8PTM: Reads stored Mode. Now per mode, leave for compatibility
-  currentBFO  = EEPROM.read(addr++) << 8;        // G8PTN: Reads stored BFO value (HIGH byte)
-  currentBFO |= EEPROM.read(addr++);             // G8PTN: Reads stored BFO value (HIGH byte)
+  wifiModeIdx = EEPROM.read(addr++);             // Reads stored WiFi connection mode
+  currentMode = EEPROM.read(addr++);             // Reads stored mode. Now per mode, leave for compatibility
+  currentBFO  = EEPROM.read(addr++) << 8;        // Reads stored BFO value (HIGH byte)
+  currentBFO |= EEPROM.read(addr++);             // Reads stored BFO value (HIGH byte)
 
   // Read current band settings
   for(int i=0 ; i<getTotalBands() ; i++)
@@ -234,5 +234,4 @@ void eepromLoadConfig()
   }
 
   EEPROM.end();
-
 }

@@ -177,7 +177,7 @@ static const char *sleepModeDesc[] =
 
 uint8_t wifiModeIdx = NET_OFF;
 static const char *wifiModeDesc[] =
-{ "Disabled", "AP Only", "Connect", "Sync Only" };
+{ "Off", "AP Only", "Connect", "Sync Only" };
 
 //
 // Step Menu

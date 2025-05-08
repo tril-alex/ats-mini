@@ -118,6 +118,7 @@ extern int8_t SsbAvcIdx;
 extern int8_t AmSoftMuteIdx;
 extern int8_t SsbSoftMuteIdx;
 extern uint8_t rdsModeIdx;
+extern uint8_t wifiModeIdx;
 
 extern int8_t agcIdx;
 extern int8_t agcNdx;
