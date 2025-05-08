@@ -243,11 +243,11 @@ static int getLastStep(int mode)
   return(0);
 }
 
-static int8_t freqInputPos = 0;
+static uint8_t freqInputPos = 0;
 
-static int8_t getDefaultFreqInputPos(int mode, int step)
+static uint8_t getDefaultFreqInputPos(int mode, int step)
 {
-  return (int8_t)(log10(step) + 0.5) + (mode == AM ? 3 : 0);
+  return (uint8_t)(log10(step) * 2) + (mode == AM ? 6 : 0);
 }
 
 void resetFreqInputPos()
@@ -262,17 +262,19 @@ uint8_t getFreqInputPos()
 
 int getFreqInputStep()
 {
-  return pow(10, freqInputPos - (currentMode == AM ? 3 : 0));
+  return freqInputPos % 2 ?
+    5 * pow(10, (freqInputPos - (currentMode == AM ? 6 : 0) - 1) / 2) :
+            pow(10, (freqInputPos - (currentMode == AM ? 6 : 0)) / 2);
 }
 
-static int8_t getMinFreqInputPos()
+static uint8_t getMinFreqInputPos()
 {
   return getDefaultFreqInputPos(currentMode, steps[currentMode][0].step);
 }
 
-static int8_t getMaxFreqInputPos()
+static uint8_t getMaxFreqInputPos()
 {
-  return (uint8_t)log10(getCurrentBand()->maximumFreq) + (currentMode != FM ? 3 : 0);
+  return (uint8_t)log10(getCurrentBand()->maximumFreq) * 2 + (currentMode != FM ? 6 : 0);
 }
 
 //
