@@ -39,6 +39,16 @@ static const String webRadioPage();
 static const String webConfigPage();
 
 //
+// Clear all settings
+//
+void netClearPreferences()
+{
+  preferences.begin("configData", false);
+  preferences.clear();
+  preferences.end();
+}
+
+//
 // Stop WiFi hardware
 //
 void netStop()
@@ -235,7 +245,7 @@ void webSetConfig(AsyncWebServerRequest *request)
   preferences.begin("configData", false);
 
   // Save user name and password
-  if(request->hasParam("username", true) && request->getParam("username", true)->value() != "")
+  if(request->hasParam("username", true) && request->hasParam("password", true))
   {
     loginUsername = request->getParam("username", true)->value();
     loginPassword = request->getParam("password", true)->value();
@@ -253,7 +263,7 @@ void webSetConfig(AsyncWebServerRequest *request)
     sprintf(nameSSID, "wifissid%d", j+1);
     sprintf(namePASS, "wifipass%d", j+1);
 
-    if(request->hasParam(nameSSID, true) && request->getParam(nameSSID, true)->value() != "")
+    if(request->hasParam(nameSSID, true) && request->hasParam(namePASS, true))
     {
       preferences.putString(nameSSID, request->getParam(nameSSID, true)->value()); 
       preferences.putString(namePASS, request->getParam(namePASS, true)->value());
@@ -262,7 +272,7 @@ void webSetConfig(AsyncWebServerRequest *request)
   }
 
   // Save time zone
-  if(request->hasParam("utcoffset", true) && request->getParam("utcoffset", true)->value() != "")
+  if(request->hasParam("utcoffset", true))
   {
     String utcOffset = request->getParam("utcoffset", true)->value();
     preferences.putString("utcoffset", utcOffset); 
@@ -356,16 +366,25 @@ static const String webRadioPage()
 
 static const String webUtcOffsetSelector()
 {
+  static const char *Cities[] =
+  {
+    "Fairbanks", "San Francisco", "Denver", "Houston",
+    "New York", "Rio de Janeiro", "Sandwich Islands", "Nuuk",
+    "Reykjavik", "London", "Berlin", "Moscow",
+    "Yerevan", "Astana", "Omsk", "Novosibirsk",
+    "Beijing", "Yakutsk", "Vladivostok", 0 
+  };
+
   String result = "";
 
-  for(int j=-5 ; j<=5 ; j++)
+  for(int j=-8 ; Cities[j+8] ; j++)
   {
     int offset = j * 3600;
     char text[64];
 
     sprintf(text,
-      "<OPTION VALUE='%d'%s>UTC%+d</OPTION>",
-      offset, offset==utcOffsetInSeconds? " SELECTED":"", j
+      "<OPTION VALUE='%d'%s>%s (UTC%+d)</OPTION>",
+      offset, offset==utcOffsetInSeconds? " SELECTED":"", Cities[j], j
     );
 
     result += text;
