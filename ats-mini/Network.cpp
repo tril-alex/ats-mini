@@ -384,7 +384,7 @@ static const String webUtcOffsetSelector()
 
     sprintf(text,
       "<OPTION VALUE='%d'%s>%s (UTC%+d)</OPTION>",
-      offset, offset==utcOffsetInSeconds? " SELECTED":"", Cities[j], j
+      offset, offset==utcOffsetInSeconds? " SELECTED":"", Cities[j+8], j
     );
 
     result += text;
