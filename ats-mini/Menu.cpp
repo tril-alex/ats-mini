@@ -711,13 +711,14 @@ bool doSideBar(uint16_t cmd, int dir)
   return(true);
 }
 
-bool clickSideBar(uint16_t cmd, bool shortPress)
+bool clickHandler(uint16_t cmd, bool shortPress)
 {
   switch(cmd)
   {
     case CMD_MENU:     clickMenu(menuIdx, shortPress);break;
     case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
     case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
+    case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
 

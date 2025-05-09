@@ -125,6 +125,7 @@ static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 void useBand(const Band *band);
 bool updateBFO(int newBFO, bool wrap);
 bool doSeek(int8_t dir);
+bool clickFreq(bool shortPress);
 
 // Utils.c
 void loadSSB(uint8_t bandwidth, bool draw = true);

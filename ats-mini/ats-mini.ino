@@ -534,6 +534,31 @@ bool doDigit(int8_t dir)
   return(updated);
 }
 
+
+bool clickFreq(bool shortPress)
+{
+  if (shortPress) {
+    bool updated = false;
+
+     // SSB tuning
+     if(isSSB()) {
+       updated = updateBFO(currentBFO - currentFrequency % getFreqInputStep(), false);
+     } else {
+       // Normal tuning
+       updated = updateFrequency(currentFrequency - currentFrequency % getFreqInputStep(), false);
+     }
+
+     if (updated) {
+       // Clear current station name and information
+       clearStationInfo();
+       // Check for named frequencies
+       identifyFrequency(currentFrequency + currentBFO / 1000);
+     }
+     return true;
+  }
+  return false;
+}
+
 //
 // Main event loop
 //
@@ -618,7 +643,7 @@ void loop()
         needRedraw = true;
       }
     }
-    else if(clickSideBar(currentCmd, pb1st.wasShortPressed))
+    else if(clickHandler(currentCmd, pb1st.wasShortPressed))
     {
       // Command handled, redraw screen
       needRedraw = true;
