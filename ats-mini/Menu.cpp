@@ -684,24 +684,24 @@ bool doSideBar(uint16_t cmd, int dir)
 
   switch(cmd)
   {
-    case CMD_MENU:      doMenu(-dir);break;
-    case CMD_MODE:      doMode(-dir);break;
-    case CMD_STEP:      doStep(-dir);break;
+    case CMD_MENU:      doMenu(dir);break;
+    case CMD_MODE:      doMode(dir);break;
+    case CMD_STEP:      doStep(dir);break;
     case CMD_SEEK:      doSeek(dir);break;
     case CMD_AGC:       doAgc(dir);break;
-    case CMD_BANDWIDTH: doBandwidth(-dir);break;
+    case CMD_BANDWIDTH: doBandwidth(dir);break;
     case CMD_VOLUME:    doVolume(dir);break;
     case CMD_SOFTMUTE:  doSoftMute(dir);break;
-    case CMD_BAND:      doBand(-dir);break;
+    case CMD_BAND:      doBand(dir);break;
     case CMD_AVC:       doAvc(dir);break;
-    case CMD_SETTINGS:  doSettings(-dir);break;
+    case CMD_SETTINGS:  doSettings(dir);break;
     case CMD_BRT:       doBrt(dir);break;
     case CMD_CAL:       doCal(dir);break;
-    case CMD_THEME:     doTheme(-dir);break;
-    case CMD_RDS:       doRDSMode(-dir);break;
-    case CMD_MEMORY:    doMemory(-dir);break;
+    case CMD_THEME:     doTheme(dir);break;
+    case CMD_RDS:       doRDSMode(dir);break;
+    case CMD_MEMORY:    doMemory(dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
-    case CMD_SLEEPMODE: doSleepMode(-dir);break;
+    case CMD_SLEEPMODE: doSleepMode(dir);break;
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
