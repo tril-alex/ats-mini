@@ -458,7 +458,11 @@ bool doRotate(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getCurrentStep(false)->step, true);
+    uint16_t step = getCurrentStep()->step;
+    uint16_t stepAdjust = (currentFrequency * 1000 + currentBFO) % step;
+    step = !stepAdjust? step : dir>0? step - stepAdjust : stepAdjust;
+
+    updateBFO(currentBFO + dir * step, true);
   }
 
   //
