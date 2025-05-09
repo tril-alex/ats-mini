@@ -39,6 +39,8 @@ const ColorTheme theme[] =
     0xBEDF, // menu_param
     0xFFFF, // freq_text
     0xD69A, // funit_text
+    0xF800, // freq_hl
+    0xFFE0, // freq_hl_act
     0xD69A, // rds_text
     0xFFFF, // scale_text
     0xF800, // scale_pointer
@@ -78,6 +80,8 @@ const ColorTheme theme[] =
     0xBEDF, // menu_param
     0xFFFF, // freq_text
     0xD69A, // funit_text
+    0xF800, // freq_hl
+    0xFFE0, // freq_hl_act
     0xD69A, // rds_text
     0xFFFF, // scale_text
     0xF800, // scale_pointer
@@ -117,6 +121,8 @@ const ColorTheme theme[] =
     0x3A08, // menu_param
     0x3A08, // freq_text
     0x632C, // funit_text
+    0x0000, // freq_hl
+    0x632C, // freq_hl_act
     0x632C, // rds_text
     0x18C3, // scale_text
     0x0000, // scale_pointer
@@ -156,6 +162,8 @@ const ColorTheme theme[] =
     0x00C2, // menu_param
     0x00C2, // freq_text
     0x1165, // funit_text
+    0x0000, // freq_hl
+    0x1165, // freq_hl_act
     0x1165, // rds_text
     0x18C3, // scale_text
     0x0000, // scale_pointer
@@ -195,6 +203,8 @@ const ColorTheme theme[] =
     0x2945, // menu_param
     0x18C3, // freq_text
     0x2945, // funit_text
+    0x0000, // freq_hl
+    0x4208, // freq_hl_act
     0x2945, // rds_text
     0x18C3, // scale_text
     0x0000, // scale_pointer
@@ -234,6 +244,8 @@ const ColorTheme theme[] =
     0xD986, // menu_param
     0xD986, // freq_text
     0xB925, // funit_text
+    0xF800, // freq_hl
+    0xD986, // freq_hl_act
     0xB925, // rds_text
     0xD986, // scale_text
     0xF800, // scale_pointer
@@ -273,6 +285,8 @@ const ColorTheme theme[] =
     0x07AD, // menu_param
     0x07AD, // freq_text
     0x052D, // funit_text
+    0x5CF2, // freq_hl
+    0x07AD, // freq_hl_act
     0x052D, // rds_text
     0x07AD, // scale_text
     0x5CF2, // scale_pointer
@@ -312,6 +326,8 @@ const ColorTheme theme[] =
     0xBEDF, // menu_param
     0x3FE0, // freq_text
     0xD69A, // funit_text
+    0xF800, // freq_hl
+    0x3FE0, // freq_hl_act
     0xD69A, // rds_text
     0x3FE0, // scale_text
     0xF800, // scale_pointer
@@ -351,6 +367,8 @@ const ColorTheme theme[] =
     0xBEDF, // menu_param
     0xFFFF, // freq_text
     0xC638, // funit_text
+    0x5005, // freq_hl
+    0xFFFF, // freq_hl_act
     0xFD95, // rds_text
     0xFFFF, // scale_text
     0x5005, // scale_pointer

@@ -18,14 +18,20 @@
 
 Controls are implemented through the encoder knob:
 
-| Gesture                | Result                                                                                 |
-|------------------------|----------------------------------------------------------------------------------------|
-| Rotate                 | Tunes frequency, navigates menu, adjusts parameters.                                   |
-| Click (<0.5 sec)       | Opens menu, selects.                                                                   |
-| Short press (>0.5 sec) | Volume shortcut.                                                                       |
-| Long press (>2 sec)    | Sleep on/off.                                                                          |
-| Press and rotate       | Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan. |
+| Gesture                | Result                                                                |
+|------------------------|-----------------------------------------------------------------------|
+| Rotate                 | Tunes frequency, navigates menu, adjusts parameters.                  |
+| Click (<0.5 sec)       | Opens menu, selects.                                                  |
+| Short press (>0.5 sec) | Volume shortcut in VFO mode, context-dependent action in other modes. |
+| Long press (>2 sec)    | Sleep on/off.                                                         |
+| Press and rotate       | Direct frequency input mode.                                          |
 
+### Direct frequency input mode
+
+* Press and rotate the encoder to select the step (digit or "half-digit").
+* Rotate the encoder to adjust the frequency.
+* Use short press to align frequency to the current step.
+* To exit the mode, click the encoder or wait for a couple of seconds.
 
 ## Menu
 

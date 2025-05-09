@@ -168,7 +168,7 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     { x - 30 - 32 * 4 -  0, y + 27, 27, 3 }, // 10000.000
   };
 
-  uint16_t hl_color = hl & 0x80 ? TH.batt_icon : TH.scale_pointer; // FIXME add theme colors
+  uint16_t hl_color = hl & 0x80 ? TH.freq_hl_act : TH.freq_hl;
   hl &= 0x7F;
 
   spr.setTextDatum(MR_DATUM);

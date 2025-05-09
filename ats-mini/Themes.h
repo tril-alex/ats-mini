@@ -48,6 +48,8 @@ typedef struct __attribute__ ((packed))
 
   uint16_t freq_text;
   uint16_t funit_text;
+  uint16_t freq_hl;
+  uint16_t freq_hl_act;
 
   uint16_t rds_text;
 
