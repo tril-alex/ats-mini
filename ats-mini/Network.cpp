@@ -34,11 +34,7 @@ NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
 static bool wifiInit(bool connectToNetwork = true);
 static void webInit();
-static void webSetFreq(AsyncWebServerRequest *request);
-static void webSetVol(AsyncWebServerRequest *request);
 static void webSetConfig(AsyncWebServerRequest *request);
-static void webConnectWifi(AsyncWebServerRequest *request);
-static const String webRadioData();
 static const String webRadioPage();
 static const String webConfigPage();
 
@@ -48,6 +44,7 @@ static const String webConfigPage();
 void netStop()
 {
   WiFi.disconnect(true);
+  drawWiFiStatus("Disconnected from WiFi network", 0);
 }
 
 //
@@ -203,38 +200,14 @@ bool wifiInit(bool connectToNetwork)
 void webInit()
 {
   server.on("/", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    String page = webRadioPage();
-
-    AsyncWebServerResponse *response = request->beginChunkedResponse(
-      "text/html", [page] (uint8_t *buffer, size_t maxlen, size_t index) -> size_t {
-        size_t len = min(maxlen, page.length() - index);
-        memcpy(buffer, page.c_str() + index, len);
-        return len;
-      }
-    );
-
-    request->send(response);
+    request->send(200, "text/html", webRadioPage());
   });
 
-  server.on("/data", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", webRadioData());
-  });
-  
   server.on("/config", HTTP_ANY, [] (AsyncWebServerRequest *request) {
     if(loginUsername != "" && loginPassword != "")
       if(!request->authenticate(loginUsername.c_str(), loginPassword.c_str()))
         return request->requestAuthentication();
     request->send(200, "text/html", webConfigPage());
-  });
-
-  server.on("/rssi", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    rx.getCurrentReceivedSignalQuality();
-    request->send(200, "text/plain", String(rx.getCurrentRSSI()));
-  });
-
-  server.on("/snr", HTTP_ANY, [] (AsyncWebServerRequest *request) {
-    rx.getCurrentReceivedSignalQuality();
-    request->send(200, "text/plain", String(rx.getCurrentSNR()));
   });
 
   server.onNotFound([] (AsyncWebServerRequest *request) {
@@ -249,29 +222,19 @@ void webInit()
 //    request->send(200, "text/html", logout_html);
 //  });
 
-  server.on("/setfrequency", HTTP_ANY, webSetFreq);
-  server.on("/setvolume",    HTTP_ANY, webSetVol);
-  server.on("/setconfig",    HTTP_ANY, webSetConfig);
-  server.on("/connectwifi",  HTTP_ANY, webConnectWifi);
+  // This method saved configuration form contents
+  server.on("/setconfig", HTTP_ANY, webSetConfig);
 
   // Start web server  
   server.begin();
 }
 
-void webSetFreq(AsyncWebServerRequest *request)
-{
-  request->send(200);
-}
-
-void webSetVol(AsyncWebServerRequest *request)
-{
-  request->send(200);
-}
-
 void webSetConfig(AsyncWebServerRequest *request)
 {
+  // Start modifying preferences
   preferences.begin("configData", false);
 
+  // Save user name and password
   if(request->hasParam("username", true) && request->getParam("username", true)->value() != "")
   {
     loginUsername = request->getParam("username", true)->value();
@@ -281,6 +244,8 @@ void webSetConfig(AsyncWebServerRequest *request)
     preferences.putString("loginpassword", loginPassword);
   }
 
+  // Save SSIDs and their passwords
+  bool haveSSID = false;
   for(int j=0 ; j<3 ; j++)
   {
     char nameSSID[16], namePASS[16];
@@ -292,9 +257,11 @@ void webSetConfig(AsyncWebServerRequest *request)
     {
       preferences.putString(nameSSID, request->getParam(nameSSID, true)->value()); 
       preferences.putString(namePASS, request->getParam(namePASS, true)->value());
+      haveSSID = true;
     }
   }
 
+  // Save time zone
   if(request->hasParam("utcoffset", true) && request->getParam("utcoffset", true)->value() != "")
   {
     String utcOffset = request->getParam("utcoffset", true)->value();
@@ -303,36 +270,82 @@ void webSetConfig(AsyncWebServerRequest *request)
     ntpClient.setTimeOffset(utcOffsetInSeconds);
     clockReset();
   }
-  
+
+  // Done with the preferences  
   preferences.end();
-  request->send(200);
+
+  // Show config page again
+  request->send(200, "text/html", webConfigPage());
+
+  // If we are currently in AP mode, and infrastructure mode requested,
+  // and there is at least one SSID / PASS pair...
+  if(haveSSID && (wifiModeIdx>NET_AP_ONLY) && (WiFi.status()!=WL_CONNECTED))
+  {
+    // Try connecting to WiFi network
+    netInit(wifiModeIdx);
+  }
 }
 
-void webConnectWifi(AsyncWebServerRequest *request)
-{
-  request->send(200);
-}
-
-const String webRadioData()
-{
-  return "";
-}
-
-const String webRadioPage()
+static const String webStyleSheet()
 {
   return
-    "<!DOCTYPE HTML>"
-    "<HTML>"
-    "<HEAD>"
-      "<META charset='UTF-8'>"
-      "<META name='viewport' content='width=device-width, initial-scale=1.0'>"
-      "<TITLE>ATS-Mini Pocket Receiver</TITLE>"
-    "</HEAD>"
-    "<BODY>"
-      "<H1>ATS-Mini Pocket Receiver</H1>"
-    "</BODY>"
-    "</HTML>"
-    ;
+"H1"
+"{"
+  "text-align: center;"
+"}"
+"TABLE"
+"{"
+  "width: 100%;"
+  "max-width: 768px;"
+  "border: 0px;"
+  "margin-left: auto;"
+  "margin-right: auto;"
+"}"
+"TH, TD"
+"{"
+  "padding: 5px;"
+"}"
+"TH.HEADING"
+"{"
+  "background-color: #80A0FF;"
+  "column-span: all;"
+  "text-align: center;"
+"}"
+"TD.LABEL"
+"{"
+  "text-align: right;"
+"}"
+"INPUT[type=text], INPUT[type=password]"
+"{"
+  "width: 100%;"
+"}"
+"INPUT[type=submit]"
+"{"
+  "width: 50%;"
+  "padding: 0.5em 0;"
+"}"
+;
+}
+
+static const String webRadioPage()
+{
+  return
+"<!DOCTYPE HTML>"
+"<HTML>"
+"<HEAD>"
+  "<META CHARSET='UTF-8'>"
+  "<META NAME='viewport' CONTENT='width=device-width, initial-scale=1.0'>"
+  "<TITLE>ATS-Mini Pocket Receiver</TITLE>"
+  "<STYLE>" + webStyleSheet() + "</STYLE>"
+"</HEAD>"
+"<BODY STYLE='font-family: sans-serif;'>"
+  "<H1>ATS-Mini Pocket Receiver</H1>"
+  "<P ALIGN='CENTER'>"
+    "<A HREF='/config'>Config</A>"
+  "</P>"
+"</BODY>"
+"</HTML>"
+;
 }
 
 static const String webUtcOffsetSelector()
@@ -370,42 +383,10 @@ const String webConfigPage()
 "<!DOCTYPE HTML>"
 "<HTML>"
 "<HEAD>"
-  "<META charset='UTF-8'>"
-  "<META name='viewport' content='width=device-width, initial-scale=1.0'>"
+  "<META CHARSET='UTF-8'>"
+  "<META NAME='viewport' CONTENT='width=device-width, initial-scale=1.0'>"
   "<TITLE>ATS-Mini Config</TITLE>"
-  "<STYLE>"
-    "H1"
-    "{"
-      "text-align: center;"
-    "}"
-    "TABLE"
-    "{"
-      "width: 100%;"
-      "max-width: 768px;"
-      "border: 0px;"
-      "margin-left: auto;"
-      "margin-right: auto;"
-    "}"
-    "TH, TD"
-    "{"
-      "padding: 5px;"
-    "}"
-    "TH.HEADING"
-    "{"
-      "background-color: #80A0FF;"
-      "column-span: all;"
-      "text-align: center;"
-    "}"
-    "TD.LABEL"
-    "{"
-      "text-align: right;"
-    "}"
-    "INPUT[type=submit]"
-    "{"
-      "width: 50%;"
-      "padding: 0.5em 0;"
-    "}"
-  "</STYLE>"
+  "<STYLE>" + webStyleSheet() + "</STYLE>"
 "</HEAD>"
 "<BODY STYLE='font-family: sans-serif;'>"
   "<H1>ATS-Mini Config</H1>"
