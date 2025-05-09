@@ -601,24 +601,10 @@ void loop()
     elapsedSleep = elapsedCommand = currentTime = millis();
   }
 
-  // Encoder released after SHORT PRESS: CHANGE VOLUME
-  else if(pb1st.wasShortPressed && (!sleepOn() || sleepModeIdx == SLEEP_UNLOCKED) && !pushAndRotate)
+  // Encoder click or short press
+  else if((pb1st.wasClicked || pb1st.wasShortPressed) && !pushAndRotate)
   {
     elapsedSleep = elapsedCommand = currentTime;
-
-    // Open volume control
-    clickVolume();
-    needRedraw = true;
-
-    // Wait a little more for the button release
-    delay(MIN_ELAPSED_TIME);
-  }
-
-  // Encoder click: SELECT MENU ITEM
-  else if(pb1st.wasClicked && !pushAndRotate)
-  {
-    elapsedSleep = elapsedCommand = currentTime;
-
     if(sleepOn())
     {
       if(currentSleep)
@@ -626,8 +612,13 @@ void loop()
         sleepOn(false);
         needRedraw = true;
       }
+      else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED)
+      {
+        clickVolume();
+        needRedraw = true;
+      }
     }
-    else if(clickSideBar(currentCmd))
+    else if(clickSideBar(currentCmd, pb1st.wasShortPressed))
     {
       // Command handled, redraw screen
       needRedraw = true;
@@ -638,15 +629,17 @@ void loop()
       currentCmd = CMD_NONE;
       needRedraw = true;
     }
+    else if(pb1st.wasShortPressed)
+    {
+      clickVolume();
+      needRedraw = true;
+    }
     else
     {
       // Activate menu
       currentCmd = CMD_MENU;
       needRedraw = true;
     }
-
-    // Wait a little more for the button release
-    delay(MIN_ELAPSED_TIME);
   }
 
   // Display sleep timeout

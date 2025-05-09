@@ -79,7 +79,7 @@ static inline bool isSettingsMode(uint16_t cmd)
 void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 void doSelectDigit(int dir);
-bool clickSideBar(uint16_t cmd);
+bool clickSideBar(uint16_t cmd, bool shortPress);
 void clickVolume();
 void selectBand(uint8_t idx, bool drawLoadingSSB = true);
 int getTotalBands();

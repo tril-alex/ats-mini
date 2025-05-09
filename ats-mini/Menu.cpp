@@ -481,7 +481,7 @@ static void doMemory(int dir)
   if(!tuneToMemory(&memories[memoryIdx])) tuneToMemory(&newMemory);
 }
 
-static void clickMemory(uint8_t idx)
+static void clickMemory(uint8_t idx, bool shortPress)
 {
   // Must have a valid index
   if(idx>LAST_ITEM(memories)) return;
@@ -607,7 +607,7 @@ static void doMenu(int dir)
   menuIdx = wrap_range(menuIdx, dir, 0, LAST_ITEM(menu));
 }
 
-static void clickMenu(int cmd)
+static void clickMenu(int cmd, bool shortPress)
 {
   // No command yet
   currentCmd = CMD_NONE;
@@ -657,7 +657,7 @@ static void doSettings(int dir)
   settingsIdx = wrap_range(settingsIdx, dir, 0, LAST_ITEM(settings));
 }
 
-static void clickSettings(int cmd)
+static void clickSettings(int cmd, bool shortPress)
 {
   // No command yet
   currentCmd = CMD_NONE;
@@ -711,13 +711,13 @@ bool doSideBar(uint16_t cmd, int dir)
   return(true);
 }
 
-bool clickSideBar(uint16_t cmd)
+bool clickSideBar(uint16_t cmd, bool shortPress)
 {
   switch(cmd)
   {
-    case CMD_MENU:     clickMenu(menuIdx);break;
-    case CMD_SETTINGS: clickSettings(settingsIdx);break;
-    case CMD_MEMORY:   clickMemory(memoryIdx);break;
+    case CMD_MENU:     clickMenu(menuIdx, shortPress);break;
+    case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
+    case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
     default:           return(false);
   }
 
@@ -727,7 +727,7 @@ bool clickSideBar(uint16_t cmd)
 
 void clickVolume()
 {
-  clickMenu(MENU_VOLUME);
+  clickMenu(MENU_VOLUME, true);
 }
 
 //
