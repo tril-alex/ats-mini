@@ -166,6 +166,7 @@ bool checkRds();
 bool identifyFrequency(uint16_t freq);
 
 // Network.cpp
+void netClearPreferences();
 void netInit(uint8_t netMode = NET_CONNECT);
 void netStop();
 bool ntpIsAvailable();

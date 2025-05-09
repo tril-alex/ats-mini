@@ -146,6 +146,7 @@ void setup()
   // Note: EEPROM reset is recommended after firmware updates
   if(digitalRead(ENCODER_PUSH_BUTTON)==LOW)
   {
+    netClearPreferences();
     eepromInvalidate();
 
     ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
