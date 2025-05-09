@@ -318,7 +318,7 @@ void showFrequencySeek(uint16_t freq)
 //
 // Tune using BFO, using algorithm from Goshante's ATS-20_EX firmware
 //
-void updateBFO(int newBFO)
+bool updateBFO(int newBFO, bool wrap)
 {
   Band *band = getCurrentBand();
   int newFreq = currentFrequency;
@@ -340,11 +340,13 @@ void updateBFO(int newBFO)
   int f = newFreq * 1000 + newBFO;
   if(f < band->minimumFreq * 1000)
   {
+    if (!wrap) return false;
     newFreq = band->maximumFreq;
     newBFO  = 0;
   }
   else if(f > band->maximumFreq * 1000)
   {
+    if (!wrap) return false;
     newFreq = band->minimumFreq;
     newBFO  = 0;
   }
@@ -368,36 +370,43 @@ void updateBFO(int newBFO)
 
   // Save current band frequency, w.r.t. new BFO value
   band->currentFreq = currentFrequency + currentBFO / 1000;
+  return true;
 }
 
 //
 // Tune to a new frequency, resetting BFO if present
 //
-void updateFrequency(int newFreq)
+bool updateFrequency(int newFreq, bool wrap)
 {
   Band *band = getCurrentBand();
 
   // Do not let new frequency exceed band limits
-  newFreq = newFreq<band->minimumFreq? band->maximumFreq
-          : newFreq>band->maximumFreq? band->minimumFreq
-          : newFreq;
+  if (newFreq < band->minimumFreq) {
+    if (!wrap) return false;
+    newFreq = band->maximumFreq;
+  } else if (newFreq > band->maximumFreq) {
+    if (!wrap) return false;
+    newFreq = band->minimumFreq;
+
+  }
 
   // Set new frequency
   rx.setFrequency(newFreq);
 
   // Clear BFO, if present
-  if(currentBFO) updateBFO(0);
+  if(currentBFO) updateBFO(0, true);
 
   // Update current frequency
   currentFrequency = rx.getFrequency();
 
   // Save current band frequency
   band->currentFreq = currentFrequency + currentBFO / 1000;
+  return true;
 }
 
 
 //
-// Handle encoder PRESS + ROTATE
+// Handle encoder rotation in seek mode
 //
 bool doSeek(int8_t dir)
 {
@@ -409,7 +418,7 @@ bool doSeek(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getCurrentStep(true)->step);
+    updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
   }
   else
   {
@@ -417,7 +426,7 @@ bool doSeek(int8_t dir)
     seekStop = false;
     rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
 
-    updateFrequency(rx.getFrequency());
+    updateFrequency(rx.getFrequency(), true);
   }
 
   // Clear current station name and information
@@ -449,7 +458,7 @@ bool doRotate(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getCurrentStep(false)->step);
+    updateBFO(currentBFO + dir * getCurrentStep(false)->step, true);
   }
 
   //
@@ -469,7 +478,7 @@ bool doRotate(int8_t dir)
     step = !stepAdjust? step : dir>0? step - stepAdjust : stepAdjust;
 
     // Tune to a new frequency
-    updateFrequency(currentFrequency + step * dir);
+    updateFrequency(currentFrequency + step * dir, true);
   }
 
   // Clear current station name and information
@@ -485,6 +494,8 @@ bool doRotate(int8_t dir)
 //
 bool doDigit(int8_t dir)
 {
+  bool updated = false;
+
   // SSB tuning
   if(isSSB())
   {
@@ -494,7 +505,7 @@ bool doDigit(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getFreqInputStep());
+    updated = updateBFO(currentBFO + dir * getFreqInputStep(), false);
   }
 
   //
@@ -509,15 +520,18 @@ bool doDigit(int8_t dir)
 #endif
 
     // Tune to a new frequency
-    updateFrequency(currentFrequency + getFreqInputStep() * dir);
+    updated = updateFrequency(currentFrequency + getFreqInputStep() * dir, false);
   }
 
-  // Clear current station name and information
-  clearStationInfo();
-  // Check for named frequencies
-  identifyFrequency(currentFrequency + currentBFO / 1000);
+  if (updated) {
+    // Clear current station name and information
+    clearStationInfo();
+    // Check for named frequencies
+    identifyFrequency(currentFrequency + currentBFO / 1000);
+  }
+
   // Will need a redraw
-  return(true);
+  return(updated);
 }
 
 //

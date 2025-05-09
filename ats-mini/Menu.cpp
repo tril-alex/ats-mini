@@ -274,7 +274,7 @@ static uint8_t getMinFreqInputPos()
 
 static uint8_t getMaxFreqInputPos()
 {
-  return (uint8_t)log10(getCurrentBand()->maximumFreq) * 2 + (currentMode != FM ? 6 : 0);
+  return (uint8_t)log10(getCurrentBand()->maximumFreq) * 2 + (currentMode != FM ? 6 : -1);
 }
 
 //
@@ -422,7 +422,7 @@ void doCal(int dir)
 
   // If in SSB mode set the SI4732/5 BFO value
   // This adjusts the BFO while in the calibration menu
-  if(isSSB()) updateBFO(currentBFO);
+  if(isSSB()) updateBFO(currentBFO, true);
 }
 
 void doBrt(int dir)
