@@ -542,7 +542,7 @@ bool clickFreq(bool shortPress)
 
      // SSB tuning
      if(isSSB()) {
-       updated = updateBFO(currentBFO - currentFrequency % getFreqInputStep(), false);
+       updated = updateBFO(currentBFO - (currentFrequency * 1000 + currentBFO) % getFreqInputStep(), false);
      } else {
        // Normal tuning
        updated = updateFrequency(currentFrequency - currentFrequency % getFreqInputStep(), false);
