@@ -806,7 +806,7 @@ void selectBand(uint8_t idx, bool drawLoadingSSB)
 // Draw functions
 //
 
-static void drawCommon(const char *title, int x, int y, int sx)
+static void drawCommon(const char *title, int x, int y, int sx, bool cursor = false)
 {
   spr.setTextDatum(MC_DATUM);
 
@@ -819,7 +819,8 @@ static void drawCommon(const char *title, int x, int y, int sx)
 
   spr.setTextFont(0);
   spr.setTextColor(TH.menu_item, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_hl_bg);
+  if(cursor)
+    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_hl_bg);
 }
 
 static void drawMenu(int x, int y, int sx)
@@ -882,7 +883,7 @@ static void drawSettings(int x, int y, int sx)
 
 static void drawMode(int x, int y, int sx)
 {
-  drawCommon(menu[MENU_MODE], x, y, sx);
+  drawCommon(menu[MENU_MODE], x, y, sx, true);
 
   int count = ITEM_COUNT(bandModeDesc);
   for(int i=-2 ; i<3 ; i++)
@@ -905,7 +906,7 @@ static void drawStep(int x, int y, int sx)
   int count = getLastStep(currentMode) + 1;
   int idx   = stepIdx[currentMode] + count;
 
-  drawCommon(menu[MENU_STEP], x, y, sx);
+  drawCommon(menu[MENU_STEP], x, y, sx, true);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -925,7 +926,6 @@ static void drawSeek(int x, int y, int sx)
 {
   drawCommon(menu[MENU_SEEK], x, y, sx);
   drawZoomedMenu(menu[MENU_SEEK]);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawSmoothArc(40+x+(sx/2), 66+y, 23, 20, 45, 180, TH.menu_param, TH.menu_bg);
   spr.fillTriangle(40+x+(sx/2)-5, 66+y-25, 40+x+(sx/2)+5, 66+y-20, 40+x+(sx/2)-5, 66+y-15, TH.menu_param);
   spr.drawSmoothArc(40+x+(sx/2), 66+y, 23, 20, 225, 360, TH.menu_param, TH.menu_bg);
@@ -934,7 +934,7 @@ static void drawSeek(int x, int y, int sx)
 
 static void drawBand(int x, int y, int sx)
 {
-  drawCommon(menu[MENU_BAND], x, y, sx);
+  drawCommon(menu[MENU_BAND], x, y, sx, true);
 
   int count = ITEM_COUNT(bands);
   for(int i=-2 ; i<3 ; i++)
@@ -956,7 +956,7 @@ static void drawBandwidth(int x, int y, int sx)
   int count = getLastBandwidth(currentMode) + 1;
   int idx   = bwIdx[currentMode] + count;
 
-  drawCommon(menu[MENU_BW], x, y, sx);
+  drawCommon(menu[MENU_BW], x, y, sx, true);
 
   for(int i=-2 ; i<3 ; i++)
   {
@@ -974,7 +974,7 @@ static void drawBandwidth(int x, int y, int sx)
 
 static void drawSleepMode(int x, int y, int sx)
 {
-  drawCommon(settings[MENU_SLEEPMODE], x, y, sx);
+  drawCommon(settings[MENU_SLEEPMODE], x, y, sx, true);
 
   int count = ITEM_COUNT(sleepModeDesc);
   for(int i=-2 ; i<3 ; i++)
@@ -993,7 +993,7 @@ static void drawSleepMode(int x, int y, int sx)
 
 static void drawWiFiMode(int x, int y, int sx)
 {
-  drawCommon(settings[MENU_WIFIMODE], x, y, sx);
+  drawCommon(settings[MENU_WIFIMODE], x, y, sx, true);
 
   int count = ITEM_COUNT(wifiModeDesc);
   for(int i=-2 ; i<3 ; i++)
@@ -1012,7 +1012,7 @@ static void drawWiFiMode(int x, int y, int sx)
 
 static void drawTheme(int x, int y, int sx)
 {
-  drawCommon(settings[MENU_THEME], x, y, sx);
+  drawCommon(settings[MENU_THEME], x, y, sx, true);
 
   int count = getTotalThemes();
   for(int i=-2 ; i<3 ; i++)
@@ -1031,7 +1031,7 @@ static void drawTheme(int x, int y, int sx)
 
 static void drawRDSMode(int x, int y, int sx)
 {
-  drawCommon(settings[MENU_RDS], x, y, sx);
+  drawCommon(settings[MENU_RDS], x, y, sx, true);
 
   int count = ITEM_COUNT(rdsMode);
   for(int i=-2 ; i<3 ; i++)
@@ -1052,7 +1052,7 @@ static void drawMemory(int x, int y, int sx)
 {
   char label_memory[16];
   sprintf(label_memory, "%s %2.2d", menu[MENU_MEMORY], memoryIdx + 1);
-  drawCommon(label_memory, x, y, sx);
+  drawCommon(label_memory, x, y, sx, true);
 
   int count = ITEM_COUNT(memories);
   for(int i=-2 ; i<3 ; i++)
@@ -1091,7 +1091,6 @@ static void drawVolume(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawNumber(volume, 40+x+(sx/2), 66+y, 7);
 }
 
@@ -1104,7 +1103,6 @@ static void drawAgc(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     spr.setTextColor(TH.menu_param, TH.menu_bg);
-    spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
     // G8PTN: Read back value is not used
     // rx.getAutomaticGainControl();
     if(!agcNdx && !agcIdx)
@@ -1130,7 +1128,6 @@ static void drawSoftMuteMaxAtt(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawString("Max Attn", 40+x+(sx/2), 32+y, 2);
   spr.drawNumber(softMuteMaxAttIdx, 40+x+(sx/2), 60+y, 4);
   spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
@@ -1143,7 +1140,6 @@ static void drawCal(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawNumber(getCurrentBand()->bandCal, 40+x+(sx/2), 60+y, 4);
   spr.drawString("Hz", 40+x+(sx/2), 90+y, 4);
 }
@@ -1155,7 +1151,6 @@ static void drawAvc(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawString("Max Gain", 40+x+(sx/2), 32+y, 2);
 
   // Only show AVC for AM and SSB modes
@@ -1174,7 +1169,6 @@ static void drawBrt(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawNumber(currentBrt, 40+x+(sx/2), 60+y, 4);
 }
 
@@ -1185,7 +1179,6 @@ static void drawSleep(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
 }
 
@@ -1196,7 +1189,6 @@ static void drawZoom(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
   spr.drawString(zoomMenu ? "On" : "Off", 40+x+(sx/2), 60+y, 4);
 }
 
@@ -1204,7 +1196,6 @@ static void drawScrollDir(int x, int y, int sx)
 {
   drawCommon(settings[MENU_SCROLL], x, y, sx);
   drawZoomedMenu(settings[MENU_SCROLL]);
-  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
 
   spr.fillRect(37+x+(sx/2), 45+y, 5, 40, TH.menu_param);
   if(scrollDirection>0)
