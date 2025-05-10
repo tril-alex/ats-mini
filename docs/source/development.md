@@ -26,6 +26,7 @@ The available options are:
 * `DISABLE_REMOTE` - disable remote control over the USB-serial port
 * `THEME_EDITOR` - enable the color theme editor
 * `ENABLE_HOLDOFF` - enable delayed screen update while tuning
+* `HALF_STEP` - enable encoder half-steps (useful for EC11E encoder)
 
 To set an option, add the `--build-property` command line argument like this:
 
