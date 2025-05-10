@@ -123,7 +123,7 @@ bool wifiInit(bool connectToNetwork)
   WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
 
   IPAddress ip(192, 168, 5, 5);
-  IPAddress gateway(192, 168, 5, 1); 
+  IPAddress gateway(192, 168, 5, 1);
   IPAddress subnet(255, 255, 255, 0);
   WiFi.softAPConfig(ip, gateway, subnet);
 
@@ -153,10 +153,10 @@ bool wifiInit(bool connectToNetwork)
     char nameSSID[16], namePASS[16];
     sprintf(nameSSID, "wifissid%d", j+1);
     sprintf(namePASS, "wifipass%d", j+1);
-  
+
     String ssid = preferences.getString(nameSSID, "");
     String password = preferences.getString(namePASS, "");
-  
+
     if(ssid != "")
     {
       WiFi.begin(ssid, password);
@@ -238,7 +238,7 @@ void webInit()
   // This method saved configuration form contents
   server.on("/setconfig", HTTP_ANY, webSetConfig);
 
-  // Start web server  
+  // Start web server
   server.begin();
 }
 
@@ -253,7 +253,7 @@ void webSetConfig(AsyncWebServerRequest *request)
     loginUsername = request->getParam("username", true)->value();
     loginPassword = request->getParam("password", true)->value();
 
-    preferences.putString("loginusername", loginUsername); 
+    preferences.putString("loginusername", loginUsername);
     preferences.putString("loginpassword", loginPassword);
   }
 
@@ -268,7 +268,7 @@ void webSetConfig(AsyncWebServerRequest *request)
 
     if(request->hasParam(nameSSID, true) && request->hasParam(namePASS, true))
     {
-      preferences.putString(nameSSID, request->getParam(nameSSID, true)->value()); 
+      preferences.putString(nameSSID, request->getParam(nameSSID, true)->value());
       preferences.putString(namePASS, request->getParam(namePASS, true)->value());
       haveSSID = true;
     }
@@ -278,13 +278,13 @@ void webSetConfig(AsyncWebServerRequest *request)
   if(request->hasParam("utcoffset", true))
   {
     String utcOffset = request->getParam("utcoffset", true)->value();
-    preferences.putString("utcoffset", utcOffset); 
+    preferences.putString("utcoffset", utcOffset);
     utcOffsetInSeconds = utcOffset.toInt();
     ntpClient.setTimeOffset(utcOffsetInSeconds);
     clockReset();
   }
 
-  // Done with the preferences  
+  // Done with the preferences
   preferences.end();
 
   // Show config page again
@@ -375,7 +375,7 @@ static const String webUtcOffsetSelector()
     "New York", "Rio de Janeiro", "Sandwich Islands", "Nuuk",
     "Reykjavik", "London", "Berlin", "Moscow",
     "Yerevan", "Astana", "Omsk", "Novosibirsk",
-    "Beijing", "Yakutsk", "Vladivostok", 0 
+    "Beijing", "Yakutsk", "Vladivostok", 0
   };
 
   String result = "";
