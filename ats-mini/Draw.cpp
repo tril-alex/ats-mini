@@ -144,41 +144,43 @@ static void drawRadioText(int y, int ymax)
 //
 static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
-  struct Rect { int x, y, w, h; };
+  struct Line { int x, y, w; };
 
-  const Rect hlDigitsFM[] =
+  const Line hlDigitsFM[] =
   {
-    { x - 30 - 32 * 0 -  0, y + 27, 27, 3 }, //    .01
-    { x - 30 - 32 * 0 - 17, y + 27, 27, 3 }, //    .05
-    { x - 30 - 32 * 1 -  0, y + 27, 27, 3 }, //    .10
-    { x - 30 - 32 * 1 - 23, y + 27, 27, 3 }, //    .50
-    { x - 30 - 32 * 2 - 12, y + 27, 27, 3 }, //   1.00
-    { x - 30 - 32 * 2 - 29, y + 27, 27, 3 }, //   5.00
-    { x - 30 - 32 * 3 - 12, y + 27, 27, 3 }, //  10.00
-    { x - 30 - 32 * 3 - 29, y + 27, 27, 3 }, //  50.00
-    { x - 30 - 32 * 4 +  3, y + 27, 12, 3 }, // 100.00
+    { x - 30 - 32 * 0 -  0, y + 28, 27 }, //    .01
+    { x - 30 - 32 * 0 - 16, y + 28, 27 }, //    .05
+    { x - 30 - 32 * 1 -  0, y + 28, 27 }, //    .10
+    { x - 30 - 32 * 1 - 22, y + 28, 27 }, //    .50
+    { x - 30 - 32 * 2 - 12, y + 28, 27 }, //   1.00
+    { x - 30 - 32 * 2 - 28, y + 28, 27 }, //   5.00
+    { x - 30 - 32 * 3 - 12, y + 28, 27 }, //  10.00
+    { x - 30 - 32 * 3 - 28, y + 28, 27 }, //  50.00
+    { x - 30 - 32 * 4 +  3, y + 28, 12 }, // 100.00
   };
 
-  const Rect hlDigitsAMSSB[] =
+  const Line hlDigitsAMSSB[] =
   {
-    { 12 + x + 14 * 2 -  0, y + 27, 12, 3 }, //      .001
-    { 12 + x + 14 * 2 -  7, y + 27, 12, 3 }, //      .005
-    { 12 + x + 14 * 1 -  0, y + 27, 12, 3 }, //      .010
-    { 12 + x + 14 * 1 -  7, y + 27, 12, 3 }, //      .050
-    { 12 + x + 14 * 0 -  0, y + 27, 12, 3 }, //      .100
-    { 12 + x + 14 * 0 - 11, y + 27, 12, 3 }, //      .500
-    { x - 30 - 32 * 0 -  0, y + 27, 27, 3 }, //     1.000
-    { x - 30 - 32 * 0 - 16, y + 27, 27, 3 }, //     5.000
-    { x - 30 - 32 * 1 -  0, y + 27, 27, 3 }, //    10.000
-    { x - 30 - 32 * 1 - 16, y + 27, 27, 3 }, //    50.000
-    { x - 30 - 32 * 2 -  0, y + 27, 27, 3 }, //   100.000
-    { x - 30 - 32 * 2 - 16, y + 27, 27, 3 }, //   500.000
-    { x - 30 - 32 * 3 -  0, y + 27, 27, 3 }, //  1000.000
-    { x - 30 - 32 * 3 - 16, y + 27, 27, 3 }, //  5000.000
-    { x - 30 - 32 * 4 -  0, y + 27, 27, 3 }, // 10000.000
+    { x + 12 + 14 * 2 -  0, y + 28, 12 }, //      .001
+    { x + 12 + 14 * 2 -  7, y + 28, 12 }, //      .005
+    { x + 12 + 14 * 1 -  0, y + 28, 12 }, //      .010
+    { x + 12 + 14 * 1 -  7, y + 28, 12 }, //      .050
+    { x + 12 + 14 * 0 -  0, y + 28, 12 }, //      .100
+    { x + 12 + 14 * 0 - 11, y + 28, 12 }, //      .500
+    { x - 30 - 32 * 0 -  0, y + 28, 27 }, //     1.000
+    { x - 30 - 32 * 0 - 16, y + 28, 27 }, //     5.000
+    { x - 30 - 32 * 1 -  0, y + 28, 27 }, //    10.000
+    { x - 30 - 32 * 1 - 16, y + 28, 27 }, //    50.000
+    { x - 30 - 32 * 2 -  0, y + 28, 27 }, //   100.000
+    { x - 30 - 32 * 2 - 16, y + 28, 27 }, //   500.000
+    { x - 30 - 32 * 3 -  0, y + 28, 27 }, //  1000.000
+    { x - 30 - 32 * 3 - 16, y + 28, 27 }, //  5000.000
+    { x - 30 - 32 * 4 -  0, y + 28, 27 }, // 10000.000
   };
 
-  uint16_t hl_color = hl & 0x80 ? TH.freq_hl_act : TH.freq_hl;
+  const struct Line *li;
+  bool select = hl & 0x80;
+  uint16_t hl_color = select ? TH.freq_hl_sel : TH.freq_hl;
   hl &= 0x7F;
 
   spr.setTextDatum(MR_DATUM);
@@ -193,10 +195,7 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     spr.drawString("MHz", ux, uy);
 
     if(hl<ITEM_COUNT(hlDigitsFM))
-    {
-      const struct Rect *r = &hlDigitsFM[hl];
-      spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, hl_color);
-    }
+      li = &hlDigitsFM[hl];
   }
   else
   {
@@ -224,9 +223,20 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     spr.drawString("kHz", ux, uy);
 
     if(hl<ITEM_COUNT(hlDigitsAMSSB))
+      li = &hlDigitsAMSSB[hl];
+  }
+
+  if(li)
+  {
+    if(select)
     {
-      const struct Rect *r = &hlDigitsAMSSB[hl];
-      spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, hl_color);
+      spr.fillRoundRect(li->x + 1, li->y - 1, li->w - 2, 3, 1, hl_color);
+      spr.fillTriangle(li->x, li->y, li->x + 2, li->y - 2, li->x + 2, li->y + 2, hl_color);
+      spr.fillTriangle(li->x + li->w - 1, li->y, li->x + li->w - 3, li->y - 2, li->x + li->w - 3, li->y + 2, hl_color);
+    }
+    else
+    {
+      spr.fillRoundRect(li->x, li->y - 1, li->w, 3, 1, hl_color);
     }
   }
 }
