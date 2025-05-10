@@ -20,8 +20,9 @@
 #define STRENGTH_CHECK_TIME   1500  // Not used
 #define RDS_CHECK_TIME         250  // Increased from 90
 #define SEEK_TIMEOUT        600000  // Max seek timeout (ms)
+#define NTP_CHECK_TIME       60000  // NTP time refresh period (ms)
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
-#define TUNE_HOLDOFF_TIME         90    // Timer to hold off display whilst tuning
+#define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tuning
 
 // =================================
 // CONSTANTS AND VARIABLES
@@ -40,6 +41,7 @@ long elapsedButton = millis();
 
 long lastStrengthCheck = millis();
 long lastRDSCheck = millis();
+long lastNTPCheck = millis();
 
 long elapsedCommand = millis();
 volatile int encoderCount = 0;
@@ -711,10 +713,18 @@ void loop()
     elapsedCommand = currentTime;
   }
 
+  // Periodically check received RDS information
   if((currentTime - lastRDSCheck) > RDS_CHECK_TIME)
   {
-    if((currentMode == FM) && (snr >= 12) && checkRds()) needRedraw = true;
+    needRedraw |= (currentMode == FM) && (snr >= 12) && checkRds();
     lastRDSCheck = currentTime;
+  }
+
+  // Periodically synchronize time via NTP
+  if((currentTime - lastNTPCheck) > NTP_CHECK_TIME)
+  {
+    needRedraw |= ntpSyncTime();
+    lastNTPCheck = currentTime;
   }
 
   // Tick EEPROM time, saving changes if the occurred and there has
@@ -734,8 +744,6 @@ void loop()
   {
     if(currentCmd == CMD_NONE) needRedraw = true;
     background_timer = currentTime;
-    // Also sync time via NTP, if needed
-    needRedraw |= ntpSyncTime();
   }
 
 #ifdef ENABLE_HOLDOFF

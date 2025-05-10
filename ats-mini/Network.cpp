@@ -53,8 +53,10 @@ void netClearPreferences()
 //
 void netStop()
 {
+  drawWiFiStatus("Disconnecting from WiFi network", 0);
+  server.end();
   WiFi.disconnect(true);
-  drawWiFiStatus("Disconnected from WiFi network", 0);
+  WiFi.softAPdisconnect(true);
 }
 
 //
@@ -74,7 +76,8 @@ void netInit(uint8_t netMode)
   {
     // Get NTP time from the network
     clockReset();
-    ntpSyncTime();
+    for(int j=0 ; j<10 ; j++)
+      if(ntpSyncTime()) break; else delay(1000);
   }
 
   // If only connected to sync...

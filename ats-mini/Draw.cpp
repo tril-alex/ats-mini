@@ -144,15 +144,10 @@ static void drawRadioText(int y, int ymax)
 //
 static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t hl)
 {
-  struct Rect
-  {
-    int x;
-    int y;
-    int w;
-    int h;
-  };
+  struct Rect { int x, y, w, h; };
 
-  const Rect hlDigitsFM[] = {
+  const Rect hlDigitsFM[] =
+  {
     { x - 30 - 32 * 0 -  0, y + 27, 27, 3 }, //    .01
     { x - 30 - 32 * 0 - 17, y + 27, 27, 3 }, //    .05
     { x - 30 - 32 * 1 -  0, y + 27, 27, 3 }, //    .10
@@ -164,7 +159,8 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     { x - 30 - 32 * 4 +  3, y + 27, 12, 3 }, // 100.00
   };
 
-  const Rect hlDigitsAMSSB[] = {
+  const Rect hlDigitsAMSSB[] =
+  {
     { 12 + x + 14 * 2 -  0, y + 27, 12, 3 }, //      .001
     { 12 + x + 14 * 2 -  7, y + 27, 12, 3 }, //      .005
     { 12 + x + 14 * 1 -  0, y + 27, 12, 3 }, //      .010
@@ -196,7 +192,8 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("MHz", ux, uy);
 
-    if (hl < ITEM_COUNT(hlDigitsFM)) {
+    if(hl<ITEM_COUNT(hlDigitsFM))
+    {
       const struct Rect *r = &hlDigitsFM[hl];
       spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, hl_color);
     }
@@ -226,7 +223,8 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("kHz", ux, uy);
 
-    if (hl < ITEM_COUNT(hlDigitsAMSSB)) {
+    if(hl<ITEM_COUNT(hlDigitsAMSSB))
+    {
       const struct Rect *r = &hlDigitsAMSSB[hl];
       spr.fillRoundRect(r->x, r->y, r->w, r->h, 1, hl_color);
     }
