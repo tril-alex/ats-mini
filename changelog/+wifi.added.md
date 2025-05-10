@@ -1,0 +1,1 @@
+Wi-Fi mode to sync time over NTP.

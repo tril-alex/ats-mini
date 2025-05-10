@@ -125,7 +125,7 @@ static const char *settings[] =
   "Scroll",
   "Sleep",
   "Sleep Mode",
-  "WiFi",
+  "Wi-Fi",
   "About",
 };
 
