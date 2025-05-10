@@ -53,7 +53,6 @@ void netClearPreferences()
 //
 void netStop()
 {
-  drawWiFiStatus("Disconnecting from WiFi network", 0);
   server.end();
   WiFi.disconnect(true);
   WiFi.softAPdisconnect(true);
@@ -64,16 +63,19 @@ void netStop()
 //
 void netInit(uint8_t netMode)
 {
+  // Always disable WiFi first
+  netStop();
+
   // Do not initialize WiFi if disabled
-  if(netMode==NET_OFF)
-  {
-    netStop();
-    return;
-  }
+  if(netMode==NET_OFF) return;
 
   // Initialize WiFi and try connecting to a network
   if(wifiInit(netMode!=NET_AP_ONLY))
   {
+    // NTP time offset determined by time zone
+    ntpClient.setTimeOffset(utcOffsetInSeconds);
+    // NTP time updates will happen every 5 minutes
+    ntpClient.setUpdateInterval(5*60*1000);
     // Get NTP time from the network
     clockReset();
     for(int j=0 ; j<10 ; j++)
@@ -119,12 +121,14 @@ bool ntpSyncTime()
 //
 bool wifiInit(bool connectToNetwork)
 {
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
-
+  // These are our own access point (AP) addresses
   IPAddress ip(192, 168, 5, 5);
   IPAddress gateway(192, 168, 5, 1);
   IPAddress subnet(255, 255, 255, 0);
+
+  // Start as access point (AP)
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
   WiFi.softAPConfig(ip, gateway, subnet);
 
   String status1 = "AP Mode IP : " + WiFi.softAPIP().toString();
@@ -181,6 +185,7 @@ bool wifiInit(bool connectToNetwork)
   // Done with preferences
   preferences.end();
 
+  // If failed connecting to WiFi network...
   if(WiFi.status()!=WL_CONNECTED)
   {
     // WiFi connection failed
@@ -195,11 +200,6 @@ bool wifiInit(bool connectToNetwork)
     // WiFi connection succeeded
     status2 = "IP : " + WiFi.localIP().toString();
     drawWiFiStatus("Connected to WiFi network", status2.c_str());
-    // Initiate NTP time updates to happen every 5 minutes
-    ntpClient.setTimeOffset(utcOffsetInSeconds);
-    ntpClient.setUpdateInterval(5*60*1000);
-    ntpClient.update();
-    clockReset();
     // Done
     ajaxInterval = 1000;
     delay(2000);
