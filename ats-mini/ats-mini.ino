@@ -255,8 +255,8 @@ void useBand(const Band *band)
 
   if(band->bandMode==FM)
   {
-    // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
+    rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
     rx.setFMDeEmphasis(1);
     rx.RdsInit();
@@ -266,9 +266,6 @@ void useBand(const Band *band)
   }
   else
   {
-    // Set the tuning capacitor for SW or MW/LW
-    // rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
-
     if(band->bandMode==AM)
     {
       rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
@@ -284,6 +281,9 @@ void useBand(const Band *band)
       // To move frequency forward, need to move the BFO backwards
       rx.setSSBBfo(-(currentBFO + band->bandCal));
     }
+
+    // Set the tuning capacitor for SW or MW/LW
+    rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
 
     // G8PTN: Enable GPIO1 as output
     rx.setGpioCtl(1, 0, 0);

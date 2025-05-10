@@ -43,6 +43,33 @@ class SI4735_fixed: public SI4735
       return getRdsVersionCode()? SI4735::getRdsText2B() : SI4735::getRdsText2A();
     }
 
+    // Copy-pasted from the parent class just to override setAM()
+    void setAM(uint16_t fromFreq, uint16_t toFreq, uint16_t initialFreq, uint16_t step)
+    {
+      currentMinimumFrequency = fromFreq;
+      currentMaximumFrequency = toFreq;
+      currentStep = step;
+
+      if (initialFreq < fromFreq || initialFreq > toFreq)
+        initialFreq = fromFreq;
+
+      setAM();
+      currentWorkFrequency = initialFreq;
+      setFrequency(currentWorkFrequency);
+    }
+
+    void setAM()
+    {
+      // Force powerDown and radioPowerUp, fixes https://github.com/esp32-si4732/ats-mini/issues/13#issuecomment-2742054451
+      powerDown();
+      setPowerUp(this->ctsIntEnable, 0, 0, this->currentClockType, AM_CURRENT_MODE, this->currentAudioMode);
+      radioPowerUp();
+      setAvcAmMaxGain(currentAvcAmMaxGain); // Set AM Automatic Volume Gain (default value is DEFAULT_CURRENT_AVC_AM_MAX_GAIN)
+      setVolume(volume);                    // Set to previus configured volume
+      currentSsbStatus = 0;
+      lastMode = AM_CURRENT_MODE;
+    }
+
 #if 0
     // Speeding up SI4735::downloadPatch() function
     bool downloadPatch(const uint8_t *ssb_patch_content, const uint16_t ssb_patch_content_size)
