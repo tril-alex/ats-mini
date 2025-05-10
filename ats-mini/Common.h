@@ -109,6 +109,7 @@ extern uint16_t currentBrt;
 extern uint16_t currentSleep;
 extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
+extern int8_t scrollDirection;
 
 extern int8_t FmAgcIdx;
 extern int8_t AmAgcIdx;

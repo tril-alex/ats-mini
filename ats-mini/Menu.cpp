@@ -107,10 +107,11 @@ static const char *menu[] =
 #define MENU_THEME        2
 #define MENU_RDS          3
 #define MENU_ZOOM         4
-#define MENU_SLEEP        5
-#define MENU_SLEEPMODE    6
-#define MENU_WIFIMODE     7
-#define MENU_ABOUT        8
+#define MENU_SCROLL       5
+#define MENU_SLEEP        6
+#define MENU_SLEEPMODE    7
+#define MENU_WIFIMODE     8
+#define MENU_ABOUT        9
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -121,6 +122,7 @@ static const char *settings[] =
   "Theme",
   "RDS",
   "Zoom Menu",
+  "Scroll",
   "Sleep",
   "Sleep Mode",
   "WiFi",
@@ -475,6 +477,11 @@ static void doZoom(int dir)
   zoomMenu = !zoomMenu;
 }
 
+static void doScrollDir(int dir)
+{
+  scrollDirection = (scrollDirection == 1) ? -1 : 1;
+}
+
 bool tuneToMemory(const Memory *memory)
 {
   // Must have frequency
@@ -693,6 +700,7 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_THEME:      currentCmd = CMD_THEME;     break;
     case MENU_RDS:        currentCmd = CMD_RDS;       break;
     case MENU_ZOOM:       currentCmd = CMD_ZOOM;      break;
+    case MENU_SCROLL:     currentCmd = CMD_SCROLL;    break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
@@ -707,26 +715,28 @@ bool doSideBar(uint16_t cmd, int dir)
 
   switch(cmd)
   {
-    case CMD_MENU:      doMenu(dir);break;
-    case CMD_MODE:      doMode(dir);break;
-    case CMD_STEP:      doStep(dir);break;
+    // Menus and list-based options must take scrollDirection into account
+    case CMD_MENU:      doMenu(scrollDirection * dir);break;
+    case CMD_MODE:      doMode(scrollDirection * dir);break;
+    case CMD_STEP:      doStep(scrollDirection * dir);break;
     case CMD_SEEK:      doSeek(dir);break;
     case CMD_AGC:       doAgc(dir);break;
-    case CMD_BANDWIDTH: doBandwidth(dir);break;
+    case CMD_BANDWIDTH: doBandwidth(scrollDirection * dir);break;
     case CMD_VOLUME:    doVolume(dir);break;
     case CMD_SOFTMUTE:  doSoftMute(dir);break;
-    case CMD_BAND:      doBand(dir);break;
+    case CMD_BAND:      doBand(scrollDirection * dir);break;
     case CMD_AVC:       doAvc(dir);break;
-    case CMD_SETTINGS:  doSettings(dir);break;
+    case CMD_SETTINGS:  doSettings(scrollDirection * dir);break;
     case CMD_BRT:       doBrt(dir);break;
     case CMD_CAL:       doCal(dir);break;
-    case CMD_THEME:     doTheme(dir);break;
-    case CMD_RDS:       doRDSMode(dir);break;
-    case CMD_MEMORY:    doMemory(dir);break;
+    case CMD_THEME:     doTheme(scrollDirection * dir);break;
+    case CMD_RDS:       doRDSMode(scrollDirection * dir);break;
+    case CMD_MEMORY:    doMemory(scrollDirection * dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
-    case CMD_SLEEPMODE: doSleepMode(dir);break;
-    case CMD_WIFIMODE:  doWiFiMode(dir);break;
+    case CMD_SLEEPMODE: doSleepMode(scrollDirection * dir);break;
+    case CMD_WIFIMODE:  doWiFiMode(scrollDirection * dir);break;
     case CMD_ZOOM:      doZoom(dir);break;
+    case CMD_SCROLL:    doScrollDir(dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -1190,6 +1200,19 @@ static void drawZoom(int x, int y, int sx)
   spr.drawString(zoomMenu ? "On" : "Off", 40+x+(sx/2), 60+y, 4);
 }
 
+static void drawScrollDir(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_SCROLL], x, y, sx);
+  drawZoomedMenu(settings[MENU_SCROLL]);
+  spr.fillRoundRect(6+x, 24+y+(2*16), 66+sx, 16, 2, TH.menu_bg);
+
+  spr.fillRect(37+x+(sx/2), 45+y, 5, 40, TH.menu_param);
+  if(scrollDirection>0)
+    spr.fillTriangle(39+x+(sx/2)-5, 45+y, 39+x+(sx/2)+5, 45+y, 39+x+(sx/2), 45+y-5, TH.menu_param);
+  else
+    spr.fillTriangle(39+x+(sx/2)-5, 85+y, 39+x+(sx/2)+5, 85+y, 39+x+(sx/2), 85+y+5, TH.menu_param);
+}
+
 static void drawInfo(int x, int y, int sx)
 {
   char text[16];
@@ -1289,8 +1312,9 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
     case CMD_SLEEP:     drawSleep(x, y, sx);     break;
     case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
-    case CMD_WIFIMODE:  drawWiFiMode(x, y, sx); break;
+    case CMD_WIFIMODE:  drawWiFiMode(x, y, sx);  break;
     case CMD_ZOOM:      drawZoom(x, y, sx);      break;
+    case CMD_SCROLL:    drawScrollDir(x, y, sx); break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

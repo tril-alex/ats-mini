@@ -152,7 +152,8 @@ void eepromSaveConfig()
   EEPROM.write(addr++, themeIdx);                // Stores the current Theme index value
   EEPROM.write(addr++, rdsModeIdx);              // Stores the current RDS Mode value
   EEPROM.write(addr++, sleepModeIdx);            // Stores the current Sleep Mode value
-  EEPROM.write(addr++, (uint8_t)zoomMenu);       // Stores the current Zoom menu setting
+  EEPROM.write(addr++, (uint8_t)zoomMenu);       // Stores the current Zoom Menu setting
+  EEPROM.write(addr++, scrollDirection);         // Stores the current Scroll setting
   EEPROM.commit();
 
   addr = EEPROM_SETP_ADDR;
@@ -223,7 +224,8 @@ void eepromLoadConfig()
   themeIdx       = EEPROM.read(addr++);          // Reads stored Theme index value
   rdsModeIdx     = EEPROM.read(addr++);          // Reads stored RDS Mode value
   sleepModeIdx   = EEPROM.read(addr++);          // Reads stored Sleep Mode value
-  zoomMenu       = (bool)EEPROM.read(addr++);    // Reads stored Zoom menu setting
+  zoomMenu       = (bool)EEPROM.read(addr++);    // Reads stored Zoom Menu setting
+  scrollDirection = EEPROM.read(addr++)==1?1:-1; // Reads stored Scroll setting
 
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<getTotalBands() ; i++)

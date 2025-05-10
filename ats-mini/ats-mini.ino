@@ -69,6 +69,7 @@ uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255
 uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
 bool zoomMenu = false;                  // Display zoomed menu item
+int8_t scrollDirection = 1;             // Menu scroll direction
 
 // Background screen refresh
 uint32_t background_timer = millis();   // Background screen refresh timer.

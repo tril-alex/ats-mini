@@ -29,10 +29,11 @@
 #define CMD_THEME     0x2300 // |
 #define CMD_RDS       0x2400 // |
 #define CMD_ZOOM      0x2500 // |
-#define CMD_SLEEP     0x2600 // |
-#define CMD_SLEEPMODE 0x2700 // |
-#define CMD_WIFIMODE  0x2800 // |
-#define CMD_ABOUT     0x2900 //-+
+#define CMD_SCROLL    0x2600 // |
+#define CMD_SLEEP     0x2700 // |
+#define CMD_SLEEPMODE 0x2800 // |
+#define CMD_WIFIMODE  0x2900 // |
+#define CMD_ABOUT     0x2A00 //-+
 
 //
 // Data Types
