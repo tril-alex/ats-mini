@@ -1,4 +1,6 @@
 #include "Common.h"
+#include "Menu.h"
+
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <AsyncTCP.h>
@@ -362,6 +364,28 @@ static const String webRadioPage()
   "<P ALIGN='CENTER'>"
     "<A HREF='/config'>Config</A>"
   "</P>"
+  "<TABLE COLUMNS=2>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Firmware</TD>"
+    "<TD>" + getVersion() + "</TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Band</TD>"
+    "<TD>" + getCurrentBand()->bandName + "</TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Frequency</TD>"
+    "<TD>" + String(currentFrequency + currentBFO/1000.0) + "kHz</TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Signal Strength</TD>"
+    "<TD>" + String(getStrength(rssi)) + "dB</TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Battery Voltage</TD>"
+    "<TD>" + String(batteryMonitor()) + "V</TD>"
+  "</TR>"
+  "</TABLE>"
 "</BODY>"
 "</HTML>"
 ;
