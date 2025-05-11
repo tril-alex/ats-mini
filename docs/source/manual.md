@@ -114,35 +114,35 @@ To reset the receiver settings (current band, frequency, favorite stations, etc)
 
 A USB-serial interface is available to control and monitor the receiver. Use [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or Picocom to connect to the serial port. Alernatively, open the following web terminal in Google Chrome: <https://www.serialterminal.com/>. A list of commands:
 
-| Button       | Function            | Comments                                                                                   |
-|--------------|---------------------|--------------------------------------------------------------------------------------------|
-| <kbd>R</kbd> | Rotate Encoder Up   | Tune the frequency up, scroll the menu, etc                                                |
-| <kbd>r</kbd> | Rotate Encoder Down | Tune the frequency down, scroll the menu, etc                                              |
-| <kbd>e</kbd> | Encoder Button      | The <kbd>e</kbd> emulates a single push and can not be used for EEPROM reset or long press |
-| <kbd>V</kbd> | Volume Up           |                                                                                            |
-| <kbd>v</kbd> | Volume Down         |                                                                                            |
-| <kbd>B</kbd> | Next Band           |                                                                                            |
-| <kbd>b</kbd> | Previous Band       |                                                                                            |
-| <kbd>M</kbd> | Next Mode           | Next modulation                                                                            |
-| <kbd>m</kbd> | Previous Mode       | Previous modulation                                                                        |
-| <kbd>S</kbd> | Next step           |                                                                                            |
-| <kbd>s</kbd> | Previous step       |                                                                                            |
-| <kbd>W</kbd> | Next Bandwidth      |                                                                                            |
-| <kbd>w</kbd> | Previous Bandwidth  |                                                                                            |
-| <kbd>A</kbd> | AGC/Att Up          | Automatic Gain Control or Attenuator up                                                    |
-| <kbd>a</kbd> | AGC/Att Down        | Automatic Gain Control or Attenuator down                                                  |
-| <kbd>L</kbd> | Backlight Up        |                                                                                            |
-| <kbd>l</kbd> | Backlight Down      |                                                                                            |
-| <kbd>I</kbd> | Calibration Up      |                                                                                            |
-| <kbd>i</kbd> | Calibration Down    |                                                                                            |
-| <kbd>O</kbd> | Sleep On            |                                                                                            |
-| <kbd>o</kbd> | Sleep Off           |                                                                                            |
-| <kbd>t</kbd> | Toggle Log          | Toggle the receiver monitor (log) on and off                                               |
-| <kbd>C</kbd> | Screenshot          | Capture a screenshot and print it as a BMP image in HEX format                             |
-| <kbd>$</kbd> | Show Memory Slots   | Show memory slots in a format suitable for restoring them after the reset                  |
-| <kbd>#</kbd> | Set Memory Slot     | Example `#01,VHF,10790,FM` (slot, band, frequency, mode). Set freq to 0 to clear a slot.   |
-| <kbd>@</kbd> | Get Theme           | Print the current color theme (see [theme editor](development.md#theme-editor))            |
-| <kbd>!</kbd> | Set Theme           | Set the current color theme as a list of HEX numbers (effective until a power cycle)       |
+| Button       | Function            | Comments                                                                                     |
+|--------------|---------------------|----------------------------------------------------------------------------------------------|
+| <kbd>R</kbd> | Rotate Encoder Up   | Tune the frequency up, scroll the menu, etc                                                  |
+| <kbd>r</kbd> | Rotate Encoder Down | Tune the frequency down, scroll the menu, etc                                                |
+| <kbd>e</kbd> | Encoder Button      | The <kbd>e</kbd> emulates a single push and can not be used for EEPROM reset or long press   |
+| <kbd>V</kbd> | Volume Up           |                                                                                              |
+| <kbd>v</kbd> | Volume Down         |                                                                                              |
+| <kbd>B</kbd> | Next Band           |                                                                                              |
+| <kbd>b</kbd> | Previous Band       |                                                                                              |
+| <kbd>M</kbd> | Next Mode           | Next modulation                                                                              |
+| <kbd>m</kbd> | Previous Mode       | Previous modulation                                                                          |
+| <kbd>S</kbd> | Next step           |                                                                                              |
+| <kbd>s</kbd> | Previous step       |                                                                                              |
+| <kbd>W</kbd> | Next Bandwidth      |                                                                                              |
+| <kbd>w</kbd> | Previous Bandwidth  |                                                                                              |
+| <kbd>A</kbd> | AGC/Att Up          | Automatic Gain Control or Attenuator up                                                      |
+| <kbd>a</kbd> | AGC/Att Down        | Automatic Gain Control or Attenuator down                                                    |
+| <kbd>L</kbd> | Backlight Up        |                                                                                              |
+| <kbd>l</kbd> | Backlight Down      |                                                                                              |
+| <kbd>I</kbd> | Calibration Up      |                                                                                              |
+| <kbd>i</kbd> | Calibration Down    |                                                                                              |
+| <kbd>O</kbd> | Sleep On            |                                                                                              |
+| <kbd>o</kbd> | Sleep Off           |                                                                                              |
+| <kbd>t</kbd> | Toggle Log          | Toggle the receiver monitor (log) on and off                                                 |
+| <kbd>C</kbd> | Screenshot          | Capture a screenshot and print it as a BMP image in HEX format                               |
+| <kbd>$</kbd> | Show Memory Slots   | Show memory slots in a format suitable for restoring them after the reset                    |
+| <kbd>#</kbd> | Set Memory Slot     | Example `#01,VHF,107900000,FM` (slot, band, frequency, mode). Set freq to 0 to clear a slot. |
+| <kbd>@</kbd> | Get Theme           | Print the current color theme (see [theme editor](development.md#theme-editor))              |
+| <kbd>!</kbd> | Set Theme           | Set the current color theme as a list of HEX numbers (effective until a power cycle)         |
 
 ```{hint}
 To backup/restore the Memory Slots, you can open this [web based tool](memory.md) in Google Chrome.
