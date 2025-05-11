@@ -178,9 +178,11 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     { x - 30 - 32 * 4 -  0, y + 28, 27 }, // 10000.000
   };
 
+  // Top bit specifies if the digit selector is on
+  bool selectOn = hl & 0x80;
   const struct Line *li;
-  bool select = hl & 0x80;
-  uint16_t hl_color = select ? TH.freq_hl_sel : TH.freq_hl;
+
+  // Lower 7 bits specify the selected digit
   hl &= 0x7F;
 
   spr.setTextDatum(MR_DATUM);
@@ -188,17 +190,20 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
 
   if(currentMode==FM)
   {
+    // Determine where underscore is located
+    li = hl<ITEM_COUNT(hlDigitsFM)? &hlDigitsFM[hl] : 0;
+
     // FM frequency
     spr.drawFloat(freq/100.00, 2, x, y, 7);
     spr.setTextDatum(ML_DATUM);
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("MHz", ux, uy);
-
-    if(hl<ITEM_COUNT(hlDigitsFM))
-      li = &hlDigitsFM[hl];
   }
   else
   {
+    // Determine where underscore is located
+    li = hl<ITEM_COUNT(hlDigitsAMSSB)? &hlDigitsAMSSB[hl] : 0;
+
     if(isSSB())
     {
       // SSB frequency
@@ -221,22 +226,20 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
     // SSB/AM frequencies are measured in kHz
     spr.setTextColor(TH.funit_text, TH.bg);
     spr.drawString("kHz", ux, uy);
-
-    if(hl<ITEM_COUNT(hlDigitsAMSSB))
-      li = &hlDigitsAMSSB[hl];
   }
 
+  // If drawing an underscore...
   if(li)
   {
-    if(select)
+    if(selectOn)
     {
-      spr.fillRoundRect(li->x + 1, li->y - 1, li->w - 2, 3, 1, hl_color);
-      spr.fillTriangle(li->x, li->y, li->x + 2, li->y - 2, li->x + 2, li->y + 2, hl_color);
-      spr.fillTriangle(li->x + li->w - 1, li->y, li->x + li->w - 3, li->y - 2, li->x + li->w - 3, li->y + 2, hl_color);
+      spr.fillRoundRect(li->x + 1, li->y - 1, li->w - 2, 3, 1, TH.freq_hl_sel);
+      spr.fillTriangle(li->x, li->y, li->x + 2, li->y - 2, li->x + 2, li->y + 2, TH.freq_hl_sel);
+      spr.fillTriangle(li->x + li->w - 1, li->y, li->x + li->w - 3, li->y - 2, li->x + li->w - 3, li->y + 2, TH.freq_hl_sel);
     }
     else
     {
-      spr.fillRoundRect(li->x, li->y - 1, li->w, 3, 1, hl_color);
+      spr.fillRoundRect(li->x, li->y - 1, li->w, 3, 1, TH.freq_hl);
     }
   }
 }

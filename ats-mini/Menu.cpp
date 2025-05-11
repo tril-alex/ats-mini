@@ -142,7 +142,7 @@ int getTotalModes() { return(ITEM_COUNT(bandModeDesc)); }
 //
 
 uint8_t memoryIdx = 0;
-Memory memories[32];
+Memory memories[MEMORY_COUNT];
 Memory newMemory;
 
 int getTotalMemories() { return(ITEM_COUNT(memories)); }

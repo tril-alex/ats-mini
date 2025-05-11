@@ -38,6 +38,7 @@ static bool wifiInit(bool connectToNetwork = true);
 static void webInit();
 static void webSetConfig(AsyncWebServerRequest *request);
 static const String webRadioPage();
+static const String webMemoryPage();
 static const String webConfigPage();
 
 //
@@ -81,7 +82,7 @@ void netInit(uint8_t netMode)
     // Get NTP time from the network
     clockReset();
     for(int j=0 ; j<10 ; j++)
-      if(ntpSyncTime()) break; else delay(1000);
+      if(ntpSyncTime()) break; else delay(500);
   }
 
   // If only connected to sync...
@@ -218,6 +219,10 @@ void webInit()
     request->send(200, "text/html", webRadioPage());
   });
 
+  server.on("/memory", HTTP_ANY, [] (AsyncWebServerRequest *request) {
+    request->send(200, "text/html", webMemoryPage());
+  });
+
   server.on("/config", HTTP_ANY, [] (AsyncWebServerRequest *request) {
     if(loginUsername != "" && loginPassword != "")
       if(!request->authenticate(loginUsername.c_str(), loginPassword.c_str()))
@@ -228,14 +233,6 @@ void webInit()
   server.onNotFound([] (AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
   });
-
-  server.on("/logout", HTTP_GET, [] (AsyncWebServerRequest *request) {
-    request->send(401);
-  });
-
-//  server.on("/logged-out", HTTP_GET, [] (AsyncWebServerRequest *request) {
-//    request->send(200, "text/html", logout_html);
-//  });
 
   // This method saved configuration form contents
   server.on("/setconfig", HTTP_ANY, webSetConfig);
@@ -395,10 +392,14 @@ static const String webUtcOffsetSelector()
 
 static const String webRadioPage()
 {
+  String freq = currentMode == FM?
+    String(currentFrequency / 100.0) + "MHz "
+  : String(currentFrequency + currentBFO / 1000.0) + "kHz ";
+
   return webPage(
 "<H1>ATS-Mini Pocket Receiver</H1>"
 "<P ALIGN='CENTER'>"
-  "<A HREF='/config'>Config</A>"
+  "<A HREF='/memory'>Memory</A>&nbsp;|&nbsp;<A HREF='/config'>Config</A>"
 "</P>"
 "<TABLE COLUMNS=2>"
 "<TR>"
@@ -411,7 +412,7 @@ static const String webRadioPage()
 "</TR>"
 "<TR>"
   "<TD CLASS='LABEL'>Frequency</TD>"
-  "<TD>" + String(currentFrequency + currentBFO/1000.0) + "kHz " + String(bandModeDesc[currentMode]) + "</TD>"
+  "<TD>" + freq + String(bandModeDesc[currentMode]) + "</TD>"
 "</TR>"
 "<TR>"
   "<TD CLASS='LABEL'>Signal Strength</TD>"
@@ -423,6 +424,30 @@ static const String webRadioPage()
 "</TR>"
 "</TABLE>"
 );
+}
+
+static const String webMemoryPage()
+{
+  String items = "";
+
+  for(int j=0 ; j<MEMORY_COUNT ; j++)
+  {
+    char text[64];
+    sprintf(text, "<TR><TD CLASS='LABEL'>%02d</TD><TD>", j+1);
+    items += text;
+
+    if(!memories[j].freq)
+      items += "</TD></TR>";
+    else
+    {
+      String freq = currentMode == FM?
+        String(memories[j].freq / 100.0) + "MHz "
+      : String(memories[j].freq + memories[j].hz100 / 10.0) + "kHz ";
+      items += freq + bandModeDesc[currentMode] + "</TD></TR>";
+    }
+  }
+
+  return webPage("<TABLE COLUMNS=2>" + items + "</TABLE>");
 }
 
 const String webConfigPage()
