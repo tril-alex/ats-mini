@@ -10,7 +10,7 @@
 * **Band name and modulation** (VHF & FM, top center). See the [Bands table](#bands-table) for more details.
 * **Info panel** (the box on the left side), also **Menu**. The parameters are explained in the [Menu](#menu) section.
 * **Frequency** (center of the screen).
-* **FM station name** (RDS PS) or **frequency name** (right below the frequency). A frequency name appears for some popular frequencies like FT8, SSTV or CB channels.
+* **FM station name** (RDS PS) or **frequency name** (right below the frequency). A frequency name appears for some popular frequencies like FT8, SSTV or CB channels. Can also display current **menu option** using a bigger font when the Zoom Menu setting is enabled.
 * **Tuning scale** (bottom of the screen). Can be replaced with additional RDS fields (RT, PTY) when extended RDS is enabled.
 
 
@@ -94,8 +94,8 @@ To reset the receiver settings (current band, frequency, favorite stations, etc)
 | 41M  | 7000 kHz      | 9000 kHz      | AM           |
 | 49M  | 5000 kHz      | 7000 kHz      | AM           |
 | 60M  | 4000 kHz      | 5100 kHz      | AM           |
-| 75M  | 3900 kHz      | 4000 kHz      | AM           |
-| 90M  | 3200 kHz      | 3400 kHz      | AM           |
+| 75M  | 3500 kHz      | 4000 kHz      | AM           |
+| 90M  | 3000 kHz      | 3500 kHz      | AM           |
 | MW3  | 1700 kHz      | 3500 kHz      | AM           |
 | MW2  | 495 kHz       | 1701 kHz      | AM           |
 | MW1  | 150 kHz       | 1800 kHz      | AM           |
@@ -112,7 +112,7 @@ To reset the receiver settings (current band, frequency, favorite stations, etc)
 
 ## Serial interface
 
-A USB-serial interface is available to control and monitor the receiver. Use [PyTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or Picocom to connect to the serial port. A list of commands:
+A USB-serial interface is available to control and monitor the receiver. Use [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or Picocom to connect to the serial port. Alernatively, open the following web terminal in Google Chrome: <https://www.serialterminal.com/>. A list of commands:
 
 | Button       | Function            | Comments                                                                                   |
 |--------------|---------------------|--------------------------------------------------------------------------------------------|
@@ -144,7 +144,9 @@ A USB-serial interface is available to control and monitor the receiver. Use [Py
 | <kbd>@</kbd> | Get Theme           | Print the current color theme (see [theme editor](development.md#theme-editor))            |
 | <kbd>!</kbd> | Set Theme           | Set the current color theme as a list of HEX numbers (effective until a power cycle)       |
 
-Note: To trigger an EEPROM write, issue a <kbd>R</kbd> and <kbd>r</kbd> command whilst in VFO mode. The write occurs after 10 seconds.
+```{hint}
+To backup/restore the Memory Slots, you can open this [web based tool](memory.md) in Google Chrome.
+```
 
 The following comma separated information is sent out on the serial interface when the monitor (log) mode is enabled:
 
