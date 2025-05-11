@@ -124,7 +124,7 @@ static void remoteGetMemories()
       uint32_t freq = (memories[i].mode == LSB || memories[i].mode == USB) ?
         memories[i].freq * 1000 + memories[i].hz100 * 100 :
         (memories[i].mode == AM) ? memories[i].freq * 1000 : memories[i].freq * 10000;
-      Serial.printf("#%02d,%s,%d,%s\r\n", i + 1, bands[memories[i].band].bandName, freq, bandModeDesc[memories[i].mode]);
+      Serial.printf("#%02d,%s,%ld,%s\r\n", i + 1, bands[memories[i].band].bandName, freq, bandModeDesc[memories[i].mode]);
     }
   }
 }
@@ -165,14 +165,14 @@ static bool remoteSetMemory()
   if (!expectNewline())
     return showError("Expected newline");
   Serial.println();
-  mem.mode = 0xFF;
+  mem.mode = 15;
   for (int i = 0; i < getTotalModes(); i++) {
     if (strcmp(bandModeDesc[i], mode) == 0) {
       mem.mode = i;
       break;
     }
   }
-  if (mem.mode == 0xFF)
+  if (mem.mode == 15)
     return showError("No such mode");
 
   if (mem.mode == LSB || mem.mode == USB) {
