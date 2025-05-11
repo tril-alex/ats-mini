@@ -501,6 +501,10 @@ bool tuneToMemory(const Memory *memory)
 
   // Enable the new band
   selectBand(memory->band);
+
+  // Update BFO if present in memory slot
+  if(memory->hz100) updateBFO(memory->hz100 * 100);
+
   return(true);
 }
 
@@ -653,9 +657,10 @@ static void clickMenu(int cmd, bool shortPress)
 
     case MENU_MEMORY:
       currentCmd = CMD_MEMORY;
-      newMemory.freq = currentFrequency + currentBFO / 1000;
-      newMemory.mode = currentMode;
-      newMemory.band = bandIdx;
+      newMemory.freq  = currentFrequency + currentBFO / 1000;
+      newMemory.hz100 = (currentBFO % 1000) / 100;
+      newMemory.mode  = currentMode;
+      newMemory.band  = bandIdx;
       doMemory(0);
       break;
 

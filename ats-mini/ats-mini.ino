@@ -347,13 +347,13 @@ bool updateBFO(int newBFO, bool wrap)
   int f = newFreq * 1000 + newBFO;
   if(f < band->minimumFreq * 1000)
   {
-    if (!wrap) return false;
+    if(!wrap) return false;
     newFreq = band->maximumFreq;
     newBFO  = 0;
   }
   else if(f > band->maximumFreq * 1000)
   {
-    if (!wrap) return false;
+    if(!wrap) return false;
     newFreq = band->minimumFreq;
     newBFO  = 0;
   }

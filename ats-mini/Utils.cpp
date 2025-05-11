@@ -231,6 +231,7 @@ bool isMemoryInBand(const Band *band, const Memory *memory)
 {
   if(memory->freq<band->minimumFreq) return(false);
   if(memory->freq>band->maximumFreq) return(false);
+  if(memory->freq==band->maximumFreq && memory->hz100) return(false);
   if(memory->mode==FM && band->bandMode!=FM) return(false);
   if(memory->mode!=FM && band->bandMode==FM) return(false);
   return(true);

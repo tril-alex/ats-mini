@@ -152,6 +152,7 @@ static bool remoteSetMemory()
   if (mem.band == 0xFF)
     return showError("No such band");
 
+  mem.hz100 = 0;
   mem.freq = readSerialInteger();
   if (readSerialChar() != ',')
     return showError("Expected ','");

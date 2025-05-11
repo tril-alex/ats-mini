@@ -75,11 +75,12 @@ typedef struct
   int16_t bandCal;        // Calibration value
 } Band;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
   uint16_t freq;           // Frequency
   uint8_t  band;           // Band
-  uint8_t  mode;           // Modulation
+  uint8_t  mode  : 4;      // Modulation
+  uint8_t  hz100 : 4;      // Hz * 100
 } Memory;
 
 typedef struct
@@ -131,7 +132,7 @@ extern const int CALMax;
 static inline bool isSSB() { return(currentMode>FM && currentMode<AM); }
 
 void useBand(const Band *band);
-bool updateBFO(int newBFO, bool wrap);
+bool updateBFO(int newBFO, bool wrap = true);
 bool doSeek(int8_t dir);
 bool clickFreq(bool shortPress);
 
