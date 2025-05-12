@@ -9,7 +9,7 @@
 #define MENU_DELTA_X    10    // Menu width delta
 #define METER_OFFSET_X   0    // Meter horizontal offset
 #define METER_OFFSET_Y   0    // Meter vertical offset
-#define SAVE_OFFSET_X   87    // EEPROM save icon horizontal offset
+#define SAVE_OFFSET_X   90    // EEPROM save icon horizontal offset
 #define SAVE_OFFSET_Y    0    // EEPROM save icon vertical offset
 #define FREQ_OFFSET_X  250    // Frequency horizontal offset
 #define FREQ_OFFSET_Y   62    // Frequency vertical offset
@@ -317,6 +317,15 @@ static void drawSMeter(int strength, int x, int y)
 }
 
 //
+// Draw stereo indicator
+//
+static void drawStereoIndicator(int x, int y)
+{
+  // Split S-meter into two rows
+  spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
+}
+
+//
 // Draw RDS station name (also CB channel, etc)
 //
 static void drawStationName(const char *name, int x, int y)
@@ -359,7 +368,7 @@ void drawScreen()
 #ifdef THEME_EDITOR
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(TH.text_warn, TH.bg);
-  spr.drawString("WARN", 319, RDS_OFFSET_Y, 4);
+  spr.drawString("warn", 319, BATT_OFFSET_Y + 14, 4);
 #endif
 
   // Draw frequency, units, and optionally highlight a digit
@@ -381,11 +390,11 @@ void drawScreen()
   // Draw S-meter
   drawSMeter(getStrength(rssi), METER_OFFSET_X, METER_OFFSET_Y);
 
-  // Indicate FM pilot detection
+  // Indicate FM pilot detection (stereo indicator)
 #ifndef THEME_EDITOR
   if((currentMode==FM) && rx.getCurrentPilot())
 #endif
-    spr.fillRect(15 + METER_OFFSET_X, 7+METER_OFFSET_Y, 4*17-2, 2, TH.bg);
+    drawStereoIndicator(METER_OFFSET_X, METER_OFFSET_Y);
 
   // Show radio text if present, else show frequency scale
   if(*getRadioText() || *getProgramInfo())
