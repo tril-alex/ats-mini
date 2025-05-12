@@ -56,8 +56,8 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Calibration** - SSB calibration offset (-2000...2000, per band).
 * **Theme** - Color theme.
 * **RDS** - Radio Data System options: PS - radio station name, CT - time, RT - text, PTY - genre, ALL (EU/US) - everything. Note that the time can be transmitted either in UTC or in local timezone, as well as be completely bogus. The clock is synchronized only once, so you can pick the right time source (switch the receiver power off and on to resync it again).
-* **Zoom menu** - Display the currently selected menu item using a larger font (accessibility option).
-* **Scroll** - Menu scroll direction for clockwise encoder turn.
+* **Zoom Menu** - Display the currently selected menu item using a larger font (accessibility option).
+* **Scroll Dir.** - Menu scroll direction for clockwise encoder turn.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
 * **Wi-Fi** - Off - disabled; AP Only - Access Point mode; Connect - stay connected to one of the three configured access points; Sync Only - Wi-Fi will be disabled after a successful time synchronization.

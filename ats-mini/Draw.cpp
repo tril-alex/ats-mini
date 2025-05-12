@@ -5,7 +5,7 @@
 
 // Display position control
 #define MENU_OFFSET_X    0    // Menu horizontal offset
-#define MENU_OFFSET_Y   20    // Menu vertical offset
+#define MENU_OFFSET_Y   18    // Menu vertical offset
 #define MENU_DELTA_X    10    // Menu width delta
 #define METER_OFFSET_X   0    // Meter horizontal offset
 #define METER_OFFSET_Y   0    // Meter vertical offset

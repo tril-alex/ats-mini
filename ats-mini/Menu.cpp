@@ -122,7 +122,7 @@ static const char *settings[] =
   "Theme",
   "RDS",
   "Zoom Menu",
-  "Scroll",
+  "Scroll Dir.",
   "Sleep",
   "Sleep Mode",
   "Wi-Fi",
