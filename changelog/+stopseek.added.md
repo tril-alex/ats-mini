@@ -1,0 +1,1 @@
+Stop the automatic seek process by clicking the encoder button (exit by rotating it still works).

@@ -312,7 +312,17 @@ void useBand(const Band *band)
 bool checkStopSeeking()
 {
   // Returns true if the user rotates the encoder
-  return(seekStop);
+  if(seekStop) return true;
+
+  // Checking isPressed without debouncing because this callback
+  // is not invoked often enough to register a click
+  if(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed)
+  {
+    // Wait till the button is released, otherwise the main loop will register a click
+    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
+    return true;
+  };
+  return false;
 }
 
 // This function is called by the seek function process.
@@ -432,7 +442,6 @@ bool doSeek(int8_t dir)
     // G8PTN: Flag is set by rotary encoder and cleared on seek entry
     seekStop = false;
     rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
-
     updateFrequency(rx.getFrequency(), true);
   }
 
