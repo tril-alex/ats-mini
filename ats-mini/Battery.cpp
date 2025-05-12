@@ -10,9 +10,6 @@
 #define BATT_SOC_LEVEL3      3.880  // Battery SOC voltage for 75%
 #define BATT_SOC_HYST_2      0.020  // Battery SOC hyteresis voltage divided by 2
 
-#define batt_offset_x        288    // Battery meter x offset
-#define batt_offset_y        0      // Battery meter y offset
-
 // State machine used for battery state of charge (SOC) detection with
 // hysteresis (Default = Illegal state)
 static uint8_t batteryState = 255;
@@ -84,15 +81,9 @@ void drawBattery(int x, int y)
   spr.setTextColor(TH.batt_voltage, TH.bg);
 
 #ifdef THEME_EDITOR
-  spr.drawRoundRect(x - 31, y + 1, 28, 14, 3, TH.batt_border);
-  spr.drawLine(x - 31 + 29, y + 5, x - 31 + 29, y + 10, TH.batt_border);
-  spr.drawLine(x - 31 + 30, y + 6, x - 31 + 30, y + 9, TH.batt_border);
-
-  spr.fillRoundRect(x - 31 + 2, y + 3, 18, 10, 2, TH.batt_full);
-  spr.fillRoundRect(x - 31 + 2, y + 3, 12, 10, 2, TH.batt_low);
-  spr.drawString("4.0V", x - 31 - 3, y, 2);
-
-  batteryVolts = 4.5;
+  // Alternate between five battery states every 10 seconds
+  batteryState = (millis() % 50000u) / 10000u;
+  batteryVolts = batteryState >= 4 ? 4.5 : 4.0;
 #endif
 
   // The hardware has a load sharing circuit to allow simultaneous charge and power

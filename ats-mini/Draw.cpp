@@ -16,7 +16,7 @@
 #define FUNIT_OFFSET_X 255    // Frequency Unit horizontal offset
 #define FUNIT_OFFSET_Y  45    // Frequency Unit vertical offset
 #define BAND_OFFSET_X  150    // Band horizontal offset
-#define BAND_OFFSET_Y    3    // Band vertical offset
+#define BAND_OFFSET_Y    9    // Band vertical offset
 // #define MODE_OFFSET_X   95    // Mode horizontal offset
 // #define MODE_OFFSET_Y  114    // Mode vertical offset
 #define RDS_OFFSET_X   165    // RDS horizontal offset
@@ -319,10 +319,14 @@ static void drawSMeter(int strength, int x, int y)
 //
 // Draw stereo indicator
 //
-static void drawStereoIndicator(int x, int y)
+static void drawStereoIndicator(int x, int y, bool stereo = true)
 {
-  // Split S-meter into two rows
-  spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
+  if(stereo)
+  {
+    // Split S-meter into two rows
+    spr.fillRect(15 + x, 7 + y, 4 * 17 - 2, 2, TH.bg);
+  }
+  // Add an "else" statement here to draw a mono indicator
 }
 
 //
@@ -391,10 +395,7 @@ void drawScreen()
   drawSMeter(getStrength(rssi), METER_OFFSET_X, METER_OFFSET_Y);
 
   // Indicate FM pilot detection (stereo indicator)
-#ifndef THEME_EDITOR
-  if((currentMode==FM) && rx.getCurrentPilot())
-#endif
-    drawStereoIndicator(METER_OFFSET_X, METER_OFFSET_Y);
+  drawStereoIndicator(METER_OFFSET_X, METER_OFFSET_Y, (currentMode==FM) && rx.getCurrentPilot());
 
   // Show radio text if present, else show frequency scale
   if(*getRadioText() || *getProgramInfo())
