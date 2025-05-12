@@ -24,14 +24,13 @@ arduino-cli compile --clean -e -p COM_PORT -u ats-mini
 The available options are:
 
 * `DISABLE_REMOTE` - disable remote control over the USB-serial port
-* `THEME_EDITOR` - enable the color theme editor
 * `ENABLE_HOLDOFF` - enable delayed screen update while tuning
 * `HALF_STEP` - enable encoder half-steps (useful for EC11E encoder)
 
 To set an option, add the `--build-property` command line argument like this:
 
 ```shell
-arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -DENABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
+arduino-cli compile --build-property "compiler.cpp.extra_flags=-DENABLE_HOLDOFF" --clean -e -p COM_PORT -u ats-mini
 ```
 
 ## Enabling the pre-commit hooks
@@ -45,7 +44,7 @@ arduino-cli compile --build-property "compiler.cpp.extra_flags=-DTHEME_EDITOR -D
 You can do all of the above using the `make` command as well:
 
 ```shell
-THEME_EDITOR=1 ENABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
+ENABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
 ```
 
 ## Adding a changelog entry
@@ -67,14 +66,14 @@ THEME_EDITOR=1 ENABLE_HOLDOFF=1 PORT=/dev/tty.usbmodem14401 make upload
 
 ## Theme editor
 
-A compile-time option called [`THEME_EDITOR`](#compile-time-options) enables a special mode that helps you pick the right colors faster without recompiling and flashing the firmware each time.
+A terminal command <kbd>T</kbd> toggles a special mode that helps you pick the right colors faster without recompiling and flashing the firmware each time. When the theme editor is enabled, some screen elements are always visible (and the battery indicator switches its state every 10 seconds):
 
 ![](_static/theme-editor.png)
 
 Press <kbd>@</kbd> to print the current color theme to the serial console:
 
 ```shell
-Color theme Default: x0000xFFFFxD69AxF800xD69Ax07E0xF800xF800xFFFFxFFFFx07E0xF800x001FxFFE0xD69AxD69AxD69Ax0000xD69AxD69AxF800xBEDFx0000xF800xFFFFxBEDFx105BxBEDFxBEDFxFFFFxD69AxD69AxFFFFxF800xC638
+Color theme Default: x0000xFFFFxD69AxF800xD69Ax07E0xF800xF800xFFFFxFFFFx07E0xF800x001FxFFE0xD69AxD69AxD69Ax0000xD69AxD69AxF800xBEDFx0000xF800xFFFFxBEDFx105BxBEDFxBEDFxFFFFxD69AxF800xFFE0xD69AxFFFFxF800xC638
 ```
 
 Then copy the theme to your favorite text editor, change the colors as you see (here is a handy [565 color picker](https://chrishewett.com/blog/true-rgb565-colour-picker/)).
@@ -82,7 +81,7 @@ Then copy the theme to your favorite text editor, change the colors as you see (
 To preview the theme, paste it to the serial console with the <kbd>!</kbd> character appended:
 
 ```shell
-!x0000xFFFFxD69AxF800xD69Ax07E0xF800xF800xFFFFxFFFFx07E0xF800x001FxFFE0xD69AxD69AxD69Ax0000xD69AxD69AxF800xBEDFx0000xF800xFFFFxBEDFx105BxBEDFxBEDFxFFFFxD69AxD69AxFFFFxF800xC638
+!x0000xFFFFxD69AxF800xD69Ax07E0xF800xF800xFFFFxFFFFx07E0xF800x001FxFFE0xD69AxD69AxD69Ax0000xD69AxD69AxF800xBEDFx0000xF800xFFFFxBEDFx105BxBEDFxBEDFxFFFFxD69AxF800xFFE0xD69AxFFFFxF800xC638
 ```
 
 Once you are happy, add the resulting colors to `Theme.cpp`.

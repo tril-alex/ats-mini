@@ -39,12 +39,8 @@ void eepromTickTime()
 
 void drawEepromIndicator(int x, int y)
 {
-#ifdef THEME_EDITOR
-  showEepromFlag = true;
-#endif
-
   // If need to draw EEPROM icon...
-  if(showEepromFlag)
+  if(showEepromFlag || switchThemeEditor())
   {
     // Draw EEPROM write request icon
     spr.fillRect(x+3, y+2, 3, 5, TH.save_icon);

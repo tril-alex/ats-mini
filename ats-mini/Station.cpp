@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Themes.h"
 #include "Menu.h"
 
 // CB frequency range
@@ -68,11 +69,10 @@ static uint16_t piCode = 0x0000;
 
 const char *getStationName()
 {
-#ifdef THEME_EDITOR
-  return("*STATION*");
-#else
-  return(getRDSMode() & RDS_PS? bufStationName : "");
-#endif
+  if(switchThemeEditor())
+    return("*STATION*");
+  else
+    return(getRDSMode() & RDS_PS? bufStationName : "");
 }
 
 const char *getRadioText()

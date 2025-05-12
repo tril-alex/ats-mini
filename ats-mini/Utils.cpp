@@ -1,5 +1,6 @@
 #include "driver/rtc_io.h"
 #include "Common.h"
+#include "Themes.h"
 #include "Button.h"
 
 // SSB patch for whole SSBRX initialization string
@@ -157,11 +158,10 @@ bool sleepOn(int x)
 
 const char *clockGet()
 {
-#ifdef THEME_EDITOR
-  return("00:00");
-#else
-  return(clockHasBeenSet? clockText : NULL);
-#endif
+  if(switchThemeEditor())
+    return("00:00");
+  else
+    return(clockHasBeenSet? clockText : NULL);
 }
 
 void clockReset()
@@ -242,9 +242,8 @@ bool isMemoryInBand(const Band *band, const Memory *memory)
 //
 int getStrength(int rssi)
 {
-#ifdef THEME_EDITOR
-  return(17);
-#endif
+  if(switchThemeEditor()) return(17);
+
   if(currentMode!=FM)
   {
     // dBuV to S point conversion HF

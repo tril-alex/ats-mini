@@ -61,12 +61,9 @@ typedef struct __attribute__ ((packed))
 extern uint8_t themeIdx;
 int getTotalThemes();
 
-#ifdef THEME_EDITOR
 extern ColorTheme theme[];
 void setColorTheme();
 void getColorTheme();
-#else
-extern const ColorTheme theme[];
-#endif
+bool switchThemeEditor(int8_t state = 2);
 
 #endif // THEMES_H

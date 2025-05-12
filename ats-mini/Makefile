@@ -11,7 +11,7 @@ DEBUG_LEVEL ?= 0
 #
 # DISABLE_REMOTE  : Disable serial port control and monitoring
 # ENABLE_HOLDOFF  : Hold off display updates while tuning
-# THEME_EDITOR    : Enable setting and printing of theme colors
+# HALF_STEP       : Enable encoder half-steps
 #
 DEFINES = -DDEBUG=$(DEBUG_LEVEL)
 
@@ -23,8 +23,8 @@ ifdef ENABLE_HOLDOFF
 	DEFINES += -DENABLE_HOLDOFF
 endif
 
-ifdef THEME_EDITOR
-	DEFINES += -DTHEME_EDITOR
+ifdef HALF_STEP
+        DEFINES += -DHALF_STEP
 endif
 
 OPTIONS = \

@@ -80,11 +80,12 @@ void drawBattery(int x, int y)
   spr.setTextDatum(TR_DATUM);
   spr.setTextColor(TH.batt_voltage, TH.bg);
 
-#ifdef THEME_EDITOR
-  // Alternate between five battery states every 10 seconds
-  batteryState = (millis() % 50000u) / 10000u;
-  batteryVolts = batteryState >= 4 ? 4.5 : 4.0;
-#endif
+  if(switchThemeEditor())
+  {
+    // Alternate between five battery states every 10 seconds
+    batteryState = (millis() % 50000u) / 10000u;
+    batteryVolts = batteryState >= 4 ? 4.5 : 4.0;
+  }
 
   // The hardware has a load sharing circuit to allow simultaneous charge and power
   // With USB(5V) connected the voltage reading will be approx. VBUS - Diode Drop = 4.65V

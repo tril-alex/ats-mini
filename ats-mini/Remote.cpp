@@ -356,14 +356,15 @@ int remoteDoCommand(char key)
         event |= REMOTE_EEPROM;
       break;
 
-#ifdef THEME_EDITOR
+    case 'T':
+      Serial.println(switchThemeEditor(!switchThemeEditor()) ? "Theme editor enabled" : "Theme editor disabled");
+      break;
     case '!':
-      setColorTheme();
+      if(switchThemeEditor()) setColorTheme();
       break;
     case '@':
-      getColorTheme();
+      if(switchThemeEditor()) getColorTheme();
       break;
-#endif
 
     default:
       // Command not recognized

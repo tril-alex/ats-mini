@@ -1,10 +1,6 @@
 #include "Themes.h"
 
-#ifdef THEME_EDITOR
 ColorTheme theme[] =
-#else
-const ColorTheme theme[] =
-#endif
 {
   {
     "Default",
@@ -379,8 +375,7 @@ const ColorTheme theme[] =
 uint8_t themeIdx = 0;
 int getTotalThemes() { return(ITEM_COUNT(theme)); }
 
-#ifdef THEME_EDITOR
-
+#ifndef DISABLE_REMOTE
 static uint8_t char2nibble(char key)
 {
   if((key >= '0') && (key <= '9')) return(key - '0');
@@ -431,5 +426,14 @@ void getColorTheme()
 
   Serial.println();
 }
+#endif
 
-#endif // THEME_EDITOR
+//
+// Turn theme editor on (1) or off (0), or get current status (2)
+//
+bool switchThemeEditor(int8_t state)
+{
+  static bool themeEditor = false;
+  themeEditor = state == 0 ? false : (state == 1 ? true : themeEditor);
+  return themeEditor;
+}

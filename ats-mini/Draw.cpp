@@ -369,11 +369,12 @@ void drawScreen()
     BAND_OFFSET_X, BAND_OFFSET_Y
   );
 
-#ifdef THEME_EDITOR
-  spr.setTextDatum(TR_DATUM);
-  spr.setTextColor(TH.text_warn, TH.bg);
-  spr.drawString("warn", 319, BATT_OFFSET_Y + 14, 4);
-#endif
+  if(switchThemeEditor())
+  {
+    spr.setTextDatum(TR_DATUM);
+    spr.setTextColor(TH.text_warn, TH.bg);
+    spr.drawString(TH.name, 319, BATT_OFFSET_Y + 17, 2);
+  }
 
   // Draw frequency, units, and optionally highlight a digit
   drawFrequency(

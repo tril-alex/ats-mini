@@ -60,9 +60,6 @@ int8_t SsbAvcIdx = 48;                  // Default SSB = 48, range = 12 to 90 in
 int8_t AmSoftMuteIdx = 4;               // Default AM  = 4, range = 0 to 32
 int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
 
-// Status bar icon flags
-bool screen_toggle = false;             // Toggle when drawsprite is called
-
 // Menu options
 uint8_t volume = DEFAULT_VOLUME;        // Volume, range = 0 (muted) - 63
 uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255 in steps of 5
