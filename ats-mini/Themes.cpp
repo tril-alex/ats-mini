@@ -403,7 +403,7 @@ void setColorTheme()
       break;
     }
 
-    if(readSerial() != 'x')
+    if(readSerialChar() != 'x')
     {
       Serial.println(" Err");
       break;
