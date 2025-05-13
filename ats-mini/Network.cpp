@@ -125,7 +125,7 @@ bool ntpSyncTime()
 bool wifiInit(bool connectToNetwork)
 {
   // These are our own access point (AP) addresses
-  IPAddress ip(192, 168, 5, 5);
+  IPAddress ip(192, 168, 5, 1);
   IPAddress gateway(192, 168, 5, 1);
   IPAddress subnet(255, 255, 255, 0);
 
