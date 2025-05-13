@@ -1,0 +1,1 @@
+Add SNR to the serial console log.
