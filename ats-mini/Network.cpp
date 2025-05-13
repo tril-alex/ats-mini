@@ -392,6 +392,9 @@ static const String webUtcOffsetSelector()
 
 static const String webRadioPage()
 {
+  String ip = WiFi.status()==WL_CONNECTED?
+    WiFi.localIP().toString() + " (local network)"
+  : WiFi.softAPIP().toString() + " (own network)";
   String freq = currentMode == FM?
     String(currentFrequency / 100.0) + "MHz "
   : String(currentFrequency + currentBFO / 1000.0) + "kHz ";
@@ -402,6 +405,10 @@ static const String webRadioPage()
   "<A HREF='/memory'>Memory</A>&nbsp;|&nbsp;<A HREF='/config'>Config</A>"
 "</P>"
 "<TABLE COLUMNS=2>"
+"<TR>"
+  "<TD CLASS='LABEL'>IP Address</TD>"
+  "<TD>" + ip + "</TD>"
+"</TR>"
 "<TR>"
   "<TD CLASS='LABEL'>Firmware</TD>"
   "<TD>" + String(getVersion()) + "</TD>"
