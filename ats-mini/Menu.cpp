@@ -188,25 +188,25 @@ static const char *wifiModeDesc[] =
 // FM (kHz * 10)
 static const Step fmSteps[] =
 {
-  {   1, "10k"  },
-  {   5, "50k"  },
-  {  10, "100k" },
-  {  20, "200k" },
-  { 100, "1M"   },
+  {   1, "10k",   1 },
+  {   5, "50k",   5 },
+  {  10, "100k", 10 },
+  {  20, "200k", 20 },
+  { 100, "1M",   10 },
 };
 
 // SSB (Hz)
 static const Step ssbSteps[] =
 {
-  {    10, "10"  },
-  {    25, "25"  },
-  {    50, "50"  },
-  {   100, "100" },
-  {   500, "500" },
-  {  1000, "1k"  },
-  {  5000, "5k"  },
-  {  9000, "9k"  },
-  { 10000, "10k" },
+  {    10, "10",  1  },
+  {    25, "25",  1  },
+  {    50, "50",  1  },
+  {   100, "100", 1  },
+  {   500, "500", 1  },
+  {  1000, "1k",  1  },
+  {  5000, "5k",  5  },
+  {  9000, "9k",  9  },
+  { 10000, "10k", 10 },
 };
 
 static const uint8_t ssbFastSteps[] =
@@ -225,13 +225,13 @@ static const uint8_t ssbFastSteps[] =
 // AM (kHz)
 static const Step amSteps[] =
 {
-  {    1, "1k"   },
-  {    5, "5k"   },
-  {    9, "9k"   },
-  {   10, "10k"  },
-  {   50, "50k"  },
-  {  100, "100k" },
-  { 1000, "1M"   },
+  {    1, "1k",    1 },
+  {    5, "5k",    5 },
+  {    9, "9k",    9 },
+  {   10, "10k",  10 },
+  {   50, "50k",  10 },
+  {  100, "100k", 10 },
+  { 1000, "1M",   10 },
 };
 
 static const Step *steps[4] = { fmSteps, ssbSteps, ssbSteps, amSteps };
@@ -547,8 +547,11 @@ void doStep(int dir)
 
   rx.setFrequencyStep(steps[currentMode][idx].step);
 
-  // Max 10kHz for spacing
-  if(currentMode!=FM) rx.setSeekAmSpacing(5);
+  // Set seek spacing
+  if(currentMode==FM)
+    rx.setSeekFmSpacing(steps[currentMode][idx].spacing);
+  else
+    rx.setSeekAmSpacing(steps[currentMode][idx].spacing);
 }
 
 void doAgc(int dir)
@@ -783,7 +786,6 @@ void selectBand(uint8_t idx, bool drawLoadingSSB)
 
   // Set tuning step
   stepIdx[currentMode] = bands[bandIdx].currentStepIdx;
-  rx.setFrequencyStep(getCurrentStep()->step);
 
   // Load SSB patch as needed
   if(isSSB())

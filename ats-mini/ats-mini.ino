@@ -288,10 +288,10 @@ void useBand(const Band *band)
     rx.setGpio(1, 0, 0);
     // Consider the range all defined current band
     rx.setSeekAmLimits(band->minimumFreq, band->maximumFreq);
-    // Max 10kHz for spacing
-    rx.setSeekAmSpacing(5);
   }
 
+  // Set step and spacing based on mode (FM, AM, SSB)
+  doStep(0);
   // Set softMuteMaxAttIdx based on mode (AM, SSB)
   doSoftMute(0);
   // Set disableAgc and agcNdx values based on mode (FM, AM , SSB)

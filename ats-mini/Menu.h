@@ -52,6 +52,7 @@ typedef struct
 {
   int step;         // Step
   const char *desc; // Step description
+  uint8_t spacing;  // Seek spacing
 } Step;
 
 typedef struct
