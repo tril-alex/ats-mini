@@ -211,13 +211,14 @@ void remotePrintStatus()
   // S-Meter conditional on compile option
   rx.getCurrentReceivedSignalQuality();
   uint8_t remoteRssi = rx.getCurrentRSSI();
+  uint8_t remoteSnr = rx.getCurrentSNR();
 
   // Use rx.getFrequency to force read of capacitor value from SI4732/5
   rx.getFrequency();
   uint16_t tuningCapacitor = rx.getAntennaTuningCapacitor();
 
   // Remote serial
-  Serial.printf("%u,%u,%d,%d,%s,%s,%s,%s,%hu,%hu,%hu,%hu,%.2f,%hu\r\n",
+  Serial.printf("%u,%u,%d,%d,%s,%s,%s,%s,%hu,%hu,%hu,%hu,%hu,%.2f,%hu\r\n",
                 APP_VERSION,
                 currentFrequency,
                 currentBFO,
@@ -229,6 +230,7 @@ void remotePrintStatus()
                 agcIdx,
                 volume,
                 remoteRssi,
+                remoteSnr,
                 tuningCapacitor,
                 remoteVoltage,
                 remoteSeqnum

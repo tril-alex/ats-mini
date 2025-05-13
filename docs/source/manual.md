@@ -164,9 +164,10 @@ The following comma separated information is sent out on the serial interface wh
 | 9        | agcIdx           | AGC/Attn          |                                     |
 | 10       | volume           | Volume            | 0 to 63 (0 = Mute)                  |
 | 11       | remoteRssi       | RSSI              | 0 to 127 dBuV                       |
-| 12       | tuningCapacitor  | Antenna Capacitor | 0 - 6143                            |
-| 13       | remoteVoltage    | ADC average value | Voltage = Value x 1.702 / 1000      |
-| 14       | remoteSeqnum     | Sequence number   | 0 to 255 repeating sequence         |
+| 12       | remoteSnr        | SNR               | 0 to 127 dB                         |
+| 13       | tuningCapacitor  | Antenna Capacitor | 0 - 6143                            |
+| 14       | remoteVoltage    | ADC average value | Voltage = Value x 1.702 / 1000      |
+| 15       | remoteSeqnum     | Sequence number   | 0 to 255 repeating sequence         |
 
 In SSB mode, the "Display" frequency (Hz) = (currentFrequency x 1000) + currentBFO
 
