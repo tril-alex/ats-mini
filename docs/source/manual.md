@@ -60,12 +60,35 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Scroll Dir.** - Menu scroll direction for clockwise encoder turn.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
-* **Wi-Fi** - Off - disabled; AP Only - Access Point mode; AP+Connect - Access Point mode + try to connect to one of the three configured access points; Connect - try to connect to a configured access point; Sync Only - same as Connect, but Wi-Fi will be disabled after a successful time synchronization.
+* **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
 * **About** - Informational screen.
 
 ## Wi-Fi
 
-TODO
+The Wi-Fi mode (2.4GHz only) can be used for the following purposes (for now):
+
+* Time synchronization via NTP (Network Time Protocol).
+* Viewing the receiver status (frequency, RSSI/SNR, volume, battery voltage, etc).
+* Viewing the Memory slots with saved frequencies.
+
+There are a couple of modes:
+
+* **Off** (default)
+* **AP Only** - Access Point mode. The receiver creates its own access point called `ATS-Mini` and starts the web server on <http://10.1.1.1>.
+* **AP+Connect** - Access Point mode + try to connect to one of the three configured access points. If the connection succeeds, the receiver will synchronize the time every 5 minutes and start the web server on both <http://10.1.1.1> and a dynamic IP address it got from the configured access point.
+* **Connect** - try to connect to one of the three configured access points, start the web server on a dynamic IP, then synchronize the time every 5 minutes.
+* **Sync Only** - same as Connect, but Wi-Fi will be disabled after a successful time synchronization.
+
+Initial configuration:
+
+* Enable the **AP Only** mode (the receiver will briefly display its 10.1.1.1 IP address).
+* Connect to the `ATS-Mini` access point from your phone or computer. There is no internet connection available on this access point.
+* Open a browser and visit the following URL: <http://10.1.1.1>. The status web page should open.
+* Click the `Config` link. Here you can add optional login and password to protect the settings page, configure up to three access points the receiver will try to connect to, and set a time zone.
+* After that, switch the Wi-Fi mode to **AP+Connect** or **Connect** (the receiver will briefly show its new dynamic IP address it got from a configured access point).
+* Now connect your phone/computer to the same access point and open the new URL to check whether the receiver connected to the internet.
+
+From now on you can switch the modes as you want and connect to your receiver either via the `ATS-Mini` internal access point (if enabled, mostly useful when there are no access points around), or via an external access point and a dynamic IP address.
 
 ## Reset
 
