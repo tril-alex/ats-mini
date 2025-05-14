@@ -450,11 +450,11 @@ static const String webMemoryPage()
   for(int j=0 ; j<MEMORY_COUNT ; j++)
   {
     char text[64];
-    sprintf(text, "<TR><TD CLASS='LABEL'>%02d</TD><TD>", j+1);
+    sprintf(text, "<TR><TD CLASS='LABEL' WIDTH='10%%'>%02d</TD><TD>", j+1);
     items += text;
 
     if(!memories[j].freq)
-      items += "</TD></TR>";
+      items += "&nbsp;---&nbsp;</TD></TR>";
     else
     {
       String freq = currentMode == FM?
@@ -464,7 +464,13 @@ static const String webMemoryPage()
     }
   }
 
-  return webPage("<TABLE COLUMNS=2>" + items + "</TABLE>");
+  return webPage(
+"<H1>ATS-Mini Pocket Receiver Memory</H1>"
+"<P ALIGN='CENTER'>"
+  "<A HREF='/'>Status</A>&nbsp;|&nbsp;<A HREF='/config'>Config</A>"
+"</P>"
+"<TABLE COLUMNS=2>" + items + "</TABLE>"
+);
 }
 
 const String webConfigPage()
