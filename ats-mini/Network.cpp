@@ -392,12 +392,22 @@ static const String webUtcOffsetSelector()
 
 static const String webRadioPage()
 {
-  String ip = WiFi.status()==WL_CONNECTED?
-    WiFi.localIP().toString() + " (local network)"
-  : WiFi.softAPIP().toString() + " (own network)";
+  String ip = "";
+  String ssid = "";
   String freq = currentMode == FM?
     String(currentFrequency / 100.0) + "MHz "
   : String(currentFrequency + currentBFO / 1000.0) + "kHz ";
+
+  if(WiFi.status()==WL_CONNECTED)
+  {
+    ip = WiFi.localIP().toString();
+    ssid = WiFi.SSID();
+  }
+  else
+  {
+    ip = WiFi.softAPIP().toString();
+    ssid = apSSID;
+  }
 
   return webPage(
 "<H1>ATS-Mini Pocket Receiver</H1>"
@@ -407,7 +417,7 @@ static const String webRadioPage()
 "<TABLE COLUMNS=2>"
 "<TR>"
   "<TD CLASS='LABEL'>IP Address</TD>"
-  "<TD>" + ip + "</TD>"
+  "<TD><A HREF='http://" + ip + "'>" + ip + "</A> (" + ssid + ")</TD>"
 "</TR>"
 "<TR>"
   "<TD CLASS='LABEL'>Firmware</TD>"
