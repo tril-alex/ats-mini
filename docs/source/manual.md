@@ -24,7 +24,7 @@ Controls are implemented through the encoder knob:
 | Click (<0.5 sec)       | Opens menu, selects.                                                  |
 | Short press (>0.5 sec) | Volume shortcut in VFO mode, context-dependent action in other modes. |
 | Long press (>2 sec)    | Sleep on/off.                                                         |
-| Press and rotate       | Direct frequency input mode.                                          |
+| Press and rotate       | Direct frequency input mode, fine tuning in Seek mode.                |
 
 ### Direct frequency input mode
 
@@ -41,7 +41,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Band** - List of [Bands](#bands-table).
 * **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
 * **Step** - Tuning step (not every step is available on every band and mode).
-* **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan.
+* **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan. Use press and rotate for manual fine tuning.
 * **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder. It is also possible to edit the memory slots via [serial port](#serial-interface).
 * **Mute** - Mute/unmute.
 * **Bandwidth** - Selects the bandwidth of the channel filter.

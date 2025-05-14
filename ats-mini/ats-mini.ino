@@ -461,15 +461,10 @@ bool doSeek(int8_t dir)
 }
 
 //
-// Handle encoder ROTATE
+// Handle tuning
 //
-bool doRotate(int8_t dir)
+bool doTune(int8_t dir)
 {
-  //
-  // Side bar menus / settings
-  //
-  if(doSideBar(currentCmd, encoderCount)) return(true);
-
   //
   // SSB tuning
   //
@@ -613,85 +608,113 @@ void loop()
   // Block encoder rotation when in the locked sleep mode
   if(encoderCount && sleepOn() && sleepModeIdx == SLEEP_LOCKED) encoderCount = 0;
 
-  // If encoder has been rotated...
-  if(encoderCount)
-  {
-    // If encoder has been rotated AND pressed...
-    if(pb1st.isPressed)
-    {
-      pushAndRotate = true;
+  // Activate push and rotate mode (can span multiple loop iterations until the button is released)
+  if (encoderCount && pb1st.isPressed) pushAndRotate = true;
+
+  // If push and rotate mode is active...
+  if (pushAndRotate) {
+    // If encoder has been rotated
+    if (encoderCount) {
       if (currentCmd == CMD_NONE) {
+        // Activate frequency input mode
         currentCmd = CMD_FREQ;
         needRedraw = true;
       } else if (currentCmd == CMD_FREQ) {
+        // Select digit
         doSelectDigit(encoderCount);
         needRedraw = true;
+      } else if (currentCmd == CMD_SEEK) {
+        // Normal tuning in seek mode
+        needRedraw |= doTune(encoderCount);
+        eepromRequestSave();
       }
+      // Clear encoder rotation
+      encoderCount = 0;
     }
-    else
-    {
-      if (currentCmd == CMD_FREQ) {
+    // Reset timeouts while push and rotate is active
+    elapsedSleep = elapsedCommand = currentTime;
+  } else {
+    // If encoder has been rotated
+    if (encoderCount) {
+      if(currentCmd == CMD_NONE) {
+        // Tuning
+        needRedraw |= doTune(encoderCount);
+      } else if(currentCmd == CMD_FREQ) {
+        // Digit tuning
         needRedraw |= doDigit(encoderCount);
-      } else {
-        needRedraw |= doRotate(encoderCount);
+      } else if(currentCmd == CMD_SEEK) {
+        // Seek mode
+        needRedraw |= doSeek(encoderCount);
         // Seek can take long time, renew the timestamp
-        if(currentCmd == CMD_SEEK) currentTime = millis();
+        currentTime = millis();
+      } else {
+        // Side bar menus / settings
+        needRedraw |= doSideBar(currentCmd, encoderCount);
       }
-    }
-    elapsedSleep = elapsedCommand = currentTime;
+      // Reset timeouts
+      elapsedSleep = elapsedCommand = currentTime;
+      eepromRequestSave();
 
-    // Clear encoder rotation
-    encoderCount = 0;
-    eepromRequestSave();
-  }
+      // Clear encoder rotation
+      encoderCount = 0;
+    } else if(pb1st.isLongPressed) {
+      // Encoder is being LONG PRESSED: TOGGLE DISPLAY
+      sleepOn(!sleepOn());
+      // CPU sleep can take long time, renew the timestamps
+      elapsedSleep = elapsedCommand = currentTime = millis();
 
-  // Encoder is being LONG PRESSED: TOGGLE DISPLAY
-  else if(pb1st.isLongPressed && !pushAndRotate)
-  {
-    sleepOn(!sleepOn());
-    // CPU sleep can take long time, renew the timestamps
-    elapsedSleep = elapsedCommand = currentTime = millis();
-  }
+    } else if ((pb1st.wasClicked || pb1st.wasShortPressed)) {
+      // Encoder click or short press
+      // Reset timeouts
+      elapsedSleep = elapsedCommand = currentTime;
 
-  // Encoder click or short press
-  else if((pb1st.wasClicked || pb1st.wasShortPressed) && !pushAndRotate)
-  {
-    elapsedSleep = elapsedCommand = currentTime;
-    if(sleepOn())
-    {
-      if(currentSleep)
-      {
-        sleepOn(false);
+      // If in locked/unlocked sleep mode
+      if (sleepOn()) {
+        // If sleep timeout is enabled, exit it via button press of any duration
+        // (users don't need to figure out that a long press is required to wake up the device)
+        if (currentSleep) {
+          sleepOn(false);
+          needRedraw = true;
+        } else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED) {
+          // Allow short press in unlocked sleep mode to adjust the volume
+          clickVolume();
+          needRedraw = true;
+        }
+      } else if(clickHandler(currentCmd, pb1st.wasShortPressed)) {
+        // Command handled, redraw screen
         needRedraw = true;
-      }
-      else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED)
-      {
+      } else if(currentCmd != CMD_NONE) {
+        // Deactivate modal mode
+        currentCmd = CMD_NONE;
+        needRedraw = true;
+      } else if(pb1st.wasShortPressed) {
+        // Volume shortcut (only active in VFO mode)
         clickVolume();
         needRedraw = true;
+      } else {
+        // Activate menu
+        currentCmd = CMD_MENU;
+        needRedraw = true;
       }
     }
-    else if(clickHandler(currentCmd, pb1st.wasShortPressed))
+  }
+
+  // Deactivate push and rotate mode
+  if (!pb1st.isPressed && pushAndRotate) {
+    pushAndRotate = false;
+    needRedraw = true;
+  }
+
+  // Disable commands control
+  if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
+  {
+    if(currentCmd != CMD_NONE)
     {
-      // Command handled, redraw screen
-      needRedraw = true;
-    }
-    else if(currentCmd != CMD_NONE)
-    {
-      // Deactivate modal mode
       currentCmd = CMD_NONE;
       needRedraw = true;
     }
-    else if(pb1st.wasShortPressed)
-    {
-      clickVolume();
-      needRedraw = true;
-    }
-    else
-    {
-      // Activate menu
-      currentCmd = CMD_MENU;
-      needRedraw = true;
-    }
+
+    elapsedCommand = currentTime;
   }
 
   // Display sleep timeout
@@ -718,18 +741,6 @@ void loop()
     elapsedRSSI = currentTime;
   }
 
-  // Disable commands control
-  if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
-  {
-    if(currentCmd != CMD_NONE && !pushAndRotate)
-    {
-      currentCmd = CMD_NONE;
-      needRedraw = true;
-    }
-
-    elapsedCommand = currentTime;
-  }
-
   // Periodically check received RDS information
   if((currentTime - lastRDSCheck) > RDS_CHECK_TIME)
   {
@@ -747,13 +758,6 @@ void loop()
   // Tick EEPROM time, saving changes if the occurred and there has
   // been no activity for a while
   eepromTickTime();
-
-  // Check for button activity
-  if(!pb1st.isPressed && pushAndRotate)
-  {
-    pushAndRotate = false;
-    needRedraw = true;
-  }
 
   // Periodically refresh the main screen
   // This covers the case where there is nothing else triggering a refresh

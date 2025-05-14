@@ -440,7 +440,6 @@ void doCal(int dir)
 
 void doBrt(int dir)
 {
-
   currentBrt = clamp_range(currentBrt, 5*dir, 10, 255);
   if(!sleepOn()) ledcWrite(PIN_LCD_BL, currentBrt);
 }
@@ -727,7 +726,6 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_MENU:      doMenu(scrollDirection * dir);break;
     case CMD_MODE:      doMode(scrollDirection * dir);break;
     case CMD_STEP:      doStep(scrollDirection * dir);break;
-    case CMD_SEEK:      doSeek(dir);break;
     case CMD_AGC:       doAgc(dir);break;
     case CMD_BANDWIDTH: doBandwidth(scrollDirection * dir);break;
     case CMD_VOLUME:    doVolume(dir);break;

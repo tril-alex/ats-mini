@@ -1,0 +1,1 @@
+Use press+rotate for manual fine tuning in Seek mode.
