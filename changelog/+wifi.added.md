@@ -1,1 +1,1 @@
-Wi-Fi mode to sync time over NTP.
+Wi-Fi mode to sync time over NTP, view the receiver status and Memory slots.
