@@ -32,10 +32,13 @@ ButtonTracker::State ButtonTracker::update(bool currentState, unsigned int debou
       if (currentState) {
         pressStartTime = now;
       } else { // Handle release
-        if ((now - pressStartTime) >= SHORT_PRESS_INTERVAL) {
-          result.wasShortPressed = true;
-        } else {
-          result.wasClicked = true;
+        unsigned long pressDuration = now - pressStartTime;
+        if (pressDuration < LONG_PRESS_INTERVAL) {
+          if (pressDuration >= SHORT_PRESS_INTERVAL) {
+            result.wasShortPressed = true;
+          } else {
+            result.wasClicked = true;
+          }
         }
       }
     }
