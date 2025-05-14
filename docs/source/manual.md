@@ -60,7 +60,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Scroll Dir.** - Menu scroll direction for clockwise encoder turn.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
-* **Wi-Fi** - Off - disabled; AP Only - Access Point mode; Connect - stay connected to one of the three configured access points; Sync Only - Wi-Fi will be disabled after a successful time synchronization.
+* **Wi-Fi** - Off - disabled; AP Only - Access Point mode; AP+Connect - Access Point mode + try to connect to one of the three configured access points; Connect - try to connect to a configured access point; Sync Only - same as Connect, but Wi-Fi will be disabled after a successful time synchronization.
 * **About** - Informational screen.
 
 ## Wi-Fi

@@ -34,7 +34,7 @@ AsyncWebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 
-static bool wifiInit(bool connectToNetwork = true);
+static bool wifiInit(uint8_t netMode);
 static void webInit();
 static void webSetConfig(AsyncWebServerRequest *request);
 static const String webRadioPage();
@@ -73,7 +73,7 @@ void netInit(uint8_t netMode)
   if(netMode==NET_OFF) return;
 
   // Initialize WiFi and try connecting to a network
-  if(wifiInit(netMode!=NET_AP_ONLY))
+  if(wifiInit(netMode))
   {
     // NTP time offset determined by time zone
     ntpClient.setTimeOffset(utcOffsetInSeconds);
@@ -122,21 +122,25 @@ bool ntpSyncTime()
 //
 // Initialize WiFi, connect to an external access point if possible
 //
-bool wifiInit(bool connectToNetwork)
+bool wifiInit(uint8_t netMode)
 {
   // These are our own access point (AP) addresses
   IPAddress ip(192, 168, 5, 1);
   IPAddress gateway(192, 168, 5, 1);
   IPAddress subnet(255, 255, 255, 0);
-
-  // Start as access point (AP)
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
-  WiFi.softAPConfig(ip, gateway, subnet);
-
-  String status1 = "AP Mode IP : " + WiFi.softAPIP().toString();
+  String status1 = "";
   String status2 = "Connecting to WiFi network..";
-  drawWiFiStatus(status1.c_str(), 0);
+
+  if(netMode==NET_AP_ONLY || netMode==NET_AP_CONNECT)
+  {
+    // Start as access point (AP)
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
+    WiFi.softAPConfig(ip, gateway, subnet);
+
+    status1 = "AP Mode IP : " + WiFi.softAPIP().toString();
+    drawWiFiStatus(status1.c_str(), 0);
+  }
 
   // Get the preferences
   preferences.begin("configData", false);
@@ -145,7 +149,7 @@ bool wifiInit(bool connectToNetwork)
   loginPassword      = preferences.getString("loginpassword", "");
 
   // If not connecting to the network, remain AP and stop here
-  if(!connectToNetwork)
+  if(netMode==NET_AP_ONLY)
   {
     preferences.end();
     ajaxInterval = 2500;
