@@ -486,6 +486,9 @@ const String webConfigPage()
 
   return webPage(
 "<H1>ATS-Mini Config</H1>"
+"<P ALIGN='CENTER'>"
+  "<A HREF='/'>Status</A>&nbsp;|&nbsp;<A HREF='/memory'>Memory</A>"
+"</P>"
 "<FORM ACTION='/setconfig' METHOD='POST'>"
   "<TABLE COLUMNS=2>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>Login Credentials</TH></TR>"
