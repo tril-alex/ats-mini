@@ -33,7 +33,8 @@ AsyncWebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient ntpClient(ntpUDP, "pool.ntp.org");
 
-static bool wifiInit(uint8_t netMode);
+static bool wifiInitAP();
+static bool wifiConnect();
 static void webInit();
 static void webSetConfig(AsyncWebServerRequest *request);
 static const String webRadioPage();
@@ -71,8 +72,11 @@ void netInit(uint8_t netMode)
   // Do not initialize WiFi if disabled
   if(netMode==NET_OFF) return;
 
+  // Start WiFi access point if requested
+  if(netMode==NET_AP_ONLY || netMode==NET_AP_CONNECT) wifiInitAP();
+
   // Initialize WiFi and try connecting to a network
-  if(wifiInit(netMode))
+  if(netMode>NET_AP_ONLY && wifiConnect())
   {
     // NTP time updates will happen every 5 minutes
     ntpClient.setUpdateInterval(5*60*1000);
@@ -119,41 +123,41 @@ bool ntpSyncTime()
 }
 
 //
-// Initialize WiFi, connect to an external access point if possible
+// Initialize WiFi access point (AP)
 //
-bool wifiInit(uint8_t netMode)
+bool wifiInitAP()
 {
   // These are our own access point (AP) addresses
   IPAddress ip(10, 1, 1, 1);
   IPAddress gateway(10, 1, 1, 1);
   IPAddress subnet(255, 255, 255, 0);
-  String status1 = "";
-  String status2 = "Connecting to WiFi network..";
 
-  if(netMode==NET_AP_ONLY || netMode==NET_AP_CONNECT)
-  {
-    // Start as access point (AP)
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
-    WiFi.softAPConfig(ip, gateway, subnet);
+  // Start as access point (AP)
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
+  WiFi.softAPConfig(ip, gateway, subnet);
 
-    status1 = String("AP Mode IP (" + String(apSSID) + "): " + WiFi.softAPIP().toString());
-    drawWiFiStatus(status1.c_str(), 0);
-  }
+  drawWiFiStatus(
+    ("Use Access Point " + String(apSSID)).c_str(),
+    ("IP : " + WiFi.softAPIP().toString()).c_str()
+  );
+
+  ajaxInterval = 2500;
+  delay(2000);
+  return(true);
+}
+
+//
+// Connect to a WiFi network
+//
+bool wifiConnect()
+{
+  String status = "Connecting to WiFi network..";
 
   // Get the preferences
   preferences.begin("configData", false);
   loginUsername      = preferences.getString("loginusername", "");
   loginPassword      = preferences.getString("loginpassword", "");
-
-  // If not connecting to the network, remain AP and stop here
-  if(netMode==NET_AP_ONLY)
-  {
-    preferences.end();
-    ajaxInterval = 2500;
-    delay(1000);
-    return(false);
-  }
 
   // Try connecting to known WiFi networks
   int wifiCheck = 0;
@@ -173,8 +177,8 @@ bool wifiInit(uint8_t netMode)
       {
         if(!(wifiCheck&7))
         {
-          status2 += ".";
-          drawWiFiStatus(status1.c_str(), status2.c_str());
+          status += ".";
+          drawWiFiStatus(status.c_str());
         }
         wifiCheck++;
         delay(500);
@@ -194,18 +198,17 @@ bool wifiInit(uint8_t netMode)
   if(WiFi.status()!=WL_CONNECTED)
   {
     // WiFi connection failed
-    drawWiFiStatus(status1.c_str(), "No WiFi connection");
+    drawWiFiStatus(status.c_str(), "No WiFi connection");
     // Done
-    ajaxInterval = 2500;
-    delay(1000);
     return(false);
   }
   else
   {
     // WiFi connection succeeded
-    status1 = String("Connected to WiFi network (" + WiFi.SSID() + ")");
-    status2 = String("IP : " + WiFi.localIP().toString());
-    drawWiFiStatus(status1.c_str(), status2.c_str());
+    drawWiFiStatus(
+      ("Connected to WiFi network (" + WiFi.SSID() + ")").c_str(),
+      ("IP : " + WiFi.localIP().toString()).c_str()
+    );
     // Done
     ajaxInterval = 1000;
     delay(2000);
