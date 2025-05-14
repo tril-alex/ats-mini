@@ -138,7 +138,7 @@ bool wifiInit(uint8_t netMode)
     WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
     WiFi.softAPConfig(ip, gateway, subnet);
 
-    status1 = "AP Mode IP : " + WiFi.softAPIP().toString();
+    status1 = String("AP Mode IP (" + String(apSSID) + "): " + WiFi.softAPIP().toString());
     drawWiFiStatus(status1.c_str(), 0);
   }
 
@@ -205,8 +205,9 @@ bool wifiInit(uint8_t netMode)
   else
   {
     // WiFi connection succeeded
-    status2 = "IP : " + WiFi.localIP().toString();
-    drawWiFiStatus("Connected to WiFi network", status2.c_str());
+    status1 = String("Connected to WiFi network (" + WiFi.SSID() + ")");
+    status2 = String("IP : " + WiFi.localIP().toString());
+    drawWiFiStatus(status1.c_str(), status2.c_str());
     // Done
     ajaxInterval = 1000;
     delay(2000);
@@ -410,7 +411,7 @@ static const String webRadioPage()
   else
   {
     ip = WiFi.softAPIP().toString();
-    ssid = apSSID;
+    ssid = String(apSSID);
   }
 
   return webPage(
