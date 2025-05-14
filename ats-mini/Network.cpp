@@ -20,7 +20,6 @@ static const int   apClients = 3;       // Maximum simultaneous connected client
 static uint16_t ajaxInterval = 2500;
 
 // Settings
-int utcOffsetInSeconds = 0;
 String loginUsername   = "";
 String loginPassword   = "";
 
@@ -32,7 +31,7 @@ AsyncWebServer server(80);
 
 // NTP Client to get time
 WiFiUDP ntpUDP;
-NTPClient ntpClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
+NTPClient ntpClient(ntpUDP, "pool.ntp.org");
 
 static bool wifiInit(uint8_t netMode);
 static void webInit();
@@ -75,8 +74,6 @@ void netInit(uint8_t netMode)
   // Initialize WiFi and try connecting to a network
   if(wifiInit(netMode))
   {
-    // NTP time offset determined by time zone
-    ntpClient.setTimeOffset(utcOffsetInSeconds);
     // NTP time updates will happen every 5 minutes
     ntpClient.setUpdateInterval(5*60*1000);
     // Get NTP time from the network
@@ -111,12 +108,14 @@ bool ntpIsAvailable()
 //
 bool ntpSyncTime()
 {
-  if(WiFi.status()==WL_CONNECTED) ntpClient.update();
+  if(WiFi.status()==WL_CONNECTED)
+  {
+    ntpClient.update();
 
-  if(ntpClient.isTimeSet())
-    return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
-  else
-    return(false);
+    if(ntpClient.isTimeSet())
+      return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
+  }
+  return(false);
 }
 
 //
@@ -144,7 +143,6 @@ bool wifiInit(uint8_t netMode)
 
   // Get the preferences
   preferences.begin("configData", false);
-  utcOffsetInSeconds = preferences.getString("utcoffset", "").toInt();
   loginUsername      = preferences.getString("loginusername", "");
   loginPassword      = preferences.getString("loginpassword", "");
 
@@ -282,10 +280,9 @@ void webSetConfig(AsyncWebServerRequest *request)
   if(request->hasParam("utcoffset", true))
   {
     String utcOffset = request->getParam("utcoffset", true)->value();
-    preferences.putString("utcoffset", utcOffset);
-    utcOffsetInSeconds = utcOffset.toInt();
-    ntpClient.setTimeOffset(utcOffsetInSeconds);
-    clockReset();
+    currentUTCOffset = utcOffset.toInt();
+    clockRefreshTime();
+    eepromRequestSave();
   }
 
   // Done with the preferences
@@ -368,25 +365,16 @@ static const String webPage(const String &body)
 
 static const String webUtcOffsetSelector()
 {
-  static const char *Cities[] =
-  {
-    "Fairbanks", "San Francisco", "Denver", "Houston",
-    "New York", "Rio de Janeiro", "Sandwich Islands", "Nuuk",
-    "Reykjavik", "London", "Berlin", "Moscow",
-    "Yerevan", "Astana", "Omsk", "Novosibirsk",
-    "Beijing", "Yakutsk", "Vladivostok", 0
-  };
-
   String result = "";
+  uint8_t idx = findUTCOffsetIdx();
 
-  for(int j=-8 ; Cities[j+8] ; j++)
+  for(int i=0 ; i<getTotalUTCOffsets(); i++)
   {
-    int offset = j * 3600;
     char text[64];
-
+    const UTCOffset *offset = getUTCOffset(i);
     sprintf(text,
-      "<OPTION VALUE='%d'%s>%s (UTC%+d)</OPTION>",
-      offset, offset==utcOffsetInSeconds? " SELECTED":"", Cities[j+8], j
+      "<OPTION VALUE='%d'%s>%s (%s)</OPTION>",
+       offset->offset, idx==i? " SELECTED":"", offset->city, offset->desc
     );
 
     result += text;

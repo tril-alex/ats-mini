@@ -5,7 +5,7 @@
 #include "Common.h"
 #include <Wire.h>
 #include "EEPROM.h"
-#include "Rotary.h"              // Disabled half-step mode
+#include "Rotary.h"
 #include "Button.h"
 #include "Menu.h"
 #include "Storage.h"

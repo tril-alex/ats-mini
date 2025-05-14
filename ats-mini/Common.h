@@ -90,6 +90,13 @@ typedef struct
   const char *name;       // Frequency name
 } NamedFreq;
 
+typedef struct
+{
+  int8_t offset;     // UTC offset in 30 minute intervals
+  const char *desc;  // Short description
+  const char *city;  // City name
+} UTCOffset;
+
 //
 // Global Variables
 //
@@ -113,6 +120,7 @@ extern uint16_t currentSleep;
 extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
 extern int8_t scrollDirection;
+extern int8_t currentUTCOffset;
 
 extern int8_t FmAgcIdx;
 extern int8_t AmAgcIdx;
@@ -149,7 +157,13 @@ const char *clockGet();
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
 void clockReset();
 bool clockTickTime();
+void clockRefreshTime();
 bool isMemoryInBand(const Band *band, const Memory *memory);
+
+// Menu.cpp
+uint8_t findUTCOffsetIdx();
+int getTotalUTCOffsets();
+const UTCOffset *getUTCOffset(uint8_t idx);
 
 // Draw.c
 void drawLoadingSSB();
@@ -177,6 +191,9 @@ void netInit(uint8_t netMode = NET_CONNECT);
 void netStop();
 bool ntpIsAvailable();
 bool ntpSyncTime();
+
+// Storage.cpp
+void eepromRequestSave();
 
 #ifndef DISABLE_REMOTE
 // Remote.c

@@ -106,12 +106,13 @@ static const char *menu[] =
 #define MENU_CALIBRATION  1
 #define MENU_THEME        2
 #define MENU_RDS          3
-#define MENU_ZOOM         4
-#define MENU_SCROLL       5
-#define MENU_SLEEP        6
-#define MENU_SLEEPMODE    7
-#define MENU_WIFIMODE     8
-#define MENU_ABOUT        9
+#define MENU_UTCOFFSET    4
+#define MENU_ZOOM         5
+#define MENU_SCROLL       6
+#define MENU_SLEEP        7
+#define MENU_SLEEPMODE    8
+#define MENU_WIFIMODE     9
+#define MENU_ABOUT        10
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -121,6 +122,7 @@ static const char *settings[] =
   "Calibration",
   "Theme",
   "RDS",
+  "UTC Offset",
   "Zoom Menu",
   "Scroll Dir.",
   "Sleep",
@@ -172,6 +174,49 @@ uint8_t getRDSMode() { return(rdsMode[rdsModeIdx].mode); }
 uint8_t sleepModeIdx = SLEEP_LOCKED;
 static const char *sleepModeDesc[] =
 { "Locked", "Unlocked", "CPU Sleep" };
+
+//
+// UTC Offset Menu
+//
+int8_t currentUTCOffset = 0;
+static const UTCOffset utcOffsets[] =
+{
+  { -8 * 2, "UTC-8", "Fairbanks" },
+  { -7 * 2, "UTC-7", "San Francisco" },
+  { -6 * 2, "UTC-6", "Denver" },
+  { -5 * 2, "UTC-5", "Houston" },
+  { -4 * 2, "UTC-4", "New York" },
+  { -3 * 2, "UTC-3", "Rio de Janeiro" },
+  { -2 * 2, "UTC-2", "Sandwich Islands" },
+  { -1 * 2, "UTC-1", "Nuuk" },
+  {  0 * 2, "UTC+0", "Reykjavik" },
+  {  1 * 2, "UTC+1", "London" },
+  {  2 * 2, "UTC+2", "Berlin" },
+  {  3 * 2, "UTC+3", "Moscow" },
+  {  4 * 2, "UTC+4", "Yerevan" },
+  {  5 * 2, "UTC+5", "Astana" },
+  {  6 * 2, "UTC+6", "Omsk" },
+  {  7 * 2, "UTC+7", "Novosibirsk" },
+  {  8 * 2, "UTC+8", "Beijing" },
+  {  9 * 2, "UTC+9", "Yakutsk" },
+  { 10 * 2, "UTC+10", "Vladivostok" },
+};
+
+uint8_t findUTCOffsetIdx() {
+  uint8_t r, l;
+  for(l=0, r=LAST_ITEM(utcOffsets); l <= r; )
+  {
+    uint8_t m = (l + r) >> 1;
+    if(utcOffsets[m].offset < currentUTCOffset) l = m + 1;
+    else if(utcOffsets[m].offset > currentUTCOffset) r = m - 1;
+    else return(m);
+  }
+
+  return(9); // UTC+0
+}
+
+int getTotalUTCOffsets() { return(ITEM_COUNT(utcOffsets)); }
+const UTCOffset *getUTCOffset(uint8_t idx) { return(&utcOffsets[idx]); }
 
 //
 // WiFi Mode Menu
@@ -471,6 +516,12 @@ static void doRDSMode(int dir)
   if(!(getRDSMode() & RDS_CT)) clockReset();
 }
 
+static void doUTCOffset(int dir)
+{
+  currentUTCOffset = utcOffsets[wrap_range(findUTCOffsetIdx(), dir, 0, LAST_ITEM(utcOffsets))].offset;
+  clockRefreshTime();
+}
+
 static void doZoom(int dir)
 {
   zoomMenu = !zoomMenu;
@@ -710,6 +761,7 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_SCROLL:     currentCmd = CMD_SCROLL;    break;
     case MENU_SLEEP:      currentCmd = CMD_SLEEP;     break;
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
+    case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
   }
@@ -743,6 +795,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_WIFIMODE:  doWiFiMode(scrollDirection * dir);break;
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_SCROLL:    doScrollDir(dir);break;
+    case CMD_UTCOFFSET: doUTCOffset(scrollDirection * dir);break;
     case CMD_ABOUT:     return(true);
     default:            return(false);
   }
@@ -1053,6 +1106,27 @@ static void drawRDSMode(int x, int y, int sx)
   }
 }
 
+static void drawUTCOffset(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_UTCOFFSET], x, y, sx, true);
+
+  int count = ITEM_COUNT(utcOffsets);
+  uint8_t idx = findUTCOffsetIdx();
+
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0) {
+      drawZoomedMenu(utcOffsets[abs((idx+count+i)%count)].desc);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    spr.setTextDatum(MC_DATUM);
+    spr.drawString(utcOffsets[abs((idx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
 static void drawMemory(int x, int y, int sx)
 {
   char label_memory[16];
@@ -1311,6 +1385,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_WIFIMODE:  drawWiFiMode(x, y, sx);  break;
     case CMD_ZOOM:      drawZoom(x, y, sx);      break;
     case CMD_SCROLL:    drawScrollDir(x, y, sx); break;
+    case CMD_UTCOFFSET: drawUTCOffset(x, y, sx); break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

@@ -172,6 +172,19 @@ void clockReset()
   clockHours = clockMinutes = clockSeconds = 0;
 }
 
+void formatClock(uint8_t hours, uint8_t minutes, int8_t offset)
+{
+  int time = (int)hours * 60 + minutes + (int)offset * 30;
+  time = time < 0 ? time + 24 * 60 : (time >= 24 * 60 ? time - 24 * 60 : time);
+  sprintf(clockText, "%02d:%02d", time / 60, time % 60);
+}
+
+void clockRefreshTime()
+{
+  if(clockHasBeenSet)
+    formatClock(clockHours, clockMinutes, currentUTCOffset);
+}
+
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
 {
   // Verify input before setting clock
@@ -182,7 +195,7 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
     clockHours   = hours;
     clockMinutes = minutes;
     clockSeconds = seconds;
-    sprintf(clockText, "%02ld:%02ld", clockHours, clockMinutes);
+    formatClock(clockHours, clockMinutes, currentUTCOffset);
     return(true);
   }
 
@@ -215,7 +228,7 @@ bool clockTickTime()
       }
 
       // Format clock for display and ask for screen update
-      sprintf(clockText, "%02ld:%02ld", clockHours, clockMinutes);
+      formatClock(clockHours, clockMinutes, currentUTCOffset);
       return(true);
     }
   }
