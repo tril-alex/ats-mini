@@ -1,0 +1,1 @@
+Add web-based Memory slot edit/backup/restore tool: <https://esp32-si4732.github.io/ats-mini/memory.html>

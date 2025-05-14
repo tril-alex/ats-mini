@@ -67,7 +67,7 @@ tableBody.addEventListener('input', e => {
 });
 
 $('#connect').onclick = async () => {
-  if (!('serial' in navigator)) { showStatus('Web Serial API not supported'); return; }
+  if (!('serial' in navigator)) { showStatus('Web Serial API not supported, use Google Chrome'); return; }
   try {
     port = await navigator.serial.requestPort();
     await port.open({baudRate:115200});
