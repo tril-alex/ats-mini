@@ -125,8 +125,8 @@ bool ntpSyncTime()
 bool wifiInit(uint8_t netMode)
 {
   // These are our own access point (AP) addresses
-  IPAddress ip(192, 168, 5, 1);
-  IPAddress gateway(192, 168, 5, 1);
+  IPAddress ip(10, 1, 1, 1);
+  IPAddress gateway(10, 1, 1, 1);
   IPAddress subnet(255, 255, 255, 0);
   String status1 = "";
   String status2 = "Connecting to WiFi network..";
