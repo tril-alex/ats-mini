@@ -306,7 +306,7 @@ void webSetConfig(AsyncWebServerRequest *request)
   preferences.end();
 
   // Show config page again
-  request->send(200, "text/html", webConfigPage());
+  request->redirect("/config");
 
   // If we are currently in AP mode, and infrastructure mode requested,
   // and there is at least one SSID / PASS pair...
