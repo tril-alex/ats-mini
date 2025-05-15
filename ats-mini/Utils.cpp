@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Themes.h"
 #include "Button.h"
+#include "Menu.h"
 
 // SSB patch for whole SSBRX initialization string
 #include "patch_init.h"
@@ -172,17 +173,16 @@ void clockReset()
   clockHours = clockMinutes = clockSeconds = 0;
 }
 
-void formatClock(uint8_t hours, uint8_t minutes, int8_t offset)
+static void formatClock(uint8_t hours, uint8_t minutes)
 {
-  int time = (int)hours * 60 + minutes + (int)offset * 30;
-  time = time < 0 ? time + 24 * 60 : (time >= 24 * 60 ? time - 24 * 60 : time);
-  sprintf(clockText, "%02d:%02d", time / 60, time % 60);
+  int t = (int)hours * 60 + minutes + getCurrentUTCOffset() * 30;
+  t = t < 0? t + 24*60 : t;
+  sprintf(clockText, "%02d:%02d", (t / 60) % 24, t % 60);
 }
 
 void clockRefreshTime()
 {
-  if(clockHasBeenSet)
-    formatClock(clockHours, clockMinutes, currentUTCOffset);
+  if(clockHasBeenSet) formatClock(clockHours, clockMinutes);
 }
 
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
@@ -195,7 +195,7 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
     clockHours   = hours;
     clockMinutes = minutes;
     clockSeconds = seconds;
-    formatClock(clockHours, clockMinutes, currentUTCOffset);
+    clockRefreshTime();
     return(true);
   }
 
@@ -228,7 +228,7 @@ bool clockTickTime()
       }
 
       // Format clock for display and ask for screen update
-      formatClock(clockHours, clockMinutes, currentUTCOffset);
+      clockRefreshTime();
       return(true);
     }
   }

@@ -178,8 +178,8 @@ static const char *sleepModeDesc[] =
 //
 // UTC Offset Menu
 //
-int8_t currentUTCOffset = 0;
-static const UTCOffset utcOffsets[] =
+uint8_t utcOffsetIdx = 8;
+const UTCOffset utcOffsets[] =
 {
   { -8 * 2, "UTC-8", "Fairbanks" },
   { -7 * 2, "UTC-7", "San Francisco" },
@@ -202,21 +202,8 @@ static const UTCOffset utcOffsets[] =
   { 10 * 2, "UTC+10", "Vladivostok" },
 };
 
-uint8_t findUTCOffsetIdx() {
-  uint8_t r, l;
-  for(l=0, r=LAST_ITEM(utcOffsets); l <= r; )
-  {
-    uint8_t m = (l + r) >> 1;
-    if(utcOffsets[m].offset < currentUTCOffset) l = m + 1;
-    else if(utcOffsets[m].offset > currentUTCOffset) r = m - 1;
-    else return(m);
-  }
-
-  return(9); // UTC+0
-}
-
+int getCurrentUTCOffset() { return(utcOffsets[utcOffsetIdx].offset); }
 int getTotalUTCOffsets() { return(ITEM_COUNT(utcOffsets)); }
-const UTCOffset *getUTCOffset(uint8_t idx) { return(&utcOffsets[idx]); }
 
 //
 // WiFi Mode Menu
@@ -518,7 +505,7 @@ static void doRDSMode(int dir)
 
 static void doUTCOffset(int dir)
 {
-  currentUTCOffset = utcOffsets[wrap_range(findUTCOffsetIdx(), dir, 0, LAST_ITEM(utcOffsets))].offset;
+  utcOffsetIdx = wrap_range(utcOffsetIdx, dir, 0, LAST_ITEM(utcOffsets));
   clockRefreshTime();
 }
 
@@ -1111,14 +1098,17 @@ static void drawUTCOffset(int x, int y, int sx)
   drawCommon(settings[MENU_UTCOFFSET], x, y, sx, true);
 
   int count = ITEM_COUNT(utcOffsets);
-  uint8_t idx = findUTCOffsetIdx();
+  uint8_t idx = utcOffsetIdx;
 
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0) {
+    if(i==0)
+    {
       drawZoomedMenu(utcOffsets[abs((idx+count+i)%count)].desc);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    } else {
+    }
+    else
+    {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
     }
 

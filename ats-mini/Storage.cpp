@@ -150,7 +150,7 @@ void eepromSaveConfig()
   EEPROM.write(addr++, sleepModeIdx);            // Stores the current Sleep Mode value
   EEPROM.write(addr++, (uint8_t)zoomMenu);       // Stores the current Zoom Menu setting
   EEPROM.write(addr++, scrollDirection<0? 1:0);  // Stores the current Scroll setting
-  EEPROM.write(addr++, currentUTCOffset);        // Stores the current UTC Offset
+  EEPROM.write(addr++, utcOffsetIdx);            // Stores the current UTC Offset
   EEPROM.commit();
 
   addr = EEPROM_SETP_ADDR;
@@ -223,7 +223,7 @@ void eepromLoadConfig()
   sleepModeIdx   = EEPROM.read(addr++);          // Reads stored Sleep Mode value
   zoomMenu       = (bool)EEPROM.read(addr++);    // Reads stored Zoom Menu setting
   scrollDirection = EEPROM.read(addr++)? -1:1;   // Reads stored Scroll setting
-  currentUTCOffset= EEPROM.read(addr++);         // Reads the current UTC Offset
+  utcOffsetIdx   = EEPROM.read(addr++);          // Reads the current UTC Offset
 
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<getTotalBands() ; i++)

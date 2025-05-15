@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Themes.h"
 #include "Menu.h"
 
 #include <WiFi.h>
@@ -283,10 +284,23 @@ void webSetConfig(AsyncWebServerRequest *request)
   if(request->hasParam("utcoffset", true))
   {
     String utcOffset = request->getParam("utcoffset", true)->value();
-    currentUTCOffset = utcOffset.toInt();
+    utcOffsetIdx = utcOffset.toInt();
     clockRefreshTime();
     eepromRequestSave();
   }
+
+  // Save theme
+  if(request->hasParam("theme", true))
+  {
+    String theme = request->getParam("theme", true)->value();
+    themeIdx = theme.toInt();
+    eepromRequestSave();
+  }
+
+  // Save scroll direction and menu zoom
+  scrollDirection = request->hasParam("scroll", true)? -1 : 1;
+  zoomMenu        = request->hasParam("zoom", true);
+  eepromRequestSave();
 
   // Done with the preferences
   preferences.end();
@@ -369,15 +383,34 @@ static const String webPage(const String &body)
 static const String webUtcOffsetSelector()
 {
   String result = "";
-  uint8_t idx = findUTCOffsetIdx();
 
   for(int i=0 ; i<getTotalUTCOffsets(); i++)
   {
     char text[64];
-    const UTCOffset *offset = getUTCOffset(i);
+
     sprintf(text,
       "<OPTION VALUE='%d'%s>%s (%s)</OPTION>",
-       offset->offset, idx==i? " SELECTED":"", offset->city, offset->desc
+      i, utcOffsetIdx==i? " SELECTED":"",
+      utcOffsets[i].city, utcOffsets[i].desc
+    );
+
+    result += text;
+  }
+
+  return(result);
+}
+
+static const String webThemeSelector()
+{
+  String result = "";
+
+  for(int i=0 ; i<getTotalThemes(); i++)
+  {
+    char text[64];
+
+    sprintf(text,
+      "<OPTION VALUE='%d'%s>%s</OPTION>",
+       i, themeIdx==i? " SELECTED":"", theme[i].name
     );
 
     result += text;
@@ -533,6 +566,22 @@ const String webConfigPage()
     "<TD>"
       "<SELECT NAME='utcoffset'>" + webUtcOffsetSelector() + "</SELECT>"
     "</TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Theme</TD>"
+    "<TD>"
+      "<SELECT NAME='theme'>" + webThemeSelector() + "</SELECT>"
+    "</TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Reverse Scrolling</TD>"
+    "<TD><INPUT TYPE='CHECKBOX' NAME='scroll' VALUE='on'" + 
+    (scrollDirection<0? " CHECKED ":"") + "></TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Zoomed Menu</TD>"
+    "<TD><INPUT TYPE='CHECKBOX' NAME='zoom' VALUE='on'" + 
+    (zoomMenu? " CHECKED ":"") + "></TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>"
     "<INPUT TYPE='SUBMIT' VALUE='Save'>"

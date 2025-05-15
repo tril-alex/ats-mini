@@ -6,7 +6,7 @@
 #include <SI4735-fixed.h>
 
 #define APP_VERSION    214  // FIRMWARE VERSION
-#define EEPROM_VERSION 70   // EEPROM VERSION (forces reset)
+#define EEPROM_VERSION 71   // EEPROM VERSION (forces reset)
 
 // Modes
 #define FM            0
@@ -78,10 +78,10 @@ typedef struct
 
 typedef struct __attribute__((packed))
 {
-  uint16_t freq;           // Frequency
-  uint8_t  band;           // Band
-  uint8_t  mode  : 4;      // Modulation
-  uint8_t  hz100 : 4;      // Hz * 100
+  uint16_t freq;          // Frequency
+  uint8_t  band;          // Band
+  uint8_t  mode  : 4;     // Modulation
+  uint8_t  hz100 : 4;     // Hz * 100
 } Memory;
 
 typedef struct
@@ -92,9 +92,9 @@ typedef struct
 
 typedef struct
 {
-  int8_t offset;     // UTC offset in 30 minute intervals
-  const char *desc;  // Short description
-  const char *city;  // City name
+  int8_t offset;          // UTC offset in 30 minute intervals
+  const char *desc;       // Short description
+  const char *city;       // City name
 } UTCOffset;
 
 //
@@ -120,7 +120,7 @@ extern uint16_t currentSleep;
 extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
 extern int8_t scrollDirection;
-extern int8_t currentUTCOffset;
+extern uint8_t utcOffsetIdx;
 
 extern int8_t FmAgcIdx;
 extern int8_t AmAgcIdx;
@@ -159,11 +159,6 @@ void clockReset();
 bool clockTickTime();
 void clockRefreshTime();
 bool isMemoryInBand(const Band *band, const Memory *memory);
-
-// Menu.cpp
-uint8_t findUTCOffsetIdx();
-int getTotalUTCOffsets();
-const UTCOffset *getUTCOffset(uint8_t idx);
 
 // Draw.c
 void drawLoadingSSB();

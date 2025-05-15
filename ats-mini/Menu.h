@@ -68,6 +68,7 @@ typedef struct
 
 extern Band bands[];
 extern Memory memories[];
+extern const UTCOffset utcOffsets[];
 extern const char *bandModeDesc[];
 extern int bandIdx;
 
@@ -98,6 +99,10 @@ int getFreqInputStep();
 const Step *getCurrentStep(bool fast = false);
 const Bandwidth *getCurrentBandwidth();
 uint8_t getRDSMode();
+
+int getCurrentUTCOffset();
+int getTotalUTCOffsets();
+const UTCOffset *getUTCOffset(uint8_t idx);
 
 void doSoftMute(int dir);
 void doAgc(int dir);
