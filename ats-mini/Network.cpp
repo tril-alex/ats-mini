@@ -575,12 +575,12 @@ const String webConfigPage()
   "</TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Reverse Scrolling</TD>"
-    "<TD><INPUT TYPE='CHECKBOX' NAME='scroll' VALUE='on'" + 
+    "<TD><INPUT TYPE='CHECKBOX' NAME='scroll' VALUE='on'" +
     (scrollDirection<0? " CHECKED ":"") + "></TD>"
   "</TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Zoomed Menu</TD>"
-    "<TD><INPUT TYPE='CHECKBOX' NAME='zoom' VALUE='on'" + 
+    "<TD><INPUT TYPE='CHECKBOX' NAME='zoom' VALUE='on'" +
     (zoomMenu? " CHECKED ":"") + "></TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>"

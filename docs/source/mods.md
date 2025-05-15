@@ -27,3 +27,7 @@ Some of the units have a smaller speaker. You can install a bigger one (1511) th
 * <https://t.me/talkradio/174172/184530>
 
 Note: a new hardware revision with the LM4809 headphone amplifier has been spotted, see <https://forum.vcfm.ru/viewtopic.php?f=9&t=2395&start=60#p187797>
+
+## 3D-printed cases
+
+* <https://www.printables.com/model/1295639-ats-mini-receiver-housing>
