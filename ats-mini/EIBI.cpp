@@ -214,10 +214,10 @@ bool eibiLoadSchedule()
   // Start loading data
   WiFiClient *stream = http.getStreamPtr();
   int totalLen = http.getSize();
-  int byteCnt, lineCnt;
-  String buffer = "";
+  int byteCnt, lineCnt, charCnt;
+  char charBuf[200];
 
-  for(byteCnt = lineCnt = 0 ; http.connected() && (totalLen<0 || byteCnt<totalLen) ; )
+  for(byteCnt = charCnt = lineCnt = 0 ; http.connected() && (totalLen<0 || byteCnt<totalLen) ; )
   {
     if(!stream->available()) delay(1);
     else
@@ -225,20 +225,28 @@ bool eibiLoadSchedule()
       char c = stream->read();
       byteCnt++;
 
-      if(c!='\n' && buffer.length()<200) buffer += c;
+      if(c!='\n' && charCnt<sizeof(charBuf)-1) charBuf[charCnt++] = c;
       else
       {
-        // Remove whitespace and LFs
-        buffer.trim();
-        buffer.replace('\r', ' ');
+        char *p, *t;
+
+        // Remove whitespace
+        charBuf[charCnt] = '\0';
+        for(p = charBuf ; *p && *p<=' ' ; ++p);
+        for(t = charBuf + charCnt - 1 ; t>=p && *t<=' ' ; *t--='\0');
 
         // If valid non-empty schedule line...
-        if(buffer.length()>0 && isdigit(buffer.charAt(0)))
+        if(t-p+1>0 && isdigit(*p))
         {
-          // Parse and write to the file
+          // Remove LFs
+          for(t = p ; *t ; ++t)
+            if(*t=='\r') *t = ' ';
+
+          // If parsed a new entry...
           StationSchedule entry;
-          if(eibiParseLine(buffer.c_str(), entry))
+          if(eibiParseLine(p, entry))
           {
+            // Write it to the output file
             file.write((uint8_t*)&entry, sizeof(entry));
             lineCnt++;
 
@@ -248,8 +256,9 @@ bool eibiLoadSchedule()
           }
         }
 
-        // Done with the current buffer
-        buffer = "";
+        // Done with the current buffer, start a new one
+        charCnt = 0;
+        if(c!='\n') charBuf[charCnt++] = c;
       }
     }
   }
