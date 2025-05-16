@@ -1,7 +1,9 @@
 #include "math.h"
 #include "Common.h"
 #include "Themes.h"
+#include "Utils.h"
 #include "Menu.h"
+#include "EIBI.h"
 
 //
 // Bands Menu
@@ -112,7 +114,8 @@ static const char *menu[] =
 #define MENU_SLEEP        7
 #define MENU_SLEEPMODE    8
 #define MENU_WIFIMODE     9
-#define MENU_ABOUT        10
+#define MENU_LOADEIBI     10
+#define MENU_ABOUT        11
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -128,6 +131,7 @@ static const char *settings[] =
   "Sleep",
   "Sleep Mode",
   "Wi-Fi",
+  "Load EIBI",
   "About",
 };
 
@@ -755,6 +759,10 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
+
+    case MENU_LOADEIBI:
+      eibiLoadSchedule();
+      break;
   }
 }
 

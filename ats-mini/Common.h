@@ -146,20 +146,6 @@ bool updateBFO(int newBFO, bool wrap = true);
 bool doSeek(int8_t dir);
 bool clickFreq(bool shortPress);
 
-// Utils.c
-void loadSSB(uint8_t bandwidth, bool draw = true);
-void unloadSSB();
-const char *getVersion();
-int getStrength(int rssi);
-bool sleepOn(int x = 2);
-bool muteOn(int x = 2);
-const char *clockGet();
-bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
-void clockReset();
-bool clockTickTime();
-void clockRefreshTime();
-bool isMemoryInBand(const Band *band, const Memory *memory);
-
 // Draw.c
 void drawLoadingSSB();
 void drawWiFiStatus(const char *line1, const char *line2 = 0);
@@ -186,6 +172,7 @@ void netInit(uint8_t netMode, bool showStatus = true);
 void netStop();
 bool ntpIsAvailable();
 bool ntpSyncTime();
+
 void netRequestConnect();
 void netTickTime();
 void drawWiFiIndicator(int x, int y);

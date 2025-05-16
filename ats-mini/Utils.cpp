@@ -22,12 +22,12 @@ static bool sleep_on = false;
 static bool ssbLoaded = false;
 
 // Time
-static bool clockHasBeenSet  = false;
-static uint32_t clockTimer   = 0;
-static uint32_t clockSeconds = 0;
-static uint32_t clockMinutes = 0;
-static uint32_t clockHours   = 0;
-static char     clockText[8] = {0};
+static bool clockHasBeenSet = false;
+static uint32_t clockTimer  = 0;
+static uint8_t clockSeconds = 0;
+static uint8_t clockMinutes = 0;
+static uint8_t clockHours   = 0;
+static char    clockText[8] = {0};
 
 //
 // Get firmware version and build time, as a string
@@ -165,6 +165,17 @@ const char *clockGet()
     return("00:00");
   else
     return(clockHasBeenSet? clockText : NULL);
+}
+
+bool clockGetHM(uint8_t *hours, uint8_t *minutes)
+{
+  if(!clockHasBeenSet) return(false);
+  else
+  {
+    *hours   = clockHours;
+    *minutes = clockMinutes;
+    return(true);
+  }
 }
 
 void clockReset()

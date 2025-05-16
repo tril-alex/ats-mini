@@ -1,6 +1,8 @@
 #include "Common.h"
 #include "Themes.h"
+#include "Utils.h"
 #include "Menu.h"
+#include "EIBI.h"
 
 // CB frequency range
 #define MIN_CB_FREQUENCY 26060
@@ -277,6 +279,20 @@ static const char *findNameByFreq(uint16_t freq, const NamedFreq *db, uint16_t d
   return(0);
 }
 
+static const char *findScheduleByFreq(uint16_t freq)
+{
+  uint8_t hour, minute;
+
+  // Must have valid time
+  if(!clockGetHM(&hour, &minute)) return(0);
+
+  // Try EIBI lookup
+  const StationSchedule *entry = eibiLookup(freq, hour, minute);
+
+  // Return just the station name
+  return(entry? entry->name : 0);
+}
+
 bool identifyFrequency(uint16_t freq)
 {
   const char *name;
@@ -286,6 +302,9 @@ bool identifyFrequency(uint16_t freq)
 
   // Try CB channel names
   name = name? name : findCBChannelByFreq(freq);
+
+  // Try EIBI schedule
+  name = name? name : findScheduleByFreq(freq);
 
   // Done
   return(showStationName(name? name : ""));
