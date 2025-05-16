@@ -10,6 +10,7 @@
 #include "Menu.h"
 #include "Storage.h"
 #include "Themes.h"
+#include "Utils.h"
 
 // SI473/5 and UI
 #define MIN_ELAPSED_TIME         5  // 300
@@ -100,6 +101,8 @@ void setup()
   // Enable serial port
   Serial.begin(115200);
 
+  // Initialize flash file system
+  diskInit();
   // Encoder pins. Enable internal pull-ups
   pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
   pinMode(ENCODER_PIN_A, INPUT_PULLUP);

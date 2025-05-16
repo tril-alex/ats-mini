@@ -37,7 +37,8 @@
 #define CMD_SLEEPMODE 0x2800 // |
 #define CMD_UTCOFFSET 0x2900 // |
 #define CMD_WIFIMODE  0x2A00 // |
-#define CMD_ABOUT     0x2B00 //-+
+#define CMD_LOADEIBI  0x2B00 // |
+#define CMD_ABOUT     0x2C00 //-+
 
 //
 // Data Types
