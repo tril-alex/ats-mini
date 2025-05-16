@@ -243,7 +243,7 @@ bool eibiLoadSchedule()
             lineCnt++;
 
             char statusMessage[64];
-            sprintf(statusMessage, "... %d entries ...", lineCnt);
+            sprintf(statusMessage, "... %d bytes, %d entries ...", byteCnt, lineCnt);
             drawWiFiStatus(eibiMessage, statusMessage);
           }
         }
