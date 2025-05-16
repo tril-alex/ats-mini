@@ -5,7 +5,8 @@
 #include "Menu.h"
 
 #define EEPROM_SIZE   512
-#define STORE_TIME  10000  // Time of inactivity to start writing EEPROM
+#define STORE_TIME    10000 // Time of inactivity to start writing EEPROM
+#define CONNECT_TIME  3000  // Time of inactivity to start connecting WiFi
 
 #define EEPROM_BASE_ADDR  0x000
 #define EEPROM_SETM_ADDR  0x080
@@ -13,10 +14,17 @@
 #define EEPROM_SETP_ADDR  0x120
 #define EEPROM_VER_ADDR   0x1F0
 
-// Flag indicating EEPROM write request
-static bool showEepromFlag = false;
-static bool itIsTimeToSave = false;
-static uint32_t storeTime = millis();
+static bool showEepromFlag = false; // TRUE: Writing to EEPROM
+static bool itIsTimeToSave = false; // TRUE: Need to save to EEPROM
+static bool itIsTimeToWiFi = false; // TRUE: Need to connect to WiFi
+static uint32_t storeTime   = millis();
+static uint32_t connectTime = millis();
+
+void netRequestConnect()
+{
+  connectTime = millis();
+  itIsTimeToWiFi = true;
+}
 
 // To store any change into the EEPROM, we need at least STORE_TIME
 // milliseconds of inactivity.
@@ -28,12 +36,20 @@ void eepromRequestSave()
 
 void eepromTickTime()
 {
-  // Save the current frequency only if it has changed
+  // Save configuration if requested
   if(itIsTimeToSave && ((millis() - storeTime) > STORE_TIME))
   {
     eepromSaveConfig();
     storeTime = millis();
     itIsTimeToSave = false;
+  }
+
+  // Connect to WiFi if requested
+  if(itIsTimeToWiFi && ((millis() - connectTime) > CONNECT_TIME))
+  {
+    netInit(wifiModeIdx);
+    connectTime = millis();
+    itIsTimeToWiFi = false;
   }
 }
 

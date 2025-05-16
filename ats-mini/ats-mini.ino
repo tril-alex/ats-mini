@@ -594,104 +594,140 @@ void loop()
 #ifndef DISABLE_REMOTE
   // Periodically print status to serial
   remoteTickTime();
+
   // Receive and execute serial command
-  if(Serial.available()>0) {
+  if(Serial.available()>0)
+  {
     int revent = remoteDoCommand(Serial.read());
     needRedraw |= !!(revent & REMOTE_CHANGED);
     pb1st.wasClicked |= !!(revent & REMOTE_CLICK);
     int direction = revent >> REMOTE_DIRECTION;
-    encoderCount = direction ? direction : encoderCount;
-    if (revent & REMOTE_EEPROM) eepromRequestSave();
+    encoderCount = direction? direction : encoderCount;
+    if(revent & REMOTE_EEPROM) eepromRequestSave();
   }
 #endif
 
   // Block encoder rotation when in the locked sleep mode
-  if(encoderCount && sleepOn() && sleepModeIdx == SLEEP_LOCKED) encoderCount = 0;
+  if(encoderCount && sleepOn() && sleepModeIdx==SLEEP_LOCKED) encoderCount = 0;
 
   // Activate push and rotate mode (can span multiple loop iterations until the button is released)
   if (encoderCount && pb1st.isPressed) pushAndRotate = true;
 
   // If push and rotate mode is active...
-  if (pushAndRotate) {
+  if(pushAndRotate)
+  {
     // If encoder has been rotated
-    if (encoderCount) {
-      if (currentCmd == CMD_NONE) {
-        // Activate frequency input mode
-        currentCmd = CMD_FREQ;
-        needRedraw = true;
-      } else if (currentCmd == CMD_FREQ) {
-        // Select digit
-        doSelectDigit(encoderCount);
-        needRedraw = true;
-      } else if (currentCmd == CMD_SEEK) {
-        // Normal tuning in seek mode
-        needRedraw |= doTune(encoderCount);
-        eepromRequestSave();
+    if(encoderCount)
+    {
+      switch(currentCmd)
+      {
+        case CMD_NONE:
+          // Activate frequency input mode
+          currentCmd = CMD_FREQ;
+          needRedraw = true;
+          break;
+        case CMD_FREQ:
+          // Select digit
+          doSelectDigit(encoderCount);
+          needRedraw = true;
+          break;
+        case CMD_SEEK:
+          // Normal tuning in seek mode
+          needRedraw |= doTune(encoderCount);
+          eepromRequestSave();
+          break;
       }
+
       // Clear encoder rotation
       encoderCount = 0;
     }
     // Reset timeouts while push and rotate is active
     elapsedSleep = elapsedCommand = currentTime;
-  } else {
+  }
+  else
+  {
     // If encoder has been rotated
-    if (encoderCount) {
-      if(currentCmd == CMD_NONE) {
-        // Tuning
-        needRedraw |= doTune(encoderCount);
-      } else if(currentCmd == CMD_FREQ) {
-        // Digit tuning
-        needRedraw |= doDigit(encoderCount);
-      } else if(currentCmd == CMD_SEEK) {
-        // Seek mode
-        needRedraw |= doSeek(encoderCount);
-        // Seek can take long time, renew the timestamp
-        currentTime = millis();
-      } else {
-        // Side bar menus / settings
-        needRedraw |= doSideBar(currentCmd, encoderCount);
+    if(encoderCount)
+    {
+      switch(currentCmd)
+      {
+        case CMD_NONE:
+          // Tuning
+          needRedraw |= doTune(encoderCount);
+          break;
+        case CMD_FREQ:
+          // Digit tuning
+          needRedraw |= doDigit(encoderCount);
+          break;
+        case CMD_SEEK:
+          // Seek mode
+          needRedraw |= doSeek(encoderCount);
+          // Seek can take long time, renew the timestamp
+          currentTime = millis();
+          break;
+        default:
+          // Side bar menus / settings
+          needRedraw |= doSideBar(currentCmd, encoderCount);
+          break;
       }
+
       // Reset timeouts
       elapsedSleep = elapsedCommand = currentTime;
       eepromRequestSave();
 
       // Clear encoder rotation
       encoderCount = 0;
-    } else if(pb1st.isLongPressed) {
+    }
+    else if(pb1st.isLongPressed)
+    {
       // Encoder is being LONG PRESSED: TOGGLE DISPLAY
       sleepOn(!sleepOn());
       // CPU sleep can take long time, renew the timestamps
       elapsedSleep = elapsedCommand = currentTime = millis();
 
-    } else if ((pb1st.wasClicked || pb1st.wasShortPressed)) {
+    }
+    else if(pb1st.wasClicked || pb1st.wasShortPressed)
+    {
       // Encoder click or short press
       // Reset timeouts
       elapsedSleep = elapsedCommand = currentTime;
 
       // If in locked/unlocked sleep mode
-      if (sleepOn()) {
+      if(sleepOn())
+      {
         // If sleep timeout is enabled, exit it via button press of any duration
         // (users don't need to figure out that a long press is required to wake up the device)
-        if (currentSleep) {
+        if(currentSleep)
+        {
           sleepOn(false);
           needRedraw = true;
-        } else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED) {
+        }
+        else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED)
+        {
           // Allow short press in unlocked sleep mode to adjust the volume
           clickVolume();
           needRedraw = true;
         }
-      } else if(clickHandler(currentCmd, pb1st.wasShortPressed)) {
+      }
+      else if(clickHandler(currentCmd, pb1st.wasShortPressed))
+      {
         // Command handled, redraw screen
         needRedraw = true;
-      } else if(currentCmd != CMD_NONE) {
+      }
+      else if(currentCmd != CMD_NONE)
+      {
         // Deactivate modal mode
         currentCmd = CMD_NONE;
         needRedraw = true;
-      } else if(pb1st.wasShortPressed) {
+      }
+      else if(pb1st.wasShortPressed)
+      {
         // Volume shortcut (only active in VFO mode)
         clickVolume();
         needRedraw = true;
-      } else {
+      }
+      else
+      {
         // Activate menu
         currentCmd = CMD_MENU;
         needRedraw = true;
@@ -700,7 +736,8 @@ void loop()
   }
 
   // Deactivate push and rotate mode
-  if (!pb1st.isPressed && pushAndRotate) {
+  if(!pb1st.isPressed && pushAndRotate)
+  {
     pushAndRotate = false;
     needRedraw = true;
   }
@@ -718,7 +755,8 @@ void loop()
   }
 
   // Display sleep timeout
-  if(currentSleep && !sleepOn() && ((currentTime - elapsedSleep) > currentSleep * 1000)) {
+  if(currentSleep && !sleepOn() && ((currentTime - elapsedSleep) > currentSleep * 1000))
+  {
     sleepOn(true);
     // CPU sleep can take long time, renew the timestamps
     elapsedSleep = elapsedCommand = currentTime = millis();

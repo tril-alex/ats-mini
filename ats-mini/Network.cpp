@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Storage.h"
 #include "Themes.h"
 #include "Menu.h"
 
@@ -311,12 +312,9 @@ void webSetConfig(AsyncWebServerRequest *request)
   request->redirect("/config");
 
   // If we are currently in AP mode, and infrastructure mode requested,
-  // and there is at least one SSID / PASS pair...
+  // and there is at least one SSID / PASS pair, request network connection
   if(haveSSID && (wifiModeIdx>NET_AP_ONLY) && (WiFi.status()!=WL_CONNECTED))
-  {
-    // Try connecting to WiFi network
-    netInit(wifiModeIdx);
-  }
+    netRequestConnect();
 }
 
 static const String webStyleSheet()

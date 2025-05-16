@@ -187,9 +187,6 @@ void netStop();
 bool ntpIsAvailable();
 bool ntpSyncTime();
 
-// Storage.cpp
-void eepromRequestSave();
-
 #ifndef DISABLE_REMOTE
 // Remote.c
 #define REMOTE_CHANGED   1
