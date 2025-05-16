@@ -276,9 +276,11 @@ void webSetConfig(AsyncWebServerRequest *request)
 
     if(request->hasParam(nameSSID, true) && request->hasParam(namePASS, true))
     {
-      preferences.putString(nameSSID, request->getParam(nameSSID, true)->value());
-      preferences.putString(namePASS, request->getParam(namePASS, true)->value());
-      haveSSID = true;
+      String ssid = request->getParam(nameSSID, true)->value();
+      String pass = request->getParam(namePASS, true)->value();
+      preferences.putString(nameSSID, ssid);
+      preferences.putString(namePASS, pass);
+      haveSSID |= ssid != "" && pass != "";
     }
   }
 
