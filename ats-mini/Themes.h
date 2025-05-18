@@ -20,6 +20,9 @@ typedef struct __attribute__ ((packed))
 
   uint16_t save_icon;
 
+  uint16_t wifi_icon;
+  uint16_t wifi_icon_conn;
+
   uint16_t batt_voltage;
   uint16_t batt_border;
   uint16_t batt_full;

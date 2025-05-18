@@ -63,11 +63,11 @@ float batteryMonitor()
 
 //
 // Show last measured battery voltage and status at given screen
-// coordinates
+// coordinates. Return true if voltage was drawn.
 //
-void drawBattery(int x, int y)
+bool drawBattery(int x, int y)
 {
-  if(sleepOn()) return;
+  if(sleepOn()) return false;
 
   // Measure battery voltage and status
   batteryMonitor();
@@ -103,6 +103,7 @@ void drawBattery(int x, int y)
     spr.fillTriangle(x + 9 + 5, y + 1 + 6, x + 9 + 10, y + 1 + 6, x + 9 + 3, y + 1 + 13, TH.batt_icon);
     spr.fillRect(x + 9 + 1, y + 1 + 6, 9, 2, TH.batt_icon);
     spr.drawPixel(x + 9 + 3, y + 1 + 12, TH.batt_icon);
+    return false;
   }
   else
   {
@@ -137,5 +138,6 @@ void drawBattery(int x, int y)
 
     spr.fillRoundRect(x + 2, y + 3, level, 10, 2, color);
     spr.drawString(voltage, x - 3, y, 2);
+    return true;
   }
 }

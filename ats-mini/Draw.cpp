@@ -23,6 +23,8 @@
 #define RDS_OFFSET_Y    94    // RDS vertical offset
 #define BATT_OFFSET_X  288    // Battery meter x offset
 #define BATT_OFFSET_Y    0    // Battery meter y offset
+#define WIFI_OFFSET_X  237    // WiFi x offset
+#define WIFI_OFFSET_Y    0    // WiFi y offset
 
 //
 // Show ABOUT screen
@@ -349,15 +351,21 @@ void drawScreen()
   // Clear screen buffer
   spr.fillSprite(TH.bg);
 
-  // Draw EEPROM write request icon
-  drawEepromIndicator(SAVE_OFFSET_X, SAVE_OFFSET_Y);
-
   // About screen is a special case
   if(currentCmd==CMD_ABOUT)
   {
     drawAbout();
     return;
   }
+
+  // Draw EEPROM write request icon
+  drawEepromIndicator(SAVE_OFFSET_X, SAVE_OFFSET_Y);
+
+  // Draw battery indicator & voltage
+  bool has_voltage = drawBattery(BATT_OFFSET_X, BATT_OFFSET_Y);
+
+  // Draw WiFi icon
+  drawWiFiIndicator(has_voltage ? WIFI_OFFSET_X : BATT_OFFSET_X - 13, WIFI_OFFSET_Y);
 
   // Set font we are going to use
   spr.setFreeFont(&Orbitron_Light_24);
@@ -408,12 +416,10 @@ void drawScreen()
   // Update if not tuning
   if(!tuning_flag)
   {
-    drawBattery(BATT_OFFSET_X, BATT_OFFSET_Y);
     spr.pushSprite(0, 0);
   }
 #else
   // No hold off
-  drawBattery(BATT_OFFSET_X, BATT_OFFSET_Y);
   spr.pushSprite(0, 0);
 #endif
 }

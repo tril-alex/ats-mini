@@ -168,7 +168,7 @@ void drawScreen();
 
 // Battery.c
 float batteryMonitor();
-void drawBattery(int x, int y);
+bool drawBattery(int x, int y);
 
 // Station.c
 const char *getStationName();
@@ -188,6 +188,7 @@ bool ntpIsAvailable();
 bool ntpSyncTime();
 void netRequestConnect();
 void netTickTime();
+void drawWiFiIndicator(int x, int y);
 
 #ifndef DISABLE_REMOTE
 // Remote.c
