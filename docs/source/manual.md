@@ -5,7 +5,8 @@
 ![](_static/screenshot-main.png)
 
 * **RSSI meter** (top left corner), also serves as a mono/stereo indicator in FM mode (one/two rows).
-* **Settings save icon** (right after the RSSI meter). The settings are saved after 10 seconds of inactivity.
+* **Settings save icon** (right after the RSSI meter). The settings are saved to non-volatile memory after 10 seconds of inactivity.
+* **Wi-Fi icon** (top right area near the battery). Different colors indicate the connection status.
 * **Battery status** (top right corner). It doesn't show the voltage when charged, see [#36](https://github.com/esp32-si4732/ats-mini/issues/36#issuecomment-2778356143). The only indication that the battery is charging is the hardware LED on the bottom of the receiver, which turns ON during charging.
 * **Band name and modulation** (VHF & FM, top center). See the [Bands table](#bands-table) for more details.
 * **Info panel** (the box on the left side), also **Menu**. The parameters are explained in the [Menu](#menu) section.
@@ -72,6 +73,7 @@ The Wi-Fi mode (2.4GHz only) can be used for the following purposes (for now):
 * Time synchronization via NTP (Network Time Protocol).
 * Viewing the receiver status (frequency, RSSI/SNR, volume, battery voltage, etc).
 * Viewing the Memory slots with saved frequencies.
+* Manage the receiver settings.
 
 There are a couple of modes:
 
@@ -86,7 +88,7 @@ Initial configuration:
 * Enable the **AP Only** mode (the receiver will briefly display its 10.1.1.1 IP address).
 * Connect to the `ATS-Mini` access point from your phone or computer. There is no internet connection available on this access point.
 * Open a browser and visit the following URL: <http://10.1.1.1>. The status web page should open.
-* Click the `Config` link. Here you can add optional login and password to protect the settings page, configure up to three access points the receiver will try to connect to, and set a time zone.
+* Click the `Config` link. Here you can add optional login and password to protect the settings page, configure up to three access points the receiver will try to connect to, and set a time zone and other settings.
 * After that, switch the Wi-Fi mode to **AP+Connect** or **Connect** (the receiver will briefly show its new dynamic IP address it got from a configured access point).
 * Now connect your phone/computer to the same access point and open the new URL to check whether the receiver connected to the internet.
 
