@@ -85,15 +85,13 @@ void netClearPreferences()
 //
 void netStop()
 {
+  wifi_mode_t mode = WiFi.getMode();
   // If network connection up, shut it down
-  if(netMode==NET_CONNECT || netMode==NET_AP_CONNECT)
+  if((mode==WIFI_STA) || (mode==WIFI_AP_STA))
     WiFi.disconnect(true);
-
-  // If access point up, shut it down
-  if(netMode==NET_AP_ONLY || netMode==NET_AP_CONNECT)
+  if((mode==WIFI_AP) || (mode==WIFI_AP_STA))
     WiFi.softAPdisconnect(true);
-
-  // Network now off
+  WiFi.mode(WIFI_MODE_NULL);
   netMode = NET_OFF;
 }
 
@@ -109,10 +107,21 @@ void netInit(uint8_t newMode, bool showStatus)
   if(newMode==NET_OFF) return;
 
   // Start WiFi access point if requested
-  if(newMode==NET_AP_ONLY || newMode==NET_AP_CONNECT)
+  if(newMode==NET_AP_ONLY)
   {
+    WiFi.mode(WIFI_AP);
     // Let user see connection status if successful
     if(wifiInitAP() && showStatus) delay(2000);
+  }
+  else if(newMode==NET_AP_CONNECT)
+  {
+    WiFi.mode(WIFI_AP_STA);
+    // Let user see connection status if successful
+    if(wifiInitAP() && showStatus) delay(2000);
+  }
+  else // NET_CONNECT, NET_SYNC
+  {
+    WiFi.mode(WIFI_STA);
   }
 
   // Initialize WiFi and try connecting to a network
@@ -136,6 +145,7 @@ void netInit(uint8_t newMode, bool showStatus)
     // Drop network connection
     WiFi.disconnect(true);
     newMode = NET_OFF;
+    WiFi.mode(WIFI_MODE_NULL);
   }
   else
   {
@@ -181,7 +191,6 @@ bool wifiInitAP()
   IPAddress subnet(255, 255, 255, 0);
 
   // Start as access point (AP)
-  WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(apSSID, apPWD, apChannel, apHideMe, apClients);
   WiFi.softAPConfig(ip, gateway, subnet);
 

@@ -182,7 +182,7 @@ bool identifyFrequency(uint16_t freq);
 
 // Network.cpp
 void netClearPreferences();
-void netInit(uint8_t netMode = NET_CONNECT, bool showStatus = true);
+void netInit(uint8_t netMode, bool showStatus = true);
 void netStop();
 bool ntpIsAvailable();
 bool ntpSyncTime();
