@@ -797,6 +797,9 @@ void loop()
   // been no activity for a while
   eepromTickTime();
 
+  // Tick NETWORK time, connecting to WiFi if requested
+  netTickTime();
+
   // Periodically refresh the main screen
   // This covers the case where there is nothing else triggering a refresh
   if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)

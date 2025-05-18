@@ -10,6 +10,8 @@
 #include <NTPClient.h>
 #include <Preferences.h>
 
+#define CONNECT_TIME  3000  // Time of inactivity to start connecting WiFi
+
 //
 // Access Point (AP) mode settings
 //
@@ -21,6 +23,9 @@ static const int   apClients = 3;       // Maximum simultaneous connected client
 
 static uint8_t  netMode      = NET_OFF; // Current WiFi connection mode
 static uint16_t ajaxInterval = 2500;
+
+static bool itIsTimeToWiFi = false; // TRUE: Need to connect to WiFi
+static uint32_t connectTime = millis();
 
 // Settings
 String loginUsername = "";
@@ -43,6 +48,27 @@ static void webSetConfig(AsyncWebServerRequest *request);
 static const String webRadioPage();
 static const String webMemoryPage();
 static const String webConfigPage();
+
+
+//
+// Delayed WiFi connection
+//
+void netRequestConnect()
+{
+  connectTime = millis();
+  itIsTimeToWiFi = true;
+}
+
+void netTickTime()
+{
+  // Connect to WiFi if requested
+  if(itIsTimeToWiFi && ((millis() - connectTime) > CONNECT_TIME))
+  {
+    netInit(wifiModeIdx);
+    connectTime = millis();
+    itIsTimeToWiFi = false;
+  }
+}
 
 //
 // Clear all settings

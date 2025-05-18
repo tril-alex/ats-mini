@@ -186,6 +186,8 @@ void netInit(uint8_t netMode = NET_CONNECT, bool showStatus = true);
 void netStop();
 bool ntpIsAvailable();
 bool ntpSyncTime();
+void netRequestConnect();
+void netTickTime();
 
 #ifndef DISABLE_REMOTE
 // Remote.c

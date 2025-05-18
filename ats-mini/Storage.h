@@ -10,6 +10,5 @@ void eepromLoadConfig();
 void drawEepromIndicator(int x, int y);
 
 void eepromRequestSave();
-void netRequestConnect();
 
 #endif // STORAGE_H
