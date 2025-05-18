@@ -74,7 +74,7 @@ void netStop()
 //
 // Initialize WiFi network and services
 //
-void netInit(uint8_t newMode)
+void netInit(uint8_t newMode, bool showStatus)
 {
   // Always disable WiFi first
   netStop();
@@ -83,13 +83,21 @@ void netInit(uint8_t newMode)
   if(newMode==NET_OFF) return;
 
   // Start WiFi access point if requested
-  if(newMode==NET_AP_ONLY || newMode==NET_AP_CONNECT) wifiInitAP();
+  if(newMode==NET_AP_ONLY || newMode==NET_AP_CONNECT)
+  {
+    // Let user see connection status if successful
+    if(wifiInitAP() && showStatus) delay(2000);
+  }
 
   // Initialize WiFi and try connecting to a network
   if(newMode>NET_AP_ONLY && wifiConnect())
   {
+    // Let user see connection status if successful
+    if(newMode!=NET_SYNC && showStatus) delay(2000);
+
     // NTP time updates will happen every 5 minutes
     ntpClient.setUpdateInterval(5*60*1000);
+
     // Get NTP time from the network
     clockReset();
     for(int j=0 ; j<10 ; j++)
@@ -101,6 +109,7 @@ void netInit(uint8_t newMode)
   {
     // Drop network connection
     WiFi.disconnect(true);
+    newMode = NET_OFF;
   }
   else
   {
@@ -156,7 +165,6 @@ bool wifiInitAP()
   );
 
   ajaxInterval = 2500;
-  delay(2000);
   return(true);
 }
 
@@ -224,7 +232,6 @@ bool wifiConnect()
     );
     // Done
     ajaxInterval = 1000;
-    delay(2000);
     return(true);
   }
 }
