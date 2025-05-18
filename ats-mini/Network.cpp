@@ -58,7 +58,6 @@ void netClearPreferences()
 //
 void netStop()
 {
-  server.end();
   WiFi.disconnect(true);
   WiFi.softAPdisconnect(true);
 }
