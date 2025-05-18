@@ -557,7 +557,7 @@ static const String webMemoryPage()
 
 const String webConfigPage()
 {
-  preferences.begin("configData", false);
+  preferences.begin("configData", true);
   String ssid1 = preferences.getString("wifissid1", "");
   String pass1 = preferences.getString("wifipass1", "");
   String ssid2 = preferences.getString("wifissid2", "");
