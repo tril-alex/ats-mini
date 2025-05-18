@@ -30,6 +30,7 @@ The SRH805S SMA-M antenna supports 144/430/1200MHz and is not really suitable fo
 * <https://www.thingiverse.com/thing:6976524>
 * <https://www.thingiverse.com/thing:6968102>
 * <https://www.thingiverse.com/thing:6997758>
+* <https://www.thingiverse.com/thing:6991652>
 * <https://3dtoday.ru/3d-models/gadgets/aksessuary/skameecka-dlya-kitaiskogo-radiopriemnika-malysarik>
 * <https://cults3d.com/es/modelo-3d/artilugios/si4732-antenna-and-frame-llaven>
 

@@ -31,3 +31,7 @@ Note: a new hardware revision with the LM4809 headphone amplifier has been spott
 ## 3D-printed cases
 
 * <https://www.printables.com/model/1295639-ats-mini-receiver-housing>
+
+## Other interesting mods
+
+* [Si4732 Mini & ATS-20+ Hybrid Radio](https://github.com/esp32-si4732/ats-mini/actions/runs/15095548341)
