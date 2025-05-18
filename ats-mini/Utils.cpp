@@ -111,6 +111,7 @@ bool sleepOn(int x)
     while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
 
     if (sleepModeIdx == SLEEP_LIGHT) {
+      netStop();
       while (true) {
         esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
         rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
@@ -135,6 +136,7 @@ bool sleepOn(int x)
       rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
       pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
       sleepOn(false);
+      netInit(wifiModeIdx, false);
     }
   }
   else if((x==0) && sleep_on)
