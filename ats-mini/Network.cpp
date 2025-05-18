@@ -576,10 +576,10 @@ static const String webMemoryPage()
       items += "&nbsp;---&nbsp;</TD></TR>";
     else
     {
-      String freq = currentMode == FM?
+      String freq = memories[j].mode == FM?
         String(memories[j].freq / 100.0) + "MHz "
       : String(memories[j].freq + memories[j].hz100 / 10.0) + "kHz ";
-      items += freq + bandModeDesc[currentMode] + "</TD></TR>";
+      items += freq + bandModeDesc[memories[j].mode] + "</TD></TR>";
     }
   }
 
