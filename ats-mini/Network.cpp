@@ -21,7 +21,6 @@ static const int   apChannel = 10;      // WiFi channel number (1..13)
 static const bool  apHideMe  = false;   // TRUE: disable SSID broadcast
 static const int   apClients = 3;       // Maximum simultaneous connected clients
 
-static uint8_t  netMode      = NET_OFF; // Current WiFi connection mode
 static uint16_t ajaxInterval = 2500;
 
 static bool itIsTimeToWiFi = false; // TRUE: Need to connect to WiFi
@@ -114,49 +113,54 @@ void drawWiFiIndicator(int x, int y)
 void netStop()
 {
   wifi_mode_t mode = WiFi.getMode();
+
   // If network connection up, shut it down
   if((mode==WIFI_STA) || (mode==WIFI_AP_STA))
     WiFi.disconnect(true);
+
+  // If access point up, shut it down
   if((mode==WIFI_AP) || (mode==WIFI_AP_STA))
     WiFi.softAPdisconnect(true);
+
   WiFi.mode(WIFI_MODE_NULL);
-  netMode = NET_OFF;
 }
 
 //
 // Initialize WiFi network and services
 //
-void netInit(uint8_t newMode, bool showStatus)
+void netInit(uint8_t netMode, bool showStatus)
 {
   // Always disable WiFi first
   netStop();
 
-  // Do not initialize WiFi if disabled
-  if(newMode==NET_OFF) return;
-
-  // Start WiFi access point if requested
-  if(newMode==NET_AP_ONLY)
+  switch(netMode)
   {
-    WiFi.mode(WIFI_AP);
-    // Let user see connection status if successful
-    if(wifiInitAP() && showStatus) delay(2000);
-  }
-  else if(newMode==NET_AP_CONNECT)
-  {
-    WiFi.mode(WIFI_AP_STA);
-    // Let user see connection status if successful
-    if(wifiInitAP() && showStatus) delay(2000);
-  }
-  else // NET_CONNECT, NET_SYNC
-  {
-    WiFi.mode(WIFI_STA);
+    case NET_OFF:
+      // Do not initialize WiFi if disabled
+      return;
+    case NET_AP_ONLY:
+      // Start WiFi access point if requested
+      WiFi.mode(WIFI_AP);
+      // Let user see connection status if successful
+      if(wifiInitAP() && showStatus) delay(2000);
+      break;
+    case NET_AP_CONNECT:
+      // Start WiFi access point if requested
+      WiFi.mode(WIFI_AP_STA);
+      // Let user see connection status if successful
+      if(wifiInitAP() && showStatus) delay(2000);
+      break;
+    default:
+      // No access point
+      WiFi.mode(WIFI_STA);
+      break;
   }
 
   // Initialize WiFi and try connecting to a network
-  if(newMode>NET_AP_ONLY && wifiConnect())
+  if(netMode>NET_AP_ONLY && wifiConnect())
   {
     // Let user see connection status if successful
-    if(newMode!=NET_SYNC && showStatus) delay(2000);
+    if(netMode!=NET_SYNC && showStatus) delay(2000);
 
     // NTP time updates will happen every 5 minutes
     ntpClient.setUpdateInterval(5*60*1000);
@@ -168,11 +172,10 @@ void netInit(uint8_t newMode, bool showStatus)
   }
 
   // If only connected to sync...
-  if(newMode==NET_SYNC)
+  if(netMode==NET_SYNC)
   {
     // Drop network connection
     WiFi.disconnect(true);
-    newMode = NET_OFF;
     WiFi.mode(WIFI_MODE_NULL);
   }
   else
@@ -180,9 +183,6 @@ void netInit(uint8_t newMode, bool showStatus)
     // Initialize web server for remote configuration
     webInit();
   }
-
-  // New network mode is not in effect
-  netMode = newMode;
 }
 
 //
