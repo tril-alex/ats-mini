@@ -527,7 +527,11 @@ bool tuneToMemory(const Memory *memory)
   if(memory->band>=getTotalBands()) return(false);
   // Band must contain frequency and modulation
   if(!isMemoryInBand(&bands[memory->band], memory)) return(false);
-
+  // Must differ from the current band, frequency and modulation
+  if(memory->band==bandIdx &&
+     memory->freq==bands[bandIdx].currentFreq &&
+     memory->mode==bands[bandIdx].bandMode)
+    return(true);
   // Save current band settings
   bands[bandIdx].currentFreq    = currentFrequency + currentBFO / 1000;
   bands[bandIdx].currentStepIdx = stepIdx[currentMode];
