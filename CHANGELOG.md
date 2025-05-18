@@ -4,6 +4,42 @@ The project documentation is available at <https://esp32-si4732.github.io/ats-mi
 
 <!-- towncrier release notes start -->
 
+## 2.20 (2025-05-18)
+
+
+### Added
+
+- Direct frequency input mode. Press and rotate the encoder to select the step (digit or "half-digit"), rotate the encoder to adjust the frequency, use short press to align frequency to the current step. To exit the mode, click the encoder or wait for a couple of seconds. [#26](https://github.com/esp32-si4732/ats-mini/issues/26)
+- `Settings->UTC Offset` now affects the displayed time (whether it was received from RDS or NTP). [#44](https://github.com/esp32-si4732/ats-mini/issues/44)
+- `Settings->Scroll Dir.` option to reverse the menu scroll direction. [#79](https://github.com/esp32-si4732/ats-mini/issues/79)
+- Add SNR to the serial console log.
+- Stop the automatic seek process by clicking the encoder button (exit by rotating it still works).
+- Use press+rotate for manual fine tuning in Seek mode.
+- Wi-Fi mode to sync time over NTP, view the receiver status and Memory slots.
+
+
+### Changed
+
+- Experimental: re-enable automatic antenna capacitor on FM, MW and 160M bands (as it was in 1.06 and earlier), plus reset it when switching between AM bands. [#13](https://github.com/esp32-si4732/ats-mini/issues/13)
+- The short press (volume) shortcut is no longer global (now works only in VFO mode) and can be used by menus and other modal modes. [#26](https://github.com/esp32-si4732/ats-mini/issues/26)
+- SSB tuning is now aligned to the current step. [#76](https://github.com/esp32-si4732/ats-mini/issues/76)
+- Completely silence speaker output on mute. [#78](https://github.com/esp32-si4732/ats-mini/issues/78)
+- Decrease RSSI & SNR thresholds in FM/AM seek modes.
+- Theme editor can be enabled or disabled via the `T` terminal command, without recompiling the firmware.
+
+
+### Fixed
+
+- Set seek step according to the current step. [#5](https://github.com/esp32-si4732/ats-mini/issues/5)
+- SSB memory slots now store frequencies with 100Hz precision. Serial commands that work with memory slots now expect frequencies in Hz. [#79](https://github.com/esp32-si4732/ats-mini/issues/79)
+- Fixed wrong menu titles. [#80](https://github.com/esp32-si4732/ats-mini/issues/80)
+- Fix audible clicks when scrolling over empty memory slots.
+
+
+### Improved Documentation
+
+- Add web-based Memory slot edit/backup/restore tool: <https://esp32-si4732.github.io/ats-mini/memory.html>
+
 ## 2.14 (2025-05-06)
 
 

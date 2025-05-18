@@ -1,1 +1,0 @@
-Fix audible clicks when scrolling over empty memory slots.
