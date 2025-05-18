@@ -295,6 +295,8 @@ void webInit()
 
 void webSetConfig(AsyncWebServerRequest *request)
 {
+  bool eepromSave = false;
+
   // Start modifying preferences
   preferences.begin("configData", false);
 
@@ -333,7 +335,7 @@ void webSetConfig(AsyncWebServerRequest *request)
     String utcOffset = request->getParam("utcoffset", true)->value();
     utcOffsetIdx = utcOffset.toInt();
     clockRefreshTime();
-    eepromRequestSave();
+    eepromSave = true;
   }
 
   // Save theme
@@ -341,16 +343,19 @@ void webSetConfig(AsyncWebServerRequest *request)
   {
     String theme = request->getParam("theme", true)->value();
     themeIdx = theme.toInt();
-    eepromRequestSave();
+    eepromSave = true;
   }
 
   // Save scroll direction and menu zoom
   scrollDirection = request->hasParam("scroll", true)? -1 : 1;
   zoomMenu        = request->hasParam("zoom", true);
-  eepromRequestSave();
+  eepromSave = true;
 
   // Done with the preferences
   preferences.end();
+
+  // Save EEPROM immediately
+  if(eepromSave) eepromRequestSave(true);
 
   // Show config page again
   request->redirect("/config");

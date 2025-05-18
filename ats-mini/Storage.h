@@ -9,6 +9,6 @@ void eepromLoadConfig();
 
 void drawEepromIndicator(int x, int y);
 
-void eepromRequestSave();
+void eepromRequestSave(bool now = false);
 
 #endif // STORAGE_H

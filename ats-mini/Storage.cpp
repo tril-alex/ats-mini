@@ -15,20 +15,21 @@
 
 static bool showEepromFlag = false; // TRUE: Writing to EEPROM
 static bool itIsTimeToSave = false; // TRUE: Need to save to EEPROM
-static uint32_t storeTime   = millis();
+static uint32_t storeTime  = millis();
 
 // To store any change into the EEPROM, we need at least STORE_TIME
 // milliseconds of inactivity.
-void eepromRequestSave()
+void eepromRequestSave(bool now)
 {
-  storeTime = millis();
+  // Underflow is ok here, see eepromTickTime
+  storeTime = millis() - (now ? STORE_TIME : 0);
   itIsTimeToSave = true;
 }
 
 void eepromTickTime()
 {
   // Save configuration if requested
-  if(itIsTimeToSave && ((millis() - storeTime) > STORE_TIME))
+  if(itIsTimeToSave && ((millis() - storeTime) >= STORE_TIME))
   {
     eepromSaveConfig();
     storeTime = millis();
