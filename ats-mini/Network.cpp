@@ -19,11 +19,12 @@ static const int   apChannel = 10;      // WiFi channel number (1..13)
 static const bool  apHideMe  = false;   // TRUE: disable SSID broadcast
 static const int   apClients = 3;       // Maximum simultaneous connected clients
 
+static uint8_t  netMode      = NET_OFF; // Current WiFi connection mode
 static uint16_t ajaxInterval = 2500;
 
 // Settings
-String loginUsername   = "";
-String loginPassword   = "";
+String loginUsername = "";
+String loginPassword = "";
 
 // Network preferences saved here
 Preferences preferences;
@@ -58,26 +59,34 @@ void netClearPreferences()
 //
 void netStop()
 {
-  WiFi.disconnect(true);
-  WiFi.softAPdisconnect(true);
+  // If network connection up, shut it down
+  if(netMode==NET_CONNECT || netMode==NET_AP_CONNECT)
+    WiFi.disconnect(true);
+
+  // If access point up, shut it down
+  if(netMode==NET_AP_ONLY || netMode==NET_AP_CONNECT)
+    WiFi.softAPdisconnect(true);
+
+  // Network now off
+  netMode = NET_OFF;
 }
 
 //
 // Initialize WiFi network and services
 //
-void netInit(uint8_t netMode)
+void netInit(uint8_t newMode)
 {
   // Always disable WiFi first
   netStop();
 
   // Do not initialize WiFi if disabled
-  if(netMode==NET_OFF) return;
+  if(newMode==NET_OFF) return;
 
   // Start WiFi access point if requested
-  if(netMode==NET_AP_ONLY || netMode==NET_AP_CONNECT) wifiInitAP();
+  if(newMode==NET_AP_ONLY || newMode==NET_AP_CONNECT) wifiInitAP();
 
   // Initialize WiFi and try connecting to a network
-  if(netMode>NET_AP_ONLY && wifiConnect())
+  if(newMode>NET_AP_ONLY && wifiConnect())
   {
     // NTP time updates will happen every 5 minutes
     ntpClient.setUpdateInterval(5*60*1000);
@@ -88,16 +97,19 @@ void netInit(uint8_t netMode)
   }
 
   // If only connected to sync...
-  if(netMode==NET_SYNC)
+  if(newMode==NET_SYNC)
   {
     // Drop network connection
-    netStop();
+    WiFi.disconnect(true);
   }
   else
   {
     // Initialize web server for remote configuration
     webInit();
   }
+
+  // New network mode is not in effect
+  netMode = newMode;
 }
 
 //
@@ -157,8 +169,8 @@ bool wifiConnect()
 
   // Get the preferences
   preferences.begin("configData", false);
-  loginUsername      = preferences.getString("loginusername", "");
-  loginPassword      = preferences.getString("loginpassword", "");
+  loginUsername = preferences.getString("loginusername", "");
+  loginPassword = preferences.getString("loginpassword", "");
 
   // Try connecting to known WiFi networks
   int wifiCheck = 0;
