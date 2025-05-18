@@ -202,7 +202,7 @@ bool wifiConnect()
   String status = "Connecting to WiFi network..";
 
   // Get the preferences
-  preferences.begin("configData", false);
+  preferences.begin("configData", true);
   loginUsername = preferences.getString("loginusername", "");
   loginPassword = preferences.getString("loginpassword", "");
 
