@@ -2,7 +2,7 @@
 #define STORAGE_H
 
 void eepromTickTime();
-void eepromRequestSave();
+void eepromRequestSave(bool now = false);
 void eepromInvalidate();
 bool eepromVerify();
 void eepromSaveConfig();
