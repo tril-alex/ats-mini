@@ -343,6 +343,26 @@ static void drawStationName(const char *name, int x, int y)
 }
 
 //
+// Draw long (EIBI) station name
+//
+static void drawLongStationName(const char *name, int x, int y)
+{
+  int width = spr.textWidth(name, 2);
+  spr.setTextColor(TH.rds_text, TH.bg);
+
+  if((x + width) >= 320)
+  {
+    spr.setTextDatum(TL_DATUM);
+    spr.drawString(name, x, y, 2);
+  }
+  else
+  {
+    spr.setTextDatum(TC_DATUM);
+    spr.drawString(name, x + (320 - x + width) / 4, y, 2);
+  }
+}
+
+//
 // Draw screen according to given command
 //
 void drawScreen()
@@ -395,7 +415,8 @@ void drawScreen()
 
   // Show station or channel name, if present
   if(*getStationName())
-    drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
+    // drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
+    drawLongStationName(getStationName(), MENU_OFFSET_X + 1 + 76 + MENU_DELTA_X + 2, RDS_OFFSET_Y);
 
   // Draw left-side menu/info bar
   // @@@ FIXME: Frequency display (above) intersects the side bar!
