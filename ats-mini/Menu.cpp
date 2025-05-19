@@ -1172,25 +1172,22 @@ static void drawAgc(int x, int y, int sx)
   drawCommon(menu[MENU_AGC_ATT], x, y, sx);
   drawZoomedMenu(menu[MENU_AGC_ATT]);
   spr.setTextDatum(MC_DATUM);
+  spr.setTextColor(TH.menu_param, TH.menu_bg);
 
-  for(int i=-2 ; i<3 ; i++)
+  // G8PTN: Read back value is not used
+  // rx.getAutomaticGainControl();
+  if(!agcNdx && !agcIdx)
   {
-    spr.setTextColor(TH.menu_param, TH.menu_bg);
-    // G8PTN: Read back value is not used
-    // rx.getAutomaticGainControl();
-    if(!agcNdx && !agcIdx)
-    {
-      spr.setFreeFont(&Orbitron_Light_24);
-      spr.drawString("AGC", 40+x+(sx/2), 48+y);
-      spr.drawString("On", 40+x+(sx/2), 72+y);
-      spr.setTextFont(0);
-    }
-    else
-    {
-      char text[16];
-      sprintf(text, "%2.2d", agcNdx);
-      spr.drawString(text, 40+x+(sx/2), 60+y, 7);
-    }
+    spr.setFreeFont(&Orbitron_Light_24);
+    spr.drawString("AGC", 40+x+(sx/2), 48+y);
+    spr.drawString("On", 40+x+(sx/2), 72+y);
+    spr.setTextFont(0);
+  }
+  else
+  {
+    char text[16];
+    sprintf(text, "%2.2d", agcNdx);
+    spr.drawString(text, 40+x+(sx/2), 60+y, 7);
   }
 }
 
