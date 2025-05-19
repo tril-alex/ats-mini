@@ -46,6 +46,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder. It is also possible to edit the memory slots via [serial port](#serial-interface) or via the [web based tool](memory.md) in Google Chrome.
 
 * **Mute** - Mute/unmute.
+* **Squelch** - mute the speaker when the RSSI level is lower than the defined threshold. Unlikely to work in SSB mode. To turn it off quickly, short press the encoder button while in the Squelch menu mode.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
 * **AGC/ATTN** - Automatic Gain Control (on/off) or Attenuation level. The attenuator is not applicable to SSB mode.
 * **AVC** - Sets the maximum gain for automatic volume control (not applicable to FM mode).

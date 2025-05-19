@@ -25,7 +25,8 @@
 #define CMD_SOFTMUTE  0x1700 // |
 #define CMD_AVC       0x1800 // |
 #define CMD_MEMORY    0x1900 // |
-#define CMD_SEEK      0x1A00 //-+
+#define CMD_SEEK      0x1A00 // |
+#define CMD_SQUELCH   0x1B00 //-+
 #define CMD_SETTINGS  0x2000 //-SETTINGS MODE starts here
 #define CMD_BRT       0x2100 // |
 #define CMD_CAL       0x2200 // |

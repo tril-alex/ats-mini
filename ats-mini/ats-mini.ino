@@ -62,6 +62,9 @@ int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
 
 // Menu options
 uint8_t volume = DEFAULT_VOLUME;        // Volume, range = 0 (muted) - 63
+uint8_t currentSquelch = 0;             // Squelch, range = 0 (disabled) - 127
+bool squelchCutoff = false;             // True if the Squelch cutoff is in effect
+
 uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255 in steps of 5
 uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
@@ -594,6 +597,60 @@ bool clickFreq(bool shortPress)
   return false;
 }
 
+bool processRssiSnr()
+{
+  static uint32_t updateCounter = 0;
+  bool needRedraw = false;
+
+  rx.getCurrentReceivedSignalQuality();
+  int newRSSI = rx.getCurrentRSSI();
+  int newSNR = rx.getCurrentSNR();
+
+  // Apply squelch if the volume is not muted
+  if(currentSquelch && currentSquelch <= 127 && !muteOn())
+  {
+    if(newRSSI >= currentSquelch)
+    {
+      squelchCutoff = false;
+      rx.setHardwareAudioMute(false);
+      rx.setVolume(volume);
+    }
+    else
+    {
+      squelchCutoff = true;
+      rx.setHardwareAudioMute(true);
+      rx.setVolume(0);
+    }
+  }
+  else
+  {
+    if(!muteOn())
+    {
+      rx.setVolume(volume);
+    }
+    rx.setHardwareAudioMute(false);
+    squelchCutoff = false;
+  }
+
+  // G8PTN: Based on 1.2s interval, update RSSI & SNR
+  if(updateCounter++ % 6 == 0)
+  {
+    // Show RSSI status only if this condition has changed
+    if(newRSSI != rssi)
+    {
+      rssi = newRSSI;
+      needRedraw = true;
+    }
+    // Show SNR status only if this condition has changed
+    if(newSNR != snr)
+    {
+      snr = newSNR;
+      needRedraw = true;
+    }
+  }
+  return needRedraw;
+}
+
 //
 // Main event loop
 //
@@ -775,20 +832,9 @@ void loop()
     elapsedSleep = elapsedCommand = currentTime = millis();
   }
 
-  // Show RSSI status only if this condition has changed
-  if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)
+  if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME)
   {
-    rx.getCurrentReceivedSignalQuality();
-    snr = rx.getCurrentSNR();
-
-    // G8PTN: Based on 1.2s update, always allow S-Meter
-    int newRssi = rx.getCurrentRSSI();
-    if(newRssi != rssi)
-    {
-      rssi = newRssi;
-      needRedraw = true;
-    }
-
+    needRedraw |= processRssiSnr();
     elapsedRSSI = currentTime;
   }
 

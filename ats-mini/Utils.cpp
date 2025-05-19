@@ -12,9 +12,6 @@ extern ButtonTracker pb1;
 // Current mute status, returned by muteOn()
 static bool muted = false;
 
-// Volume level when mute is applied
-static uint8_t mute_vol_val = 0;
-
 // Current sleep status, returned by sleepOn()
 static bool sleep_on = false;
 
@@ -76,16 +73,13 @@ bool muteOn(int x)
 {
   if((x==0) && muted)
   {
-    rx.setVolume(mute_vol_val);
+    rx.setVolume(volume);
     // Enable audio amplifier to restore speaker output
     digitalWrite(PIN_AMP_EN, HIGH);
-    volume = mute_vol_val;
     muted = false;
   }
   else if((x==1) && !muted)
   {
-    mute_vol_val = volume;
-    volume = 0;
     rx.setVolume(volume);
     // Disable audio amplifier to silence speaker
     digitalWrite(PIN_AMP_EN, LOW);
@@ -115,7 +109,14 @@ bool sleepOn(int x)
 
     if(sleepModeIdx == SLEEP_LIGHT)
     {
+      // Disable WiFi
       netStop();
+
+      // Unmute squelch
+      if(squelchCutoff && !muteOn()) {
+        rx.setHardwareAudioMute(false);
+        rx.setVolume(volume);
+      }
 
       while(true)
       {
@@ -147,6 +148,7 @@ bool sleepOn(int x)
       rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
       pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
       sleepOn(false);
+      // Enable WiFi
       netInit(wifiModeIdx, false);
     }
   }
