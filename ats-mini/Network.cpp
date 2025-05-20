@@ -79,14 +79,27 @@ void netClearPreferences()
   preferences.end();
 }
 
-// -1 not connected, 0 - disabled, 1 - connected
+//
+// Get current connection status
+// (-1 - not connected, 0 - disabled, 1 - connected)
+//
 int8_t getWiFiStatus()
 {
   wifi_mode_t mode = WiFi.getMode();
-  if(mode==WIFI_MODE_NULL) return 0;
-  if(((mode==WIFI_AP) || (mode==WIFI_AP_STA)) && WiFi.softAPgetStationNum()) return 1;
-  if(((mode==WIFI_STA) || (mode==WIFI_AP_STA)) && WiFi.status()==WL_CONNECTED) return 1;
-  return -1;
+
+  switch(mode)
+  {
+    case WIFI_MODE_NULL:
+      return(0);
+    case WIFI_AP:
+      return(WiFi.softAPgetStationNum()? 1 : -1);
+    case WIFI_STA:
+      return(WiFi.status()==WL_CONNECTED? 1 : -1);
+    case WIFI_AP_STA:
+      return(WiFi.softAPgetStationNum() || (WiFi.status()==WL_CONNECTED)? 1 : -1);
+  }
+
+  return(-1);
 }
 
 void drawWiFiIndicator(int x, int y)
@@ -97,8 +110,9 @@ void drawWiFiIndicator(int x, int y)
   if(status || switchThemeEditor())
   {
     uint16_t color = (status>0) ? TH.batt_full : TH.batt_low;
+
+    // For the editor, alternate between WiFi states every 10 seconds
     if(switchThemeEditor())
-      // Alternate between WiFi states every 10 seconds
       color = ((millis() % 20000) / 10000) ? TH.batt_full : TH.batt_low;
 
     spr.drawSmoothArc(x, 15+y, 14, 13, 150, 210, color, TH.bg);
@@ -203,7 +217,11 @@ bool ntpSyncTime()
     ntpClient.update();
 
     if(ntpClient.isTimeSet())
-      return(clockSet(ntpClient.getHours(), ntpClient.getMinutes()));
+      return(clockSet(
+        ntpClient.getHours(),
+        ntpClient.getMinutes(),
+        ntpClient.getSeconds()
+      ));
   }
   return(false);
 }

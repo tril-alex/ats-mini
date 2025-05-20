@@ -107,28 +107,38 @@ bool sleepOn(int x)
     spr.pushSprite(0, 0);
     tft.writecommand(ST7789_DISPOFF);
     tft.writecommand(ST7789_SLPIN);
-    // Wait till the button is released to prevent immediate wakeup
-    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
 
-    if (sleepModeIdx == SLEEP_LIGHT) {
+    // Wait till the button is released to prevent immediate wakeup
+    while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
+      delay(100);
+
+    if(sleepModeIdx == SLEEP_LIGHT)
+    {
       netStop();
-      while (true) {
+
+      while(true)
+      {
         esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
         rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
         rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
         esp_light_sleep_start();
+
         // Waking up here
-        if (currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+        if(currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+
         // Wait for a long press, otherwise enter the sleep again
         pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
+
         bool wasLongPressed = false;
-        while (true) {
+        while(true)
+        {
           ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
           wasLongPressed |= pb1st.isLongPressed;
-          if (wasLongPressed || !pb1st.isPressed) break;
+          if(wasLongPressed || !pb1st.isPressed) break;
           delay(100);
         }
-        if (wasLongPressed) break;
+
+        if(wasLongPressed) break;
       }
       // Reenable the pin as well as the display
       rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
@@ -149,7 +159,8 @@ bool sleepOn(int x)
     ledcWrite(PIN_LCD_BL, currentBrt);
     // Wait till the button is released to prevent the main loop clicks
     pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
-    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed) delay(100);
+    while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed)
+      delay(100);
   }
 
   return(sleep_on);
