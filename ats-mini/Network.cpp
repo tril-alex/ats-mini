@@ -101,9 +101,9 @@ void drawWiFiIndicator(int x, int y)
       // Alternate between WiFi states every 10 seconds
       color = ((millis() % 20000) / 10000) ? TH.batt_full : TH.batt_low;
 
-    spr.drawSmoothArc(x, 15+y, 14, 12, 150, 210, color, TH.bg);
-    spr.drawSmoothArc(x, 15+y, 9, 7, 150, 210, color, TH.bg);
-    spr.drawSmoothArc(x, 15+y, 4, 2, 150, 210, color, TH.bg);
+    spr.drawSmoothArc(x, 15+y, 14, 13, 150, 210, color, TH.bg);
+    spr.drawSmoothArc(x, 15+y, 9, 8, 150, 210, color, TH.bg);
+    spr.drawSmoothArc(x, 15+y, 4, 3, 150, 210, color, TH.bg);
   }
 }
 
