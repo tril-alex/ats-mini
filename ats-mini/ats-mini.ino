@@ -207,6 +207,7 @@ void setup()
   delay(50);
   rx.setVolume(volume);
   rx.setMaxSeekTime(SEEK_TIMEOUT);
+  rx.setMaxDelaySetFrequency(60); // https://github.com/esp32-si4732/ats-mini/issues/97
 
   // Draw display for the first time
   drawScreen();
@@ -253,7 +254,7 @@ void useBand(const Band *band)
   if(band->bandMode==FM)
   {
     rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
-    rx.setTuneFrequencyAntennaCapacitor(0);
+    // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
 
     // More sensitive seek thresholds
@@ -290,7 +291,7 @@ void useBand(const Band *band)
     }
 
     // Set the tuning capacitor for SW or MW/LW
-    rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
+    // rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
 
     // G8PTN: Enable GPIO1 as output
     rx.setGpioCtl(1, 0, 0);
@@ -380,6 +381,7 @@ bool updateBFO(int newBFO, bool wrap)
   {
     // Apply new frequency
     rx.setFrequency(newFreq);
+
     // Re-apply to remove noise
     doAgc(0);
     // Update current frequency
