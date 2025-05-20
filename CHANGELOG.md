@@ -1,8 +1,21 @@
 # Changelog
 
-The project documentation is available at <https://esp32-si4732.github.io/ats-mini/>. The firmware flashing instructions are available at <https://esp32-si4732.github.io/ats-mini/flash.html>
+The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.html>. The firmware flashing instructions are available at <https://esp32-si4732.github.io/ats-mini/flash.html>
 
 <!-- towncrier release notes start -->
+
+## 2.21 (2025-05-21)
+
+
+### Changed
+
+- Make the Wi-Fi icon a bit more lightweight.
+
+
+### Fixed
+
+- Disable the automatic tuning capacitor. [#97](https://github.com/esp32-si4732/ats-mini/issues/97)
+- NTP time synchronization no longer ignores seconds.
 
 ## 2.20 (2025-05-18)
 

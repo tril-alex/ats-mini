@@ -1,1 +1,0 @@
-Make the Wi-Fi icon a bit more lightweight.

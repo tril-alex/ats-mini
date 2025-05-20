@@ -5,7 +5,7 @@
 #include <TFT_eSPI.h>
 #include <SI4735-fixed.h>
 
-#define APP_VERSION    220  // FIRMWARE VERSION
+#define APP_VERSION    221  // FIRMWARE VERSION
 #define EEPROM_VERSION 71   // EEPROM VERSION (forces reset)
 
 // Modes

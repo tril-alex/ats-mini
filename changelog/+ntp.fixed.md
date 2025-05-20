@@ -1,1 +1,0 @@
-NTP time synchronization no longer ignores seconds.
