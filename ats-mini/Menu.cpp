@@ -519,6 +519,13 @@ static void doScrollDir(int dir)
   scrollDirection = (scrollDirection == 1) ? -1 : 1;
 }
 
+uint8_t doAbout(int dir)
+{
+  static uint8_t aboutScreen = 0;
+  aboutScreen = clamp_range(aboutScreen, dir, 0, 2);
+  return aboutScreen;
+}
+
 bool tuneToMemory(const Memory *memory)
 {
   // Must have frequency
@@ -787,7 +794,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_SCROLL:    doScrollDir(dir);break;
     case CMD_UTCOFFSET: doUTCOffset(scrollDirection * dir);break;
-    case CMD_ABOUT:     return(true);
+    case CMD_ABOUT:     doAbout(dir);break;
     default:            return(false);
   }
 

@@ -554,7 +554,7 @@ static const String webRadioPage()
 "</TR>"
 "<TR>"
   "<TD CLASS='LABEL'>Firmware</TD>"
-  "<TD>" + String(getVersion()) + "</TD>"
+  "<TD>" + String(getVersion(true)) + "</TD>"
 "</TR>"
 "<TR>"
   "<TD CLASS='LABEL'>Band</TD>"

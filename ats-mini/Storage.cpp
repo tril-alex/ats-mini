@@ -63,8 +63,20 @@ void eepromInvalidate()
   // use to free up memory and avoid memory leaks
   EEPROM.begin(EEPROM_SIZE);
   EEPROM.write(EEPROM_BASE_ADDR, 0x00);
+  EEPROM.write(EEPROM_VER_ADDR + 2, 0x01);
   EEPROM.commit();
   EEPROM.end();
+}
+
+// Return true first time after the settings have been reset
+bool eepromFirstRun()
+{
+  EEPROM.begin(EEPROM_SIZE);
+  bool firstRun = EEPROM.read(EEPROM_VER_ADDR + 2);
+  if(firstRun) EEPROM.write(EEPROM_VER_ADDR + 2, 0x00);
+  EEPROM.end();
+
+  return(firstRun);
 }
 
 // Check EEPROM contents against EEPROM_VERSION

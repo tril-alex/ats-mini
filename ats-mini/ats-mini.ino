@@ -152,7 +152,7 @@ void setup()
     ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
     tft.setTextSize(2);
     tft.setTextColor(TH.text, TH.bg);
-    tft.println(getVersion());
+    tft.println(getVersion(true));
     tft.println();
     tft.setTextColor(TH.text_warn, TH.bg);
     tft.print("EEPROM Resetting");
@@ -208,6 +208,17 @@ void setup()
   rx.setVolume(volume);
   rx.setMaxSeekTime(SEEK_TIMEOUT);
   rx.setMaxDelaySetFrequency(60); // https://github.com/esp32-si4732/ats-mini/issues/97
+
+    // Show help screen on first run
+  if(eepromFirstRun())
+  {
+    // Clear screen buffer
+    spr.fillSprite(TH.bg);
+    ledcWrite(PIN_LCD_BL, currentBrt);
+    drawAboutHelp(0);
+    while(digitalRead(ENCODER_PUSH_BUTTON) != LOW) delay(100);
+    while(digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
+  }
 
   // Draw display for the first time
   drawScreen();
@@ -802,14 +813,6 @@ void loop()
   // Tick NETWORK time, connecting to WiFi if requested
   netTickTime();
 
-  // Periodically refresh the main screen
-  // This covers the case where there is nothing else triggering a refresh
-  if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)
-  {
-    if(currentCmd == CMD_NONE) needRedraw = true;
-    background_timer = currentTime;
-  }
-
 #ifdef ENABLE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))
@@ -821,6 +824,15 @@ void loop()
 
   // Run clock
   needRedraw |= clockTickTime();
+
+  // Periodically refresh the main screen
+  // This covers the case where there is nothing else triggering a refresh
+  if(needRedraw) background_timer = currentTime;
+  if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)
+  {
+    if(currentCmd == CMD_NONE) needRedraw = true;
+    background_timer = currentTime;
+  }
 
   // Redraw screen if necessary
   if(needRedraw) drawScreen();

@@ -5,6 +5,14 @@
 #include <TFT_eSPI.h>
 #include <SI4735-fixed.h>
 
+#define RECEIVER_NAME  "ESP32-SI4732 Receiver"
+#define FIRMWARE_NAME  "ATS-Mini"
+#define FIRMWARE_URL   "https://github.com/esp32-si4732/ats-mini"
+#define MANUAL_URL     "https://esp32-si4732.github.io/ats-mini/manual.html"
+#define AUTHORS_LINE1  "Authors: PU2CLR (Ricardo Caratti),"
+#define AUTHORS_LINE2  "Volos Projects, Ralph Xavier, Sunnygold,"
+#define AUTHORS_LINE3  "Goshante, G8PTN (Dave), R9UCL (Max Arnold),"
+#define AUTHORS_LINE4  "Marat Fayzullin"
 #define APP_VERSION    221  // FIRMWARE VERSION
 #define EEPROM_VERSION 71   // EEPROM VERSION (forces reset)
 
@@ -145,11 +153,12 @@ void useBand(const Band *band);
 bool updateBFO(int newBFO, bool wrap = true);
 bool doSeek(int8_t dir);
 bool clickFreq(bool shortPress);
+uint8_t doAbout(int dir);
 
 // Utils.c
 void loadSSB(uint8_t bandwidth, bool draw = true);
 void unloadSSB();
-const char *getVersion();
+const char *getVersion(bool shorter = false);
 int getStrength(int rssi);
 bool sleepOn(int x = 2);
 bool muteOn(int x = 2);
@@ -165,6 +174,7 @@ void drawLoadingSSB();
 void drawWiFiStatus(const char *line1, const char *line2 = 0);
 void drawZoomedMenu(const char *text);
 void drawScreen();
+void drawAboutHelp(uint8_t arrow);
 
 // Battery.c
 float batteryMonitor();

@@ -32,16 +32,17 @@ static char     clockText[8] = {0};
 //
 // Get firmware version and build time, as a string
 //
-const char *getVersion()
+const char *getVersion(bool shorter)
 {
-  static char versionString[25] = "\0";
+  static char versionString[35] = "\0";
 
-  if(!versionString[0])
-    sprintf(versionString, "F/W: v%1.1d.%2.2d %s",
-      APP_VERSION / 100,
-      APP_VERSION % 100,
-      __DATE__
-    );
+  sprintf(versionString, "%s%sF/W: v%1.1d.%2.2d %s",
+    shorter ? "" : FIRMWARE_NAME,
+    shorter ? "" : " ",
+    APP_VERSION / 100,
+    APP_VERSION % 100,
+    __DATE__
+  );
 
   return(versionString);
 }
