@@ -1,0 +1,1 @@
+EXPERIMENTAL: enable PSRAM.

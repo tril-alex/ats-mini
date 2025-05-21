@@ -52,7 +52,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sketch-paths: |
             - ats-mini
-          fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB
+          # If you change this line, change it in sketch.yaml as well
+          fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=opi,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none
           cli-compile-flags: |
             - --profile
             - esp32s3
