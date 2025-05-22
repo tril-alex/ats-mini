@@ -570,30 +570,16 @@ static void clickMemory(uint8_t idx, bool shortPress)
   if(idx>LAST_ITEM(memories)) return;
 
   // If clicking on an empty memory slot, save to it
-  if(!memories[idx].freq)
-  {
-    memories[idx] = newMemory;
-    currentCmd = CMD_NONE;
-  }
-  // If clicking on the same memory slot, delete it
-  else if(!memcmp(&memories[idx], &newMemory, sizeof(newMemory)))
-  {
-    memories[idx].freq = 0;
-    currentCmd = CMD_NONE;
-  }
-  // Do nothing, memory slot already activated in doMemory()
-  else
-  {
-    currentCmd = CMD_NONE;
-  }
+  if(!memories[idx].freq) memories[idx] = newMemory;
+  // On a press, delete memory slot contents
+  else if(shortPress) memories[idx].freq = 0;
+  // On a click, do nothing, slot already activated in doMemory() 
+  else currentCmd = CMD_NONE;
 }
 
 static void clickSquelch(bool shortPress)
 {
-  if(shortPress)
-    currentSquelch = 0;
-  else
-    currentCmd = CMD_NONE;
+  if(shortPress) currentSquelch = 0; else currentCmd = CMD_NONE;
 }
 
 void doStep(int dir)
@@ -1161,8 +1147,6 @@ static void drawMemory(int x, int y, int sx)
 
     if(i==0 && !memories[j].freq)
       text = "Add";
-    else if(i==0 && !memcmp(&memories[j], &newMemory, sizeof(newMemory)))
-      text = "Delete";
     else if(!memories[j].freq)
       text = "- - -";
     else if(memories[j].mode==FM)
