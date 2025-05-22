@@ -633,7 +633,7 @@ bool processRssiSnr()
   }
 
   // G8PTN: Based on 1.2s interval, update RSSI & SNR
-  if(updateCounter++ % 6 == 0)
+  if(!(updateCounter++ & 7))
   {
     // Show RSSI status only if this condition has changed
     if(newRSSI != rssi)

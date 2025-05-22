@@ -96,7 +96,7 @@ static void drawAboutSystem(uint8_t arrow)
 
   sprintf(
     text,
-    "Mem: F %luM, R %luk (%luk), PS %luk (%luk)",
+    "MEM: F %luM, R %luk (%luk), PS %luk (%luk)",
     ESP.getFlashChipSize() / (1024U * 1024U),
     ESP.getHeapSize()/1024U, ESP.getFreeHeap()/1024U,
     ESP.getPsramSize()/1024U, ESP.getFreePsram()/1024U
@@ -105,7 +105,7 @@ static void drawAboutSystem(uint8_t arrow)
 
   sprintf(
     text,
-    "Display: ID %08lX, status %02X%08lX",
+    "Display ID: %08lX, STAT: %02X%08lX",
     tft.readcommand32(ST7789_RDDID, 1),
     tft.readcommand8(ST7789_RDDST, 1),
     tft.readcommand32(ST7789_RDDST, 2)
@@ -115,7 +115,7 @@ static void drawAboutSystem(uint8_t arrow)
   uint64_t mac = ESP.getEfuseMac();
   sprintf(
     text,
-    "Mac: %02X:%02X:%02X:%02X:%02X:%02X",
+    "WiFi MAC: %02X:%02X:%02X:%02X:%02X:%02X",
     (uint8_t)mac,
     (uint8_t)(mac >> 8),
     (uint8_t)(mac >> 16),

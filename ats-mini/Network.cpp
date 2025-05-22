@@ -111,9 +111,9 @@ void drawWiFiIndicator(int x, int y)
   {
     uint16_t color = (status>0) ? TH.batt_full : TH.batt_low;
 
-    // For the editor, alternate between WiFi states every 10 seconds
+    // For the editor, alternate between WiFi states every ~8 seconds
     if(switchThemeEditor())
-      color = ((millis() % 20000) / 10000) ? TH.batt_full : TH.batt_low;
+      color = millis()&0x2000? TH.batt_full : TH.batt_low;
 
     spr.drawSmoothArc(x, 15+y, 14, 13, 150, 210, color, TH.bg);
     spr.drawSmoothArc(x, 15+y, 9, 8, 150, 210, color, TH.bg);
