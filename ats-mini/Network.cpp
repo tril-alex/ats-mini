@@ -97,9 +97,9 @@ int8_t getWiFiStatus()
       return(WiFi.status()==WL_CONNECTED? 1 : -1);
     case WIFI_AP_STA:
       return(WiFi.softAPgetStationNum() || (WiFi.status()==WL_CONNECTED)? 1 : -1);
+    default:
+      return(-1);
   }
-
-  return(-1);
 }
 
 void drawWiFiIndicator(int x, int y)
