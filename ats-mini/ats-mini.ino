@@ -210,9 +210,8 @@ void setup()
   delay(50);
   rx.setVolume(volume);
   rx.setMaxSeekTime(SEEK_TIMEOUT);
-  rx.setMaxDelaySetFrequency(60); // https://github.com/esp32-si4732/ats-mini/issues/97
 
-    // Show help screen on first run
+  // Show help screen on first run
   if(eepromFirstRun())
   {
     // Clear screen buffer
