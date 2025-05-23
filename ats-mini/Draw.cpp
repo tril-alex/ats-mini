@@ -32,7 +32,7 @@ static void displayQRCode(esp_qrcode_handle_t qrcode) {
     for (int y = 0; y < size; y++) {
         for (int x = 0; x < size; x++) {
             if (esp_qrcode_get_module(qrcode, x, y)) {
-                spr.fillRect(2 + x * 4, 170 - 2 - size * 4 + y * 4, 4, 4, TFT_WHITE);
+                spr.fillRect(2 + x * 4, 170 - 2 - size * 4 + y * 4, 4, 4, TH.text);
             }
         }
     }
