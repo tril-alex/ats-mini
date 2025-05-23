@@ -608,12 +608,12 @@ bool processRssiSnr()
   // Apply squelch if the volume is not muted
   if(currentSquelch && currentSquelch <= 127)
   {
-    if(newRSSI >= currentSquelch)
+    if(newRSSI >= currentSquelch && squelchCutoff)
     {
-      squelchCutoff = false;
       tempMuteOn(false);
+      squelchCutoff = false;
     }
-    else
+    else if(newRSSI < currentSquelch && !squelchCutoff)
     {
       tempMuteOn(true);
       squelchCutoff = true;
