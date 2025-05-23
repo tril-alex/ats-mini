@@ -573,7 +573,7 @@ static void clickMemory(uint8_t idx, bool shortPress)
   if(!memories[idx].freq) memories[idx] = newMemory;
   // On a press, delete memory slot contents
   else if(shortPress) memories[idx].freq = 0;
-  // On a click, do nothing, slot already activated in doMemory() 
+  // On a click, do nothing, slot already activated in doMemory()
   else currentCmd = CMD_NONE;
 }
 
@@ -644,7 +644,7 @@ void doMode(int dir)
 
 void doSquelch(int dir)
 {
-  currentSquelch = wrap_range(currentSquelch, dir, 0, 127);
+  currentSquelch = clamp_range(currentSquelch, dir, 0, 127);
 }
 
 void doSoftMute(int dir)

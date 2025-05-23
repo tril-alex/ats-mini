@@ -164,6 +164,7 @@ const char *getVersion(bool shorter = false);
 int getStrength(int rssi);
 bool sleepOn(int x = 2);
 bool muteOn(int x = 2);
+void tempMuteOn(bool x);
 const char *clockGet();
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
 void clockReset();

@@ -76,18 +76,43 @@ bool muteOn(int x)
     rx.setVolume(volume);
     // Enable audio amplifier to restore speaker output
     digitalWrite(PIN_AMP_EN, HIGH);
+    rx.setHardwareAudioMute(false);
     muted = false;
   }
   else if((x==1) && !muted)
   {
-    rx.setVolume(volume);
+    rx.setVolume(0);
     // Disable audio amplifier to silence speaker
     digitalWrite(PIN_AMP_EN, LOW);
+    rx.setHardwareAudioMute(true);
     muted = true;
   }
 
   return(muted);
 }
+
+//
+// Temporarily mute sound on (true) or off (false) if not in a permanent mute state
+// Do not drive PIN_AMP_EN here because a short impulse can trigger amplifier mode D,
+// see the NS4160 datasheet https://esp32-si4732.github.io/ats-mini/hardware.html#datasheets
+//
+void tempMuteOn(bool x)
+{
+  if(!muteOn())
+  {
+    if(x)
+    {
+      rx.setVolume(0);
+      rx.setHardwareAudioMute(true);
+    }
+    else
+    {
+      rx.setVolume(volume);
+      rx.setHardwareAudioMute(false);
+    }
+  }
+}
+
 
 //
 // Turn sleep on (1) or off (0), or get current status (2)
@@ -113,10 +138,7 @@ bool sleepOn(int x)
       netStop();
 
       // Unmute squelch
-      if(squelchCutoff && !muteOn()) {
-        rx.setHardwareAudioMute(false);
-        rx.setVolume(volume);
-      }
+      if(squelchCutoff) tempMuteOn(false);
 
       while(true)
       {

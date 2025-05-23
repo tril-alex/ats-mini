@@ -606,28 +606,22 @@ bool processRssiSnr()
   int newSNR = rx.getCurrentSNR();
 
   // Apply squelch if the volume is not muted
-  if(currentSquelch && currentSquelch <= 127 && !muteOn())
+  if(currentSquelch && currentSquelch <= 127)
   {
     if(newRSSI >= currentSquelch)
     {
       squelchCutoff = false;
-      rx.setHardwareAudioMute(false);
-      rx.setVolume(volume);
+      tempMuteOn(false);
     }
     else
     {
+      tempMuteOn(true);
       squelchCutoff = true;
-      rx.setHardwareAudioMute(true);
-      rx.setVolume(0);
     }
   }
-  else
+  else if(squelchCutoff)
   {
-    if(!muteOn())
-    {
-      rx.setVolume(volume);
-    }
-    rx.setHardwareAudioMute(false);
+    tempMuteOn(false);
     squelchCutoff = false;
   }
 
