@@ -1,1 +1,0 @@
-Help screen and system info screen (see `Settings->About`). The help screen is also displayed on first start.

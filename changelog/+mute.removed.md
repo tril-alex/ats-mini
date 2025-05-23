@@ -1,1 +1,0 @@
-Removed the Mute menu option. Use short press instead while in the volume adjustment mode.
