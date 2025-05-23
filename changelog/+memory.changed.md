@@ -1,0 +1,1 @@
+Use short press to delete a memory slot.
