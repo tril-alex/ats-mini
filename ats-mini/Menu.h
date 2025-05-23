@@ -89,7 +89,6 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 void doSelectDigit(int dir);
 bool clickHandler(uint16_t cmd, bool shortPress);
-void clickVolume();
 void selectBand(uint8_t idx, bool drawLoadingSSB = true);
 int getTotalBands();
 int getTotalModes();

@@ -765,10 +765,14 @@ void loop()
           sleepOn(false);
           needRedraw = true;
         }
-        else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED)
+        else if(sleepModeIdx == SLEEP_UNLOCKED)
         {
-          // Allow short press in unlocked sleep mode to adjust the volume
-          clickVolume();
+          // Allow to adjust the volume in sleep mode
+          if(pb1st.wasShortPressed && currentCmd==CMD_NONE)
+            currentCmd = CMD_VOLUME;
+          else if(currentCmd==CMD_VOLUME)
+            clickHandler(currentCmd, pb1st.wasShortPressed);
+
           needRedraw = true;
         }
       }
@@ -786,7 +790,7 @@ void loop()
       else if(pb1st.wasShortPressed)
       {
         // Volume shortcut (only active in VFO mode)
-        clickVolume();
+        currentCmd = CMD_VOLUME;
         needRedraw = true;
       }
       else

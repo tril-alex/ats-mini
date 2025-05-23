@@ -73,13 +73,12 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_STEP         3
 #define MENU_SEEK         4
 #define MENU_MEMORY       5
-#define MENU_MUTE         6
-#define MENU_SQUELCH      7
-#define MENU_BW           8
-#define MENU_AGC_ATT      9
-#define MENU_AVC          10
-#define MENU_SOFTMUTE     11
-#define MENU_SETTINGS     12
+#define MENU_SQUELCH      6
+#define MENU_BW           7
+#define MENU_AGC_ATT      8
+#define MENU_AVC          9
+#define MENU_SOFTMUTE    10
+#define MENU_SETTINGS    11
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -91,7 +90,6 @@ static const char *menu[] =
   "Step",
   "Seek",
   "Memory",
-  "Mute",
   "Squelch",
   "Bandwidth",
   "AGC/ATTN",
@@ -441,6 +439,16 @@ void doVolume(int dir)
   if(!muteOn()) rx.setVolume(volume);
 }
 
+static void clickVolume(bool shortPress)
+{
+  if(shortPress) muteOn(!muteOn()); else currentCmd = CMD_NONE;
+}
+
+static void clickSquelch(bool shortPress)
+{
+  if(shortPress) currentSquelch = 0; else currentCmd = CMD_NONE;
+}
+
 static void doTheme(int dir)
 {
   themeIdx = wrap_range(themeIdx, dir, 0, getTotalThemes() - 1);
@@ -577,11 +585,6 @@ static void clickMemory(uint8_t idx, bool shortPress)
   else currentCmd = CMD_NONE;
 }
 
-static void clickSquelch(bool shortPress)
-{
-  if(shortPress) currentSquelch = 0; else currentCmd = CMD_NONE;
-}
-
 void doStep(int dir)
 {
   uint8_t idx = stepIdx[currentMode];
@@ -707,6 +710,7 @@ static void clickMenu(int cmd, bool shortPress)
     case MENU_BAND:     currentCmd = CMD_BAND;      break;
     case MENU_SETTINGS: currentCmd = CMD_SETTINGS;  break;
     case MENU_SQUELCH:  currentCmd = CMD_SQUELCH;   break;
+    case MENU_VOLUME:   currentCmd = CMD_VOLUME;    break;
 
     case MENU_MEMORY:
       currentCmd = CMD_MEMORY;
@@ -725,16 +729,6 @@ static void clickMenu(int cmd, bool shortPress)
     case MENU_AVC:
       // No AVC in FM mode
       if(currentMode!=FM) currentCmd = CMD_AVC;
-      break;
-
-    case MENU_VOLUME:
-      // Unmute sound when changing volume
-      muteOn(false);
-      currentCmd = CMD_VOLUME;
-      break;
-
-    case MENU_MUTE:
-      muteOn(!muteOn());
       break;
   }
 }
@@ -813,6 +807,7 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
     case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
     case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
+    case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
@@ -820,11 +815,6 @@ bool clickHandler(uint16_t cmd, bool shortPress)
 
   // Encoder input handled
   return(true);
-}
-
-void clickVolume()
-{
-  clickMenu(MENU_VOLUME, true);
 }
 
 //
@@ -1174,6 +1164,14 @@ static void drawVolume(int x, int y, int sx)
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.drawNumber(volume, 40+x+(sx/2), 66+y, 7);
+
+  if(muteOn())
+  {
+    for(int i=-3; i<4; i++)
+    {
+      spr.drawLine(40+x+(sx/2) + 30 + i, 66 + y - 30 + i, 40+x+(sx/2) - 30 + i, 66 + y + 30 + i, TH.menu_param);
+    }
+  }
 }
 
 static void drawAgc(int x, int y, int sx)
