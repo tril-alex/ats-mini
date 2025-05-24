@@ -48,6 +48,17 @@ static const String webRadioPage();
 static const String webMemoryPage();
 static const String webConfigPage();
 
+#if 0
+static std::string replaceAll(std::string str, const std::string &from, const std::string &to)
+{
+  size_t i;
+
+  while(i=str.find(from, 0) ; i!=str.npos ; i=str.find(from, i+to.length()))
+    str.replace(i, from.length(), to);
+
+  return(str);
+}
+#endif
 
 //
 // Delayed WiFi connection
@@ -421,6 +432,19 @@ void webSetConfig(AsyncWebServerRequest *request)
     netRequestConnect();
 }
 
+static const String webInputField(const String &name, const String &value, bool pass = false)
+{
+  String newValue(value);
+
+  newValue.replace("\"", "&quot;");
+  newValue.replace("'", "&apos;");
+
+  return(
+    "<INPUT TYPE='" + String(pass? "PASSWORD":"TEXT") + "' NAME='" +
+    name + "' VALUE='" + newValue + "'>"
+  );
+}
+
 static const String webStyleSheet()
 {
   return
@@ -635,38 +659,38 @@ const String webConfigPage()
   "<TR><TH COLSPAN=2 CLASS='HEADING'>Login Credentials</TH></TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Username</TD>"
-    "<TD><INPUT TYPE='TEXT' NAME='username' VALUE='" + loginUsername + "'></TD>"
+    "<TD>" + webInputField("username", loginUsername) + "</TD>"
   "</TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Password</TD>"
-    "<TD><INPUT TYPE='PASSWORD' NAME='password' VALUE='" + loginPassword + "'></TD>"
+    "<TD>" + webInputField("password", loginPassword, true) + "</TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>WiFi Network 1</TH></TR>"
   "<TR>"
     "<TD CLASS='LABEL'>SSID</TD>"
-    "<TD><INPUT TYPE='TEXT' NAME='wifissid1' VALUE='" + ssid1 + "'></TD>"
+    "<TD>" + webInputField("wifissid1", ssid1) + "</TD>"
   "</TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Password</TD>"
-    "<TD><INPUT TYPE='PASSWORD' NAME='wifipass1' VALUE='" + pass1 + "'></TD>"
+    "<TD>" + webInputField("wifipass1", pass1, true) + "</TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>WiFi Network 2</TH></TR>"
   "<TR>"
     "<TD CLASS='LABEL'>SSID</TD>"
-    "<TD><INPUT TYPE='TEXT' NAME='wifissid2' VALUE='" + ssid2 + "'></TD>"
+    "<TD>" + webInputField("wifissid2", ssid2) + "</TD>"
   "</TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Password</TD>"
-    "<TD><INPUT TYPE='PASSWORD' NAME='wifipass2' VALUE='" + pass2 + "'></TD>"
+    "<TD>" + webInputField("wifipass2", pass2, true) + "</TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>WiFi Network 3</TH></TR>"
   "<TR>"
     "<TD CLASS='LABEL'>SSID</TD>"
-    "<TD><INPUT TYPE='TEXT' NAME='wifissid3' VALUE='" + ssid3 + "'></TD>"
+    "<TD>" + webInputField("wifissid3", ssid3) + "</TD>"
   "</TR>"
   "<TR>"
     "<TD CLASS='LABEL'>Password</TD>"
-    "<TD><INPUT TYPE='PASSWORD' NAME='wifipass3' VALUE='" + pass3 + "'></TD>"
+    "<TD>" + webInputField("wifipass3", pass3, true) + "</TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>Settings</TH></TR>"
   "<TR>"
