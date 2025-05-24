@@ -12,9 +12,6 @@ extern ButtonTracker pb1;
 // Current mute status, returned by muteOn()
 static bool muted = false;
 
-// Volume level when mute is applied
-static uint8_t mute_vol_val = 0;
-
 // Current sleep status, returned by sleepOn()
 static bool sleep_on = false;
 
@@ -32,16 +29,17 @@ static char    clockText[8] = {0};
 //
 // Get firmware version and build time, as a string
 //
-const char *getVersion()
+const char *getVersion(bool shorter)
 {
-  static char versionString[25] = "\0";
+  static char versionString[35] = "\0";
 
-  if(!versionString[0])
-    sprintf(versionString, "F/W: v%1.1d.%2.2d %s",
-      APP_VERSION / 100,
-      APP_VERSION % 100,
-      __DATE__
-    );
+  sprintf(versionString, "%s%sF/W: v%1.1d.%2.2d %s",
+    shorter ? "" : FIRMWARE_NAME,
+    shorter ? "" : " ",
+    APP_VERSION / 100,
+    APP_VERSION % 100,
+    __DATE__
+  );
 
   return(versionString);
 }
@@ -75,24 +73,46 @@ bool muteOn(int x)
 {
   if((x==0) && muted)
   {
-    rx.setVolume(mute_vol_val);
+    rx.setVolume(volume);
     // Enable audio amplifier to restore speaker output
     digitalWrite(PIN_AMP_EN, HIGH);
-    volume = mute_vol_val;
+    rx.setHardwareAudioMute(false);
     muted = false;
   }
   else if((x==1) && !muted)
   {
-    mute_vol_val = volume;
-    volume = 0;
-    rx.setVolume(volume);
+    rx.setVolume(0);
     // Disable audio amplifier to silence speaker
     digitalWrite(PIN_AMP_EN, LOW);
+    rx.setHardwareAudioMute(true);
     muted = true;
   }
 
   return(muted);
 }
+
+//
+// Temporarily mute sound on (true) or off (false) if not in a permanent mute state
+// Do not drive PIN_AMP_EN here because a short impulse can trigger amplifier mode D,
+// see the NS4160 datasheet https://esp32-si4732.github.io/ats-mini/hardware.html#datasheets
+//
+void tempMuteOn(bool x)
+{
+  if(!muteOn(2))
+  {
+    if(x)
+    {
+      rx.setVolume(0);
+      rx.setHardwareAudioMute(true);
+    }
+    else
+    {
+      rx.setVolume(volume);
+      rx.setHardwareAudioMute(false);
+    }
+  }
+}
+
 
 //
 // Turn sleep on (1) or off (0), or get current status (2)
@@ -107,28 +127,42 @@ bool sleepOn(int x)
     spr.pushSprite(0, 0);
     tft.writecommand(ST7789_DISPOFF);
     tft.writecommand(ST7789_SLPIN);
-    // Wait till the button is released to prevent immediate wakeup
-    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
 
-    if (sleepModeIdx == SLEEP_LIGHT) {
+    // Wait till the button is released to prevent immediate wakeup
+    while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
+      delay(100);
+
+    if(sleepModeIdx == SLEEP_LIGHT)
+    {
+      // Disable WiFi
       netStop();
-      while (true) {
+
+      // Unmute squelch
+      if(squelchCutoff) tempMuteOn(false);
+
+      while(true)
+      {
         esp_sleep_enable_ext0_wakeup((gpio_num_t)ENCODER_PUSH_BUTTON, LOW);
         rtc_gpio_pullup_en((gpio_num_t)ENCODER_PUSH_BUTTON);
         rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
         esp_light_sleep_start();
+
         // Waking up here
-        if (currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+        if(currentSleep) break; // Short click is enough to exit from sleep if timeout is enabled
+
         // Wait for a long press, otherwise enter the sleep again
         pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
+
         bool wasLongPressed = false;
-        while (true) {
+        while(true)
+        {
           ButtonTracker::State pb1st = pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0);
           wasLongPressed |= pb1st.isLongPressed;
-          if (wasLongPressed || !pb1st.isPressed) break;
+          if(wasLongPressed || !pb1st.isPressed) break;
           delay(100);
         }
-        if (wasLongPressed) break;
+
+        if(wasLongPressed) break;
       }
       // Reenable the pin as well as the display
       rtc_gpio_pullup_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
@@ -136,6 +170,7 @@ bool sleepOn(int x)
       rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
       pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
       sleepOn(false);
+      // Enable WiFi
       netInit(wifiModeIdx, false);
     }
   }
@@ -149,7 +184,8 @@ bool sleepOn(int x)
     ledcWrite(PIN_LCD_BL, currentBrt);
     // Wait till the button is released to prevent the main loop clicks
     pb1.reset(); // Reset the button state (its timers could be stale due to CPU sleep)
-    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed) delay(100);
+    while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed)
+      delay(100);
   }
 
   return(sleep_on);
@@ -273,40 +309,38 @@ int getStrength(int rssi)
   if(currentMode!=FM)
   {
     // dBuV to S point conversion HF
-    if ((rssi <= 1))                  return  1;  // S0
-    if ((rssi >  1) and (rssi <=  2)) return  2;  // S1
-    if ((rssi >  2) and (rssi <=  3)) return  3;  // S2
-    if ((rssi >  3) and (rssi <=  4)) return  4;  // S3
-    if ((rssi >  4) and (rssi <= 10)) return  5;  // S4
-    if ((rssi > 10) and (rssi <= 16)) return  6;  // S5
-    if ((rssi > 16) and (rssi <= 22)) return  7;  // S6
-    if ((rssi > 22) and (rssi <= 28)) return  8;  // S7
-    if ((rssi > 28) and (rssi <= 34)) return  9;  // S8
-    if ((rssi > 34) and (rssi <= 44)) return 10;  // S9
-    if ((rssi > 44) and (rssi <= 54)) return 11;  // S9 +10
-    if ((rssi > 54) and (rssi <= 64)) return 12;  // S9 +20
-    if ((rssi > 64) and (rssi <= 74)) return 13;  // S9 +30
-    if ((rssi > 74) and (rssi <= 84)) return 14;  // S9 +40
-    if ((rssi > 84) and (rssi <= 94)) return 15;  // S9 +50
-    if  (rssi > 94)                   return 16;  // S9 +60
-    if  (rssi > 95)                   return 17;  //>S9 +60
+    if (rssi <=  1) return  1; // S0
+    if (rssi <=  2) return  2; // S1
+    if (rssi <=  3) return  3; // S2
+    if (rssi <=  4) return  4; // S3
+    if (rssi <= 10) return  5; // S4
+    if (rssi <= 16) return  6; // S5
+    if (rssi <= 22) return  7; // S6
+    if (rssi <= 28) return  8; // S7
+    if (rssi <= 34) return  9; // S8
+    if (rssi <= 44) return 10; // S9
+    if (rssi <= 54) return 11; // S9 +10
+    if (rssi <= 64) return 12; // S9 +20
+    if (rssi <= 74) return 13; // S9 +30
+    if (rssi <= 84) return 14; // S9 +40
+    if (rssi <= 94) return 15; // S9 +50
+    if (rssi <= 95) return 16; // S9 +60
+    return                 17; //>S9 +60
   }
   else
   {
     // dBuV to S point conversion FM
-    if ((rssi <= 1))                  return  1;  // S0
-    if ((rssi >  1) and (rssi <=  2)) return  7;  // S6
-    if ((rssi >  2) and (rssi <=  8)) return  8;  // S7
-    if ((rssi >  8) and (rssi <= 14)) return  9;  // S8
-    if ((rssi > 14) and (rssi <= 24)) return 10;  // S9
-    if ((rssi > 24) and (rssi <= 34)) return 11;  // S9 +10
-    if ((rssi > 34) and (rssi <= 44)) return 12;  // S9 +20
-    if ((rssi > 44) and (rssi <= 54)) return 13;  // S9 +30
-    if ((rssi > 54) and (rssi <= 64)) return 14;  // S9 +40
-    if ((rssi > 64) and (rssi <= 74)) return 15;  // S9 +50
-    if  (rssi > 74)                   return 16;  // S9 +60
-    if  (rssi > 76)                   return 17;  //>S9 +60
+    if (rssi <=  1) return  1; // S0
+    if (rssi <=  2) return  7; // S6
+    if (rssi <=  8) return  8; // S7
+    if (rssi <= 14) return  9; // S8
+    if (rssi <= 24) return 10; // S9
+    if (rssi <= 34) return 11; // S9 +10
+    if (rssi <= 44) return 12; // S9 +20
+    if (rssi <= 54) return 13; // S9 +30
+    if (rssi <= 64) return 14; // S9 +40
+    if (rssi <= 74) return 15; // S9 +50
+    if (rssi <= 76) return 16; // S9 +60
+    return                 17; //>S9 +60
   }
-
-  return(1);
 }

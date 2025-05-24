@@ -1,3 +1,4 @@
+#include <qrcode.h>
 #include "Common.h"
 #include "Themes.h"
 #include "Storage.h"
@@ -27,44 +28,141 @@
 #define WIFI_OFFSET_X  237    // WiFi x offset
 #define WIFI_OFFSET_Y    0    // WiFi y offset
 
-//
-// Show ABOUT screen
-//
-static void drawAbout()
+static void displayQRCode(esp_qrcode_handle_t qrcode) {
+    int size = esp_qrcode_get_size(qrcode);
+    for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            if (esp_qrcode_get_module(qrcode, x, y)) {
+                spr.fillRect(2 + x * 4, 170 - 2 - size * 4 + y * 4, 4, 4, TH.text);
+            }
+        }
+    }
+}
+
+static void drawAboutCommon(uint8_t arrow)
 {
-  // About screen
+  if(arrow & 3) spr.fillRect(282, 11, 22, 3, TH.text_muted);
+  if(arrow & 2) spr.fillTriangle(279, 12, 285, 8, 285, 16, TH.text_muted);
+  if(arrow & 1) spr.fillTriangle(307, 12, 301, 8, 301, 16, TH.text_muted);
+
   spr.setTextDatum(TL_DATUM);
   spr.setTextColor(TH.text_muted, TH.bg);
-  spr.drawString("ESP32-SI4732 Receiver", 0, 0, 4);
+  spr.drawString(RECEIVER_NAME, 0, 0, 4);
   spr.setTextColor(TH.text, TH.bg);
   spr.drawString(getVersion(), 2, 25, 2);
-  spr.drawString("https://github.com/esp32-si4732/ats-mini", 2, 25 + 16, 2);
-  spr.drawString("Authors: PU2CLR (Ricardo Caratti),", 2, 70, 2);
-  spr.drawString("Volos Projects, Ralph Xavier, Sunnygold,", 2, 70 + 16, 2);
-  spr.drawString("Goshante, G8PTN (Dave), R9UCL (Max Arnold),", 2, 70 + 16 * 2, 2);
-  spr.drawString("Marat Fayzullin", 2, 70 + 16 * 3, 2);
+}
 
-  char text[64];
-  sprintf(text, "DID: %08lX  DST: %02X%08lX",
+//
+// Show HELP screen
+//
+void drawAboutHelp(uint8_t arrow)
+{
+  drawAboutCommon(arrow);
+  esp_qrcode_config_t qrcode_config = ESP_QRCODE_CONFIG_DEFAULT();
+  qrcode_config.display_func = displayQRCode;
+  esp_qrcode_generate(&qrcode_config, MANUAL_URL);
+  spr.drawString("Scan the QR code to read", 130, 70 + 16 * -1, 2);
+  spr.drawString("the User Manual.", 130, 70 + 16 * 0, 2);
+  spr.drawString("Click the encoder button", 130, 70 + 16 * 1, 2);
+  spr.drawString("to continue.", 130, 70 + 16 * 2, 2);
+  if(arrow)
+  {
+    spr.drawString("Rotate the encoder to see", 130, 70 + 16 * 3, 2);
+    spr.drawString("the next page.", 130, 70 + 16 * 4, 2);
+  }
+  else
+  {
+    spr.drawString("To see this screen again,", 130, 70 + 16 * 4, 2);
+    spr.drawString("go to Menu->Settings->About.", 130, 70 + 16 * 5, 2);
+  }
+  spr.pushSprite(0, 0);
+}
+
+//
+// Show SYSTEM screen
+//
+static void drawAboutSystem(uint8_t arrow)
+{
+  drawAboutCommon(arrow);
+
+  char text[100];
+  sprintf(
+    text,
+    "CPU: %s r%i, %lu MHz",
+    ESP.getChipModel(),
+    ESP.getChipRevision(),
+    ESP.getCpuFreqMHz()
+  );
+  spr.drawString(text, 2, 70 + 16 * -1, 2);
+
+  sprintf(
+    text,
+    "MEM: F %luM, R %luk (%luk), PS %luk (%luk)",
+    ESP.getFlashChipSize() / (1024U * 1024U),
+    ESP.getHeapSize()/1024U, ESP.getFreeHeap()/1024U,
+    ESP.getPsramSize()/1024U, ESP.getFreePsram()/1024U
+  );
+  spr.drawString(text, 2, 70 + 16 * 0, 2);
+
+  sprintf(
+    text,
+    "Display ID: %08lX, STAT: %02X%08lX",
     tft.readcommand32(ST7789_RDDID, 1),
     tft.readcommand8(ST7789_RDDST, 1),
     tft.readcommand32(ST7789_RDDST, 2)
   );
-  spr.drawString(text, 2, 144, 2);
+  spr.drawString(text, 2, 70 + 16 * 1, 2);
+
+  uint64_t mac = ESP.getEfuseMac();
+  sprintf(
+    text,
+    "WiFi MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+    (uint8_t)mac,
+    (uint8_t)(mac >> 8),
+    (uint8_t)(mac >> 16),
+    (uint8_t)(mac >> 24),
+    (uint8_t)(mac >> 32),
+    (uint8_t)(mac >> 40)
+  );
+  spr.drawString(text, 2, 70 + 16 * 2, 2);
+
+  // sprintf(text, "SDK: Arduino Core %d.%d.%d", ESP_ARDUINO_VERSION_MAJOR, ESP_ARDUINO_VERSION_MINOR, ESP_ARDUINO_VERSION_PATCH);
+  //FILESYSTEM.totalBytes();
+  //FILESYSTEM.usedBytes();
 
   for(int i=0 ; i<8 ; i++)
   {
     uint16_t rgb = (i&1? 0x001F:0) | (i&2? 0x07E0:0) | (i&4? 0xF800:0);
     spr.fillRect(i*40, 160, 40, 20, rgb);
   }
-
-#ifdef ENABLE_HOLDOFF
-  // Update if not tuning
-  if(!tuning_flag) spr.pushSprite(0, 0);
-#else
-  // No hold off
   spr.pushSprite(0, 0);
-#endif
+}
+
+//
+// Show AUTHORS screen
+//
+static void drawAboutAuthors(uint8_t arrow)
+{
+  drawAboutCommon(arrow);
+  spr.drawString(FIRMWARE_URL, 2, 25 + 16, 2);
+  spr.drawString(AUTHORS_LINE1, 2, 70, 2);
+  spr.drawString(AUTHORS_LINE2, 2, 70 + 16, 2);
+  spr.drawString(AUTHORS_LINE3, 2, 70 + 16 * 2, 2);
+  spr.drawString(AUTHORS_LINE4, 2, 70 + 16 * 3, 2);
+  spr.pushSprite(0, 0);
+}
+
+//
+// Draw ABOUT screens
+//
+static void drawAbout()
+{
+  switch(doAbout(0)) {
+  case 0: drawAboutHelp(1); break;
+  case 1: drawAboutAuthors(3); break;
+  case 2: drawAboutSystem(2); break;
+  default: break;
+  }
 }
 
 // Draw zoomed menu item

@@ -193,7 +193,18 @@ static bool remoteSetMemory()
       memories[slot-1] = mem;
       return true;
     } else {
-      return showError("Invalid frequency or mode");
+      // Handle duplicate band names (15M)
+      mem.band = 0xFF;
+      for (int i = getTotalBands()-1; i >= 0; i--) {
+        if (strcmp(bands[i].bandName, band) == 0) {
+          mem.band = i;
+          break;
+        }
+      }
+      if (mem.band == 0xFF)
+        return showError("No such band");
+      if (!isMemoryInBand(&bands[mem.band], &mem))
+        return showError("Invalid frequency or mode");
     }
   }
 

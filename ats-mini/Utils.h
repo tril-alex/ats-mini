@@ -8,7 +8,7 @@ void loadSSB(uint8_t bandwidth, bool draw = true);
 void unloadSSB();
 
 // Get firmware version
-const char *getVersion();
+const char *getVersion(bool shorter = false);
 
 // Convert RSSI to signal strength
 int getStrength(int rssi);
@@ -16,6 +16,7 @@ int getStrength(int rssi);
 // Set, reset, toggle, or query switches
 bool sleepOn(int x = 2);
 bool muteOn(int x = 2);
+void tempMuteOn(bool x);
 
 // Wall clock functions
 const char *clockGet();

@@ -1,6 +1,7 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
+bool eepromFirstRun();
 void eepromTickTime();
 void eepromRequestSave(bool now = false);
 void eepromInvalidate();

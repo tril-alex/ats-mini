@@ -75,12 +75,12 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_STEP         3
 #define MENU_SEEK         4
 #define MENU_MEMORY       5
-#define MENU_MUTE         6
+#define MENU_SQUELCH      6
 #define MENU_BW           7
 #define MENU_AGC_ATT      8
 #define MENU_AVC          9
-#define MENU_SOFTMUTE     10
-#define MENU_SETTINGS     11
+#define MENU_SOFTMUTE    10
+#define MENU_SETTINGS    11
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -92,7 +92,7 @@ static const char *menu[] =
   "Step",
   "Seek",
   "Memory",
-  "Mute",
+  "Squelch",
   "Bandwidth",
   "AGC/ATTN",
   "AVC",
@@ -439,8 +439,18 @@ void doSelectDigit(int dir)
 
 void doVolume(int dir)
 {
-  if(dir>0) rx.volumeUp(); else if(dir<0) rx.volumeDown();
-  volume = rx.getVolume();
+  volume = clamp_range(volume, dir, 0, 63);
+  if(!muteOn()) rx.setVolume(volume);
+}
+
+static void clickVolume(bool shortPress)
+{
+  if(shortPress) muteOn(!muteOn()); else currentCmd = CMD_NONE;
+}
+
+static void clickSquelch(bool shortPress)
+{
+  if(shortPress) currentSquelch = 0; else currentCmd = CMD_NONE;
 }
 
 static void doTheme(int dir)
@@ -495,7 +505,7 @@ static void doWiFiMode(int dir)
   wifiModeIdx = wrap_range(wifiModeIdx, dir, 0, LAST_ITEM(wifiModeDesc));
 }
 
-static void clickWiFiMode(uint8_t mode)
+static void clickWiFiMode(uint8_t mode, bool shortPress)
 {
   currentCmd = CMD_NONE;
   netInit(mode);
@@ -521,6 +531,13 @@ static void doZoom(int dir)
 static void doScrollDir(int dir)
 {
   scrollDirection = (scrollDirection == 1) ? -1 : 1;
+}
+
+uint8_t doAbout(int dir)
+{
+  static uint8_t aboutScreen = 0;
+  aboutScreen = clamp_range(aboutScreen, dir, 0, 2);
+  return aboutScreen;
 }
 
 bool tuneToMemory(const Memory *memory)
@@ -565,22 +582,11 @@ static void clickMemory(uint8_t idx, bool shortPress)
   if(idx>LAST_ITEM(memories)) return;
 
   // If clicking on an empty memory slot, save to it
-  if(!memories[idx].freq)
-  {
-    memories[idx] = newMemory;
-    currentCmd = CMD_NONE;
-  }
-  // If clicking on the same memory slot, delete it
-  else if(!memcmp(&memories[idx], &newMemory, sizeof(newMemory)))
-  {
-    memories[idx].freq = 0;
-    currentCmd = CMD_NONE;
-  }
-  // Do nothing, memory slot already activated in doMemory()
-  else
-  {
-    currentCmd = CMD_NONE;
-  }
+  if(!memories[idx].freq) memories[idx] = newMemory;
+  // On a press, delete memory slot contents
+  else if(shortPress) memories[idx].freq = 0;
+  // On a click, do nothing, slot already activated in doMemory()
+  else currentCmd = CMD_NONE;
 }
 
 void doStep(int dir)
@@ -643,6 +649,11 @@ void doMode(int dir)
   selectBand(bandIdx);
 }
 
+void doSquelch(int dir)
+{
+  currentSquelch = clamp_range(currentSquelch, dir, 0, 127);
+}
+
 void doSoftMute(int dir)
 {
   // Nothing to do if FM mode
@@ -702,6 +713,8 @@ static void clickMenu(int cmd, bool shortPress)
     case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
     case MENU_BAND:     currentCmd = CMD_BAND;      break;
     case MENU_SETTINGS: currentCmd = CMD_SETTINGS;  break;
+    case MENU_SQUELCH:  currentCmd = CMD_SQUELCH;   break;
+    case MENU_VOLUME:   currentCmd = CMD_VOLUME;    break;
 
     case MENU_MEMORY:
       currentCmd = CMD_MEMORY;
@@ -720,16 +733,6 @@ static void clickMenu(int cmd, bool shortPress)
     case MENU_AVC:
       // No AVC in FM mode
       if(currentMode!=FM) currentCmd = CMD_AVC;
-      break;
-
-    case MENU_VOLUME:
-      // Unmute sound when changing volume
-      muteOn(false);
-      currentCmd = CMD_VOLUME;
-      break;
-
-    case MENU_MUTE:
-      muteOn(!muteOn());
       break;
   }
 }
@@ -795,7 +798,8 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_ZOOM:      doZoom(dir);break;
     case CMD_SCROLL:    doScrollDir(dir);break;
     case CMD_UTCOFFSET: doUTCOffset(scrollDirection * dir);break;
-    case CMD_ABOUT:     return(true);
+    case CMD_SQUELCH:   doSquelch(dir);break;
+    case CMD_ABOUT:     doAbout(dir);break;
     default:            return(false);
   }
 
@@ -810,18 +814,15 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_MENU:     clickMenu(menuIdx, shortPress);break;
     case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
     case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
-    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx);break;
+    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
+    case CMD_VOLUME:   clickVolume(shortPress); break;
+    case CMD_SQUELCH:  clickSquelch(shortPress); break;
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
 
   // Encoder input handled
   return(true);
-}
-
-void clickVolume()
-{
-  clickMenu(MENU_VOLUME, true);
 }
 
 //
@@ -1144,8 +1145,6 @@ static void drawMemory(int x, int y, int sx)
 
     if(i==0 && !memories[j].freq)
       text = "Add";
-    else if(i==0 && !memcmp(&memories[j], &newMemory, sizeof(newMemory)))
-      text = "Delete";
     else if(!memories[j].freq)
       text = "- - -";
     else if(memories[j].mode==FM)
@@ -1173,6 +1172,14 @@ static void drawVolume(int x, int y, int sx)
 
   spr.setTextColor(TH.menu_param, TH.menu_bg);
   spr.drawNumber(volume, 40+x+(sx/2), 66+y, 7);
+
+  if(muteOn())
+  {
+    for(int i=-3; i<4; i++)
+    {
+      spr.drawLine(40+x+(sx/2) + 30 + i, 66 + y - 30 + i, 40+x+(sx/2) - 30 + i, 66 + y + 30 + i, TH.menu_param);
+    }
+  }
 }
 
 static void drawAgc(int x, int y, int sx)
@@ -1196,6 +1203,23 @@ static void drawAgc(int x, int y, int sx)
     char text[16];
     sprintf(text, "%2.2d", agcNdx);
     spr.drawString(text, 40+x+(sx/2), 60+y, 7);
+  }
+}
+
+static void drawSquelch(int x, int y, int sx)
+{
+  drawCommon(menu[MENU_SQUELCH], x, y, sx);
+  drawZoomedMenu(menu[MENU_SQUELCH]);
+  spr.setTextDatum(MC_DATUM);
+
+  if(currentSquelch)
+  {
+    spr.drawNumber(currentSquelch, 40+x+(sx/2), 60+y, 4);
+    spr.drawString("dBuV", 40+x+(sx/2), 90+y, 4);
+  }
+  else
+  {
+    spr.drawString("Off", 40+x+(sx/2), 60+y, 4);
   }
 }
 
@@ -1311,11 +1335,11 @@ static void drawInfo(int x, int y, int sx)
   }
 
   spr.drawString("Vol:", 6+x, 64+y+(0*16), 2);
-  if(muteOn())
+  if(muteOn() || squelchCutoff)
   {
-    //spr.setTextDatum(MR_DATUM);
     spr.setTextColor(TH.box_off_text, TH.box_off_bg);
-    spr.drawString("Muted", 48+x, 64+y+(0*16), 2);
+    sprintf(text, muteOn() ? "Muted" : "%d/sq", volume);
+    spr.drawString(text, 48+x, 64+y+(0*16), 2);
     spr.setTextColor(TH.box_text, TH.box_bg);
   }
   else
@@ -1385,6 +1409,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_ZOOM:      drawZoom(x, y, sx);      break;
     case CMD_SCROLL:    drawScrollDir(x, y, sx); break;
     case CMD_UTCOFFSET: drawUTCOffset(x, y, sx); break;
+    case CMD_SQUELCH:   drawSquelch(x, y, sx);   break;
     default:            drawInfo(x, y, sx);      break;
   }
 }

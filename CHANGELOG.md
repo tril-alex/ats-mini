@@ -1,8 +1,44 @@
 # Changelog
 
-The project documentation is available at <https://esp32-si4732.github.io/ats-mini/>. The firmware flashing instructions are available at <https://esp32-si4732.github.io/ats-mini/flash.html>
+The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.html>. The firmware flashing instructions are available at <https://esp32-si4732.github.io/ats-mini/flash.html>
 
 <!-- towncrier release notes start -->
+
+## 2.22 (2025-05-23)
+
+
+### Removed
+
+- Removed the Mute menu option. Use short press instead while in the volume adjustment mode.
+
+
+### Added
+
+- Experimental Squelch option based on RSSI threshold. Unlikely to work in SSB mode. To turn it off quickly, short press (>0.5 sec) the encoder button in the Squelch menu mode. [#32](https://github.com/esp32-si4732/ats-mini/issues/32)
+- Help screen and system info screen (see `Settings->About`). The help screen is also displayed on first start.
+
+
+### Changed
+
+- Use short press to delete a memory slot.
+
+
+### Fixed
+
+- Fix restoring memory slots that belong to the bands with the same names. [#100](https://github.com/esp32-si4732/ats-mini/issues/100)
+
+## 2.21 (2025-05-21)
+
+
+### Changed
+
+- Make the Wi-Fi icon a bit more lightweight.
+
+
+### Fixed
+
+- Disable the automatic tuning capacitor. [#97](https://github.com/esp32-si4732/ats-mini/issues/97)
+- NTP time synchronization no longer ignores seconds.
 
 ## 2.20 (2025-05-18)
 

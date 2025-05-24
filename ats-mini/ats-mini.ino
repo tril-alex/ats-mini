@@ -63,6 +63,9 @@ int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
 
 // Menu options
 uint8_t volume = DEFAULT_VOLUME;        // Volume, range = 0 (muted) - 63
+uint8_t currentSquelch = 0;             // Squelch, range = 0 (disabled) - 127
+bool squelchCutoff = false;             // True if the Squelch cutoff is in effect
+
 uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255 in steps of 5
 uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
 long elapsedSleep = millis();           // Display sleep timer
@@ -155,7 +158,7 @@ void setup()
     ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
     tft.setTextSize(2);
     tft.setTextColor(TH.text, TH.bg);
-    tft.println(getVersion());
+    tft.println(getVersion(true));
     tft.println();
     tft.setTextColor(TH.text_warn, TH.bg);
     tft.print("EEPROM Resetting");
@@ -211,6 +214,17 @@ void setup()
   rx.setVolume(volume);
   rx.setMaxSeekTime(SEEK_TIMEOUT);
 
+  // Show help screen on first run
+  if(eepromFirstRun())
+  {
+    // Clear screen buffer
+    spr.fillSprite(TH.bg);
+    ledcWrite(PIN_LCD_BL, currentBrt);
+    drawAboutHelp(0);
+    while(digitalRead(ENCODER_PUSH_BUTTON) != LOW) delay(100);
+    while(digitalRead(ENCODER_PUSH_BUTTON) == LOW) delay(100);
+  }
+
   // Draw display for the first time
   drawScreen();
   ledcWrite(PIN_LCD_BL, currentBrt);
@@ -256,7 +270,7 @@ void useBand(const Band *band)
   if(band->bandMode==FM)
   {
     rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
-    rx.setTuneFrequencyAntennaCapacitor(0);
+    // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
 
     // More sensitive seek thresholds
@@ -293,7 +307,7 @@ void useBand(const Band *band)
     }
 
     // Set the tuning capacitor for SW or MW/LW
-    rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
+    // rx.setTuneFrequencyAntennaCapacitor((band->bandType == MW_BAND_TYPE || band->bandType == LW_BAND_TYPE) ? 0 : 1);
 
     // G8PTN: Enable GPIO1 as output
     rx.setGpioCtl(1, 0, 0);
@@ -383,6 +397,7 @@ bool updateBFO(int newBFO, bool wrap)
   {
     // Apply new frequency
     rx.setFrequency(newFreq);
+
     // Re-apply to remove noise
     doAgc(0);
     // Update current frequency
@@ -584,6 +599,54 @@ bool clickFreq(bool shortPress)
   return false;
 }
 
+bool processRssiSnr()
+{
+  static uint32_t updateCounter = 0;
+  bool needRedraw = false;
+
+  rx.getCurrentReceivedSignalQuality();
+  int newRSSI = rx.getCurrentRSSI();
+  int newSNR = rx.getCurrentSNR();
+
+  // Apply squelch if the volume is not muted
+  if(currentSquelch && currentSquelch <= 127)
+  {
+    if(newRSSI >= currentSquelch && squelchCutoff)
+    {
+      tempMuteOn(false);
+      squelchCutoff = false;
+    }
+    else if(newRSSI < currentSquelch && !squelchCutoff)
+    {
+      tempMuteOn(true);
+      squelchCutoff = true;
+    }
+  }
+  else if(squelchCutoff)
+  {
+    tempMuteOn(false);
+    squelchCutoff = false;
+  }
+
+  // G8PTN: Based on 1.2s interval, update RSSI & SNR
+  if(!(updateCounter++ & 7))
+  {
+    // Show RSSI status only if this condition has changed
+    if(newRSSI != rssi)
+    {
+      rssi = newRSSI;
+      needRedraw = true;
+    }
+    // Show SNR status only if this condition has changed
+    if(newSNR != snr)
+    {
+      snr = newSNR;
+      needRedraw = true;
+    }
+  }
+  return needRedraw;
+}
+
 //
 // Main event loop
 //
@@ -705,10 +768,14 @@ void loop()
           sleepOn(false);
           needRedraw = true;
         }
-        else if(pb1st.wasShortPressed && sleepModeIdx == SLEEP_UNLOCKED)
+        else if(sleepModeIdx == SLEEP_UNLOCKED)
         {
-          // Allow short press in unlocked sleep mode to adjust the volume
-          clickVolume();
+          // Allow to adjust the volume in sleep mode
+          if(pb1st.wasShortPressed && currentCmd==CMD_NONE)
+            currentCmd = CMD_VOLUME;
+          else if(currentCmd==CMD_VOLUME)
+            clickHandler(currentCmd, pb1st.wasShortPressed);
+
           needRedraw = true;
         }
       }
@@ -726,7 +793,7 @@ void loop()
       else if(pb1st.wasShortPressed)
       {
         // Volume shortcut (only active in VFO mode)
-        clickVolume();
+        currentCmd = CMD_VOLUME;
         needRedraw = true;
       }
       else
@@ -765,20 +832,9 @@ void loop()
     elapsedSleep = elapsedCommand = currentTime = millis();
   }
 
-  // Show RSSI status only if this condition has changed
-  if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME * 6)
+  if((currentTime - elapsedRSSI) > MIN_ELAPSED_RSSI_TIME)
   {
-    rx.getCurrentReceivedSignalQuality();
-    snr = rx.getCurrentSNR();
-
-    // G8PTN: Based on 1.2s update, always allow S-Meter
-    int newRssi = rx.getCurrentRSSI();
-    if(newRssi != rssi)
-    {
-      rssi = newRssi;
-      needRedraw = true;
-    }
-
+    needRedraw |= processRssiSnr();
     elapsedRSSI = currentTime;
   }
 
@@ -803,14 +859,6 @@ void loop()
   // Tick NETWORK time, connecting to WiFi if requested
   netTickTime();
 
-  // Periodically refresh the main screen
-  // This covers the case where there is nothing else triggering a refresh
-  if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)
-  {
-    if(currentCmd == CMD_NONE) needRedraw = true;
-    background_timer = currentTime;
-  }
-
 #ifdef ENABLE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))
@@ -822,6 +870,15 @@ void loop()
 
   // Run clock
   needRedraw |= clockTickTime();
+
+  // Periodically refresh the main screen
+  // This covers the case where there is nothing else triggering a refresh
+  if(needRedraw) background_timer = currentTime;
+  if((currentTime - background_timer) > BACKGROUND_REFRESH_TIME)
+  {
+    if(currentCmd == CMD_NONE) needRedraw = true;
+    background_timer = currentTime;
+  }
 
   // Redraw screen if necessary
   if(needRedraw) drawScreen();

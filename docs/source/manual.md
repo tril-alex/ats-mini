@@ -40,12 +40,11 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 
 * **Mode** - FM (only available on the VHF band); LSB, USB, AM (available on other bands). The receiver doesn't support the NFM mode (on any band, including the CB) due to limitations of the SI4732 chip.
 * **Band** - List of [Bands](#bands-table).
-* **Volume** - 0 (muted) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design.
+* **Volume** - 0 (silent) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design. Use short press to mute/unmute.
 * **Step** - Tuning step (not every step is available on every band and mode).
 * **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan. Use press and rotate for manual fine tuning.
-* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, `Delete` to erase the current frequency, switch between stored slots by rotating the encoder. It is also possible to edit the memory slots via [serial port](#serial-interface) or via the [web based tool](memory.md) in Google Chrome.
-
-* **Mute** - Mute/unmute.
+* **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, short press to erase a slot, switch between stored slots by rotating the encoder. It is also possible to edit the memory slots via [serial port](#serial-interface) or via the [web based tool](memory.md) in Google Chrome.
+* **Squelch** - mute the speaker when the RSSI level is lower than the defined threshold. Unlikely to work in SSB mode. To turn it off quickly, short press the encoder button while in the Squelch menu mode.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
 * **AGC/ATTN** - Automatic Gain Control (on/off) or Attenuation level. The attenuator is not applicable to SSB mode.
 * **AVC** - Sets the maximum gain for automatic volume control (not applicable to FM mode).
@@ -64,7 +63,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
-* **About** - Informational screen.
+* **About** - Informational screens (Help, Authors, System).
 
 ## Wi-Fi
 
