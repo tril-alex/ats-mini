@@ -112,17 +112,7 @@ static void drawAboutSystem(uint8_t arrow)
   );
   spr.drawString(text, 2, 70 + 16 * 1, 2);
 
-  uint64_t mac = ESP.getEfuseMac();
-  sprintf(
-    text,
-    "WiFi MAC: %02X:%02X:%02X:%02X:%02X:%02X",
-    (uint8_t)mac,
-    (uint8_t)(mac >> 8),
-    (uint8_t)(mac >> 16),
-    (uint8_t)(mac >> 24),
-    (uint8_t)(mac >> 32),
-    (uint8_t)(mac >> 40)
-  );
+  sprintf(text, "WiFi MAC: %s", getMACAddress());
   spr.drawString(text, 2, 70 + 16 * 2, 2);
 
   // sprintf(text, "SDK: Arduino Core %d.%d.%d", ESP_ARDUINO_VERSION_MAJOR, ESP_ARDUINO_VERSION_MINOR, ESP_ARDUINO_VERSION_PATCH);

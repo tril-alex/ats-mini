@@ -45,6 +45,30 @@ const char *getVersion(bool shorter)
 }
 
 //
+// Get MAC address
+//
+const char *getMACAddress()
+{
+  static char macString[20] = "\0";
+
+  if(!macString[0])
+  {
+    uint64_t mac = ESP.getEfuseMac();
+    sprintf(
+      macString,
+      "%02X:%02X:%02X:%02X:%02X:%02X",
+      (uint8_t)mac,
+      (uint8_t)(mac >> 8),
+      (uint8_t)(mac >> 16),
+      (uint8_t)(mac >> 24),
+      (uint8_t)(mac >> 32),
+      (uint8_t)(mac >> 40)
+    );
+  }
+  return(macString);
+}
+
+//
 // Load SSB patch into SI4735
 //
 void loadSSB(uint8_t bandwidth, bool draw)

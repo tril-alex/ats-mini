@@ -161,6 +161,7 @@ uint8_t doAbout(int dir);
 void loadSSB(uint8_t bandwidth, bool draw = true);
 void unloadSSB();
 const char *getVersion(bool shorter = false);
+const char *getMACAddress();
 int getStrength(int rssi);
 bool sleepOn(int x = 2);
 bool muteOn(int x = 2);
