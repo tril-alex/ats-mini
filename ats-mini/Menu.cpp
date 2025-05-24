@@ -104,16 +104,17 @@ static const char *menu[] =
 
 #define MENU_BRIGHTNESS   0
 #define MENU_CALIBRATION  1
-#define MENU_THEME        2
-#define MENU_RDS          3
-#define MENU_UTCOFFSET    4
-#define MENU_FM_REGION    5
-#define MENU_ZOOM         6
-#define MENU_SCROLL       7
-#define MENU_SLEEP        8
-#define MENU_SLEEPMODE    9
-#define MENU_WIFIMODE     10
-#define MENU_ABOUT        11
+#define MENU_RDS          2
+#define MENU_UTCOFFSET    3
+#define MENU_FM_REGION    4
+#define MENU_THEME        5
+#define MENU_UI           6
+#define MENU_ZOOM         7
+#define MENU_SCROLL       8
+#define MENU_SLEEP        9
+#define MENU_SLEEPMODE    10
+#define MENU_WIFIMODE     11
+#define MENU_ABOUT        12
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -121,10 +122,11 @@ static const char *settings[] =
 {
   "Brightness",
   "Calibration",
-  "Theme",
   "RDS",
   "UTC Offset",
   "FM Region",
+  "Theme",
+  "UI Layout",
   "Zoom Menu",
   "Scroll Dir.",
   "Sleep",
@@ -218,6 +220,13 @@ const UTCOffset utcOffsets[] =
 
 int getCurrentUTCOffset() { return(utcOffsets[utcOffsetIdx].offset); }
 int getTotalUTCOffsets() { return(ITEM_COUNT(utcOffsets)); }
+
+//
+// UI Layout Menu
+//
+uint8_t uiLayoutIdx = 0;
+static const char *uiLayoutDesc[] =
+{ "Default", "S-Meter" };
 
 //
 // WiFi Mode Menu
@@ -466,6 +475,11 @@ static void clickSquelch(bool shortPress)
 static void doTheme(int dir)
 {
   themeIdx = wrap_range(themeIdx, dir, 0, getTotalThemes() - 1);
+}
+
+static void doUILayout(int dir)
+{
+  uiLayoutIdx = uiLayoutIdx > LAST_ITEM(uiLayoutDesc) ? UI_DEFAULT : wrap_range(uiLayoutIdx, dir, 0, LAST_ITEM(uiLayoutDesc));
 }
 
 void doAvc(int dir)
@@ -773,6 +787,7 @@ static void clickSettings(int cmd, bool shortPress)
       if(isSSB()) currentCmd = CMD_CAL;
       break;
     case MENU_THEME:      currentCmd = CMD_THEME;     break;
+    case MENU_UI:         currentCmd = CMD_UI;        break;
     case MENU_RDS:        currentCmd = CMD_RDS;       break;
     case MENU_ZOOM:       currentCmd = CMD_ZOOM;      break;
     case MENU_SCROLL:     currentCmd = CMD_SCROLL;    break;
@@ -810,6 +825,7 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_BRT:       doBrt(dir);break;
     case CMD_CAL:       doCal(dir);break;
     case CMD_THEME:     doTheme(scrollDirection * dir);break;
+    case CMD_UI:        doUILayout(scrollDirection * dir);break;
     case CMD_RDS:       doRDSMode(scrollDirection * dir);break;
     case CMD_MEMORY:    doMemory(scrollDirection * dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
@@ -1104,6 +1120,25 @@ static void drawTheme(int x, int y, int sx)
 
     spr.setTextDatum(MC_DATUM);
     spr.drawString(theme[abs((themeIdx+count+i)%count)].name, 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
+static void drawUILayout(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_UI], x, y, sx, true);
+
+  int count = ITEM_COUNT(uiLayoutDesc);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0) {
+      drawZoomedMenu(uiLayoutDesc[abs((uiLayoutIdx+count+i)%count)]);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    spr.setTextDatum(MC_DATUM);
+    spr.drawString(uiLayoutDesc[abs((uiLayoutIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -1439,6 +1474,7 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_BAND:      drawBand(x, y, sx);      break;
     case CMD_BANDWIDTH: drawBandwidth(x, y, sx); break;
     case CMD_THEME:     drawTheme(x, y, sx);     break;
+    case CMD_UI:        drawUILayout(x, y, sx);  break;
     case CMD_VOLUME:    drawVolume(x, y, sx);    break;
     case CMD_AGC:       drawAgc(x, y, sx);       break;
     case CMD_SOFTMUTE:  drawSoftMuteMaxAtt(x, y, sx);break;
