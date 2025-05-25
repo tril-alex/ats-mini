@@ -586,7 +586,8 @@ static void drawLayoutSmeter(const char *statusLine1, const char *statusLine2)
 
   // Show station or channel name, if present
   if(*getStationName())
-    drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
+    // drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
+    drawLongStationName(getStationName(), MENU_OFFSET_X + 1 + 76 + MENU_DELTA_X + 2, RDS_OFFSET_Y);
 
   // Draw band scale
   drawSmallScale(isSSB()? (currentFrequency + currentBFO/1000) : currentFrequency, 120);
