@@ -63,6 +63,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
+* **FM Region** - FM Region setting. For setting FM de-emphasis time constant by region.
 * **About** - Informational screens (Help, Authors, System).
 
 ## Wi-Fi

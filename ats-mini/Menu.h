@@ -38,7 +38,8 @@
 #define CMD_SLEEPMODE 0x2800 // |
 #define CMD_UTCOFFSET 0x2900 // |
 #define CMD_WIFIMODE  0x2A00 // |
-#define CMD_ABOUT     0x2B00 //-+
+#define CMD_FM_REGION 0x2B00 // |
+#define CMD_ABOUT     0x2C00 //-+
 
 //
 // Data Types
@@ -71,6 +72,7 @@ extern Band bands[];
 extern Memory memories[];
 extern const UTCOffset utcOffsets[];
 extern const char *bandModeDesc[];
+extern const FMRegion fmRegions[];
 extern int bandIdx;
 
 // These are menu commands
@@ -107,6 +109,7 @@ const UTCOffset *getUTCOffset(uint8_t idx);
 void doSoftMute(int dir);
 void doAgc(int dir);
 void doAvc(int dir);
+void doFmRegion(int dir);
 void doBandwidth(int dir);
 void doVolume(int dir);
 void doBrt(int dir);
