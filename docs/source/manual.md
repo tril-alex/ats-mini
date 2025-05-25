@@ -73,6 +73,7 @@ The Wi-Fi mode (2.4GHz only) can be used for the following purposes (for now):
 * Viewing the receiver status (frequency, RSSI/SNR, volume, battery voltage, etc).
 * Viewing the Memory slots with saved frequencies.
 * Manage the receiver settings.
+* Backup/restore the settings (EEPROM). The restore function only works on compatible firmware versions (if the settings were changed significantly, the full reset is inavoidable).
 
 There are a couple of modes:
 
