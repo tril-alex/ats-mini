@@ -180,7 +180,8 @@ static const RDSMode rdsMode[] =
   { RDS_PS | RDS_CT, "PS+CT" },
   { RDS_PS | RDS_PI, "PS+PI" },
   { RDS_PS | RDS_PI | RDS_CT, "PS+PI+CT" },
-  { RDS_PS | RDS_PI | RDS_RT | RDS_PT, "PS+PI+RT" },
+  { RDS_PS | RDS_PI | RDS_RT | RDS_PT, "ALL-CT (EU)" },
+  { RDS_PS | RDS_PI | RDS_RT | RDS_PT | RDS_RBDS, "ALL-CT (US)" },
   { RDS_PS | RDS_PI | RDS_RT | RDS_PT | RDS_CT, "ALL (EU)" },
   { RDS_PS | RDS_PI | RDS_RT | RDS_PT | RDS_CT | RDS_RBDS, "ALL (US)" },
 };
@@ -489,7 +490,7 @@ static void doUILayout(int dir)
 void doAvc(int dir)
 {
   // Only allow for AM and SSB modes
-  if(currentCmd==FM) return;
+  if(currentMode==FM) return;
 
   if(isSSB())
   {
