@@ -191,13 +191,13 @@ bool eibiLoadSchedule()
   static const char *eibiMessage = "Loading EIBI Schedule";
   HTTPClient http;
 
-  drawWiFiStatus(eibiMessage, "Connecting...");
+  drawScreen(eibiMessage, "Connecting...");
 
   // Open HTTP connection to EIBI site
   http.begin(EIBI_URL);
   if(http.GET() != HTTP_CODE_OK)
   {
-    drawWiFiStatus(eibiMessage, "Failed connecting to EIBI!");
+    drawScreen(eibiMessage, "Failed connecting to EIBI!");
     http.end();
     return(false);
   }
@@ -206,7 +206,7 @@ bool eibiLoadSchedule()
   fs::File file = LittleFS.open(TEMP_PATH, "wb");
   if(!file)
   {
-    drawWiFiStatus(eibiMessage, "Failed opening local storage!");
+    drawScreen(eibiMessage, "Failed opening local storage!");
     http.end();
     return(false);
   }
@@ -254,7 +254,7 @@ bool eibiLoadSchedule()
             {
               char statusMessage[64];
               sprintf(statusMessage, "... %d bytes, %d entries ...", byteCnt, lineCnt);
-              drawWiFiStatus(eibiMessage, statusMessage);
+              drawScreen(eibiMessage, statusMessage);
             }
           }
         }
@@ -266,7 +266,7 @@ bool eibiLoadSchedule()
     }
   }
 
-  drawWiFiStatus(eibiMessage, "DONE!");
+  drawScreen(eibiMessage, "DONE!");
 
   // Done with file and HTTP connection
   file.close();

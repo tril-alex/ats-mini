@@ -3,10 +3,8 @@
 #include "Storage.h"
 #include "Themes.h"
 #include "Menu.h"
-
 #include <LittleFS.h>
 
-#define EEPROM_SIZE   512
 #define STORE_TIME    10000 // Time of inactivity to start writing EEPROM
 
 #define EEPROM_BASE_ADDR  0x000
@@ -17,6 +15,7 @@
 
 static bool showEepromFlag = false; // TRUE: Writing to EEPROM
 static bool itIsTimeToSave = false; // TRUE: Need to save to EEPROM
+static bool itIsTimeToLoad = false; // TRUE: Need to load from EEPROM
 static uint32_t storeTime  = millis();
 
 // To store any change into the EEPROM, we need at least STORE_TIME
@@ -24,12 +23,27 @@ static uint32_t storeTime  = millis();
 void eepromRequestSave(bool now)
 {
   // Underflow is ok here, see eepromTickTime
-  storeTime = millis() - (now ? STORE_TIME : 0);
+  storeTime = millis() - (now? STORE_TIME : 0);
   itIsTimeToSave = true;
+}
+
+void eepromRequestLoad()
+{
+  storeTime = millis();
+  itIsTimeToLoad = true;
 }
 
 void eepromTickTime()
 {
+  // Load configuration if requested
+  if(itIsTimeToLoad)
+  {
+    eepromLoadConfig();
+    selectBand(bandIdx, false);
+    rx.setVolume(volume);
+    itIsTimeToLoad = false;
+  }
+
   // Save configuration if requested
   if(itIsTimeToSave && ((millis() - storeTime) >= STORE_TIME))
   {
@@ -82,16 +96,25 @@ bool eepromFirstRun()
 }
 
 // Check EEPROM contents against EEPROM_VERSION
-bool eepromVerify()
+bool eepromVerify(const uint8_t *buf)
 {
   uint8_t  appId;
   uint16_t appVer;
 
-  EEPROM.begin(EEPROM_SIZE);
-  appId   = EEPROM.read(EEPROM_BASE_ADDR);
-  appVer  = EEPROM.read(EEPROM_VER_ADDR) << 8;
-  appVer |= EEPROM.read(EEPROM_VER_ADDR + 1);
-  EEPROM.end();
+  if(buf)
+  {
+    appId   = buf[EEPROM_BASE_ADDR];
+    appVer  = buf[EEPROM_VER_ADDR] << 8;
+    appVer |= buf[EEPROM_VER_ADDR + 1];
+  }
+  else
+  {
+    EEPROM.begin(EEPROM_SIZE);
+    appId   = EEPROM.read(EEPROM_BASE_ADDR);
+    appVer  = EEPROM.read(EEPROM_VER_ADDR) << 8;
+    appVer |= EEPROM.read(EEPROM_VER_ADDR + 1);
+    EEPROM.end();
+  }
 
   return(appId==EEPROM_VERSION);
 }
@@ -166,6 +189,8 @@ void eepromSaveConfig()
   EEPROM.write(addr++, scrollDirection<0? 1:0);  // Stores the current Scroll setting
   EEPROM.write(addr++, utcOffsetIdx);            // Stores the current UTC Offset
   EEPROM.write(addr++, currentSquelch);          // Stores the current Squelch value
+  EEPROM.write(addr++, FmRegionIdx);             // Stores the current FM region value
+  EEPROM.write(addr++, uiLayoutIdx);             // Stores the current UI Layout index value
   EEPROM.commit();
 
   addr = EEPROM_SETP_ADDR;
@@ -240,6 +265,9 @@ void eepromLoadConfig()
   scrollDirection = EEPROM.read(addr++)? -1:1;   // Reads stored Scroll setting
   utcOffsetIdx   = EEPROM.read(addr++);          // Reads the current UTC Offset
   currentSquelch = EEPROM.read(addr++);          // Reads the current Squelch value
+  FmRegionIdx    = EEPROM.read(addr++);          // Reads the current FM region value
+  FmRegionIdx    = FmRegionIdx >= getTotalFmRegions() ? 0 : FmRegionIdx;
+  uiLayoutIdx    = EEPROM.read(addr++);          // Reads stored UI Layout index value
 
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<getTotalBands() ; i++)
@@ -276,5 +304,43 @@ bool diskInit()
   }
 
   Serial.println("Mounted LittleFS!");
+  return(true);
+}
+
+bool eepromReadBinary(uint8_t *buf, uint32_t size)
+{
+  if(size<EEPROM_SIZE) return(false);
+
+  // Make sure nobody saves or loads
+  itIsTimeToSave = false;
+  itIsTimeToLoad = false;
+
+  EEPROM.begin(EEPROM_SIZE);
+
+  for(int j=0 ; j<EEPROM_SIZE ; ++j)
+    buf[j] = EEPROM.read(j);
+
+  EEPROM.end();
+  return(true);
+}
+
+
+bool eepromWriteBinary(const uint8_t *buf, uint32_t size)
+{
+  if(size>EEPROM_SIZE) return(false);
+
+  // Make sure nobody saves or loads
+  itIsTimeToSave = false;
+  itIsTimeToLoad = false;
+
+  EEPROM.begin(EEPROM_SIZE);
+
+  for(int j=0 ; j<EEPROM_SIZE ; ++j)
+    EEPROM.write(j, buf[j]);
+
+  EEPROM.end();
+
+  // Now we need to load new EEPROM config
+  eepromRequestLoad();
   return(true);
 }

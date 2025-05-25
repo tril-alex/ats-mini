@@ -30,16 +30,22 @@
 #define CMD_SETTINGS  0x2000 //-SETTINGS MODE starts here
 #define CMD_BRT       0x2100 // |
 #define CMD_CAL       0x2200 // |
-#define CMD_THEME     0x2300 // |
-#define CMD_RDS       0x2400 // |
-#define CMD_ZOOM      0x2500 // |
-#define CMD_SCROLL    0x2600 // |
-#define CMD_SLEEP     0x2700 // |
-#define CMD_SLEEPMODE 0x2800 // |
-#define CMD_UTCOFFSET 0x2900 // |
-#define CMD_WIFIMODE  0x2A00 // |
-#define CMD_LOADEIBI  0x2B00 // |
-#define CMD_ABOUT     0x2C00 //-+
+#define CMD_RDS       0x2300 // |
+#define CMD_UTCOFFSET 0x2400 // |
+#define CMD_FM_REGION 0x2500 // |
+#define CMD_THEME     0x2600 // |
+#define CMD_UI        0x2700 // |
+#define CMD_ZOOM      0x2800 // |
+#define CMD_SCROLL    0x2900 // |
+#define CMD_SLEEP     0x2A00 // |
+#define CMD_SLEEPMODE 0x2B00 // |
+#define CMD_LOADEIBI  0x2C00 // |
+#define CMD_WIFIMODE  0x2D00 // |
+#define CMD_ABOUT     0x2E00 //-+
+
+// UI Layouts
+#define UI_DEFAULT  0
+#define UI_SMETER   1
 
 //
 // Data Types
@@ -72,6 +78,7 @@ extern Band bands[];
 extern Memory memories[];
 extern const UTCOffset utcOffsets[];
 extern const char *bandModeDesc[];
+extern const FMRegion fmRegions[];
 extern int bandIdx;
 
 // These are menu commands
@@ -104,10 +111,12 @@ uint8_t getRDSMode();
 int getCurrentUTCOffset();
 int getTotalUTCOffsets();
 const UTCOffset *getUTCOffset(uint8_t idx);
+int getTotalFmRegions();
 
 void doSoftMute(int dir);
 void doAgc(int dir);
 void doAvc(int dir);
+void doFmRegion(int dir);
 void doBandwidth(int dir);
 void doVolume(int dir);
 void doBrt(int dir);

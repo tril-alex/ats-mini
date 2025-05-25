@@ -105,6 +105,14 @@ typedef struct
   const char *city;       // City name
 } UTCOffset;
 
+typedef struct
+{
+  // From https://www.skyworksinc.com/-/media/Skyworks/SL/documents/public/application-notes/AN332.pdf
+  // Property 0x1100. FM_DEEMPHASIS
+  uint8_t value;
+  const char* desc;
+} FMRegion;
+
 //
 // Global Variables
 //
@@ -131,6 +139,7 @@ extern uint8_t sleepModeIdx;
 extern bool zoomMenu;
 extern int8_t scrollDirection;
 extern uint8_t utcOffsetIdx;
+extern uint8_t uiLayoutIdx;
 
 extern int8_t FmAgcIdx;
 extern int8_t AmAgcIdx;
@@ -141,6 +150,7 @@ extern int8_t AmSoftMuteIdx;
 extern int8_t SsbSoftMuteIdx;
 extern uint8_t rdsModeIdx;
 extern uint8_t wifiModeIdx;
+extern uint8_t FmRegionIdx;
 
 extern int8_t agcIdx;
 extern int8_t agcNdx;
@@ -159,9 +169,8 @@ uint8_t doAbout(int dir);
 
 // Draw.c
 void drawLoadingSSB();
-void drawWiFiStatus(const char *line1, const char *line2 = 0);
 void drawZoomedMenu(const char *text);
-void drawScreen();
+void drawScreen(const char *statusLine1 = 0, const char *statusLine2 = 0);
 void drawAboutHelp(uint8_t arrow);
 
 // Battery.c

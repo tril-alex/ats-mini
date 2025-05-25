@@ -14,6 +14,18 @@
 * **FM station name** (RDS PS) or **frequency name** (right below the frequency). A frequency name appears for some popular frequencies like FT8, SSTV or CB channels. Can also display current **menu option** using a bigger font when the Zoom Menu setting is enabled.
 * **Tuning scale** (bottom of the screen). Can be replaced with additional RDS fields (RT, PTY) when extended RDS is enabled.
 
+## Alternative UI
+
+![](_static/screenshot-smeter.png)
+
+The differences are:
+
+* **Stereo indicator** is on the right side of the band and mode (VHF & FM).
+* **Tuning scale** (right under the station name). Numbers on the left & right sides are the band limits.
+* **S/N Meter** (in dB). The range is 0...127 and the visual indicator linearly displays this range.
+* **RSSI & S-Meter** (the number is in dBµV, the meter is in S-points). Please note that the RSSI range is also 0...127 (no negative values) and according to [these tables](https://dl4zao.de/_downloads/Dezibel.pdf) any values below S4 on HF (rssi < 4) and below S7 on VHF (rssi < 2) are bogus. Thus it is very far from being precise, and also depends on the antenna impedance.
+
+Both meters can be replaced with additional RDS fields (RT, PTY) when extended RDS is enabled.
 
 ## Controls
 
@@ -55,9 +67,11 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 
 * **Brightness** - Display brightness level (10...255). The minimal one draws about 80mA of the battery power, the default one about 100mA, the max level about 120mA.
 * **Calibration** - SSB calibration offset (-2000...2000, per band).
-* **Theme** - Color theme.
 * **RDS** - Radio Data System options: PS - radio station name, CT - time, RT - text, PTY - genre, ALL (EU/US) - everything. Note that the time can be transmitted either in UTC or in local timezone, as well as be completely bogus. The clock is synchronized only once, so you can pick the right time source (switch the receiver power off and on to resync it again).
 * **UTC Offset** - Affects the displayed time, whether it was received via RDS or NTP.
+* **FM Region** - FM de-emphasis time constant by region (50µs for EU/JP/AU and 70µs for the US).
+* **Theme** - Color theme.
+* **UI Layout** - Alternative UI layouts. For now there is just one alternative UI with large S-meter and S/N-meter.
 * **Zoom Menu** - Display the currently selected menu item using a larger font (accessibility option).
 * **Scroll Dir.** - Menu scroll direction for clockwise encoder turn.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
@@ -73,6 +87,7 @@ The Wi-Fi mode (2.4GHz only) can be used for the following purposes (for now):
 * Viewing the receiver status (frequency, RSSI/SNR, volume, battery voltage, etc).
 * Viewing the Memory slots with saved frequencies.
 * Manage the receiver settings.
+* Backup/restore the settings (EEPROM). The restore function only works on compatible firmware versions (if the settings were changed significantly, the full reset is inavoidable).
 
 There are a couple of modes:
 

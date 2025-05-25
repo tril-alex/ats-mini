@@ -10,8 +10,12 @@ void unloadSSB();
 // Get firmware version
 const char *getVersion(bool shorter = false);
 
+// Hardware info
+const char *getMACAddress();
+
 // Convert RSSI to signal strength
 int getStrength(int rssi);
+int getInterpolatedStrength(int rssi);
 
 // Set, reset, toggle, or query switches
 bool sleepOn(int x = 2);

@@ -106,16 +106,18 @@ static const char *menu[] =
 
 #define MENU_BRIGHTNESS   0
 #define MENU_CALIBRATION  1
-#define MENU_THEME        2
-#define MENU_RDS          3
-#define MENU_UTCOFFSET    4
-#define MENU_ZOOM         5
-#define MENU_SCROLL       6
-#define MENU_SLEEP        7
-#define MENU_SLEEPMODE    8
-#define MENU_LOADEIBI     9
-#define MENU_WIFIMODE     10
-#define MENU_ABOUT        11
+#define MENU_RDS          2
+#define MENU_UTCOFFSET    3
+#define MENU_FM_REGION    4
+#define MENU_THEME        5
+#define MENU_UI           6
+#define MENU_ZOOM         7
+#define MENU_SCROLL       8
+#define MENU_SLEEP        9
+#define MENU_SLEEPMODE    10
+#define MENU_LOADEIBI     11
+#define MENU_WIFIMODE     12
+#define MENU_ABOUT        13
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -123,9 +125,11 @@ static const char *settings[] =
 {
   "Brightness",
   "Calibration",
-  "Theme",
   "RDS",
   "UTC Offset",
+  "FM Region",
+  "Theme",
+  "UI Layout",
   "Zoom Menu",
   "Scroll Dir.",
   "Sleep",
@@ -134,6 +138,18 @@ static const char *settings[] =
   "Wi-Fi",
   "About",
 };
+
+//
+// FM Region Menu
+//
+const FMRegion fmRegions[] = {
+  // 50uS de-emphasis
+  { 0x1, "EU/JP/AU" },
+  // 75uS de-emphasis
+  { 0x2, "US" },
+};
+
+int getTotalFmRegions() { return(ITEM_COUNT(fmRegions)); }
 
 //
 // Mode Menu
@@ -208,6 +224,13 @@ const UTCOffset utcOffsets[] =
 
 int getCurrentUTCOffset() { return(utcOffsets[utcOffsetIdx].offset); }
 int getTotalUTCOffsets() { return(ITEM_COUNT(utcOffsets)); }
+
+//
+// UI Layout Menu
+//
+uint8_t uiLayoutIdx = 0;
+static const char *uiLayoutDesc[] =
+{ "Default", "S-Meter" };
 
 //
 // WiFi Mode Menu
@@ -458,6 +481,11 @@ static void doTheme(int dir)
   themeIdx = wrap_range(themeIdx, dir, 0, getTotalThemes() - 1);
 }
 
+static void doUILayout(int dir)
+{
+  uiLayoutIdx = uiLayoutIdx > LAST_ITEM(uiLayoutDesc) ? UI_DEFAULT : wrap_range(uiLayoutIdx, dir, 0, LAST_ITEM(uiLayoutDesc));
+}
+
 void doAvc(int dir)
 {
   // Only allow for AM and SSB modes
@@ -473,6 +501,15 @@ void doAvc(int dir)
     AmAvcIdx = wrap_range(AmAvcIdx, 2*dir, 12, 90);
     rx.setAvcAmMaxGain(AmAvcIdx);
   }
+}
+
+void doFmRegion(int dir)
+{
+  // Only allow for FM mode
+  if(currentMode!=FM) return;
+
+  FmRegionIdx = wrap_range(FmRegionIdx, dir, 0, LAST_ITEM(fmRegions));
+  rx.setFMDeEmphasis(fmRegions[FmRegionIdx].value);
 }
 
 void doCal(int dir)
@@ -754,6 +791,7 @@ static void clickSettings(int cmd, bool shortPress)
       if(isSSB()) currentCmd = CMD_CAL;
       break;
     case MENU_THEME:      currentCmd = CMD_THEME;     break;
+    case MENU_UI:         currentCmd = CMD_UI;        break;
     case MENU_RDS:        currentCmd = CMD_RDS;       break;
     case MENU_ZOOM:       currentCmd = CMD_ZOOM;      break;
     case MENU_SCROLL:     currentCmd = CMD_SCROLL;    break;
@@ -761,6 +799,10 @@ static void clickSettings(int cmd, bool shortPress)
     case MENU_SLEEPMODE:  currentCmd = CMD_SLEEPMODE; break;
     case MENU_UTCOFFSET:  currentCmd = CMD_UTCOFFSET; break;
     case MENU_WIFIMODE:   currentCmd = CMD_WIFIMODE;  break;
+    case MENU_FM_REGION:
+      // Only in FM mode
+      if(currentMode==FM) currentCmd = CMD_FM_REGION;
+      break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
 
     case MENU_LOADEIBI:
@@ -786,10 +828,12 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_SOFTMUTE:  doSoftMute(dir);break;
     case CMD_BAND:      doBand(scrollDirection * dir);break;
     case CMD_AVC:       doAvc(dir);break;
+    case CMD_FM_REGION: doFmRegion(scrollDirection * dir);break;
     case CMD_SETTINGS:  doSettings(scrollDirection * dir);break;
     case CMD_BRT:       doBrt(dir);break;
     case CMD_CAL:       doCal(dir);break;
     case CMD_THEME:     doTheme(scrollDirection * dir);break;
+    case CMD_UI:        doUILayout(scrollDirection * dir);break;
     case CMD_RDS:       doRDSMode(scrollDirection * dir);break;
     case CMD_MEMORY:    doMemory(scrollDirection * dir);break;
     case CMD_SLEEP:     doSleep(dir);break;
@@ -1087,6 +1131,30 @@ static void drawTheme(int x, int y, int sx)
   }
 }
 
+static void drawUILayout(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_UI], x, y, sx, true);
+
+  int count = ITEM_COUNT(uiLayoutDesc);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0) {
+      drawZoomedMenu(uiLayoutDesc[abs((uiLayoutIdx+count+i)%count)]);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    // Prevent repeats for short menus
+    if (count < 5 && ((uiLayoutIdx+i) < 0 || (uiLayoutIdx+i) >= count)) {
+      continue;
+    }
+
+    spr.setTextDatum(MC_DATUM);
+    spr.drawString(uiLayoutDesc[abs((uiLayoutIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
 static void drawRDSMode(int x, int y, int sx)
 {
   drawCommon(settings[MENU_RDS], x, y, sx, true);
@@ -1264,6 +1332,30 @@ static void drawAvc(int x, int y, int sx)
   }
 }
 
+static void drawFmRegion(int x, int y, int sx)
+{
+  drawCommon(settings[MENU_FM_REGION], x, y, sx, true);
+
+  int count = ITEM_COUNT(fmRegions);
+  for(int i=-2 ; i<3 ; i++)
+  {
+    if(i==0) {
+      drawZoomedMenu(fmRegions[abs((FmRegionIdx+count+i)%count)].desc);
+      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
+    } else {
+      spr.setTextColor(TH.menu_item, TH.menu_bg);
+    }
+
+    // Prevent repeats for short menus
+    if (count < 5 && ((FmRegionIdx+i) < 0 || (FmRegionIdx+i) >= count)) {
+      continue;
+    }
+
+    spr.setTextDatum(MC_DATUM);
+    spr.drawString(fmRegions[abs((FmRegionIdx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
+  }
+}
+
 static void drawBrt(int x, int y, int sx)
 {
   drawCommon(settings[MENU_BRIGHTNESS], x, y, sx);
@@ -1395,11 +1487,13 @@ void drawSideBar(uint16_t cmd, int x, int y, int sx)
     case CMD_BAND:      drawBand(x, y, sx);      break;
     case CMD_BANDWIDTH: drawBandwidth(x, y, sx); break;
     case CMD_THEME:     drawTheme(x, y, sx);     break;
+    case CMD_UI:        drawUILayout(x, y, sx);  break;
     case CMD_VOLUME:    drawVolume(x, y, sx);    break;
     case CMD_AGC:       drawAgc(x, y, sx);       break;
     case CMD_SOFTMUTE:  drawSoftMuteMaxAtt(x, y, sx);break;
     case CMD_CAL:       drawCal(x, y, sx);       break;
     case CMD_AVC:       drawAvc(x, y, sx);       break;
+    case CMD_FM_REGION: drawFmRegion(x, y, sx);  break;
     case CMD_BRT:       drawBrt(x, y, sx);       break;
     case CMD_RDS:       drawRDSMode(x, y, sx);   break;
     case CMD_MEMORY:    drawMemory(x, y, sx);    break;
