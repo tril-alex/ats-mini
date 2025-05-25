@@ -486,7 +486,7 @@ static void doUILayout(int dir)
 void doAvc(int dir)
 {
   // Only allow for AM and SSB modes
-  if(currentCmd==FM) return;
+  if(currentMode==FM) return;
 
   if(isSSB())
   {
