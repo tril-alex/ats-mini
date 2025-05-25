@@ -1137,6 +1137,11 @@ static void drawUILayout(int x, int y, int sx)
       spr.setTextColor(TH.menu_item, TH.menu_bg);
     }
 
+    // Prevent repeats for short menus
+    if (count < 5 && ((uiLayoutIdx+i) < 0 || (uiLayoutIdx+i) >= count)) {
+      continue;
+    }
+
     spr.setTextDatum(MC_DATUM);
     spr.drawString(uiLayoutDesc[abs((uiLayoutIdx+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
