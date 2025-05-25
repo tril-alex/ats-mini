@@ -107,12 +107,12 @@ static const char *menu[] =
 #define MENU_THEME        2
 #define MENU_RDS          3
 #define MENU_UTCOFFSET    4
-#define MENU_ZOOM         5
-#define MENU_SCROLL       6
-#define MENU_SLEEP        7
-#define MENU_SLEEPMODE    8
-#define MENU_WIFIMODE     9
-#define MENU_FM_REGION    10
+#define MENU_FM_REGION    5
+#define MENU_ZOOM         6
+#define MENU_SCROLL       7
+#define MENU_SLEEP        8
+#define MENU_SLEEPMODE    9
+#define MENU_WIFIMODE     10
 #define MENU_ABOUT        11
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
@@ -124,12 +124,12 @@ static const char *settings[] =
   "Theme",
   "RDS",
   "UTC Offset",
+  "FM Region",
   "Zoom Menu",
   "Scroll Dir.",
   "Sleep",
   "Sleep Mode",
   "Wi-Fi",
-  "FM Region",
   "About",
 };
 
@@ -142,6 +142,8 @@ const FMRegion fmRegions[] = {
   // 75uS de-emphasis
   { 0x2, "US" },
 };
+
+int getTotalFmRegions() { return(ITEM_COUNT(fmRegions)); }
 
 //
 // Mode Menu
@@ -1297,7 +1299,7 @@ static void drawFmRegion(int x, int y, int sx)
     }
 
     // Prevent repeats for short menus
-    if (count < 5 && (i < 0 || i >= count)) {
+    if (count < 5 && ((FmRegionIdx+i) < 0 || (FmRegionIdx+i) >= count)) {
       continue;
     }
 

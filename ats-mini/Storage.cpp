@@ -263,7 +263,8 @@ void eepromLoadConfig()
   scrollDirection = EEPROM.read(addr++)? -1:1;   // Reads stored Scroll setting
   utcOffsetIdx   = EEPROM.read(addr++);          // Reads the current UTC Offset
   currentSquelch = EEPROM.read(addr++);          // Reads the current Squelch value
-  FmRegionIdx = EEPROM.read(addr++);             // Reads the current FM region value
+  FmRegionIdx    = EEPROM.read(addr++);          // Reads the current FM region value
+  FmRegionIdx    = FmRegionIdx >= getTotalFmRegions() ? 0 : FmRegionIdx;
 
   addr = EEPROM_SETP_ADDR;
   for(int i=0 ; i<getTotalBands() ; i++)
