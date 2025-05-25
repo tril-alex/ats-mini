@@ -447,7 +447,13 @@ static void webReadEEPROM(AsyncWebServerRequest *request)
   if(!eepromReadBinary(buf, sizeof(buf)))
     request->send(200, "text/plain", "Failed reading EEPROM");
   else
-    request->send(200, "application/octet-stream", buf, sizeof(buf));
+  {
+    AsyncWebServerResponse *response = request->beginResponse(200, "application/octet-stream", buf, sizeof(buf));
+    char hdr[100];
+    sprintf(hdr, "attachment; filename=ats-mini-eeprom-%hu-%hu.bin", APP_VERSION, EEPROM_VERSION);
+    response->addHeader("Content-Disposition", hdr);
+    request->send(response);
+  }
 }
 
 static void webWriteEEPROM(AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool lastChunk)
@@ -525,6 +531,10 @@ static const String webStyleSheet()
 "{"
   "width: 50%;"
   "padding: 0.5em 0;"
+"}"
+".CENTER"
+"{"
+  "text-align: center;"
 "}"
 ;
 }
@@ -691,7 +701,6 @@ const String webConfigPage()
 "<P ALIGN='CENTER'>"
   "<A HREF='/'>Status</A>"
   "&nbsp;|&nbsp;<A HREF='/memory'>Memory</A>"
-  "&nbsp;|&nbsp;<A HREF='/ats-mini-eeprom.bin'>EEPROM</A>"
 "</P>"
 "<FORM ACTION='/setconfig' METHOD='POST'>"
   "<TABLE COLUMNS=2>"
@@ -762,7 +771,10 @@ const String webConfigPage()
 "<FORM ACTION='/writeeeprom' METHOD='POST' ENCTYPE='multipart/form-data'>"
   "<TABLE COLUMNS=2>"
   "<TR>"
-    "<TD CLASS='LABEL'>EEPROM Contents</TD>"
+    "<TD CLASS='CENTER' COLSPAN=2><A HREF='/ats-mini-eeprom.bin'>Download EEPROM Contents...</A></TD>"
+  "</TR>"
+  "<TR>"
+    "<TD CLASS='LABEL'>Upload EEPROM Contents</TD>"
     "<TD><INPUT TYPE='FILE' NAME='eeprom' ACCEPT='.bin'></TD>"
   "</TR>"
   "<TR><TH COLSPAN=2 CLASS='HEADING'>"
