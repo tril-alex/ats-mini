@@ -286,24 +286,24 @@ bool diskInit()
 
   if(!mounted)
   {
-    Serial.println("Formatting LittleFS...");
+    // Serial.println("Formatting LittleFS...");
 
     if(!LittleFS.format())
     {
-      Serial.println("ERROR: format failed");
+      // Serial.println("ERROR: format failed");
       return(false);
     }
 
-    Serial.println("Re-mounting LittleFS...");
+    // Serial.println("Re-mounting LittleFS...");
     mounted = LittleFS.begin(false, "/littlefs", 10, "littlefs");
     if(!mounted)
     {
-      Serial.println("ERROR: remount failed");
+      // Serial.println("ERROR: remount failed");
       return(false);
     }
   }
 
-  Serial.println("Mounted LittleFS!");
+  // Serial.println("Mounted LittleFS!");
   return(true);
 }
 
