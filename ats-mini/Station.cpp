@@ -283,6 +283,8 @@ static const char *findScheduleByFreq(uint16_t freq)
 {
   uint8_t hour, minute;
 
+  if(currentMode==FM) return(0);
+
   // Must have valid time
   if(!clockGetHM(&hour, &minute)) return(0);
 
