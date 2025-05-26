@@ -269,6 +269,7 @@ bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds)
     clockMinutes = minutes;
     clockSeconds = seconds;
     clockRefreshTime();
+    identifyFrequency(currentFrequency + currentBFO / 1000);
     return(true);
   }
 

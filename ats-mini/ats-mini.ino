@@ -107,6 +107,7 @@ void setup()
 
   // Initialize flash file system
   diskInit();
+
   // Encoder pins. Enable internal pull-ups
   pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
   pinMode(ENCODER_PIN_A, INPUT_PULLUP);
@@ -784,6 +785,9 @@ void loop()
       {
         // Command handled, redraw screen
         needRedraw = true;
+
+        // EiBi can take long time, renew the timestamps
+        elapsedSleep = elapsedCommand = currentTime = millis();
       }
       else if(currentCmd != CMD_NONE)
       {

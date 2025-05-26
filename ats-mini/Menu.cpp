@@ -134,7 +134,7 @@ static const char *settings[] =
   "Scroll Dir.",
   "Sleep",
   "Sleep Mode",
-  "Load EIBI",
+  "Load EiBi",
   "Wi-Fi",
   "About",
 };

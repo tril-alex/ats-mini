@@ -101,11 +101,19 @@ void clearStationInfo()
   piCode = 0x0000;
 }
 
-static bool showStationName(const char *stationName)
+static bool showStationName(const char *stationName, bool isLong = false)
 {
-  if(stationName && strcmp(bufStationName, stationName))
+  if(stationName && strcmp((isLong && bufStationName[0] == 0xFF) ? bufStationName + 1 : bufStationName, stationName))
   {
-    strcpy(bufStationName, stationName);
+    // If the name is explicitly marked as long, add 0xFF in front of it
+    // This is done to display the EiBi names differently
+    if(isLong)
+    {
+      bufStationName[0] = 0xFF;
+      strcpy(bufStationName + 1, stationName);
+    }
+    else
+      strcpy(bufStationName, stationName);
     return(true);
   }
 
@@ -301,13 +309,13 @@ bool identifyFrequency(uint16_t freq)
 
   // Try list of named frequencies first
   name = findNameByFreq(freq, namedFrequencies, ITEM_COUNT(namedFrequencies));
+  if(name) return(showStationName(name));
 
   // Try CB channel names
-  name = name? name : findCBChannelByFreq(freq);
+  name = findCBChannelByFreq(freq);
+  if(name) return(showStationName(name));
 
   // Try EIBI schedule
-  name = name? name : findScheduleByFreq(freq);
-
-  // Done
-  return(showStationName(name? name : ""));
+  name = findScheduleByFreq(freq);
+  return(showStationName(name? name : "", true));
 }

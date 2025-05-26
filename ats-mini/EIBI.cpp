@@ -145,21 +145,44 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute)
   return(NULL);
 }
 
+char replace_accented_char(char c) {
+  switch ((unsigned char)c) {
+  // Lowercase vowels with accents
+  case 0xE1: case 0xE0: case 0xE2: case 0xE3: case 0xE4: return 'a'; // á, à, â, ã, ä
+  case 0xE9: case 0xE8: case 0xEA: case 0xEB: return 'e';             // é, è, ê, ë
+  case 0xED: case 0xEC: case 0xEE: case 0xEF: return 'i';            // í, ì, î, ï
+  case 0xF3: case 0xF2: case 0xF4: case 0xF5: case 0xF6: return 'o';  // ó, ò, ô, õ, ö
+  case 0xFA: case 0xF9: case 0xFB: case 0xFC: return 'u';             // ú, ù, û, ü
+  // Uppercase vowels with accents
+  case 0xC1: case 0xC0: case 0xC2: case 0xC3: case 0xC4: return 'A';  // Á, À, Â, Ã, Ä
+  case 0xC9: case 0xC8: case 0xCA: case 0xCB: return 'E';             // É, È, Ê, Ë
+  case 0xCD: case 0xCC: case 0xCE: case 0xCF: return 'I';             // Í, Ì, Î, Ï
+  case 0xD3: case 0xD2: case 0xD4: case 0xD5: case 0xD6: return 'O';  // Ó, Ò, Ô, Õ, Ö
+  case 0xDA: case 0xD9: case 0xDB: case 0xDC: return 'U';             // Ú, Ù, Û, Ü
+  // Other special chars
+  case 0xF1: return 'n';  // ñ
+  case 0xD1: return 'N';  // Ñ
+  case 0xE7: return 'c';  // ç
+  case 0xC7: return 'C';  // Ç
+  default: return c;      // No change
+  }
+}
+
 static bool eibiParseLine(const char *line, StationSchedule &entry)
 {
   char nameStr[sizeof(entry.name) + 1];
-  char freqStr[12] = {0};
-  char timeStr[12] = {0};
-  char tmpCol[8]   = {0};
+  char freqStr[15] = {0};
+  char timeStr[10] = {0};
+  char tmpCol[12]  = {0};
   char *p, *t;
 
   // Scan line for data
-  if(sscanf(line, "%11c%11c%7c%24c", freqStr, timeStr, tmpCol, nameStr)<3)
+  if(sscanf(line, "%14c%9c%11c%24c", freqStr, timeStr, tmpCol, nameStr)<3)
     return(false);
 
   // Terminate found data
-  freqStr[11] = '\0';
-  timeStr[11] = '\0';
+  freqStr[14] = '\0';
+  timeStr[9] = '\0';
   nameStr[24] = '\0';
 
   // Parse frequency
@@ -178,6 +201,11 @@ static bool eibiParseLine(const char *line, StationSchedule &entry)
   for(p = nameStr ; *p==' ' || *p=='\t' ; ++p);
   for(t = p + strlen(p) - 1 ; t>=p && (*t==' ' || *t=='\t') ; *t--='\0');
 
+  // Replace accented characters
+  for (t = p; *t != '\0'; t++) {
+    *t = replace_accented_char(*t);
+  }
+
   // Copy name
   strncpy(entry.name, p, sizeof(entry.name) - 1);
   entry.name[sizeof(entry.name)-1] = '\0';
@@ -188,16 +216,16 @@ static bool eibiParseLine(const char *line, StationSchedule &entry)
 
 bool eibiLoadSchedule()
 {
-  static const char *eibiMessage = "Loading EIBI Schedule";
+  static const char *eibiMessage = "Loading EiBi Schedule";
   HTTPClient http;
 
   drawScreen(eibiMessage, "Connecting...");
 
-  // Open HTTP connection to EIBI site
+  // Open HTTP connection to EiBi site
   http.begin(EIBI_URL);
   if(http.GET() != HTTP_CODE_OK)
   {
-    drawScreen(eibiMessage, "Failed connecting to EIBI!");
+    drawScreen(eibiMessage, "Failed connecting to EiBi!");
     http.end();
     return(false);
   }
@@ -266,8 +294,6 @@ bool eibiLoadSchedule()
     }
   }
 
-  drawScreen(eibiMessage, "DONE!");
-
   // Done with file and HTTP connection
   file.close();
   http.end();
@@ -277,5 +303,7 @@ bool eibiLoadSchedule()
   LittleFS.rename(TEMP_PATH, EIBI_PATH);
 
   // Success
+  identifyFrequency(currentFrequency + currentBFO / 1000);
+  drawScreen(eibiMessage, "DONE!");
   return(true);
 }
