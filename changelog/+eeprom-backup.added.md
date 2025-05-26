@@ -1,1 +1,0 @@
-EEPROM backup/restore via the receiver web interface. Restore only works on compatible firmware versions.

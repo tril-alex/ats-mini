@@ -4,6 +4,23 @@ The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.
 
 <!-- towncrier release notes start -->
 
+## 2.23 (2025-05-26)
+
+
+### Added
+
+- Ability to select FM de-emphasis setting based on region. [#85](https://github.com/esp32-si4732/ats-mini/issues/85)
+- Show MAC-address on the receiver status web page. [#114](https://github.com/esp32-si4732/ats-mini/issues/114)
+- Add ALL-CT RDS options for those who prefer precise time over WiFi.
+- EEPROM backup/restore via the receiver web interface. Restore only works on compatible firmware versions.
+- New optional UI layout with large S-meter and S/N-meter.
+
+
+### Fixed
+
+- Escape quotes in web form fields (like SSIDs & passwords). [#113](https://github.com/esp32-si4732/ats-mini/issues/113)
+- Fix the AVC bug, huge thanks to Dave (G8PTN)! [#117](https://github.com/esp32-si4732/ats-mini/issues/117)
+
 ## 2.22 (2025-05-23)
 
 
