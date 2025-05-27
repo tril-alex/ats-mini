@@ -19,6 +19,8 @@ struct StationSchedule
 };
 
 bool eibiLoadSchedule();
-const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute);
+const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset=NULL);
+const StationSchedule *eibiPrev(size_t *offset);
+const StationSchedule *eibiNext(size_t *offset);
 
 #endif // EIBI_H

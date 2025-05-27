@@ -60,7 +60,55 @@ const BandLabel bandLabels[] =
   {29600, 30000,  "9m BC"         }
 };
 
-const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute)
+const StationSchedule *eibiNext(size_t *offset)
+{
+  // Will return this static entry
+  static StationSchedule entry;
+
+  // Must have valid offset
+  if(!offset) return(NULL);
+
+  // Open file with EIBI data
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if(!file) return(NULL);
+
+  static StationSchedule *result = NULL;
+  if(file.seek(*offset + sizeof(entry), fs::SeekSet))
+    if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+    {
+      *offset += sizeof(entry);
+      result = &entry;
+    }
+
+  file.close();
+  return(result);
+}
+
+const StationSchedule *eibiPrev(size_t *offset)
+{
+  // Will return this static entry
+  static StationSchedule entry;
+
+  // Must have valid offset
+  if(!offset) return(NULL);
+
+  // Open file with EIBI data
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if(!file) return(NULL);
+
+  static StationSchedule *result = NULL;
+  if(file.seek(*offset - sizeof(entry), fs::SeekSet))
+    if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+    {
+      *offset -= sizeof(entry);
+      result = &entry;
+    }
+
+  file.close();
+  return(result);
+}
+
+const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
   static StationSchedule entry;
@@ -116,6 +164,7 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute)
     // If entry applies to all hours, return it
     if(entry.start_h < 0 || entry.end_h < 0)
     {
+      if(offset) *offset = file.position() - sizeof(entry);
       file.close();
       return(&entry);
     }
@@ -127,6 +176,7 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute)
     // Check for inclusive schedule
     if(start <= end && now >= start && now <= end)
     {
+      if(offset) *offset = file.position() - sizeof(entry);
       file.close();
       return(&entry);
     }
@@ -134,6 +184,7 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute)
     // Check for exclusive schedule
     if(start > end && (now >= start || now <= end))
     {
+      if(offset) *offset = file.position() - sizeof(entry);
       file.close();
       return(&entry);
     }
@@ -278,7 +329,7 @@ bool eibiLoadSchedule()
             file.write((uint8_t*)&entry, sizeof(entry));
             lineCnt++;
 
-            if(!(lineCnt % 100))
+            if(!(lineCnt & 31))
             {
               char statusMessage[64];
               sprintf(statusMessage, "... %d bytes, %d entries ...", byteCnt, lineCnt);
