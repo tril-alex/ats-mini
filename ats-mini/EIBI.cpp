@@ -98,11 +98,13 @@ const StationSchedule *eibiPrev(size_t *offset)
 
   static StationSchedule *result = NULL;
   if(file.seek(*offset - sizeof(entry), fs::SeekSet))
+  {
     if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
     {
       *offset -= sizeof(entry);
       result = &entry;
     }
+  }
 
   file.close();
   return(result);
@@ -127,7 +129,11 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
   {
     // Go to the middle entry
     mid = (left + right) / 2;
-    file.seek(mid * sizeof(entry), fs::SeekSet);
+    if(!file.seek(mid * sizeof(entry), fs::SeekSet))
+    {
+      file.close();
+      return(NULL);
+    }
 
     // Read middle entry
     if(file.read((uint8_t*)&entry, sizeof(entry)) != sizeof(entry))
