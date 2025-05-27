@@ -47,6 +47,10 @@
 #define UI_DEFAULT  0
 #define UI_SMETER   1
 
+// Seek modes
+#define SEEK_DEFAULT  0
+#define SEEK_SCHEDULE 1
+
 //
 // Data Types
 //
@@ -93,6 +97,7 @@ static inline bool isSettingsMode(uint16_t cmd)
   return((cmd>=CMD_SETTINGS) && (cmd<CMD_ABOUT));
 }
 
+uint8_t seekMode(bool toggle = false);
 void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 void doSelectDigit(int dir);

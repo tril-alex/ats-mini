@@ -432,6 +432,14 @@ static void setBandwidth()
   }
 }
 
+// Seek mode. Pass true to toggle, false to return the current one
+uint8_t seekMode(bool toggle)
+{
+  static uint8_t mode = SEEK_DEFAULT;
+  mode = toggle ? (mode == SEEK_DEFAULT ? SEEK_SCHEDULE : SEEK_DEFAULT) : mode;
+  return(mode);
+}
+
 //
 // Utility functions to change menu values
 //
@@ -475,6 +483,11 @@ static void clickVolume(bool shortPress)
 static void clickSquelch(bool shortPress)
 {
   if(shortPress) currentSquelch = 0; else currentCmd = CMD_NONE;
+}
+
+static void clickSeek(bool shortPress)
+{
+  if(shortPress) seekMode(true); else currentCmd = CMD_NONE;
 }
 
 static void doTheme(int dir)
@@ -862,6 +875,7 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
     case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
+    case CMD_SEEK:     clickSeek(shortPress); break;
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
@@ -1029,10 +1043,17 @@ static void drawSeek(int x, int y, int sx)
 {
   drawCommon(menu[MENU_SEEK], x, y, sx);
   drawZoomedMenu(menu[MENU_SEEK]);
-  spr.drawSmoothArc(40+x+(sx/2), 66+y, 23, 20, 45, 180, TH.menu_param, TH.menu_bg);
-  spr.fillTriangle(40+x+(sx/2)-5, 66+y-25, 40+x+(sx/2)+5, 66+y-20, 40+x+(sx/2)-5, 66+y-15, TH.menu_param);
-  spr.drawSmoothArc(40+x+(sx/2), 66+y, 23, 20, 225, 360, TH.menu_param, TH.menu_bg);
-  spr.fillTriangle(40+x+(sx/2)+5, 66+y+25, 40+x+(sx/2)-5, 66+y+20, 40+x+(sx/2)+5, 66+y+15, TH.menu_param);
+  spr.drawSmoothArc(40+x+(sx/2), 66+y, 30, 27, 45, 180, TH.menu_param, TH.menu_bg);
+  spr.fillTriangle(40+x+(sx/2)-5, 66+y-32, 40+x+(sx/2)+5, 66+y-27, 40+x+(sx/2)-5, 66+y-22, TH.menu_param);
+  spr.drawSmoothArc(40+x+(sx/2), 66+y, 30, 27, 225, 360, TH.menu_param, TH.menu_bg);
+  spr.fillTriangle(40+x+(sx/2)+5, 66+y+32, 40+x+(sx/2)-5, 66+y+27, 40+x+(sx/2)+5, 66+y+22, TH.menu_param);
+
+  if(seekMode()==SEEK_SCHEDULE)
+  {
+    spr.drawCircle(40+x+(sx/2), 66+y, 10, TH.menu_param);
+    spr.drawLine(40+x+(sx/2), 66+y, 40+x+(sx/2), 66+y-7, TH.menu_param);
+    spr.drawLine(40+x+(sx/2), 66+y, 40+x+(sx/2)+4, 66+y+4, TH.menu_param);
+  }
 }
 
 static void drawBand(int x, int y, int sx)
