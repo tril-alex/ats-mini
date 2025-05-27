@@ -60,7 +60,26 @@ const BandLabel bandLabels[] =
   {29600, 30000,  "9m BC"         }
 };
 
-const StationSchedule *eibiNext(size_t *offset)
+static bool entryIsNow(const StationSchedule *entry, int now)
+{
+  // Check if entry applies to all hours
+  if(entry->start_h < 0 || entry->end_h < 0) return(true);
+
+  // These are starting/ending times in minutes
+  int start = entry->start_h * 60 + entry->start_m;
+  int end   = entry->end_h * 60 + entry->end_m;
+
+  // Check for inclusive schedule
+  if(start <= end && now >= start && now <= end) return(true);
+
+  // Check for exclusive schedule
+  if(start > end && (now >= start || now <= end)) return(true);
+
+  // Nope
+  return(false);
+}
+
+const StationSchedule *eibiNext(uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
   static StationSchedule entry;
@@ -72,19 +91,37 @@ const StationSchedule *eibiNext(size_t *offset)
   fs::File file = LittleFS.open(EIBI_PATH, "rb");
   if(!file) return(NULL);
 
-  static StationSchedule *result = NULL;
-  if(file.seek(*offset + sizeof(entry), fs::SeekSet))
+  StationSchedule *result = NULL;
+  int now = hour * 60 + minute;
+  uint16_t freq = 0;
+
+  // Read current entry
+  if(file.seek(*offset, fs::SeekSet))
     if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+      freq = entry.freq;
+
+  // Must have valid current entry
+  if(!freq)
+  {
+    file.close();
+    return(NULL);
+  }
+
+  while(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+  {
+    if((entry.freq!=freq) && entryIsNow(&entry, now))
     {
-      *offset += sizeof(entry);
+      *offset = file.position() - sizeof(entry);
       result = &entry;
+      break;
     }
+  }
 
   file.close();
   return(result);
 }
 
-const StationSchedule *eibiPrev(size_t *offset)
+const StationSchedule *eibiPrev(uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
   static StationSchedule entry;
@@ -96,13 +133,31 @@ const StationSchedule *eibiPrev(size_t *offset)
   fs::File file = LittleFS.open(EIBI_PATH, "rb");
   if(!file) return(NULL);
 
-  static StationSchedule *result = NULL;
-  if(file.seek(*offset - sizeof(entry), fs::SeekSet))
-  {
+  StationSchedule *result = NULL;
+  int now = hour * 60 + minute;
+  uint16_t freq = 0;
+
+  // Read current entry
+  if(file.seek(*offset, fs::SeekSet))
     if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+      freq = entry.freq;
+
+  // Must have valid current entry
+  if(!freq)
+  {
+    file.close();
+    return(NULL);
+  }
+
+  for(size_t pos = *offset; file.seek(pos -= sizeof(entry), fs::SeekSet) ;)
+  {
+    if(file.read((uint8_t*)&entry, sizeof(entry)) != sizeof(entry)) break;
+
+    if((entry.freq!=freq) && entryIsNow(&entry, now))
     {
-      *offset -= sizeof(entry);
+      *offset = pos;
       result = &entry;
+      break;
     }
   }
 
@@ -167,28 +222,8 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
     // Match frequency
     if(entry.freq != freq) break;
 
-    // If entry applies to all hours, return it
-    if(entry.start_h < 0 || entry.end_h < 0)
-    {
-      if(offset) *offset = file.position() - sizeof(entry);
-      file.close();
-      return(&entry);
-    }
-
-    // These are starting/ending times in minutes
-    int start = entry.start_h * 60 + entry.start_m;
-    int end   = entry.end_h * 60 + entry.end_m;
-
-    // Check for inclusive schedule
-    if(start <= end && now >= start && now <= end)
-    {
-      if(offset) *offset = file.position() - sizeof(entry);
-      file.close();
-      return(&entry);
-    }
-
-    // Check for exclusive schedule
-    if(start > end && (now >= start || now <= end))
+    // Match time
+    if(entryIsNow(&entry, now))
     {
       if(offset) *offset = file.position() - sizeof(entry);
       file.close();
