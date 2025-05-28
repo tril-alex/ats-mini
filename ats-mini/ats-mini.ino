@@ -11,6 +11,7 @@
 #include "Storage.h"
 #include "Themes.h"
 #include "Utils.h"
+#include "EIBI.h"
 
 // SI473/5 and UI
 #define MIN_ELAPSED_TIME         5  // 300
@@ -475,10 +476,20 @@ bool doSeek(int8_t dir)
       updateFrequency(rx.getFrequency(), true);
     }
   }
-  else if(seekMode() == SEEK_SCHEDULE)
+  else if(seekMode() == SEEK_SCHEDULE && dir)
   {
+    uint8_t hour, minute;
+    // Clock is valid because the above seekMode() call checks that
+    clockGetHM(&hour, &minute);
 
+    size_t offset = -1;
+    const StationSchedule *schedule = dir > 0 ?
+      eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+      eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+
+    if(schedule) updateFrequency(schedule->freq, false);
   }
+
   // Clear current station name and information
   clearStationInfo();
   // Check for named frequencies
