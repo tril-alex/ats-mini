@@ -454,24 +454,30 @@ bool updateFrequency(int newFreq, bool wrap)
 //
 bool doSeek(int8_t dir)
 {
-  if(isSSB())
+  if(seekMode() == SEEK_DEFAULT)
   {
+    if(isSSB())
+    {
 #ifdef ENABLE_HOLDOFF
-    // Tuning timer to hold off (FM/AM) display updates
-    tuning_flag = true;
-    tuning_timer = millis();
+      // Tuning timer to hold off (FM/AM) display updates
+      tuning_flag = true;
+      tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
+      updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
+    }
+    else
+    {
+      // G8PTN: Flag is set by rotary encoder and cleared on seek entry
+      seekStop = false;
+      rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
+      updateFrequency(rx.getFrequency(), true);
+    }
   }
-  else
+  else if(seekMode() == SEEK_SCHEDULE)
   {
-    // G8PTN: Flag is set by rotary encoder and cleared on seek entry
-    seekStop = false;
-    rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
-    updateFrequency(rx.getFrequency(), true);
-  }
 
+  }
   // Clear current station name and information
   clearStationInfo();
   // Check for named frequencies

@@ -219,6 +219,11 @@ bool sleepOn(int x)
 // Set and count time
 //
 
+bool clockAvailable()
+{
+  return(clockHasBeenSet);
+}
+
 const char *clockGet()
 {
   if(switchThemeEditor())

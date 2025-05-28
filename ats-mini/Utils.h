@@ -24,6 +24,7 @@ void tempMuteOn(bool x);
 
 // Wall clock functions
 const char *clockGet();
+bool clockAvailable();
 bool clockGetHM(uint8_t *hours, uint8_t *minutes);
 bool clockSet(uint8_t hours, uint8_t minutes, uint8_t seconds = 0);
 void clockReset();

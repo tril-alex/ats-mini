@@ -60,6 +60,12 @@ const BandLabel bandLabels[] =
   {29600, 30000,  "9m BC"         }
 };
 
+// FIXME: this might be slow
+bool eibiAvailable()
+{
+  return(LittleFS.exists(EIBI_PATH));
+}
+
 static bool entryIsNow(const StationSchedule *entry, int now)
 {
   // Check if entry applies to all hours
