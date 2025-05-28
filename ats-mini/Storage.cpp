@@ -280,8 +280,14 @@ void eepromLoadConfig()
   EEPROM.end();
 }
 
-bool diskInit()
+bool diskInit(bool force)
 {
+  if(force)
+  {
+    LittleFS.end();
+    LittleFS.format();
+  }
+
   bool mounted = LittleFS.begin(false, "/littlefs", 10, "littlefs");
 
   if(!mounted)

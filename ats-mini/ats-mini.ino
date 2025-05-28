@@ -156,6 +156,7 @@ void setup()
   {
     netClearPreferences();
     eepromInvalidate();
+    diskInit(true);
 
     ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
     tft.setTextSize(2);

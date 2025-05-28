@@ -16,7 +16,7 @@ bool eepromWriteBinary(const uint8_t *buf, uint32_t size);
 void drawEepromIndicator(int x, int y);
 
 
-bool diskInit();
+bool diskInit(bool force = false);
 void eepromRequestSave(bool now = false);
 void eepromRequestLoad();
 
