@@ -192,12 +192,23 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
     }
 
     // Compare frequency
-    if(entry.freq == freq)
-      break;
     if(entry.freq < freq)
       left = mid + 1;
     else if(entry.freq > freq)
       right = mid - 1;
+    else
+    {
+      StationSchedule entry1;
+
+      if(!file.seek((mid - 1) * sizeof(entry), fs::SeekSet))
+        break;
+      else if(file.read((uint8_t*)&entry1, sizeof(entry1)) != sizeof(entry1))
+        break;
+      else if(entry1.freq < entry.freq)
+        break;
+      else
+        right = mid;
+    }
   }
 
   // Drop out if not found
@@ -206,6 +217,9 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
     file.close();
     return(NULL);
   }
+
+  // Make sure we are at the correct file offset
+  file.seek((mid + 1) * sizeof(entry), fs::SeekSet);
 
   // This is our current time in minutes
   int now = hour * 60 + minute;
@@ -233,26 +247,28 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
   return(NULL);
 }
 
-char replace_accented_char(char c) {
-  switch ((unsigned char)c) {
-  // Lowercase vowels with accents
-  case 0xE1: case 0xE0: case 0xE2: case 0xE3: case 0xE4: return 'a'; // á, à, â, ã, ä
-  case 0xE9: case 0xE8: case 0xEA: case 0xEB: return 'e';             // é, è, ê, ë
-  case 0xED: case 0xEC: case 0xEE: case 0xEF: return 'i';            // í, ì, î, ï
-  case 0xF3: case 0xF2: case 0xF4: case 0xF5: case 0xF6: return 'o';  // ó, ò, ô, õ, ö
-  case 0xFA: case 0xF9: case 0xFB: case 0xFC: return 'u';             // ú, ù, û, ü
-  // Uppercase vowels with accents
-  case 0xC1: case 0xC0: case 0xC2: case 0xC3: case 0xC4: return 'A';  // Á, À, Â, Ã, Ä
-  case 0xC9: case 0xC8: case 0xCA: case 0xCB: return 'E';             // É, È, Ê, Ë
-  case 0xCD: case 0xCC: case 0xCE: case 0xCF: return 'I';             // Í, Ì, Î, Ï
-  case 0xD3: case 0xD2: case 0xD4: case 0xD5: case 0xD6: return 'O';  // Ó, Ò, Ô, Õ, Ö
-  case 0xDA: case 0xD9: case 0xDB: case 0xDC: return 'U';             // Ú, Ù, Û, Ü
-  // Other special chars
-  case 0xF1: return 'n';  // ñ
-  case 0xD1: return 'N';  // Ñ
-  case 0xE7: return 'c';  // ç
-  case 0xC7: return 'C';  // Ç
-  default: return c;      // No change
+char replace_accented_char(char c)
+{
+  switch((unsigned char)c)
+  {
+    // Lowercase vowels with accents
+    case 0xE1: case 0xE0: case 0xE2: case 0xE3: case 0xE4: return 'a'; // á, à, â, ã, ä
+    case 0xE9: case 0xE8: case 0xEA: case 0xEB: return 'e';             // é, è, ê, ë
+    case 0xED: case 0xEC: case 0xEE: case 0xEF: return 'i';            // í, ì, î, ï
+    case 0xF3: case 0xF2: case 0xF4: case 0xF5: case 0xF6: return 'o';  // ó, ò, ô, õ, ö
+    case 0xFA: case 0xF9: case 0xFB: case 0xFC: return 'u';             // ú, ù, û, ü
+    // Uppercase vowels with accents
+    case 0xC1: case 0xC0: case 0xC2: case 0xC3: case 0xC4: return 'A';  // Á, À, Â, Ã, Ä
+    case 0xC9: case 0xC8: case 0xCA: case 0xCB: return 'E';             // É, È, Ê, Ë
+    case 0xCD: case 0xCC: case 0xCE: case 0xCF: return 'I';             // Í, Ì, Î, Ï
+    case 0xD3: case 0xD2: case 0xD4: case 0xD5: case 0xD6: return 'O';  // Ó, Ò, Ô, Õ, Ö
+    case 0xDA: case 0xD9: case 0xDB: case 0xDC: return 'U';             // Ú, Ù, Û, Ü
+    // Other special chars
+    case 0xF1: return 'n';  // ñ
+    case 0xD1: return 'N';  // Ñ
+    case 0xE7: return 'c';  // ç
+    case 0xC7: return 'C';  // Ç
+    default: return c;      // No change
   }
 }
 
