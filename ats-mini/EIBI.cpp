@@ -79,7 +79,7 @@ static bool entryIsNow(const StationSchedule *entry, int now)
   return(false);
 }
 
-const StationSchedule *eibiNext(uint8_t hour, uint8_t minute, size_t *offset)
+const StationSchedule *eibiNext(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
   static StationSchedule entry;
@@ -87,21 +87,18 @@ const StationSchedule *eibiNext(uint8_t hour, uint8_t minute, size_t *offset)
   // Must have valid offset
   if(!offset) return(NULL);
 
+  // If no valid offset yet, find some
+  if(*offset==(size_t)-1) eibiLookup(freq, hour, minute, offset);
+
   // Open file with EIBI data
   fs::File file = LittleFS.open(EIBI_PATH, "rb");
   if(!file) return(NULL);
 
   StationSchedule *result = NULL;
   int now = hour * 60 + minute;
-  uint16_t freq = 0;
 
-  // Read current entry
-  if(file.seek(*offset, fs::SeekSet))
-    if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
-      freq = entry.freq;
-
-  // Must have valid current entry
-  if(!freq)
+  // Go to the starting offset
+  if(!file.seek(*offset, fs::SeekSet))
   {
     file.close();
     return(NULL);
@@ -109,7 +106,7 @@ const StationSchedule *eibiNext(uint8_t hour, uint8_t minute, size_t *offset)
 
   while(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
   {
-    if((entry.freq!=freq) && entryIsNow(&entry, now))
+    if((entry.freq>freq) && entryIsNow(&entry, now))
     {
       *offset = file.position() - sizeof(entry);
       result = &entry;
@@ -121,7 +118,7 @@ const StationSchedule *eibiNext(uint8_t hour, uint8_t minute, size_t *offset)
   return(result);
 }
 
-const StationSchedule *eibiPrev(uint8_t hour, uint8_t minute, size_t *offset)
+const StationSchedule *eibiPrev(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
   static StationSchedule entry;
@@ -129,31 +126,21 @@ const StationSchedule *eibiPrev(uint8_t hour, uint8_t minute, size_t *offset)
   // Must have valid offset
   if(!offset) return(NULL);
 
+  // If no valid offset yet, find some
+  if(*offset==(size_t)-1) eibiLookup(freq, hour, minute, offset);
+
   // Open file with EIBI data
   fs::File file = LittleFS.open(EIBI_PATH, "rb");
   if(!file) return(NULL);
 
   StationSchedule *result = NULL;
   int now = hour * 60 + minute;
-  uint16_t freq = 0;
 
-  // Read current entry
-  if(file.seek(*offset, fs::SeekSet))
-    if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
-      freq = entry.freq;
-
-  // Must have valid current entry
-  if(!freq)
-  {
-    file.close();
-    return(NULL);
-  }
-
-  for(size_t pos = *offset; file.seek(pos -= sizeof(entry), fs::SeekSet) ;)
+  for(size_t pos = *offset; file.seek(pos, fs::SeekSet) ; pos -= sizeof(entry))
   {
     if(file.read((uint8_t*)&entry, sizeof(entry)) != sizeof(entry)) break;
 
-    if((entry.freq!=freq) && entryIsNow(&entry, now))
+    if((entry.freq<freq) && entryIsNow(&entry, now))
     {
       *offset = pos;
       result = &entry;
@@ -184,6 +171,7 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
   {
     // Go to the middle entry
     mid = (left + right) / 2;
+    if(offset) *offset = mid * sizeof(entry);
     if(!file.seek(mid * sizeof(entry), fs::SeekSet))
     {
       file.close();
@@ -219,13 +207,15 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
   // Keep reading entries from file
   do
   {
+    // Report offset within the file
+    if(offset) *offset = file.position() - sizeof(entry);
+
     // Match frequency
     if(entry.freq != freq) break;
 
     // Match time
     if(entryIsNow(&entry, now))
     {
-      if(offset) *offset = file.position() - sizeof(entry);
       file.close();
       return(&entry);
     }
