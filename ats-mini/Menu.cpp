@@ -436,7 +436,13 @@ static void setBandwidth()
 uint8_t seekMode(bool toggle)
 {
   static uint8_t mode = SEEK_DEFAULT;
+
   mode = toggle ? (mode == SEEK_DEFAULT ? SEEK_SCHEDULE : SEEK_DEFAULT) : mode;
+
+  // Use normal seek on FM or if there is no schedule loaded
+  if(currentMode == FM || !eibiAvailable() || !clockAvailable())
+    return(SEEK_DEFAULT);
+
   return(mode);
 }
 
