@@ -193,6 +193,7 @@ bool sleepOn(int x)
       rtc_gpio_pulldown_dis((gpio_num_t)ENCODER_PUSH_BUTTON);
       rtc_gpio_deinit((gpio_num_t)ENCODER_PUSH_BUTTON);
       pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
+      if(squelchCutoff) tempMuteOn(true);
       sleepOn(false);
       // Enable WiFi
       netInit(wifiModeIdx, false);
