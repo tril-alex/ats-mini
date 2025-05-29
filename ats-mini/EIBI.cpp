@@ -346,6 +346,9 @@ static bool eibiParseLine(const char *line, StationSchedule &entry)
   entry.end_h   = eh;
   entry.end_m   = em;
 
+  // Remove jammers
+  if(strstr(nameStr, "Jammer")) return(false);
+
   // Remove leading and trailing white space from name
   for(p = nameStr ; *p==' ' || *p=='\t' ; ++p);
   for(t = p + strlen(p) - 1 ; t>=p && (*t==' ' || *t=='\t') ; *t--='\0');
