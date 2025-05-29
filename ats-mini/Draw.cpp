@@ -545,7 +545,7 @@ static void drawLongStationName(const char *name, int x, int y)
   else if(width <= 60)
   {
     spr.setTextDatum(TC_DATUM);
-    spr.drawString(name, x + (320 - x - width) / 2, y, 2);
+    spr.drawString(name, x + (320 - x) / 3, y, 2);
   }
   else
   {

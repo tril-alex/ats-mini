@@ -158,7 +158,7 @@ const StationSchedule *eibiPrev(uint16_t freq, uint8_t hour, uint8_t minute, siz
   return(result);
 }
 
-const StationSchedule *eibiAtSameFreq(uint8_t hour, uint8_t minute, size_t *offset)
+const StationSchedule *eibiAtSameFreq(uint8_t hour, uint8_t minute, size_t *offset, bool same)
 {
   // Will return this static entry
   static StationSchedule entry;
@@ -180,6 +180,14 @@ const StationSchedule *eibiAtSameFreq(uint8_t hour, uint8_t minute, size_t *offs
 
   StationSchedule *result = NULL;
   int now = hour * 60 + minute;
+
+  if(same && entryIsNow(&e0, now))
+  {
+    entry = e0;
+    result = &entry;
+    file.close();
+    return(result);
+  }
 
   while(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
   {

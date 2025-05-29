@@ -23,6 +23,7 @@
 #define RDS_CHECK_TIME         250  // Increased from 90
 #define SEEK_TIMEOUT        600000  // Max seek timeout (ms)
 #define NTP_CHECK_TIME       60000  // NTP time refresh period (ms)
+#define SCHEDULE_CHECK_TIME   2000  // How often to identify the same frequency (ms)
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
 #define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tuning
 
@@ -44,6 +45,7 @@ long elapsedButton = millis();
 long lastStrengthCheck = millis();
 long lastRDSCheck = millis();
 long lastNTPCheck = millis();
+long lastScheduleCheck = millis();
 
 long elapsedCommand = millis();
 volatile int encoderCount = 0;
@@ -866,6 +868,13 @@ void loop()
   {
     needRedraw |= (currentMode == FM) && (snr >= 12) && checkRds();
     lastRDSCheck = currentTime;
+  }
+
+  // Periodically check schedule
+  if((currentTime - lastScheduleCheck) > SCHEDULE_CHECK_TIME)
+  {
+    needRedraw |= identifyFrequency(currentFrequency + currentBFO / 1000, true);
+    lastScheduleCheck = currentTime;
   }
 
   // Periodically synchronize time via NTP

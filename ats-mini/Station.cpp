@@ -287,7 +287,7 @@ static const char *findNameByFreq(uint16_t freq, const NamedFreq *db, uint16_t d
   return(0);
 }
 
-static const char *findScheduleByFreq(uint16_t freq)
+static const char *findScheduleByFreq(uint16_t freq, bool same)
 {
   uint8_t hour, minute;
 
@@ -296,26 +296,56 @@ static const char *findScheduleByFreq(uint16_t freq)
   // Must have valid time
   if(!clockGetHM(&hour, &minute)) return(0);
 
-  // Try EIBI lookup
-  const StationSchedule *entry = eibiLookup(freq, hour, minute);
+  static uint16_t last_freq = 0;
+  static uint8_t last_minute = 255;
+  static size_t first_offset = (size_t)-1;
+  static size_t last_offset = (size_t)-1;
+  const StationSchedule *entry = NULL;
+
+  // Try EIBI lookup at the next offset and same freq
+  if(same && freq == last_freq && last_offset != (size_t)-1)
+  {
+    entry = eibiAtSameFreq(hour, minute, &last_offset, false);
+
+    // Try EIBI lookup at the first offset and same freq
+    if(!entry)
+    {
+      last_offset = first_offset;
+      entry = eibiAtSameFreq(hour, minute, &last_offset, true);
+    }
+  }
+
+  // Try new EIBI lookup if not found or once per minute
+  if(!same || (!entry && last_offset != (size_t)-1) || last_minute != minute)
+  {
+    last_freq = freq;
+    last_minute = minute;
+    last_offset = (size_t)-1;
+    entry = eibiLookup(freq, hour, minute, &last_offset);
+    first_offset = last_offset = entry ? last_offset : (size_t)-1;
+  }
 
   // Return just the station name
   return(entry? entry->name : 0);
 }
 
-bool identifyFrequency(uint16_t freq)
+bool identifyFrequency(uint16_t freq, bool same)
 {
   const char *name;
 
-  // Try list of named frequencies first
-  name = findNameByFreq(freq, namedFrequencies, ITEM_COUNT(namedFrequencies));
-  if(name) return(showStationName(name));
+  // Do not try look up static names for the same frequency
+  if(!same)
+  {
+    // Try list of named frequencies first
+    name = findNameByFreq(freq, namedFrequencies, ITEM_COUNT(namedFrequencies));
+    if(name) return(showStationName(name));
 
-  // Try CB channel names
-  name = findCBChannelByFreq(freq);
-  if(name) return(showStationName(name));
+    // Try CB channel names
+    name = findCBChannelByFreq(freq);
+    if(name) return(showStationName(name));
+  }
 
   // Try EIBI schedule
-  name = findScheduleByFreq(freq);
+  name = findScheduleByFreq(freq, same);
   return(showStationName(name? name : "", true));
 }
