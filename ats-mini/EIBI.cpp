@@ -170,6 +170,7 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
   // Set up binary search
   ssize_t left  = 0;
   ssize_t right = file.size() / sizeof(entry);
+  ssize_t match = -1;
   ssize_t mid;
 
   // Search for the frequency
@@ -198,28 +199,33 @@ const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, s
       right = mid - 1;
     else
     {
-      StationSchedule entry1;
-
-      if(!file.seek((mid - 1) * sizeof(entry), fs::SeekSet))
-        break;
-      else if(file.read((uint8_t*)&entry1, sizeof(entry1)) != sizeof(entry1))
-        break;
-      else if(entry1.freq < entry.freq)
-        break;
-      else
-        right = mid;
+      match = mid;
+      right = mid - 1;
     }
   }
 
   // Drop out if not found
-  if(left > right)
+  if(match < 0)
   {
     file.close();
     return(NULL);
   }
 
-  // Make sure we are at the correct file offset
-  file.seek((mid + 1) * sizeof(entry), fs::SeekSet);
+  // If found entry is not the same as the last read entry...
+  if(match != mid)
+  {
+    // Read the right entry
+    if(file.seek(match * sizeof(entry), fs::SeekSet))
+      if(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+        mid = match;
+
+    // Drop out if failed to read
+    if(match != mid)
+    {
+      file.close();
+      return(NULL);
+    }
+  }
 
   // This is our current time in minutes
   int now = hour * 60 + minute;
