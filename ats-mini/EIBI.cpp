@@ -158,6 +158,45 @@ const StationSchedule *eibiPrev(uint16_t freq, uint8_t hour, uint8_t minute, siz
   return(result);
 }
 
+const StationSchedule *eibiAtSameFreq(uint8_t hour, uint8_t minute, size_t *offset)
+{
+  // Will return this static entry
+  static StationSchedule entry;
+
+  // Must have valid offset
+  if(!offset) return(NULL);
+
+  // Open file with EIBI data
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if(!file) return(NULL);
+
+  // Read current entry to get frequency
+  StationSchedule e0;
+  if(!file.seek(*offset, fs::SeekSet) || file.read((uint8_t*)&e0, sizeof(e0)) != sizeof(e0))
+  {
+    file.close();
+    return(NULL);
+  }
+
+  StationSchedule *result = NULL;
+  int now = hour * 60 + minute;
+
+  while(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+  {
+    if(entry.freq != e0.freq)
+      break;
+    else if(entryIsNow(&entry, now))
+    {
+      *offset = file.position() - sizeof(entry);
+      result = &entry;
+      break;
+    }
+  }
+
+  file.close();
+  return(result);
+}
+
 const StationSchedule *eibiLookup(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
