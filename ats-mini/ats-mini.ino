@@ -10,6 +10,8 @@
 #include "Menu.h"
 #include "Storage.h"
 #include "Themes.h"
+#include "Utils.h"
+#include "EIBI.h"
 
 // SI473/5 and UI
 #define MIN_ELAPSED_TIME         5  // 300
@@ -104,6 +106,9 @@ void setup()
   // Enable serial port
   Serial.begin(115200);
 
+  // Initialize flash file system
+  diskInit();
+
   // Encoder pins. Enable internal pull-ups
   pinMode(ENCODER_PUSH_BUTTON, INPUT_PULLUP);
   pinMode(ENCODER_PIN_A, INPUT_PULLUP);
@@ -152,6 +157,7 @@ void setup()
   {
     netClearPreferences();
     eepromInvalidate();
+    diskInit(true);
 
     ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
     tft.setTextSize(2);
@@ -450,22 +456,38 @@ bool updateFrequency(int newFreq, bool wrap)
 //
 bool doSeek(int8_t dir)
 {
-  if(isSSB())
+  if(seekMode() == SEEK_DEFAULT)
   {
+    if(isSSB())
+    {
 #ifdef ENABLE_HOLDOFF
-    // Tuning timer to hold off (FM/AM) display updates
-    tuning_flag = true;
-    tuning_timer = millis();
+      // Tuning timer to hold off (FM/AM) display updates
+      tuning_flag = true;
+      tuning_timer = millis();
 #endif
 
-    updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
+      updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
+    }
+    else
+    {
+      // G8PTN: Flag is set by rotary encoder and cleared on seek entry
+      seekStop = false;
+      rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
+      updateFrequency(rx.getFrequency(), true);
+    }
   }
-  else
+  else if(seekMode() == SEEK_SCHEDULE && dir)
   {
-    // G8PTN: Flag is set by rotary encoder and cleared on seek entry
-    seekStop = false;
-    rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
-    updateFrequency(rx.getFrequency(), true);
+    uint8_t hour, minute;
+    // Clock is valid because the above seekMode() call checks that
+    clockGetHM(&hour, &minute);
+
+    size_t offset = -1;
+    const StationSchedule *schedule = dir > 0 ?
+      eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+      eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+
+    if(schedule) updateFrequency(schedule->freq, false);
   }
 
   // Clear current station name and information
@@ -781,6 +803,9 @@ void loop()
       {
         // Command handled, redraw screen
         needRedraw = true;
+
+        // EiBi can take long time, renew the timestamps
+        elapsedSleep = elapsedCommand = currentTime = millis();
       }
       else if(currentCmd != CMD_NONE)
       {

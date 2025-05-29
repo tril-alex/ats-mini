@@ -53,7 +53,7 @@ jobs:
           sketch-paths: |
             - ats-mini
           # If you change this line, change it in sketch.yaml as well
-          fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=default_8MB,DebugLevel=none
+          fqbn: esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=8M,PSRAM=disabled,CPUFreq=80,USBMode=hwcdc,FlashMode=qio,PartitionScheme=custom,DebugLevel=none
           cli-compile-flags: |
             - --profile
             - esp32s3

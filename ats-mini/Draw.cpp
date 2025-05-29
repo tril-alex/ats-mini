@@ -2,7 +2,11 @@
 #include "Common.h"
 #include "Themes.h"
 #include "Storage.h"
+#include "Utils.h"
 #include "Menu.h"
+#include <LittleFS.h>
+#include <nvs.h>
+#include <nvs_flash.h>
 
 // Display position control
 #define MENU_OFFSET_X    0    // Menu horizontal offset
@@ -102,12 +106,31 @@ static void drawAboutSystem(uint8_t arrow)
 
   sprintf(
     text,
-    "MEM: F %luM, R %luk (%luk), PS %luk (%luk)",
+    "FLASH: %luM, %luk (%luk), FS %luk (%luk)",
     ESP.getFlashChipSize() / (1024U * 1024U),
+    ESP.getFreeSketchSpace() / 1024U, (ESP.getFreeSketchSpace() - ESP.getSketchSize()) / 1024U,
+    LittleFS.totalBytes() / 1024U, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024U
+  );
+  spr.drawString(text, 2, 70 + 16 * 0, 2);
+
+  nvs_stats_t nvs_stats;
+  nvs_get_stats(NULL, &nvs_stats);
+  sprintf(
+    text,
+    "NVS: TOTAL %lu, USED %lu, FREE %lu",
+    nvs_stats.total_entries,
+    nvs_stats.used_entries,
+    nvs_stats.free_entries
+  );
+  spr.drawString(text, 2, 70 + 16 * 1, 2);
+
+  sprintf(
+    text,
+    "MEM: HEAP %luk (%luk), PSRAM %luk (%luk)",
     ESP.getHeapSize()/1024U, ESP.getFreeHeap()/1024U,
     ESP.getPsramSize()/1024U, ESP.getFreePsram()/1024U
   );
-  spr.drawString(text, 2, 70 + 16 * 0, 2);
+  spr.drawString(text, 2, 70 + 16 * 2, 2);
 
   sprintf(
     text,
@@ -116,14 +139,10 @@ static void drawAboutSystem(uint8_t arrow)
     tft.readcommand8(ST7789_RDDST, 1),
     tft.readcommand32(ST7789_RDDST, 2)
   );
-  spr.drawString(text, 2, 70 + 16 * 1, 2);
+  spr.drawString(text, 2, 70 + 16 * 3, 2);
 
   sprintf(text, "WiFi MAC: %s", getMACAddress());
-  spr.drawString(text, 2, 70 + 16 * 2, 2);
-
-  // sprintf(text, "SDK: Arduino Core %d.%d.%d", ESP_ARDUINO_VERSION_MAJOR, ESP_ARDUINO_VERSION_MINOR, ESP_ARDUINO_VERSION_PATCH);
-  //FILESYSTEM.totalBytes();
-  //FILESYSTEM.usedBytes();
+  spr.drawString(text, 2, 70 + 16 * 4, 2);
 
   for(int i=0 ; i<8 ; i++)
   {
@@ -511,6 +530,31 @@ static void drawStationName(const char *name, int x, int y)
 }
 
 //
+// Draw long (EIBI) station name
+//
+static void drawLongStationName(const char *name, int x, int y)
+{
+  int width = spr.textWidth(name, 2);
+  spr.setTextColor(TH.rds_text, TH.bg);
+
+  if((x + width) >= 320)
+  {
+    spr.setTextDatum(TL_DATUM);
+    spr.drawString(name, x, y, 2);
+  }
+  else if(width <= 60)
+  {
+    spr.setTextDatum(TC_DATUM);
+    spr.drawString(name, x + (320 - x - width) / 2, y, 2);
+  }
+  else
+  {
+    spr.setTextDatum(TC_DATUM);
+    spr.drawString(name, x + (320 - x + width) / 4, y, 2);
+  }
+}
+
+//
 // Draw network status
 //
 static bool drawWiFiStatus(const char *statusLine1, const char *statusLine2, int x, int y)
@@ -564,7 +608,9 @@ static void drawLayoutSmeter(const char *statusLine1, const char *statusLine2)
   );
 
   // Show station or channel name, if present
-  if(*getStationName())
+  if(*getStationName() == 0xFF)
+    drawLongStationName(getStationName() + 1, MENU_OFFSET_X + 1 + 76 + MENU_DELTA_X + 2, RDS_OFFSET_Y);
+  else if(*getStationName())
     drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
 
   // Draw band scale
@@ -629,7 +675,9 @@ void drawLayoutDefault(const char *statusLine1, const char *statusLine2)
   );
 
   // Show station or channel name, if present
-  if(*getStationName())
+  if(*getStationName() == 0xFF)
+    drawLongStationName(getStationName() + 1, MENU_OFFSET_X + 1 + 76 + MENU_DELTA_X + 2, RDS_OFFSET_Y);
+  else if(*getStationName())
     drawStationName(getStationName(), RDS_OFFSET_X, RDS_OFFSET_Y);
 
   // Draw left-side menu/info bar

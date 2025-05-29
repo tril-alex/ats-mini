@@ -1,6 +1,8 @@
 #include "Common.h"
 #include "Themes.h"
+#include "Utils.h"
 #include "Menu.h"
+#include "EIBI.h"
 
 // CB frequency range
 #define MIN_CB_FREQUENCY 26060
@@ -99,11 +101,19 @@ void clearStationInfo()
   piCode = 0x0000;
 }
 
-static bool showStationName(const char *stationName)
+static bool showStationName(const char *stationName, bool isLong = false)
 {
-  if(stationName && strcmp(bufStationName, stationName))
+  if(stationName && strcmp((isLong && bufStationName[0] == 0xFF) ? bufStationName + 1 : bufStationName, stationName))
   {
-    strcpy(bufStationName, stationName);
+    // If the name is explicitly marked as long, add 0xFF in front of it
+    // This is done to display the EiBi names differently
+    if(isLong)
+    {
+      bufStationName[0] = 0xFF;
+      strcpy(bufStationName + 1, stationName);
+    }
+    else
+      strcpy(bufStationName, stationName);
     return(true);
   }
 
@@ -277,16 +287,35 @@ static const char *findNameByFreq(uint16_t freq, const NamedFreq *db, uint16_t d
   return(0);
 }
 
+static const char *findScheduleByFreq(uint16_t freq)
+{
+  uint8_t hour, minute;
+
+  if(currentMode==FM) return(0);
+
+  // Must have valid time
+  if(!clockGetHM(&hour, &minute)) return(0);
+
+  // Try EIBI lookup
+  const StationSchedule *entry = eibiLookup(freq, hour, minute);
+
+  // Return just the station name
+  return(entry? entry->name : 0);
+}
+
 bool identifyFrequency(uint16_t freq)
 {
   const char *name;
 
   // Try list of named frequencies first
   name = findNameByFreq(freq, namedFrequencies, ITEM_COUNT(namedFrequencies));
+  if(name) return(showStationName(name));
 
   // Try CB channel names
-  name = name? name : findCBChannelByFreq(freq);
+  name = findCBChannelByFreq(freq);
+  if(name) return(showStationName(name));
 
-  // Done
-  return(showStationName(name? name : ""));
+  // Try EIBI schedule
+  name = findScheduleByFreq(freq);
+  return(showStationName(name? name : "", true));
 }

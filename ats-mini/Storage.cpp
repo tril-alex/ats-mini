@@ -3,6 +3,7 @@
 #include "Storage.h"
 #include "Themes.h"
 #include "Menu.h"
+#include <LittleFS.h>
 
 #define STORE_TIME    10000 // Time of inactivity to start writing EEPROM
 
@@ -277,6 +278,39 @@ void eepromLoadConfig()
   }
 
   EEPROM.end();
+}
+
+bool diskInit(bool force)
+{
+  if(force)
+  {
+    LittleFS.end();
+    LittleFS.format();
+  }
+
+  bool mounted = LittleFS.begin(false, "/littlefs", 10, "littlefs");
+
+  if(!mounted)
+  {
+    // Serial.println("Formatting LittleFS...");
+
+    if(!LittleFS.format())
+    {
+      // Serial.println("ERROR: format failed");
+      return(false);
+    }
+
+    // Serial.println("Re-mounting LittleFS...");
+    mounted = LittleFS.begin(false, "/littlefs", 10, "littlefs");
+    if(!mounted)
+    {
+      // Serial.println("ERROR: remount failed");
+      return(false);
+    }
+  }
+
+  // Serial.println("Mounted LittleFS!");
+  return(true);
 }
 
 bool eepromReadBinary(uint8_t *buf, uint32_t size)
