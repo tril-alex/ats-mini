@@ -11,7 +11,7 @@
 * **Band name and modulation** (VHF & FM, top center). See the [Bands table](#bands-table) for more details.
 * **Info panel** (the box on the left side), also **Menu**. The parameters are explained in the [Menu](#menu) section.
 * **Frequency** (center of the screen).
-* **FM station name** (RDS PS) or **frequency name** (right below the frequency). A frequency name appears for some popular frequencies like FT8, SSTV or CB channels. Can also display current **menu option** using a bigger font when the Zoom Menu setting is enabled.
+* **FM station name** (RDS PS) or **frequency name** (right below the frequency). A frequency name appears for some popular frequencies like FT8, SSTV, CB channels, or a shortwave [schedule](#schedule). Can also display current **menu option** using a bigger font when the Zoom Menu setting is enabled.
 * **Tuning scale** (bottom of the screen). Can be replaced with additional RDS fields (RT, PTY) when extended RDS is enabled.
 
 ## Alternative UI
@@ -54,7 +54,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Band** - List of [Bands](#bands-table).
 * **Volume** - 0 (silent) ... 63 (max). The headphone volume level can be low (compared to the built-in speaker) due to limitation of the initial hardware design. Use short press to mute/unmute.
 * **Step** - Tuning step (not every step is available on every band and mode).
-* **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate the encoder to stop the scan. Use press and rotate for manual fine tuning.
+* **Seek** - Scan up or down (AM/FM), faster tuning (LSB/USB). Rotate or click the encoder to stop the scan. Use short press to switch between the scan and [schedule](#schedule) modes. Use press and rotate for manual fine tuning.
 * **Memory** - 32 slots to store favorite frequencies. Click `Add` on an empty slot to store the current frequency, short press to erase a slot, switch between stored slots by rotating the encoder. It is also possible to edit the memory slots via [serial port](#serial-interface) or via the [web based tool](memory.md) in Google Chrome.
 * **Squelch** - mute the speaker when the RSSI level is lower than the defined threshold. Unlikely to work in SSB mode. To turn it off quickly, short press the encoder button while in the Squelch menu mode.
 * **Bandwidth** - Selects the bandwidth of the channel filter.
@@ -76,6 +76,7 @@ The menu can be invoked by clicking the encoder button and is closed automatical
 * **Scroll Dir.** - Menu scroll direction for clockwise encoder turn.
 * **Sleep** - Automatic sleep interval in seconds (0 - disabled).
 * **Sleep Mode** - Locked - lock the encoder rotation during sleep; Unlocked - allow tuning the frequency in sleep mode; CPU Sleep - the maximum power saving mode. With the display being on, default brightness, and Wi-Fi the power consumption is about 170mA, without Wi-Fi 100mA, Locked/Unlocked modes draw about 70mA, CPU sleep mode draws about 40mA.
+* **Load EiBi** - download the EiBi [schedule](#schedule) (requires Wi-Fi internet connection).
 * **Wi-Fi** - Wi-Fi mode: Off (default), Access Point, Access Point + Connect, Connect, Sync Only. More details on that below.
 * **About** - Informational screens (Help, Authors, System).
 
@@ -100,7 +101,7 @@ There are a couple of modes:
 Initial configuration:
 
 * Enable the **AP Only** mode (the receiver will briefly display its 10.1.1.1 IP address).
-* Connect to the `ATS-Mini` access point from your phone or computer. There is no internet connection available on this access point.
+* Connect to the `ATS-Mini` access point from your phone or computer. There is no internet connection available on this access point. When connecting from a phone, it might be necessary to switch off the mobile data connection and any VPN/firewall software.
 * Open a browser and visit the following URL: <http://10.1.1.1>. The status web page should open.
 * Click the `Config` link. Here you can add optional login and password to protect the settings page, configure up to three access points the receiver will try to connect to, and set a time zone and other settings.
 * After that, switch the Wi-Fi mode to **AP+Connect** or **Connect** (the receiver will briefly show its new dynamic IP address it got from a configured access point).
@@ -108,9 +109,22 @@ Initial configuration:
 
 From now on you can switch the modes as you want and connect to your receiver either via the `ATS-Mini` internal access point (if enabled, mostly useful when there are no access points around), or via an external access point and a dynamic IP address.
 
+```{hint}
+When on the go, you can set up a mobile Wi-Fi hotspot on your smartphone and use it to connect the receiver to the internet.
+```
+
+## Schedule
+
+The receiver can download the [EiBi](http://eibispace.de/dx/eibi.txt) shortwave schedule and use it to display broadcasting stations, allowing you to quickly tune to them. Here’s how it works:
+
+* The schedule only needs to be downloaded once via [Wi-Fi](#wi-fi). It will be stored in the receiver's flash memory so it doesn't need to be fetched every time the device powers on.
+* To display scheduled stations correctly, the receiver’s clock must be set. The simplest and most battery-preserving way is to configure a Wi-Fi internet connection and then switch it to Sync Only mode. The UTC offset setting doesn’t matter, as the receiver syncs via NTP in UTC. A less reliable alternative is to use RDS CT, but this requires finding a station that broadcasts UTC time (not local time).
+* Once set up, the receiver will display station names currently broadcasting on specific frequencies (only scheduled times are considered; days of the week are ignored for now).
+* You can quickly jump between stations using the Seek mode (marked by a clock icon). To switch between modes, short press the encoder while in Seek mode.
+
 ## Reset
 
-To reset the receiver settings (current band, frequency, favorite stations, etc):
+To reset the receiver settings (current band, frequency, favorite stations, downloaded schedule, etc):
 
 1. Switch off the receiver
 2. Press and hold the encoder
