@@ -11,7 +11,9 @@
 
 #define EIBI_PATH "/schedules.bin"
 #define TEMP_PATH "/schedules.tmp"
+#ifndef EIBI_URL
 #define EIBI_URL  "http://eibispace.de/dx/eibi.txt"
+#endif
 
 const BandLabel bandLabels[] =
 {
