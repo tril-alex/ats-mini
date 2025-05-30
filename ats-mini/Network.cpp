@@ -470,7 +470,7 @@ static void webWriteEEPROM(AsyncWebServerRequest *request, const String &filenam
   {
     if(!eepromVerify(buf))
       eepromStatus = "Wrong EEPROM version";
-    else if(!eepromWriteBinary(buf, EEPROM_SIZE))
+    else if(!eepromRequestUpdate(buf, sizeof(buf)))
       eepromStatus = "Failed writing EEPROM";
     else
       eepromStatus = "Wrote EEPROM";

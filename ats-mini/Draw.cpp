@@ -106,7 +106,7 @@ static void drawAboutSystem(uint8_t arrow)
 
   sprintf(
     text,
-    "FLASH: %luM, %luk (%luk), FS %luk (%luk)",
+    "FLASH: %luM, %luk (%uk), FS %luk (%uk)",
     ESP.getFlashChipSize() / (1024U * 1024U),
     ESP.getFreeSketchSpace() / 1024U, (ESP.getFreeSketchSpace() - ESP.getSketchSize()) / 1024U,
     LittleFS.totalBytes() / 1024U, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024U
@@ -117,7 +117,7 @@ static void drawAboutSystem(uint8_t arrow)
   nvs_get_stats(NULL, &nvs_stats);
   sprintf(
     text,
-    "NVS: TOTAL %lu, USED %lu, FREE %lu",
+    "NVS: TOTAL %u, USED %u, FREE %u",
     nvs_stats.total_entries,
     nvs_stats.used_entries,
     nvs_stats.free_entries
