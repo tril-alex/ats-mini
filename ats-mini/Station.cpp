@@ -287,7 +287,7 @@ static const char *findNameByFreq(uint16_t freq, const NamedFreq *db, uint16_t d
   return(0);
 }
 
-static const char *findScheduleByFreq(uint16_t freq, bool same)
+static const char *findScheduleByFreq(uint16_t freq, bool periodic)
 {
   uint8_t hour, minute;
 
@@ -303,7 +303,7 @@ static const char *findScheduleByFreq(uint16_t freq, bool same)
   const StationSchedule *entry = NULL;
 
   // Try EIBI lookup at the next offset and same freq
-  if(same && freq == last_freq && last_offset != (size_t)-1)
+  if(periodic && freq == last_freq && last_offset != (size_t)-1)
   {
     entry = eibiAtSameFreq(hour, minute, &last_offset, false);
 
@@ -316,7 +316,7 @@ static const char *findScheduleByFreq(uint16_t freq, bool same)
   }
 
   // Try new EIBI lookup if not found or once per minute
-  if(!same || (!entry && last_offset != (size_t)-1) || last_minute != minute)
+  if(!periodic || (!entry && last_offset != (size_t)-1) || last_minute != minute)
   {
     last_freq = freq;
     last_minute = minute;
@@ -329,23 +329,41 @@ static const char *findScheduleByFreq(uint16_t freq, bool same)
   return(entry? entry->name : 0);
 }
 
-bool identifyFrequency(uint16_t freq, bool same)
+bool identifyFrequency(uint16_t freq, bool periodic)
 {
   const char *name;
+  static uint16_t last_freq = 0;
+  static bool name_found = false;
 
-  // Do not try look up static names for the same frequency
-  if(!same)
+  // RDS has priority on FM
+  if(currentMode==FM) return(false);
+
+  // Do not try to look up static names more than once for the same freq
+  if(periodic && last_freq==freq && name_found) return(false);
+  last_freq = freq;
+  name_found = false;
+
+  // For non-periodic calls the name will be found earlier
+  if(!periodic)
   {
     // Try list of named frequencies first
     name = findNameByFreq(freq, namedFrequencies, ITEM_COUNT(namedFrequencies));
-    if(name) return(showStationName(name));
+    if(name)
+    {
+      name_found = true;
+      return(showStationName(name));
+    }
 
     // Try CB channel names
     name = findCBChannelByFreq(freq);
-    if(name) return(showStationName(name));
+    if(name)
+    {
+      name_found = true;
+      return(showStationName(name));
+    }
   }
 
   // Try EIBI schedule
-  name = findScheduleByFreq(freq, same);
+  name = findScheduleByFreq(freq, periodic);
   return(showStationName(name? name : "", true));
 }

@@ -185,7 +185,7 @@ const char *getRdsTime();
 uint16_t getRdsPiCode();
 void clearStationInfo();
 bool checkRds();
-bool identifyFrequency(uint16_t freq, bool same = false);
+bool identifyFrequency(uint16_t freq, bool periodic = false);
 
 // Network.cpp
 void netClearPreferences();
