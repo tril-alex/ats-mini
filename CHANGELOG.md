@@ -4,6 +4,18 @@ The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.
 
 <!-- towncrier release notes start -->
 
+## 2.24 (2025-05-30)
+
+
+### Added
+
+- EiBi schedule support, see https://esp32-si4732.github.io/ats-mini/manual.html#schedule
+
+
+### Fixed
+
+- Reapply Squelch after waking up from CPU Sleep mode. [#127](https://github.com/esp32-si4732/ats-mini/issues/127)
+
 ## 2.23 (2025-05-26)
 
 

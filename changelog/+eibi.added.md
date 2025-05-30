@@ -1,1 +1,0 @@
-EiBi schedule support, see https://esp32-si4732.github.io/ats-mini/manual.html#schedule
