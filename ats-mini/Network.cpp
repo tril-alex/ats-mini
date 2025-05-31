@@ -770,6 +770,8 @@ const String webConfigPage()
   "</TH></TR>"
   "</TABLE>"
 "</FORM>"
+#if 0
+// @@@ Reenable once /writeeeprom stops breaking 30m band entry
 "<FORM ACTION='/writeeeprom' METHOD='POST' ENCTYPE='multipart/form-data'>"
   "<TABLE COLUMNS=2>"
   "<TR>"
@@ -784,5 +786,6 @@ const String webConfigPage()
   "</TH></TR>"
   "</TABLE>"
 "</FORM>"
+#endif
 );
 }
