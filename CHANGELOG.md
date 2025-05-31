@@ -4,6 +4,18 @@ The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.
 
 <!-- towncrier release notes start -->
 
+## 2.25 (2025-05-31)
+
+
+### Removed
+
+- Disable EEPROM backup/restore option on the settings web page. If you used this feature to restore the EEPROM and now see strange bugs when switching bands, please reset the receiver settings.
+
+
+### Fixed
+
+- Fix blinking RDS and static frequency name.
+
 ## 2.24 (2025-05-30)
 
 
