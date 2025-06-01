@@ -381,6 +381,9 @@ bool eibiLoadSchedule()
   static const char *eibiMessage = "Loading EiBi Schedule";
   HTTPClient http;
 
+  // Need to be connected to the network
+  if(getWiFiStatus() < 2) return(false);
+
   drawScreen(eibiMessage, "Connecting...");
 
   // Open HTTP connection to EiBi site

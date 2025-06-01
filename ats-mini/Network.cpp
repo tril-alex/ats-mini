@@ -93,7 +93,7 @@ void netClearPreferences()
 
 //
 // Get current connection status
-// (-1 - not connected, 0 - disabled, 1 - connected)
+// (-1 - not connected, 0 - disabled, 1 - connected, 2 - connected to network)
 //
 int8_t getWiFiStatus()
 {
@@ -106,9 +106,9 @@ int8_t getWiFiStatus()
     case WIFI_AP:
       return(WiFi.softAPgetStationNum()? 1 : -1);
     case WIFI_STA:
-      return(WiFi.status()==WL_CONNECTED? 1 : -1);
+      return(WiFi.status()==WL_CONNECTED? 2 : -1);
     case WIFI_AP_STA:
-      return(WiFi.softAPgetStationNum() || (WiFi.status()==WL_CONNECTED)? 1 : -1);
+      return((WiFi.status()==WL_CONNECTED)? 2 : WiFi.softAPgetStationNum()? 1 : -1);
     default:
       return(-1);
   }
@@ -274,7 +274,6 @@ static bool wifiConnect()
   loginPassword = preferences.getString("loginpassword", "");
 
   // Try connecting to known WiFi networks
-  int wifiCheck = 0;
   for(int j=0 ; (j<3) && (WiFi.status()!=WL_CONNECTED) ; j++)
   {
     char nameSSID[16], namePASS[16];
@@ -287,19 +286,18 @@ static bool wifiConnect()
     if(ssid != "")
     {
       WiFi.begin(ssid, password);
-      while((WiFi.status()!=WL_CONNECTED) && (wifiCheck<30))
+      for(int j=0 ; (WiFi.status()!=WL_CONNECTED) && (j<24) ; j++)
       {
-        if(!(wifiCheck&7))
+        if(!(j&7))
         {
           status += ".";
           drawScreen(status.c_str());
         }
-        wifiCheck++;
         delay(500);
         if(digitalRead(ENCODER_PUSH_BUTTON)==LOW)
         {
           WiFi.disconnect();
-          wifiCheck = 30;
+          break;
         }
       }
     }
