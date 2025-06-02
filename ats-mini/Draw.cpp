@@ -106,10 +106,12 @@ static void drawAboutSystem(uint8_t arrow)
 
   sprintf(
     text,
-    "FLASH: %luM, %luk (%uk), FS %luk (%uk)",
+    "FLASH: %luM, %luk (%luk), FS %luk (%luk)",
     ESP.getFlashChipSize() / (1024U * 1024U),
-    ESP.getFreeSketchSpace() / 1024U, (ESP.getFreeSketchSpace() - ESP.getSketchSize()) / 1024U,
-    LittleFS.totalBytes() / 1024U, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024U
+    ESP.getFreeSketchSpace() / 1024U,
+    (ESP.getFreeSketchSpace() - ESP.getSketchSize()) / 1024U,
+    (unsigned long)LittleFS.totalBytes() / 1024U,
+    (unsigned long)(LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024U
   );
   spr.drawString(text, 2, 70 + 16 * 0, 2);
 
