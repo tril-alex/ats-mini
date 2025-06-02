@@ -244,6 +244,9 @@ void setup()
 
   // Connect WiFi, if necessary
   netInit(wifiModeIdx);
+
+  // Start Bluetooth LE, if necessary
+  bleInit(bleModeIdx);
 }
 
 //
@@ -703,6 +706,8 @@ void loop()
     if(revent & REMOTE_EEPROM) eepromRequestSave();
   }
 #endif
+
+  int ble_event = bleDoCommand(bleModeIdx);
 
   // Block encoder rotation when in the locked sleep mode
   if(encoderCount && sleepOn() && sleepModeIdx==SLEEP_LOCKED) encoderCount = 0;

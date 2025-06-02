@@ -18,7 +18,7 @@
 //
 // Access Point (AP) mode settings
 //
-static const char *apSSID    = "ATS-Mini";
+static const char *apSSID    = RECEIVER_NAME;
 static const char *apPWD     = 0;       // No password
 static const int   apChannel = 10;      // WiFi channel number (1..13)
 static const bool  apHideMe  = false;   // TRUE: disable SSID broadcast

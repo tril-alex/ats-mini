@@ -5,8 +5,8 @@
 #include <TFT_eSPI.h>
 #include <SI4735-fixed.h>
 
-#define RECEIVER_NAME  "ESP32-SI4732 Receiver"
-#define FIRMWARE_NAME  "ATS-Mini"
+#define RECEIVER_DESC  "ESP32-SI4732 Receiver"
+#define RECEIVER_NAME  "ATS-Mini"
 #define FIRMWARE_URL   "https://github.com/esp32-si4732/ats-mini"
 #define MANUAL_URL     "https://esp32-si4732.github.io/ats-mini/manual.html"
 #define AUTHORS_LINE1  "Authors: PU2CLR (Ricardo Caratti),"
@@ -66,6 +66,10 @@
 #define NET_AP_CONNECT 2 // Create access point, connect to a network normally, if possible
 #define NET_CONNECT    3 // Connect to a network normally, if possible
 #define NET_SYNC       4 // Connect to sync time, then disconnect
+
+// Bluetooth modes
+#define BLE_OFF        0 // Bluetooth is disabled
+#define BLE_BLUEFRUIT  1 // Bluefruit Connect app mode
 
 //
 // Data Types
@@ -149,6 +153,7 @@ extern int8_t SsbAvcIdx;
 extern int8_t AmSoftMuteIdx;
 extern int8_t SsbSoftMuteIdx;
 extern uint8_t rdsModeIdx;
+extern uint8_t bleModeIdx;
 extern uint8_t wifiModeIdx;
 extern uint8_t FmRegionIdx;
 
@@ -197,6 +202,12 @@ bool ntpSyncTime();
 
 void netRequestConnect();
 void netTickTime();
+
+// Ble.cpp
+int bleDoCommand(uint8_t bleModeIdx);
+void bleInit(uint8_t bleMode);
+void bleStop();
+int8_t getBleStatus();
 
 #ifndef DISABLE_REMOTE
 // Remote.c
