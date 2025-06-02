@@ -1,0 +1,1 @@
+Fix timeout when connecting to Wi-Fi access points.
