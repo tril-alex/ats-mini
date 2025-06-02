@@ -4,6 +4,19 @@ The user manual is available at <https://esp32-si4732.github.io/ats-mini/manual.
 
 <!-- towncrier release notes start -->
 
+## 2.26 (2025-06-02)
+
+
+### Added
+
+- Show DHCP-assigned IP address on the About system screen.
+
+
+### Fixed
+
+- Fix crash when trying download the EiBi schedule in offline mode. [#132](https://github.com/esp32-si4732/ats-mini/issues/132)
+- Fix timeout when connecting to Wi-Fi access points.
+
 ## 2.25 (2025-05-31)
 
 

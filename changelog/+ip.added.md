@@ -1,1 +1,0 @@
-Show DHCP-assigned IP address on the About system screen.
