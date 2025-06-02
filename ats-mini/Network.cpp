@@ -114,6 +114,12 @@ int8_t getWiFiStatus()
   }
 }
 
+char *getWiFiIPAddress()
+{
+  static char ip[16];
+  return strcpy(ip, WiFi.status()==WL_CONNECTED ? WiFi.localIP().toString().c_str() : "");
+}
+
 void drawWiFiIndicator(int x, int y)
 {
   int8_t status = getWiFiStatus();

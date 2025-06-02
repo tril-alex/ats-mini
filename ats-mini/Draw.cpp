@@ -141,7 +141,8 @@ static void drawAboutSystem(uint8_t arrow)
   );
   spr.drawString(text, 2, 70 + 16 * 3, 2);
 
-  sprintf(text, "WiFi MAC: %s", getMACAddress());
+  char *ip = getWiFiIPAddress();
+  sprintf(text, "WiFi MAC: %s%s%s", getMACAddress(), *ip ? ", IP: " : "", *ip ? ip : "");
   spr.drawString(text, 2, 70 + 16 * 4, 2);
 
   for(int i=0 ; i<8 ; i++)
