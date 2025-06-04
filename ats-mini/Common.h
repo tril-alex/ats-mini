@@ -177,6 +177,11 @@ void drawAboutHelp(uint8_t arrow);
 float batteryMonitor();
 bool drawBattery(int x, int y);
 
+// Scan.c
+void scanStart();
+float scanGetRSSI(uint16_t freq);
+float scanGetSNR(uint16_t freq);
+
 // Station.c
 const char *getStationName();
 const char *getRadioText();
