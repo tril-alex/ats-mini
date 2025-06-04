@@ -81,6 +81,7 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_AVC          9
 #define MENU_SOFTMUTE    10
 #define MENU_SETTINGS    11
+#define MENU_SCAN   	 12 
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -98,6 +99,7 @@ static const char *menu[] =
   "AVC",
   "SoftMute",
   "Settings",
+  "Scan",
 };
 
 //
@@ -790,6 +792,11 @@ static void clickMenu(int cmd, bool shortPress)
     case MENU_AVC:
       // No AVC in FM mode
       if(currentMode!=FM) currentCmd = CMD_AVC;
+      break;
+
+    case MENU_SCAN:
+      currentCmd = CMD_SCAN;
+      scanStart(); 
       break;
   }
 }
