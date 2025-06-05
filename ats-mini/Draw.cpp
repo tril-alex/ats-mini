@@ -210,6 +210,21 @@ void drawLoadingSSB()
 }
 
 //
+// Show "Scanning Band" message
+//
+void drawScanningBand()
+{
+  if(sleepOn()) return;
+
+  spr.setTextDatum(MC_DATUM);
+  spr.fillSmoothRoundRect(80, 40, 160, 40, 4, TH.text);
+  spr.fillSmoothRoundRect(81, 41, 158, 38, 4, TH.menu_bg);
+  spr.setTextColor(TH.text, TH.menu_bg);
+  spr.drawString("Scanning...", 160, 62, 4);
+  spr.pushSprite(0, 0);
+}
+
+//
 // Draw band and mode indicators
 //
 static void drawBandAndMode(const char *band, const char *mode, int x, int y)
@@ -353,9 +368,8 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
 //
 static void drawScale(uint32_t freq)
 {
-  uint16_t ptrColor = scanOn()? TH.scale_line : TH.scale_pointer;
-  spr.fillTriangle(156, 120, 160, 130, 164, 120, ptrColor);
-  spr.drawLine(160, 130, 160, 169, ptrColor);
+  spr.fillTriangle(156, 120, 160, 130, 164, 120, TH.scale_pointer);
+  spr.drawLine(160, 130, 160, 169, TH.scale_pointer);
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text, TH.bg);
@@ -376,9 +390,8 @@ static void drawScale(uint32_t freq)
     int16_t x = i * 8 - offset;
     if(freq >= minFreq && freq <= maxFreq)
     {
-      uint16_t lineColor =
-        i == 20 && (offset == 0 || ((freq % 5) == 0 && offset == 1)) ?
-          TH.scale_pointer : TH.scale_line;
+      uint16_t lineColor = (i==20) && (!offset || (!(freq%5) && offset==1))?
+        TH.scale_pointer : TH.scale_line;
 
       if((freq % 10) == 0)
       {
@@ -401,7 +414,7 @@ static void drawScale(uint32_t freq)
         spr.drawLine(x, 169, x, 160, lineColor);
       }
 
-      int rssi = 20 * scanGetRSSI((freq + 20) * 10);
+      int rssi = 20 * scanGetRSSI(freq * 10);
       if(rssi > 0) spr.fillRect(x-1, 170 - rssi, 3, rssi, TH.scale_pointer);
     }
   }

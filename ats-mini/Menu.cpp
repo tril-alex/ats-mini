@@ -795,8 +795,8 @@ static void clickMenu(int cmd, bool shortPress)
       break;
 
     case MENU_SCAN:
-      currentCmd = CMD_SCAN;
-      scanOn(true); 
+      // Run a band scan
+      scanRun();
       break;
   }
 }
@@ -886,10 +886,10 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
     case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
     case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
-    case CMD_VOLUME:   clickVolume(shortPress); break;
-    case CMD_SQUELCH:  clickSquelch(shortPress); break;
-    case CMD_SEEK:     clickSeek(shortPress); break;
-    case CMD_FREQ:     return clickFreq(shortPress);
+    case CMD_VOLUME:   clickVolume(shortPress);break;
+    case CMD_SQUELCH:  clickSquelch(shortPress);break;
+    case CMD_SEEK:     clickSeek(shortPress);break;
+    case CMD_FREQ:     return(clickFreq(shortPress));
     default:           return(false);
   }
 

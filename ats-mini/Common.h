@@ -169,6 +169,7 @@ uint8_t doAbout(int dir);
 
 // Draw.c
 void drawLoadingSSB();
+void drawScanningBand();
 void drawZoomedMenu(const char *text);
 void drawScreen(const char *statusLine1 = 0, const char *statusLine2 = 0);
 void drawAboutHelp(uint8_t arrow);
@@ -182,6 +183,7 @@ bool scanOn(uint8_t x = 2);
 float scanGetRSSI(uint16_t freq);
 float scanGetSNR(uint16_t freq);
 void scanTickTime();
+void scanRun();
 
 // Station.c
 const char *getStationName();
