@@ -796,7 +796,7 @@ static void clickMenu(int cmd, bool shortPress)
 
     case MENU_SCAN:
       currentCmd = CMD_SCAN;
-      scanStart(); 
+      scanOn(true); 
       break;
   }
 }

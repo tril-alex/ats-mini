@@ -1,19 +1,20 @@
 #include "Common.h"
+#include "Utils.h"
 #include "Menu.h"
 
-#define SCAN_POINTS   300
+#define SCAN_TIME   500
+#define SCAN_POINTS 50
 #define SCAN_RSSI_THRESHOLD 20
 
 typedef struct
 {
-  uint16_t freq;
   uint8_t rssi;
   uint8_t snr;
 } ScanPoint;
 
 ScanPoint scanData[SCAN_POINTS];
 
-uint8_t  scanSelectedIdx = 0;
+uint32_t scanTime = millis();
 uint16_t scanStartFreq = 0;
 uint16_t scanStep    = 0;
 uint16_t scanCount   = 0;
@@ -21,7 +22,7 @@ uint8_t  scanMinRSSI = 255;
 uint8_t  scanMaxRSSI = 0;
 uint8_t  scanMinSNR  = 255;
 uint8_t  scanMaxSNR  = 0;
-uint8_t  scanOn      = 0;
+uint8_t  scanStatus  = 0;
 
 static inline uint8_t min(uint8_t a, uint8_t b) { return(a<b? a:b); }
 static inline uint8_t max(uint8_t a, uint8_t b) { return(a>b? a:b); }
@@ -29,57 +30,72 @@ static inline uint8_t max(uint8_t a, uint8_t b) { return(a>b? a:b); }
 float scanGetRSSI(uint16_t freq)
 {
   // Input frequency must be in range of existing data
-  if(scanOn==2 && freq>=scanStartFreq || freq<scanStartFreq+scanStep*scanCount)
-  {
-    uint8_t result = scanData[(freq - scanStartFreq) / scanStep].rssi;
-    return((result - scanMinRSSI) / (float)(scanMaxRSSI - scanMinRSSI + 1));
-  }
+  if((scanStatus!=2) || (freq<scanStartFreq) || (freq>=scanStartFreq+scanStep*scanCount))
+    return(0.0);
 
-  return(0.0);
+  uint8_t result = scanData[(freq - scanStartFreq) / scanStep].rssi;
+  return((result - scanMinRSSI) / (float)(scanMaxRSSI - scanMinRSSI + 1));
 }
 
 float scanGetSNR(uint16_t freq)
 {
   // Input frequency must be in range of existing data
-  if(scanOn==2 && freq>=scanStartFreq || freq<scanStartFreq+scanStep*scanCount)
+  if((scanStatus!=2) || (freq<scanStartFreq) || (freq>=scanStartFreq+scanStep*scanCount))
+    return(0.0);
+
+  uint8_t result = scanData[(freq - scanStartFreq) / scanStep].snr;
+  return((result - scanMinSNR) / (float)(scanMaxSNR - scanMinSNR + 1));
+}
+
+bool scanOn(uint8_t x)
+{
+  if((x==1) && (scanStatus!=1))
   {
-    uint8_t result = scanData[(freq - scanStartFreq) / scanStep].snr;
-    return((result - scanMinSNR) / (float)(scanMaxSNR - scanMinSNR + 1));
+    scanStep    = getCurrentStep()->step;
+    scanCount   = 0;
+    scanMinRSSI = 255;
+    scanMaxRSSI = 0;
+    scanMinSNR  = 255;
+    scanMaxSNR  = 0;
+    scanStatus  = 1;
+    scanTime    = millis();
+
+    scanStartFreq = currentFrequency - scanStep * (SCAN_POINTS / 2);
+
+    if(!isFreqInBand(getCurrentBand(), scanStartFreq))
+      scanStartFreq = getCurrentBand()->minimumFreq;
+
+    memset(scanData, 0, sizeof(scanData));
+  }
+  else if((x==0) && (scanStatus==1))
+  {
+    rx.setFrequency(currentFrequency);
+    scanStatus = 0;
   }
 
-  return(0.0);
+  // Return current scanning status
+  return(scanStatus==1);
 }
 
-void scanStart()
-{
-  scanSelectedIdx = 0;
-  scanStartFreq = currentFrequency;
-  scanStep    = getCurrentStep()->step;
-  scanCount   = 0;
-  scanMinRSSI = 255;
-  scanMaxRSSI = 0;
-  scanMinSNR  = 255;
-  scanMaxSNR  = 0;
-  scanOn      = 1;
-}
-
-void scanRun()
+void scanTickTime()
 {
   // Scan must be on
-  if(scanOn != 1 || scanCount >= SCAN_POINTS) return;
+  if((scanStatus!=1) || (scanCount>=SCAN_POINTS) || (millis()-scanTime<SCAN_TIME))
+    return;
 
+  // This is our current frequency to scan
   uint16_t freq = scanStartFreq + scanStep * scanCount;
 
   // If frequency not yet set, set it and wait until next call to measure
   if(rx.getFrequency() != freq)
   {
     rx.setFrequency(freq);
+    scanTime = millis();
     return;
   }
 
   // Measure RSSI/SNR values
   rx.getCurrentReceivedSignalQuality();
-  scanData[scanCount].freq = freq;
   scanData[scanCount].rssi = rx.getCurrentRSSI();
   scanData[scanCount].snr  = rx.getCurrentSNR();
 
@@ -89,11 +105,17 @@ void scanRun()
   scanMinSNR  = min(scanData[scanCount].snr, scanMinSNR);
   scanMaxSNR  = max(scanData[scanCount].snr, scanMaxSNR);
 
+  // Next frequency to scan
+  freq += scanStep;
+
   // Set next frequency to scan or expire scan
-  if(++scanCount >= SCAN_POINTS)
-    scanOn = 2;
+  if((++scanCount >= SCAN_POINTS) || !isFreqInBand(getCurrentBand(), freq))
+    scanStatus = 2;
   else
-    rx.setFrequency(freq + scanStep);
+    rx.setFrequency(freq);
+
+  // Save last scan time
+  scanTime = millis();
 }
 
 #if 0
