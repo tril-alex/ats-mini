@@ -353,8 +353,9 @@ static void drawFrequency(uint32_t freq, int x, int y, int ux, int uy, uint8_t h
 //
 static void drawScale(uint32_t freq)
 {
-  spr.fillTriangle(156, 120, 160, 130, 164, 120, TH.scale_pointer);
-  spr.drawLine(160, 130, 160, 169, TH.scale_pointer);
+  uint16_t ptrColor = scanOn()? TH.scale_line : TH.scale_pointer;
+  spr.fillTriangle(156, 120, 160, 130, 164, 120, ptrColor);
+  spr.drawLine(160, 130, 160, 169, ptrColor);
 
   spr.setTextDatum(MC_DATUM);
   spr.setTextColor(TH.scale_text, TH.bg);
@@ -399,6 +400,9 @@ static void drawScale(uint32_t freq)
       {
         spr.drawLine(x, 169, x, 160, lineColor);
       }
+
+      int rssi = 20 * scanGetRSSI((freq + 20) * 10);
+      if(rssi > 0) spr.fillRect(x-1, 170 - rssi, 3, rssi, TH.scale_pointer);
     }
   }
 }

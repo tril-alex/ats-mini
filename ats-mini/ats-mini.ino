@@ -895,6 +895,9 @@ void loop()
   // Tick NETWORK time, connecting to WiFi if requested
   netTickTime();
 
+  // Tick scanner time, running scan as required
+  scanTickTime();
+
 #ifdef ENABLE_HOLDOFF
   // Check if tuning flag is set
   if(tuning_flag && ((currentTime - tuning_timer) > TUNE_HOLDOFF_TIME))

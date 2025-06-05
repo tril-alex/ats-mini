@@ -318,6 +318,14 @@ bool clockTickTime()
 }
 
 //
+// Check if given frequency belongs to given band
+//
+bool isFreqInBand(const Band *band, uint16_t freq)
+{
+  return((freq>=band->minimumFreq) && (freq<=band->maximumFreq));
+}
+
+//
 // Check if given memory entry belongs to given band
 //
 bool isMemoryInBand(const Band *band, const Memory *memory)
