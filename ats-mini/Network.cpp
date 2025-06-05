@@ -11,6 +11,7 @@
 #include <ESPAsyncWebServer.h>
 #include <NTPClient.h>
 #include <Preferences.h>
+#include <ESPmDNS.h>
 
 #define CONNECT_TIME  3000  // Time of inactivity to start connecting WiFi
 
@@ -214,6 +215,16 @@ void netInit(uint8_t netMode, bool showStatus)
   {
     // Initialize web server for remote configuration
     webInit();
+
+    //Initialize mDNS
+    if (!MDNS.begin("atsmini")) 
+    {  // Set the hostname to "atsmini.local"
+      Serial.println("Error setting up MDNS responder!");
+    }
+    else 
+    {
+     Serial.println("mDNS responder started, listening on atsmini.local");
+    }
   }
 }
 
