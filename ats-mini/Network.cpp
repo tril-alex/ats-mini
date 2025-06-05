@@ -216,15 +216,8 @@ void netInit(uint8_t netMode, bool showStatus)
     // Initialize web server for remote configuration
     webInit();
 
-    //Initialize mDNS
-    if (!MDNS.begin("atsmini")) 
-    {  // Set the hostname to "atsmini.local"
-      Serial.println("Error setting up MDNS responder!");
-    }
-    else 
-    {
-     Serial.println("mDNS responder started, listening on atsmini.local");
-    }
+    // Initialize mDNS
+    MDNS.begin("atsmini"); // Set the hostname to "atsmini.local"
   }
 }
 
@@ -271,7 +264,7 @@ static bool wifiInitAP()
 
   drawScreen(
     ("Use Access Point " + String(apSSID)).c_str(),
-    ("IP : " + WiFi.softAPIP().toString()).c_str()
+    ("IP : " + WiFi.softAPIP().toString() + " or atsmini.local").c_str()
   );
 
   ajaxInterval = 2500;
@@ -336,7 +329,7 @@ static bool wifiConnect()
     // WiFi connection succeeded
     drawScreen(
       ("Connected to WiFi network (" + WiFi.SSID() + ")").c_str(),
-      ("IP : " + WiFi.localIP().toString()).c_str()
+      ("IP : " + WiFi.localIP().toString() + " or atsmini.local").c_str()
     );
     // Done
     ajaxInterval = 1000;
