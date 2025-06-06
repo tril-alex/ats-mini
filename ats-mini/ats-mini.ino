@@ -472,6 +472,10 @@ bool doSeek(int8_t dir)
     }
     else
     {
+      // Clear stale parameters
+      clearStationInfo();
+      rssi = snr = 0;
+
       // G8PTN: Flag is set by rotary encoder and cleared on seek entry
       seekStop = false;
       rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
