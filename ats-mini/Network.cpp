@@ -147,6 +147,8 @@ void netStop()
 {
   wifi_mode_t mode = WiFi.getMode();
 
+  MDNS.end();
+
   // If network connection up, shut it down
   if((mode==WIFI_STA) || (mode==WIFI_AP_STA))
     WiFi.disconnect(true);
@@ -218,6 +220,7 @@ void netInit(uint8_t netMode, bool showStatus)
 
     // Initialize mDNS
     MDNS.begin("atsmini"); // Set the hostname to "atsmini.local"
+    MDNS.addService("http", "tcp", 80);
   }
 }
 
