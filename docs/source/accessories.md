@@ -33,8 +33,11 @@ The SRH805S SMA-M antenna supports 144/430/1200MHz and is not really suitable fo
 * <https://www.thingiverse.com/thing:6991652>
 * <https://3dtoday.ru/3d-models/gadgets/aksessuary/skameecka-dlya-kitaiskogo-radiopriemnika-malysarik>
 * <https://cults3d.com/es/modelo-3d/artilugios/si4732-antenna-and-frame-llaven>
+* <https://www.printables.com/model/1314023-a-desk-stand-for-the-ats-mini-si4732-pocket-receiv>
 
 ## Cases
 
 * <https://cults3d.com/en/3d-model/gadget/ats-mini-shell-knob-switch-mrhu-2>
 * <https://makerworld.com/en/models/785921-esp32s3-si4732-receivershou-yin-ji-wai-ke>
+* <https://cults3d.com/ru/3d-model/gadzhet/si4732-ats-mini-shell-v-3>
+* <https://cults3d.com/ru/3d-model/razlichnye/mini-radio-si4732-gehaeuse>
