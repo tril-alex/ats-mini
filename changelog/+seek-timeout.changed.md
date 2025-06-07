@@ -1,0 +1,1 @@
+Disable Seek mode (menu) timeout.

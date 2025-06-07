@@ -844,7 +844,7 @@ void loop()
   // Disable commands control
   if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
-    if(currentCmd != CMD_NONE)
+    if(currentCmd != CMD_NONE && currentCmd != CMD_SEEK)
     {
       currentCmd = CMD_NONE;
       needRedraw = true;
