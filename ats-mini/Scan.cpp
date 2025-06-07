@@ -125,6 +125,6 @@ static bool scanTickTime()
 //
 void scanRun(uint16_t centerFreq, uint16_t step)
 {
-  drawScanningBand();
+  drawMessage("Scanning...");
   for(scanInit(centerFreq, step) ; scanTickTime() ; delay(SCAN_TIME));
 }

@@ -168,8 +168,7 @@ bool clickFreq(bool shortPress);
 uint8_t doAbout(int dir);
 
 // Draw.c
-void drawLoadingSSB();
-void drawScanningBand();
+void drawMessage(const char *msg);
 void drawZoomedMenu(const char *text);
 void drawScreen(const char *statusLine1 = 0, const char *statusLine2 = 0);
 void drawAboutHelp(uint8_t arrow);
