@@ -1,0 +1,1 @@
+Fix backwards EiBi seek from 30000kHz.
