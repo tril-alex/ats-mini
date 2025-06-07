@@ -179,11 +179,9 @@ float batteryMonitor();
 bool drawBattery(int x, int y);
 
 // Scan.c
-bool scanOn(uint8_t x = 2);
+void scanRun(uint16_t centerFreq, uint16_t step);
 float scanGetRSSI(uint16_t freq);
 float scanGetSNR(uint16_t freq);
-void scanTickTime();
-void scanRun();
 
 // Station.c
 const char *getStationName();

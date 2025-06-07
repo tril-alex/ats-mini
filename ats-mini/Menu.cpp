@@ -795,8 +795,9 @@ static void clickMenu(int cmd, bool shortPress)
       break;
 
     case MENU_SCAN:
-      // Run a band scan
-      scanRun();
+      // Run a band scan around current frequency with the same
+      // step as scale resolution (10kHz for AM, 100kHz for FM)
+      scanRun(currentFrequency, 10);
       break;
   }
 }

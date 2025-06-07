@@ -49,48 +49,38 @@ float scanGetSNR(uint16_t freq)
   return((result - scanMinSNR) / (float)(scanMaxSNR - scanMinSNR + 1));
 }
 
-bool scanOn(uint8_t x)
+static void scanInit(uint16_t centerFreq, uint16_t step)
 {
-  if((x==1) && (scanStatus!=SCAN_RUN))
-  {
-    // Using the same 10kHz/100kHz step as the scale on the screen
-    scanStep    = 10;
-    scanCount   = 0;
-    scanMinRSSI = 255;
-    scanMaxRSSI = 0;
-    scanMinSNR  = 255;
-    scanMaxSNR  = 0;
-    scanStatus  = SCAN_RUN;
-    scanTime    = millis();
+  scanStep    = step;
+  scanCount   = 0;
+  scanMinRSSI = 255;
+  scanMaxRSSI = 0;
+  scanMinSNR  = 255;
+  scanMaxSNR  = 0;
+  scanStatus  = SCAN_RUN;
+  scanTime    = millis();
 
-    const Band *band = getCurrentBand();
-    int freq = scanStep * (currentFrequency / scanStep - SCAN_POINTS / 2);
+  const Band *band = getCurrentBand();
+  int freq = scanStep * (centerFreq / scanStep - SCAN_POINTS / 2);
 
-    // Adjust to band boundaries
-    if(freq + scanStep * (SCAN_POINTS - 1) > band->maximumFreq)
-      freq = band->maximumFreq - scanStep * (SCAN_POINTS - 1);
-    if(freq < band->minimumFreq)
-      freq = band->minimumFreq;
-    scanStartFreq = freq;
+  // Adjust to band boundaries
+  if(freq + scanStep * (SCAN_POINTS - 1) > band->maximumFreq)
+    freq = band->maximumFreq - scanStep * (SCAN_POINTS - 1);
+  if(freq < band->minimumFreq)
+    freq = band->minimumFreq;
+  scanStartFreq = freq;
 
-    // Clear scan data
-    memset(scanData, 0, sizeof(scanData));
-  }
-  else if((x==0) && (scanStatus==SCAN_RUN))
-  {
-    rx.setFrequency(currentFrequency);
-    scanStatus = scanCount? SCAN_DONE : SCAN_OFF;
-  }
-
-  // Return current scanning status
-  return(scanStatus==SCAN_RUN);
+  // Clear scan data
+  memset(scanData, 0, sizeof(scanData));
 }
 
-void scanTickTime()
+static bool scanTickTime()
 {
   // Scan must be on
-  if((scanStatus!=SCAN_RUN) || (scanCount>=SCAN_POINTS) || (millis()-scanTime<SCAN_TIME))
-    return;
+  if((scanStatus!=SCAN_RUN) || (scanCount>=SCAN_POINTS)) return(false);
+
+  // Wait for the right time
+  if(millis() - scanTime < SCAN_TIME) return(true);
 
   // This is our current frequency to scan
   uint16_t freq = scanStartFreq + scanStep * scanCount;
@@ -100,7 +90,7 @@ void scanTickTime()
   {
     rx.setFrequency(freq);
     scanTime = millis();
-    return;
+    return(true);
   }
 
   // Measure RSSI/SNR values
@@ -125,13 +115,16 @@ void scanTickTime()
 
   // Save last scan time
   scanTime = millis();
+
+  // Return current scan status
+  return(scanStatus==SCAN_RUN);
 }
 
 //
 // Run entire scan once
 //
-void scanRun()
+void scanRun(uint16_t centerFreq, uint16_t step)
 {
   drawScanningBand();
-  for(scanOn(true) ; scanOn() ; delay(SCAN_TIME)) scanTickTime();
+  for(scanInit(centerFreq, step) ; scanTickTime() ; delay(SCAN_TIME));
 }
