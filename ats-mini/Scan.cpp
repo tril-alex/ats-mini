@@ -2,12 +2,12 @@
 #include "Utils.h"
 #include "Menu.h"
 
-#define SCAN_TIME   100
-#define SCAN_POINTS 200
+#define SCAN_TIME   100 // Msecs between tuning and reading RSSI
+#define SCAN_POINTS 200 // Number of frequencies to scan
 
-#define SCAN_OFF    0
-#define SCAN_RUN    1
-#define SCAN_DONE   2
+#define SCAN_OFF    0   // Scanner off, no data
+#define SCAN_RUN    1   // Scanner running
+#define SCAN_DONE   2   // Scanner done, valid data in scanData[]
 
 static struct
 {
@@ -53,7 +53,8 @@ bool scanOn(uint8_t x)
 {
   if((x==1) && (scanStatus!=SCAN_RUN))
   {
-    scanStep    = getCurrentStep()->step;
+    // Using the same 10kHz/100kHz step as the scale on the screen
+    scanStep    = 10;
     scanCount   = 0;
     scanMinRSSI = 255;
     scanMaxRSSI = 0;
@@ -62,11 +63,17 @@ bool scanOn(uint8_t x)
     scanStatus  = SCAN_RUN;
     scanTime    = millis();
 
-    scanStartFreq = currentFrequency - scanStep * (SCAN_POINTS / 2);
+    const Band *band = getCurrentBand();
+    int freq = scanStep * (currentFrequency / scanStep - SCAN_POINTS / 2);
 
-    if(!isFreqInBand(getCurrentBand(), scanStartFreq))
-      scanStartFreq = getCurrentBand()->minimumFreq;
+    // Adjust to band boundaries
+    if(freq + scanStep * (SCAN_POINTS - 1) > band->maximumFreq)
+      freq = band->maximumFreq - scanStep * (SCAN_POINTS - 1);
+    if(freq < band->minimumFreq)
+      freq = band->minimumFreq;
+    scanStartFreq = freq;
 
+    // Clear scan data
     memset(scanData, 0, sizeof(scanData));
   }
   else if((x==0) && (scanStatus==SCAN_RUN))
