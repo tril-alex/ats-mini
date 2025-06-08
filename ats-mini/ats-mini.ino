@@ -349,9 +349,11 @@ bool checkStopSeeking()
   if(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed)
   {
     // Wait till the button is released, otherwise the main loop will register a click
-    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
+    while(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed)
+      delay(100);
     return true;
-  };
+  }
+
   return false;
 }
 
@@ -429,13 +431,13 @@ bool updateFrequency(int newFreq, bool wrap)
   Band *band = getCurrentBand();
 
   // Do not let new frequency exceed band limits
-  if (newFreq < band->minimumFreq) {
-    if (!wrap) return false;
-    newFreq = band->maximumFreq;
-  } else if (newFreq > band->maximumFreq) {
-    if (!wrap) return false;
-    newFreq = band->minimumFreq;
-
+  if(newFreq < band->minimumFreq)
+  {
+    if(!wrap) return false; else newFreq = band->maximumFreq;
+  }
+  else if(newFreq > band->maximumFreq)
+  {
+    if(!wrap) return false; else newFreq = band->minimumFreq;
   }
 
   // Set new frequency

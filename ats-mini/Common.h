@@ -168,7 +168,7 @@ bool clickFreq(bool shortPress);
 uint8_t doAbout(int dir);
 
 // Draw.c
-void drawLoadingSSB();
+void drawMessage(const char *msg);
 void drawZoomedMenu(const char *text);
 void drawScreen(const char *statusLine1 = 0, const char *statusLine2 = 0);
 void drawAboutHelp(uint8_t arrow);
@@ -176,6 +176,11 @@ void drawAboutHelp(uint8_t arrow);
 // Battery.c
 float batteryMonitor();
 bool drawBattery(int x, int y);
+
+// Scan.c
+void scanRun(uint16_t centerFreq, uint16_t step);
+float scanGetRSSI(uint16_t freq);
+float scanGetSNR(uint16_t freq);
 
 // Station.c
 const char *getStationName();
