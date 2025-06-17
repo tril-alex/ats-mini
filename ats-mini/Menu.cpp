@@ -906,6 +906,10 @@ bool clickHandler(uint16_t cmd, bool shortPress)
 
 void selectBand(uint8_t idx, bool drawLoadingSSB)
 {
+  // Silence click on some hardware versions
+  // https://github.com/esp32-si4732/ats-mini/discussions/103
+  tempMuteOn(true);
+
   // Set band and mode
   bandIdx = min(idx, LAST_ITEM(bands));
   currentMode = bands[bandIdx].bandMode;
@@ -933,6 +937,9 @@ void selectBand(uint8_t idx, bool drawLoadingSSB)
 
   // Set default digit position based on the current step
   resetFreqInputPos();
+
+  // Unmute the sound
+  tempMuteOn(false);
 }
 
 //
