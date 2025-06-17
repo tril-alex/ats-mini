@@ -276,6 +276,7 @@ void useBand(const Band *band)
 
   if(band->bandMode==FM)
   {
+    // rx.setMaxDelaySetFrequency(60);
     rx.setFM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
     // rx.setTuneFrequencyAntennaCapacitor(0);
     rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
@@ -283,7 +284,7 @@ void useBand(const Band *band)
     // More sensitive seek thresholds
     // https://github.com/pu2clr/SI4735/issues/7#issuecomment-810963604
     rx.setSeekFmRssiThreshold(5); // default is 20
-    rx.setSeekFmSNRThreshold(3); // default is 3
+    rx.setSeekFmSNRThreshold(2); // default is 3
 
     rx.setFMDeEmphasis(fmRegions[FmRegionIdx].value);
     rx.RdsInit();
@@ -293,13 +294,14 @@ void useBand(const Band *band)
   }
   else
   {
+    // rx.setMaxDelaySetFrequency(80);
     if(band->bandMode==AM)
     {
       rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
       // More sensitive seek thresholds
       // https://github.com/pu2clr/SI4735/issues/7#issuecomment-810963604
-      rx.setSeekAmRssiThreshold(15); // default is 25
-      rx.setSeekAmSNRThreshold(5); // default is 5
+      rx.setSeekAmRssiThreshold(10); // default is 25
+      rx.setSeekAmSNRThreshold(3); // default is 5
     }
     else
     {
