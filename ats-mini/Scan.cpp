@@ -125,5 +125,10 @@ static bool scanTickTime()
 //
 void scanRun(uint16_t centerFreq, uint16_t step)
 {
+  // Save current frequency
+  uint16_t curFreq = rx.getFrequency();
+  // Scan the whole range
   for(scanInit(centerFreq, step) ; scanTickTime() ; delay(SCAN_TIME));
+  // Restore current frequency
+  rx.setFrequency(curFreq);
 }
