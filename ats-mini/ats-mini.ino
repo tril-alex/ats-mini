@@ -548,7 +548,7 @@ bool doTune(int8_t dir)
 
     uint16_t step = getCurrentStep()->step;
     uint16_t stepAdjust = currentFrequency % step;
-    stepAdjust = (currentMode==FM) && (step==200)? (stepAdjust+100) % step : stepAdjust;
+    stepAdjust = (currentMode==FM) && (step==20)? (stepAdjust+10) % step : stepAdjust;
     step = !stepAdjust? step : dir>0? step - stepAdjust : stepAdjust;
 
     // Tune to a new frequency
