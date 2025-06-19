@@ -546,9 +546,9 @@ bool doTune(int8_t dir)
     tuning_timer = millis();
 #endif
 
-    // G8PTN: Used in place of rx.frequencyUp() and rx.frequencyDown()
     uint16_t step = getCurrentStep()->step;
     uint16_t stepAdjust = currentFrequency % step;
+    stepAdjust = (currentMode==FM) && (step==200)? (stepAdjust+100) % step : stepAdjust;
     step = !stepAdjust? step : dir>0? step - stepAdjust : stepAdjust;
 
     // Tune to a new frequency
