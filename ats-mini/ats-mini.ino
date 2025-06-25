@@ -815,11 +815,11 @@ if (isScanningRuUk && currentCmd != CMD_SCAN_RU_UK) {
           // Seek can take long time, renew the timestamp
           currentTime = millis();
           break;
-        case CMD_SCAN_RU_UK: // !!! НОВЫЙ БЛОК ДЛЯ СКАНИРОВАНИЯ RU/UK
-          isScanningRuUk = true; // Устанавливаем флаг, что мы в этом режиме
-          doScanRuUk(encoderCount); // Вызываем новую функцию
+        case CMD_SCAN_RU_UK:
+          isScanningRuUk = true;
+          doScanRuUk(encoderCount);
           needRedraw = true;
-          currentTime = millis(); // Обновляем время
+          currentTime = millis();
           break;
         default:
           // Side bar menus / settings
