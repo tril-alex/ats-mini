@@ -1,7 +1,7 @@
 // =================================
-// INCLUDE FILES 1
+// INCLUDE FILES
 // =================================
- 
+
 #include "Common.h"
 #include <Wire.h>
 #include "EEPROM.h"
@@ -13,9 +13,7 @@
 #include "Utils.h"
 #include "EIBI.h"
 
-int eibiRuUkScanOffset = -1; 
-
-// SI473/5 and UI 1
+// SI473/5 and UI
 #define MIN_ELAPSED_TIME         5  // 300
 #define MIN_ELAPSED_RSSI_TIME  200  // RSSI check uses IN_ELAPSED_RSSI_TIME * 6 = 1.2s
 #define ELAPSED_COMMAND      10000  // time to turn off the last command controlled by encoder. Time to goes back to the VFO control // G8PTN: Increased time and corrected comment
@@ -86,9 +84,6 @@ bool tuning_flag = false;               // Flag to indicate tuning
 //
 // Current parameters
 //
-// Новая переменная для отслеживания режима сканирования RU/UK станций
-bool isScanningRuUk = false; // Изначально режим выключен
-
 uint16_t currentCmd  = CMD_NONE;
 uint8_t  currentMode = FM;
 int16_t  currentBFO  = 0;
@@ -477,6 +472,10 @@ bool doSeek(int8_t dir)
     }
     else
     {
+      // Clear stale parameters
+      clearStationInfo();
+      rssi = snr = 0;
+
       // G8PTN: Flag is set by rotary encoder and cleared on seek entry
       seekStop = false;
       rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
@@ -602,57 +601,6 @@ bool doDigit(int8_t dir)
 }
 
 
-// Новая функция для обработки сканирования русских/украинских станций
-void doScanRuUk(int8_t dir) {
-  // Проверка доступности EiBi и времени (NTP)
-  if (!eibiAvailable() || !ntpIsAvailable()) {
-    drawScreen("Scan RU/UK", "EiBi/NTP missing!");
-    isScanningRuUk = false; // Выходим из режима, если что-то не готово
-    eibiRuUkScanOffset = -1; // Сброс смещения
-    return;
-  }
-
-  // Получаем текущее время UTC.
-  // Используем вашу существующую функцию clockGetHM.
-  // Убедитесь, что она возвращает UTC время, иначе вам может понадобиться
-  // использовать функции из <time.h> (time, gmtime).
-  uint8_t hour, minute;
-  clockGetHM(&hour, &minute);
-
-  const StationSchedule *station = NULL;
-
-  if (dir > 0) { // Ищем следующую станцию
-    station = eibiNextRuUk(currentFrequency, hour, minute);
-  } else { // Ищем предыдущую станцию
-    station = eibiPrevRuUk(currentFrequency, hour, minute);
-  }
-
-  if (station) {
-    currentFrequency = station->freq;
-    currentMode = AM; // Для КВ обычно AM. Если в EiBi есть информация о моде, её можно использовать.
-
-    // Установка диапазона.
-    // Ваш useBand() уже должен быть способен правильно обрабатывать КВ-частоты.
-    useBand(getCurrentBand());
-
-    rx.setFrequency(currentFrequency, currentMode);
-    rx.setVolume(volume); // Устанавливаем текущую громкость
-    rx.setSquelch(currentSquelch); // Устанавливаем текущий шумоподавитель
-
-    // Отображение информации о станции
-    // Используем String(station->freq / 1000.0, 3) для отображения частоты в МГц с тремя знаками после запятой
-    // Форматируем минуты, чтобы всегда было две цифры (например, 05 вместо 5)
-    drawScreen(station->name, String(station->freq / 1000.0, 3) + " MHz (" +
-               String(station->start_h) + ":" + (station->start_m < 10 ? "0" : "") + String(station->start_m) + "-" +
-               String(station->end_h) + ":" + (station->end_m < 10 ? "0" : "") + String(station->end_m) + " UTC)");
-  } else {
-    drawScreen("Scan RU/UK", "No station found!");
-    isScanningRuUk = false; // Если станций не найдено, выходим из режима
-    eibiRuUkScanOffset = -1; // Сброс смещения
-  }
-}
-
-
 bool clickFreq(bool shortPress)
 {
   if (shortPress) {
@@ -751,14 +699,6 @@ void loop()
   }
 #endif
 
-// !!! ВСТАВЬТЕ СЮДА ЭТОТ БЛОК:
-// Если текущая команда не CMD_SCAN_RU_UK, но мы были в этом режиме, сбрасываем его
-if (isScanningRuUk && currentCmd != CMD_SCAN_RU_UK) {
-  isScanningRuUk = false;
-  eibiRuUkScanOffset = -1; // Сброс смещения для начала нового поиска
-}
-// !!! КОНЕЦ БЛОКА ВСТАВКИ
-
   // Block encoder rotation when in the locked sleep mode
   if(encoderCount && sleepOn() && sleepModeIdx==SLEEP_LOCKED) encoderCount = 0;
 
@@ -817,12 +757,6 @@ if (isScanningRuUk && currentCmd != CMD_SCAN_RU_UK) {
           // Seek can take long time, renew the timestamp
           currentTime = millis();
           break;
-case CMD_SCAN_RU_UK:
-isScanningRuUk = true;
-doScanRuUk(encoderCount);
-needRedraw = true;
-currentTime = millis();
-break;
         default:
           // Side bar menus / settings
           needRedraw |= doSideBar(currentCmd, encoderCount);
@@ -910,7 +844,7 @@ break;
   // Disable commands control
   if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
-    if(currentCmd != CMD_NONE)
+    if(currentCmd != CMD_NONE && currentCmd != CMD_SEEK)
     {
       currentCmd = CMD_NONE;
       needRedraw = true;
