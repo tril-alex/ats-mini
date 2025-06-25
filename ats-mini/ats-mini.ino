@@ -482,16 +482,26 @@ bool doSeek(int8_t dir)
       updateFrequency(rx.getFrequency(), true);
     }
   }
-  else if(seekMode() == SEEK_SCHEDULE && dir)
+  else if(dir)  // Добавляем новый режим поиска
   {
     uint8_t hour, minute;
-    // Clock is valid because the above seekMode() call checks that
     clockGetHM(&hour, &minute);
-
     size_t offset = -1;
-    const StationSchedule *schedule = dir > 0 ?
-      eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
-      eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+    const StationSchedule *schedule = NULL;
+
+    switch(seekMode()) {
+      case SEEK_SCHEDULE:
+        schedule = dir > 0 ? 
+          eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+          eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+        break;
+        
+      case SEEK_RUS:  // Новый режим поиска RUS станций
+        schedule = dir > 0 ? 
+          eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+          eibiPrevRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+        break;
+    }
 
     if(schedule) updateFrequency(schedule->freq, false);
   }
