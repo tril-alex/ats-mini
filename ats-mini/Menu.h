@@ -3,7 +3,7 @@
   
 #include "Common.h"
 
-// Number of memory slots
+// Number of memory slots 1
 #define MEMORY_COUNT  32
 
 // Band Types
