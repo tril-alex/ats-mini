@@ -502,7 +502,6 @@ static void clickSeek(bool shortPress)
   if(shortPress) {
     // Переключаем режим поиска
     seekMode(true);
-    
     // Отображаем текущий режим
     switch(seekMode()) {
       case SEEK_SCHEDULE:
