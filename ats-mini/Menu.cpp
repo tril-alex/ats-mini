@@ -137,6 +137,7 @@ static const char *settings[] =
   "Load EiBi",
   "Wi-Fi",
   "About",
+  "Scan RU/UK", // <--- Добавляем новый пункт здесь
 };
 
 //
@@ -824,6 +825,21 @@ static void clickSettings(int cmd, bool shortPress)
       if(currentMode==FM) currentCmd = CMD_FM_REGION;
       break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
+
+    // Добавляем новый case для нашей команды
+    case MENU_SCAN_RU_UK: // <-- Здесь обрабатываем выбор "Scan RU/UK"
+      // Проверяем, что расписание EiBi доступно и часы синхронизированы
+      if (eibiAvailable() && clockAvailable()) {
+        currentCmd = CMD_SCAN_RU_UK; // Устанавливаем нашу новую команду
+        // Здесь мы не сбрасываем eibiRuScanOffset, это будет сделано в ats-mini.ino
+        // при первом входе в режим CMD_SCAN_RU_UK, чтобы можно было продолжить
+        // сканирование с места при возврате в меню.
+        // Но для нового сканирования при входе, его нужно будет инициализировать.
+        // Пока оставьте это так, мы добавим это в ats-mini.ino.
+      } else {
+        drawScreen("Scan RU/UK", "EiBi/Clock missing!"); // Сообщение об ошибке, если что-то не готово
+      }
+      break;
 
     case MENU_LOADEIBI:
       eibiLoadSchedule();
