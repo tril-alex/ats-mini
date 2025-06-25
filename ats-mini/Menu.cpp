@@ -7,7 +7,7 @@
 //
 // Bands Menu
 //
-// TO CONFIGURE YOUR OWN BAND PLAN:
+// TO 1 CONFIGURE YOUR OWN BAND PLAN:
 // Add new bands by inserting new lines in the table below. Remove
 // bands by deleting lines. Change bands by editing lines below.
 //
