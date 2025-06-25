@@ -84,6 +84,9 @@ bool tuning_flag = false;               // Flag to indicate tuning
 //
 // Current parameters
 //
+// Новая переменная для отслеживания режима сканирования RU/UK станций
+bool isScanningRuUk = false; // Изначально режим выключен
+
 uint16_t currentCmd  = CMD_NONE;
 uint8_t  currentMode = FM;
 int16_t  currentBFO  = 0;
@@ -597,6 +600,57 @@ bool doDigit(int8_t dir)
 }
 
 
+// Новая функция для обработки сканирования русских/украинских станций
+void doScanRuUk(int8_t dir) {
+  // Проверка доступности EiBi и времени (NTP)
+  if (!eibiAvailable() || !ntpIsAvailable()) {
+    drawScreen("Scan RU/UK", "EiBi/NTP missing!");
+    isScanningRuUk = false; // Выходим из режима, если что-то не готово
+    eibiRuUkScanOffset = -1; // Сброс смещения
+    return;
+  }
+
+  // Получаем текущее время UTC.
+  // Используем вашу существующую функцию clockGetHM.
+  // Убедитесь, что она возвращает UTC время, иначе вам может понадобиться
+  // использовать функции из <time.h> (time, gmtime).
+  uint8_t hour, minute;
+  clockGetHM(&hour, &minute);
+
+  const StationSchedule *station = NULL;
+
+  if (dir > 0) { // Ищем следующую станцию
+    station = eibiNextRuUk(currentFrequency, hour, minute);
+  } else { // Ищем предыдущую станцию
+    station = eibiPrevRuUk(currentFrequency, hour, minute);
+  }
+
+  if (station) {
+    currentFrequency = station->freq;
+    currentMode = AM; // Для КВ обычно AM. Если в EiBi есть информация о моде, её можно использовать.
+
+    // Установка диапазона.
+    // Ваш useBand() уже должен быть способен правильно обрабатывать КВ-частоты.
+    useBand(getCurrentBand());
+
+    rx.setFrequency(currentFrequency, currentMode);
+    rx.setVolume(volume); // Устанавливаем текущую громкость
+    rx.setSquelch(currentSquelch); // Устанавливаем текущий шумоподавитель
+
+    // Отображение информации о станции
+    // Используем String(station->freq / 1000.0, 3) для отображения частоты в МГц с тремя знаками после запятой
+    // Форматируем минуты, чтобы всегда было две цифры (например, 05 вместо 5)
+    drawScreen(station->name, String(station->freq / 1000.0, 3) + " MHz (" +
+               String(station->start_h) + ":" + (station->start_m < 10 ? "0" : "") + String(station->start_m) + "-" +
+               String(station->end_h) + ":" + (station->end_m < 10 ? "0" : "") + String(station->end_m) + " UTC)");
+  } else {
+    drawScreen("Scan RU/UK", "No station found!");
+    isScanningRuUk = false; // Если станций не найдено, выходим из режима
+    eibiRuUkScanOffset = -1; // Сброс смещения
+  }
+}
+
+
 bool clickFreq(bool shortPress)
 {
   if (shortPress) {
@@ -695,6 +749,14 @@ void loop()
   }
 #endif
 
+// !!! ВСТАВЬТЕ СЮДА ЭТОТ БЛОК:
+// Если текущая команда не CMD_SCAN_RU_UK, но мы были в этом режиме, сбрасываем его
+if (isScanningRuUk && currentCmd != CMD_SCAN_RU_UK) {
+  isScanningRuUk = false;
+  eibiRuUkScanOffset = -1; // Сброс смещения для начала нового поиска
+}
+// !!! КОНЕЦ БЛОКА ВСТАВКИ
+
   // Block encoder rotation when in the locked sleep mode
   if(encoderCount && sleepOn() && sleepModeIdx==SLEEP_LOCKED) encoderCount = 0;
 
@@ -753,6 +815,12 @@ void loop()
           // Seek can take long time, renew the timestamp
           currentTime = millis();
           break;
+        case CMD_SCAN_RU_UK: // !!! НОВЫЙ БЛОК ДЛЯ СКАНИРОВАНИЯ RU/UK
+          isScanningRuUk = true; // Устанавливаем флаг, что мы в этом режиме
+          doScanRuUk(encoderCount); // Вызываем новую функцию
+          needRedraw = true;
+          currentTime = millis(); // Обновляем время
+          break;
         default:
           // Side bar menus / settings
           needRedraw |= doSideBar(currentCmd, encoderCount);
