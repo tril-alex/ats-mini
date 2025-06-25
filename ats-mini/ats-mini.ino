@@ -815,12 +815,12 @@ if (isScanningRuUk && currentCmd != CMD_SCAN_RU_UK) {
           // Seek can take long time, renew the timestamp
           currentTime = millis();
           break;
-        case CMD_SCAN_RU_UK:
-          isScanningRuUk = true;
-          doScanRuUk(encoderCount);
-          needRedraw = true;
-          currentTime = millis();
-          break;
+case CMD_SCAN_RU_UK:
+isScanningRuUk = true;
+doScanRuUk(encoderCount);
+needRedraw = true;
+currentTime = millis();
+break;
         default:
           // Side bar menus / settings
           needRedraw |= doSideBar(currentCmd, encoderCount);
