@@ -496,13 +496,13 @@ bool doSeek(int8_t dir)
           eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
         break;
         
-      case SEEK_RUS:  // Новый режим поиска RUS станций
+      case SEEK_RUS:
         schedule = dir > 0 ? 
           eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
           eibiPrevRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
         break;
     }
-
+    
     if(schedule) updateFrequency(schedule->freq, false);
   }
 
