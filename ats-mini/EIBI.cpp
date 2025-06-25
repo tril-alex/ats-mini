@@ -477,3 +477,67 @@ bool eibiLoadSchedule()
   drawScreen(eibiMessage, "DONE!");
   return(true);
 }
+
+
+const StationSchedule *eibiNextRus(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
+{
+  static StationSchedule entry;
+
+  if(!offset) return NULL;
+  if(*offset == (size_t)-1) eibiLookup(freq, hour, minute, offset);
+
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if(!file) return NULL;
+
+  StationSchedule *result = NULL;
+  int now = hour * 60 + minute;
+
+  if(!file.seek(*offset, fs::SeekSet)) {
+    file.close();
+    return NULL;
+  }
+
+  while(file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry)) {
+    if((entry.freq > freq) && entryIsNow(&entry, now)) {
+      // Проверяем наличие RUS в названии
+      if(strstr(entry.name, " RUS") || strstr(entry.name, "(RUS)")) {
+        *offset = file.position() - sizeof(entry);
+        result = &entry;
+        break;
+      }
+    }
+  }
+
+  file.close();
+  return result;
+}
+
+const StationSchedule *eibiPrevRus(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
+{
+  static StationSchedule entry;
+
+  if(!offset) return NULL;
+  if(*offset == (size_t)-1) eibiLookup(freq, hour, minute, offset);
+
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if(!file) return NULL;
+
+  StationSchedule *result = NULL;
+  int now = hour * 60 + minute;
+
+  for(size_t pos = *offset; file.seek(pos, fs::SeekSet); pos -= sizeof(entry)) {
+    if(file.read((uint8_t*)&entry, sizeof(entry)) != sizeof(entry)) break;
+
+    if((entry.freq < freq) && entryIsNow(&entry, now)) {
+      // Проверяем наличие RUS в названии
+      if(strstr(entry.name, " RUS") || strstr(entry.name, "(RUS)")) {
+        *offset = pos;
+        result = &entry;
+        break;
+      }
+    }
+  }
+
+  file.close();
+  return result;
+}
