@@ -13,6 +13,8 @@
 #include "Utils.h"
 #include "EIBI.h"
 
+int eibiRuUkScanOffset = -1; 
+
 // SI473/5 and UI 1
 #define MIN_ELAPSED_TIME         5  // 300
 #define MIN_ELAPSED_RSSI_TIME  200  // RSSI check uses IN_ELAPSED_RSSI_TIME * 6 = 1.2s
