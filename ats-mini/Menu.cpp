@@ -906,7 +906,7 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
     case CMD_SEEK:     clickSeek(shortPress); break;  // Обновленная функция
-    case CMD_SEEK_RUS:  clickSeek(shortPress); break;  // Новая команда
+    case CMD_SEEK_RU:  clickSeek(shortPress); break;  // Новая команда
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
