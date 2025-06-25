@@ -25,7 +25,7 @@
 #define NTP_CHECK_TIME       60000  // NTP time refresh period (ms)
 #define SCHEDULE_CHECK_TIME   2000  // How often to identify the same frequency (ms)
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
-#define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tuning
+#define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tunin
 
 // =================================
 // CONSTANTS AND VARIABLES
