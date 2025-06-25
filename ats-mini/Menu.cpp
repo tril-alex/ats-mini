@@ -789,7 +789,7 @@ static void clickMenu(int cmd, bool shortPress)
     
     case MENU_STEP:     currentCmd = CMD_STEP;      break;
     case MENU_SEEK:     currentCmd = CMD_SEEK;      break;
-    case MENU_SEEK_RUS:  currentCmd = CMD_SEEK_RUS;   break;
+    case MENU_SEEK_RUS:  currentCmd = CMD_SEEK_RU;   break;
     case MENU_MODE:     currentCmd = CMD_MODE;      break;
     case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
     case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
