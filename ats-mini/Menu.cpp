@@ -789,7 +789,7 @@ static void clickMenu(int cmd, bool shortPress)
     
     case MENU_STEP:     currentCmd = CMD_STEP;      break;
     case MENU_SEEK:     currentCmd = CMD_SEEK;      break;
-    case MENU_SEEK_RUS:  currentCmd = CMD_SEEK_RU;   break;
+    case MENU_SEEK_RUS:  currentCmd = CMD_SEEK_RUS;   break;
     case MENU_MODE:     currentCmd = CMD_MODE;      break;
     case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
     case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
@@ -907,7 +907,7 @@ bool clickHandler(uint16_t cmd, bool shortPress)
     case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
     case CMD_SEEK:     clickSeek(shortPress); break;  // Обновленная функция
-    case CMD_SEEK_RU:  clickSeek(shortPress); break;  // Новая команда
+    case CMD_SEEK_RUS:  clickSeek(shortPress); break;  // Новая команда
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
