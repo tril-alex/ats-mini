@@ -81,6 +81,7 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_AVC          9
 #define MENU_SOFTMUTE    10
 #define MENU_SETTINGS    11
+#define MENU_SEEK_RU    12
 
 int8_t menuIdx = MENU_VOLUME;
 
