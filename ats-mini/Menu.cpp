@@ -118,6 +118,7 @@ static const char *menu[] =
 #define MENU_LOADEIBI     11
 #define MENU_WIFIMODE     12
 #define MENU_ABOUT        13
+#define MENU_SCAN_RU_UK   14 
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
