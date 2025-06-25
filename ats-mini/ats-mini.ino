@@ -491,13 +491,13 @@ bool doSeek(int8_t dir)
 
     switch(seekMode()) {
       case SEEK_SCHEDULE:
-        schedule = dir > 0 ? 
+        schedule = dir > 0 ?
           eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
           eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
         break;
         
       case SEEK_RUS:
-        schedule = dir > 0 ? 
+        schedule = dir > 0 ?
           eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
           eibiPrevRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
         break;
