@@ -46,6 +46,16 @@ jobs:
         run: |
           echo "slug=$(git describe --tags --match 'v?.??' --always --dirty || echo v0.00)" >> "$GITHUB_OUTPUT"
 
+          - name: Clean and Install ESP32 platform and libraries
+            run: |
+              arduino-cli core uninstall esp32:esp32 || true
+              arduino-cli core update-index
+              arduino-cli core install esp32:esp32@3.2.0
+              arduino-cli lib update-index
+              arduino-cli lib install "TFT_eSPI" "PU2CLR SI4735" "Async TCP" "ESP Async WebServer" "NTPClient" "Preferences" "Wire" "EEPROM" "FS" "SPIFFS" "LittleFS" "HTTPClient" "Networking" "NetworkClientSecure" "WiFi"
+            working-directory: .
+
+
       - name: Compile firmware
         uses: arduino/compile-sketches@v1
         with:
@@ -61,6 +71,8 @@ jobs:
           # Disabled to prevent building artifact for a previous commit
           enable-deltas-report: false
           enable-warnings-report: true
+
+          
 
       - name: Save sketches report artifact
         uses: actions/upload-artifact@v4
