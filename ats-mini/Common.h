@@ -55,7 +55,7 @@
 // Seek modes
 #define SEEK_DEFAULT   0
 #define SEEK_SCHEDULE  1
-#define SEEK_RUS       2  // Добавляем новый режим поиска
+#define SEEK_RUS       2
 
 // Compute number of items in an array
 #define ITEM_COUNT(array) (sizeof(array) / sizeof((array)[0]))
