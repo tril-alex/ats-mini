@@ -440,9 +440,9 @@ uint8_t seekMode(bool toggle)
   static uint8_t mode = SEEK_DEFAULT;
 
   if(toggle) {
-    mode = (mode == SEEK_DEFAULT) ? SEEK_SCHEDULE : 
-           (mode == SEEK_SCHEDULE) ? SEEK_RUS : 
-           SEEK_DEFAULT;
+    mode = (mode == SEEK_DEFAULT) ? SEEK_SCHEDULE :
+           (mode == SEEK_SCHEDULE) ? SEEK_RUS :
+            SEEK_DEFAULT;
   }
 
   // Use normal seek on FM or if there is no schedule loaded
@@ -786,7 +786,6 @@ static void clickMenu(int cmd, bool shortPress)
 
   switch(cmd)
   {
-    
     case MENU_STEP:     currentCmd = CMD_STEP;      break;
     case MENU_SEEK:     currentCmd = CMD_SEEK;      break;
     case MENU_SEEK_RUS:  currentCmd = CMD_SEEK_RU;   break;
