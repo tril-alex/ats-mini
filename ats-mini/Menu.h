@@ -41,8 +41,9 @@
 #define CMD_SLEEPMODE 0x2B00 // |
 #define CMD_LOADEIBI  0x2C00 // |
 #define CMD_WIFIMODE  0x2D00 // |
+#define CMD_SEEK_RU   0x1B00 |
 #define CMD_ABOUT     0x2E00 //-+
-#define CMD_SEEK_RU   0x1B00  // Новая команда для поиска RUS станций
+
 
 // UI Layouts
 #define UI_DEFAULT  0
