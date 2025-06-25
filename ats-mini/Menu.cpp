@@ -899,18 +899,17 @@ bool clickHandler(uint16_t cmd, bool shortPress)
 {
   switch(cmd)
   {
-    case CMD_MENU:     clickMenu(menuIdx, shortPress);break;
-    case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
-    case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
-    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
+    case CMD_MENU:     clickMenu(menuIdx, shortPress); break;
+    case CMD_SETTINGS: clickSettings(settingsIdx, shortPress); break;
+    case CMD_MEMORY:   clickMemory(memoryIdx, shortPress); break;
+    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress); break;
     case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
-    case CMD_SEEK:     clickSeek(shortPress); break;
+    case CMD_SEEK:     clickSeek(shortPress); break;  // Обновленная функция
+    case CMD_SEEK_RU:  clickSeek(shortPress); break;  // Новая команда
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
-
-  // Encoder input handled
   return(true);
 }
 
