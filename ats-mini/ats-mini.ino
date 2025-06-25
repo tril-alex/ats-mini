@@ -495,7 +495,6 @@ bool doSeek(int8_t dir)
           eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
           eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
         break;
-        
       case SEEK_RUS:
         schedule = dir > 0 ?
           eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
