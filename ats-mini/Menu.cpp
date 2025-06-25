@@ -4,7 +4,6 @@
 #include "Utils.h"
 #include "Menu.h"
 #include "EIBI.h"
-  
 //
 // Bands Menu
 //
@@ -138,7 +137,7 @@ static const char *settings[] =
   "Load EiBi",
   "Wi-Fi",
   "About",
-  "Scan RU/UK", // <--- Добавляем новый пункт здесь
+  "Scan RU/UK",
 };
 
 //
