@@ -4,10 +4,11 @@
 #include "Utils.h"
 #include "Menu.h"
 #include "EIBI.h"
+
 //
-// Bands Menu 1
+// Bands Menu
 //
-// TO 1 CONFIGURE YOUR OWN BAND PLAN:
+// TO CONFIGURE YOUR OWN BAND PLAN:
 // Add new bands by inserting new lines in the table below. Remove
 // bands by deleting lines. Change bands by editing lines below.
 //
@@ -117,7 +118,6 @@ static const char *menu[] =
 #define MENU_LOADEIBI     11
 #define MENU_WIFIMODE     12
 #define MENU_ABOUT        13
-#define MENU_SCAN_RU_UK   14 
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -137,7 +137,6 @@ static const char *settings[] =
   "Load EiBi",
   "Wi-Fi",
   "About",
-  "Scan RU/UK",
 };
 
 //
@@ -825,21 +824,6 @@ static void clickSettings(int cmd, bool shortPress)
       if(currentMode==FM) currentCmd = CMD_FM_REGION;
       break;
     case MENU_ABOUT:      currentCmd = CMD_ABOUT;     break;
-
-    // Добавляем новый case для нашей команды
-    case MENU_SCAN_RU_UK: // <-- Здесь обрабатываем выбор "Scan RU/UK"
-      // Проверяем, что расписание EiBi доступно и часы синхронизированы
-      if (eibiAvailable() && clockAvailable()) {
-        currentCmd = CMD_SCAN_RU_UK; // Устанавливаем нашу новую команду
-        // Здесь мы не сбрасываем eibiRuScanOffset, это будет сделано в ats-mini.ino
-        // при первом входе в режим CMD_SCAN_RU_UK, чтобы можно было продолжить
-        // сканирование с места при возврате в меню.
-        // Но для нового сканирования при входе, его нужно будет инициализировать.
-        // Пока оставьте это так, мы добавим это в ats-mini.ino.
-      } else {
-        drawScreen("Scan RU/UK", "EiBi/Clock missing!"); // Сообщение об ошибке, если что-то не готово
-      }
-      break;
 
     case MENU_LOADEIBI:
       eibiLoadSchedule();
