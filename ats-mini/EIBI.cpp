@@ -15,6 +15,9 @@
 #define EIBI_URL  "http://eibispace.de/dx/eibi.txt"
 #endif
 
+// Глобальная переменная для отслеживания текущего смещения в режиме сканирования RUS/UK
+long eibiRuUkScanOffset = -1; // -1 означает, что поиск неактивен или начинается с начала
+
 const BandLabel bandLabels[] =
 {
   {  472,   479,  "630m (CW)"     },
@@ -126,6 +129,70 @@ const StationSchedule *eibiNext(uint16_t freq, uint8_t hour, uint8_t minute, siz
   return(result);
 }
 
+// Добавляем новую функцию для поиска следующей русской/украинской станции
+const StationSchedule *eibiNextRuUk(uint16_t currentFreq, uint8_t hour, uint8_t minute)
+{
+  // Will return this static entry
+  static StationSchedule entry;
+
+  if (!eibiAvailable()) return NULL; // Проверяем доступность EiBi
+
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if (!file) return NULL; // Не удалось открыть файл
+
+  // Если eibiRuUkScanOffset равно -1, начинаем поиск с начала файла
+  // Иначе продолжаем с последнего найденного места
+  if (eibiRuUkScanOffset != -1) {
+      file.seek(eibiRuUkScanOffset, fs::SeekSet);
+  } else {
+      file.seek(0, fs::SeekSet);
+  }
+
+  size_t currentOffset;
+  int now = hour * 60 + minute;
+
+  // Перебираем записи до конца файла (первый проход)
+  while (file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+  {
+    currentOffset = file.position() - sizeof(entry); // Сохраняем смещение текущей записи
+
+    // Проверяем, что станция активна в текущее время
+    if (entryIsNow(&entry, now) && entry.freq >= currentFreq)
+    {
+      // Проверяем, содержит ли название "RUS " или "UKR "
+      if (strstr(entry.name, "RUS ") != NULL || strstr(entry.name, "UKR ") != NULL)
+      {
+        file.close();
+        eibiRuUkScanOffset = currentOffset; // Сохраняем смещение найденной станции
+        return &entry;
+      }
+    }
+  }
+
+  // Если дошли до конца и не нашли, начинаем сначала (циклический поиск)
+  file.seek(0, fs::SeekSet);
+  eibiRuUkScanOffset = -1; // Сбрасываем смещение, чтобы начать с начала при следующем циклическом вызове
+
+  // Второй проход, начиная с начала файла (для циклического поиска)
+  while (file.read((uint8_t*)&entry, sizeof(entry)) == sizeof(entry))
+  {
+    currentOffset = file.position() - sizeof(entry);
+
+    if (entryIsNow(&entry, now))
+    {
+      if (strstr(entry.name, "RUS ") != NULL || strstr(entry.name, "UKR ") != NULL)
+      {
+        file.close();
+        eibiRuUkScanOffset = currentOffset;
+        return &entry;
+      }
+    }
+  }
+
+  file.close();
+  return NULL; // Ничего не найдено
+}
+
 const StationSchedule *eibiPrev(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset)
 {
   // Will return this static entry
@@ -158,6 +225,93 @@ const StationSchedule *eibiPrev(uint16_t freq, uint8_t hour, uint8_t minute, siz
 
   file.close();
   return(result);
+}
+
+// Добавляем новую функцию для поиска предыдущей русской/украинской станции
+const StationSchedule *eibiPrevRuUk(uint16_t currentFreq, uint8_t hour, uint8_t minute)
+{
+  // Will return this static entry
+  static StationSchedule entry;
+
+  if (!eibiAvailable()) return NULL;
+
+  fs::File file = LittleFS.open(EIBI_PATH, "rb");
+  if (!file) return NULL;
+
+  size_t currentOffset = 0;
+  long foundOffset = -1; // Используем long для консистентности с eibiRuUkScanOffset
+  StationSchedule foundEntry;
+  int now = hour * 60 + minute;
+
+  // Определяем начальную позицию для поиска.
+  // Если eibiRuUkScanOffset равен -1, начинаем с конца файла.
+  // Иначе - с текущей сохраненной позиции.
+  if (eibiRuUkScanOffset != -1) {
+    file.seek(eibiRuUkScanOffset, fs::SeekSet);
+  } else {
+    file.seek(file.size() - sizeof(entry), fs::SeekSet); // Начинаем с конца
+  }
+
+
+  // Первый проход: назад от текущей (или конечной) позиции
+  while (file.position() > 0)
+  {
+    // Перемещаемся на две записи назад, чтобы прочитать текущую запись
+    file.seek(file.position() - 2 * sizeof(entry), fs::SeekSet);
+    currentOffset = file.position(); // Смещение, с которого читаем
+
+    if (file.read((uint8_t*)&entry, sizeof(entry)) != sizeof(entry)) break;
+
+    // Проверяем, что станция активна в текущее время
+    if (entryIsNow(&entry, now) && entry.freq <= currentFreq)
+    {
+      // Проверяем, содержит ли название "RUS " или "UKR "
+      if (strstr(entry.name, "RUS ") != NULL || strstr(entry.name, "UK ") != NULL)
+      {
+        foundOffset = currentOffset;
+        foundEntry = entry;
+        break; // Нашли ближайшую предыдущую станцию, выходим из первого цикла
+      }
+    }
+  }
+
+  if (foundOffset != -1) {
+      file.close();
+      eibiRuUkScanOffset = foundOffset;
+      return &foundEntry;
+  }
+
+  // Если ничего не нашли на первом проходе, циклически переходим в конец файла
+  file.seek(file.size() - sizeof(entry), fs::SeekSet);
+  foundOffset = -1; // Сбрасываем, чтобы найти самую первую подходящую станцию при циклическом поиске
+
+  // Второй проход: начинаем с конца файла и идем назад до начала (циклический поиск)
+  while (file.position() > 0)
+  {
+    file.seek(file.position() - 2 * sizeof(entry), fs::SeekSet);
+    currentOffset = file.position();
+
+    if (file.read((uint8_t*)&entry, sizeof(entry)) != sizeof(entry)) break;
+
+    if (entryIsNow(&entry, now))
+    {
+      if (strstr(entry.name, "RUS ") != NULL || strstr(entry.name, "UKR ") != NULL)
+      {
+        foundOffset = currentOffset;
+        foundEntry = entry;
+        // НЕ break; продолжаем до начала файла, чтобы найти самую последнюю подходящую станцию
+        // при циклическом переходе с начала в конец.
+      }
+    }
+  }
+
+  file.close();
+  if (foundOffset != -1) {
+      eibiRuUkScanOffset = foundOffset;
+      return &foundEntry;
+  }
+
+  return NULL; // Ничего не найдено
 }
 
 const StationSchedule *eibiAtSameFreq(uint8_t hour, uint8_t minute, size_t *offset, bool same)
