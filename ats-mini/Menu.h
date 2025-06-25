@@ -1,9 +1,9 @@
 #ifndef MENU_H
 #define MENU_H
-  
+
 #include "Common.h"
 
-// Number of memory slots 1
+// Number of memory slots
 #define MEMORY_COUNT  32
 
 // Band Types
@@ -42,8 +42,6 @@
 #define CMD_LOADEIBI  0x2C00 // |
 #define CMD_WIFIMODE  0x2D00 // |
 #define CMD_ABOUT     0x2E00 //-+
-// Наша новая команда для сканирования русских/украинских станций
-#define CMD_SCAN_RU_UK 0x2F00 // Выбираем следующее доступное значение в этой серии
 
 // UI Layouts
 #define UI_DEFAULT  0
