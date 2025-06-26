@@ -81,6 +81,7 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_AVC          9
 #define MENU_SOFTMUTE    10
 #define MENU_SETTINGS    11
+#define MENU_SEARCH_RU   12
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -91,7 +92,6 @@ static const char *menu[] =
   "Volume",
   "Step",
   "Seek",
-   "SEARCH RU",
   "Memory",
   "Squelch",
   "Bandwidth",
@@ -99,6 +99,7 @@ static const char *menu[] =
   "AVC",
   "SoftMute",
   "Settings",
+  "SEARCH RU",
 };
 
 //
