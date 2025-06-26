@@ -81,7 +81,6 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 #define MENU_AVC          9
 #define MENU_SOFTMUTE    10
 #define MENU_SETTINGS    11
-#define MENU_SEEK_RUS    12
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -92,7 +91,6 @@ static const char *menu[] =
   "Volume",
   "Step",
   "Seek",
-  "SEARCH RU",
   "Memory",
   "Squelch",
   "Bandwidth",
@@ -439,17 +437,13 @@ uint8_t seekMode(bool toggle)
 {
   static uint8_t mode = SEEK_DEFAULT;
 
-  if(toggle) {
-    mode = (mode == SEEK_DEFAULT) ? SEEK_SCHEDULE :
-           (mode == SEEK_SCHEDULE) ? SEEK_RUS :
-            SEEK_DEFAULT;
-  }
+  mode = toggle ? (mode == SEEK_DEFAULT ? SEEK_SCHEDULE : SEEK_DEFAULT) : mode;
 
   // Use normal seek on FM or if there is no schedule loaded
   if(currentMode == FM || !eibiAvailable() || !clockAvailable())
-    return SEEK_DEFAULT;
+    return(SEEK_DEFAULT);
 
-  return mode;
+  return(mode);
 }
 
 //
@@ -499,23 +493,7 @@ static void clickSquelch(bool shortPress)
 
 static void clickSeek(bool shortPress)
 {
-  if(shortPress) {
-    // Переключаем режим поиска
-    seekMode(true);
-    // Отображаем текущий режим
-    switch(seekMode()) {
-      case SEEK_SCHEDULE:
-        drawScreen("Seek Mode", "Schedule");
-        break;
-      case SEEK_RUS:
-        drawScreen("Seek Mode", "RUS Only");
-        break;
-      default:
-        drawScreen("Seek Mode", "Normal");
-    }
-  } else {
-    currentCmd = CMD_NONE;
-  }
+  if(shortPress) seekMode(true); else currentCmd = CMD_NONE;
 }
 
 static void doTheme(int dir)
@@ -787,7 +765,6 @@ static void clickMenu(int cmd, bool shortPress)
   {
     case MENU_STEP:     currentCmd = CMD_STEP;      break;
     case MENU_SEEK:     currentCmd = CMD_SEEK;      break;
-    case MENU_SEEK_RUS:  currentCmd = CMD_SEEK_RU;   break;
     case MENU_MODE:     currentCmd = CMD_MODE;      break;
     case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
     case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
@@ -898,17 +875,18 @@ bool clickHandler(uint16_t cmd, bool shortPress)
 {
   switch(cmd)
   {
-    case CMD_MENU:     clickMenu(menuIdx, shortPress); break;
-    case CMD_SETTINGS: clickSettings(settingsIdx, shortPress); break;
-    case CMD_MEMORY:   clickMemory(memoryIdx, shortPress); break;
-    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress); break;
+    case CMD_MENU:     clickMenu(menuIdx, shortPress);break;
+    case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
+    case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
+    case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
     case CMD_VOLUME:   clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
-    case CMD_SEEK:     clickSeek(shortPress); break;  // Обновленная функция
-    case CMD_SEEK_RU:  clickSeek(shortPress); break;  // Новая команда
+    case CMD_SEEK:     clickSeek(shortPress); break;
     case CMD_FREQ:     return clickFreq(shortPress);
     default:           return(false);
   }
+
+  // Encoder input handled
   return(true);
 }
 
