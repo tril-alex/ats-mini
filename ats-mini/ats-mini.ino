@@ -25,7 +25,7 @@
 #define NTP_CHECK_TIME       60000  // NTP time refresh period (ms)
 #define SCHEDULE_CHECK_TIME   2000  // How often to identify the same frequency (ms)
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
-#define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tunin
+#define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tuning
 
 // =================================
 // CONSTANTS AND VARIABLES
@@ -482,26 +482,17 @@ bool doSeek(int8_t dir)
       updateFrequency(rx.getFrequency(), true);
     }
   }
-  else if(dir)  // Добавляем новый режим поиска
+  else if(seekMode() == SEEK_SCHEDULE && dir)
   {
     uint8_t hour, minute;
+    // Clock is valid because the above seekMode() call checks that
     clockGetHM(&hour, &minute);
-    size_t offset = -1;
-    const StationSchedule *schedule = NULL;
 
-    switch(seekMode()) {
-      case SEEK_SCHEDULE:
-        schedule = dir > 0 ?
-          eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
-          eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
-        break;
-      case SEEK_RUS:
-        schedule = dir > 0 ?
-          eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
-          eibiPrevRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
-        break;
-    }
-    
+    size_t offset = -1;
+    const StationSchedule *schedule = dir > 0 ?
+      eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+      eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+
     if(schedule) updateFrequency(schedule->freq, false);
   }
 
