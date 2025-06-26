@@ -22,6 +22,11 @@
 #define USB           2
 #define AM            3
 
+// Seek modes
+#define SEEK_DEFAULT   0
+#define SEEK_SCHEDULE  1
+#define SEEK_RUS       2  // Добавляем новый режим поиска
+
 // RDS Modes
 #define RDS_PS        0b00000001  // Station name
 #define RDS_CT        0b00000010  // Time
