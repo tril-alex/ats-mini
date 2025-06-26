@@ -12,7 +12,6 @@
 #define SW_BAND_TYPE  2
 #define LW_BAND_TYPE  3
 
-
 // Commands
 #define CMD_NONE      0x0000
 #define CMD_FREQ      0x0100
@@ -28,6 +27,8 @@
 #define CMD_MEMORY    0x1900 // |
 #define CMD_SEEK      0x1A00 // |
 #define CMD_SQUELCH   0x1B00 //-+
+// Дублирование команд SEEK с суффиксом _2
+#define CMD_SEEK_2    0x1C00 // | Копия команды SEEK
 #define CMD_SETTINGS  0x2000 //-SETTINGS MODE starts here
 #define CMD_BRT       0x2100 // |
 #define CMD_CAL       0x2200 // |
@@ -42,10 +43,7 @@
 #define CMD_SLEEPMODE 0x2B00 // |
 #define CMD_LOADEIBI  0x2C00 // |
 #define CMD_WIFIMODE  0x2D00 // |
-#define CMD_SEEK_RU   0x2F00 // |
 #define CMD_ABOUT     0x2E00 //-+
-
-
 
 // UI Layouts
 #define UI_DEFAULT  0
@@ -54,6 +52,9 @@
 // Seek modes
 #define SEEK_DEFAULT  0
 #define SEEK_SCHEDULE 1
+// Дублирование режимов SEEK с суффиксом _2
+#define SEEK_DEFAULT_2  2
+#define SEEK_SCHEDULE_2 3
 
 //
 // Data Types
@@ -89,19 +90,22 @@ extern const char *bandModeDesc[];
 extern const FMRegion fmRegions[];
 extern int bandIdx;
 
-// These are menu commands
+// Эти функции являются командами меню
 static inline bool isMenuMode(uint16_t cmd)
 {
   return((cmd>=CMD_BAND) && (cmd<CMD_SETTINGS));
 }
 
-// These are settings
+// Эти функции являются настройками
 static inline bool isSettingsMode(uint16_t cmd)
 {
   return((cmd>=CMD_SETTINGS) && (cmd<CMD_ABOUT));
 }
 
 uint8_t seekMode(bool toggle = false);
+// Дублирование функции seekMode с суффиксом _2
+uint8_t seekMode_2(bool toggle = false);
+
 void drawSideBar(uint16_t cmd, int x, int y, int sx);
 bool doSideBar(uint16_t cmd, int dir);
 void doSelectDigit(int dir);
