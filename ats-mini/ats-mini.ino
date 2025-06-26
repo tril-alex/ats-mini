@@ -458,42 +458,62 @@ bool updateFrequency(int newFreq, bool wrap)
 //
 bool doSeek(int8_t dir)
 {
-  if(currentMode == FM) {
-    return rx.seekStationProgress(dir, showFrequency, showStatusSeek);
-  }
-  
-  size_t offset = -1;
-  const StationSchedule *entry;
-  uint16_t newFreq;
-  uint8_t hour, minute;
-  
-  clockGetTime(&hour, &minute);
-  
-  switch(seekMode()) {
-    case SEEK_SCHEDULE:
-      entry = dir > 0 ? 
-        eibiNext(currentFrequency, hour, minute, &offset) :
-        eibiPrev(currentFrequency, hour, minute, &offset);
-      break;  
-    case SEEK_RUS:  // Новый режим поиска
-      entry = dir > 0 ? 
-        eibiNextRus(currentFrequency, hour, minute, &offset) :
-        eibiPrevRus(currentFrequency, hour, minute, &offset);
-      break;
-    default:
-      return rx.seekStation(dir);
-  }
-  
-  if(entry) {
-    newFreq = entry->freq;
-    if(newFreq != currentFrequency) {
-      currentFrequency = newFreq;
-      identifyFrequency(currentFrequency);
-      return true;
+  if(seekMode() == SEEK_DEFAULT)
+  {
+    if(isSSB())
+    {
+#ifdef ENABLE_HOLDOFF
+      // Tuning timer to hold off (FM/AM) display updates
+      tuning_flag = true;
+      tuning_timer = millis();
+#endif
+
+      updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
+    }
+    else
+    {
+      // Clear stale parameters
+      clearStationInfo();
+      rssi = snr = 0;
+
+      // G8PTN: Flag is set by rotary encoder and cleared on seek entry
+      seekStop = false;
+      rx.seekStationProgress(showFrequencySeek, checkStopSeeking, dir>0? 1 : 0);
+      updateFrequency(rx.getFrequency(), true);
     }
   }
-  
-  return false;
+  else if(seekMode() == SEEK_SCHEDULE && dir)
+  {
+    uint8_t hour, minute;
+    // Clock is valid because the above seekMode() call checks that
+    clockGetHM(&hour, &minute);
+
+    size_t offset = -1;
+    const StationSchedule *schedule = dir > 0 ?
+      eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+      eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+
+    if(schedule) updateFrequency(schedule->freq, false);
+  else if(seekMode() == SEEK_RUS && dir)
+  {
+    uint8_t hour, minute;
+    // Clock is valid because the above seekMode() call checks that
+    clockGetHM(&hour, &minute);
+
+    size_t offset = -1;
+    const StationSchedule *schedule = dir > 0 ?
+      eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+      eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+
+    if(schedule) updateFrequency(schedule->freq, false);
+  }
+
+  // Clear current station name and information
+  clearStationInfo();
+  // Check for named frequencies
+  identifyFrequency(currentFrequency + currentBFO / 1000);
+  // Will need a redraw
+  return(true);
 }
 
   // Clear current station name and information
