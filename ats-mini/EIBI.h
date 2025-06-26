@@ -25,7 +25,4 @@ const StationSchedule *eibiPrev(uint16_t freq, uint8_t hour, uint8_t minute, siz
 const StationSchedule *eibiNext(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset);
 const StationSchedule *eibiAtSameFreq(uint8_t hour, uint8_t minute, size_t *offset, bool same);
 
-const StationSchedule *eibiNextRus(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset);
-const StationSchedule *eibiPrevRus(uint16_t freq, uint8_t hour, uint8_t minute, size_t *offset);
-
 #endif // EIBI_H
