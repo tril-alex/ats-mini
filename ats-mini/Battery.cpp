@@ -1,9 +1,7 @@
 #include "Common.h"
 #include "Themes.h"
 #include "Utils.h"
- 
 #define VBAT_MON  4                 // GPIO04 -- Battery Monitor PIN
-
 #define BATT_ADC_READS          10  // ADC reads for average calculation (Maximum value = 16 to avoid rollover in average calculation)
 #define BATT_ADC_FACTOR      1.702  // ADC correction factor used for the battery monitor
 #define BATT_SOC_LEVEL1      3.680  // Battery SOC voltage for 25%
