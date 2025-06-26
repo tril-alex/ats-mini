@@ -12,6 +12,8 @@
 #define SW_BAND_TYPE  2
 #define LW_BAND_TYPE  3
 
+#define CMD_SEEK_RU   0x1B00
+
 // Commands
 #define CMD_NONE      0x0000
 #define CMD_FREQ      0x0100
