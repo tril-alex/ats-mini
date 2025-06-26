@@ -14,18 +14,21 @@
 #include "EIBI.h"
 
 // SI473/5 and UI
-#define MIN_ELAPSED_TIME         5  // 300
-#define MIN_ELAPSED_RSSI_TIME  200  // RSSI check uses IN_ELAPSED_RSSI_TIME * 6 = 1.2s
-#define ELAPSED_COMMAND      10000  // time to turn off the last command controlled by encoder. Time to goes back to the VFO control // G8PTN: Increased time and corrected comment
-#define DEFAULT_VOLUME          35  // change it for your favorite sound volume
-#define DEFAULT_SLEEP            0  // Default sleep interval, range = 0 (off) to 255 in steps of 5
-#define STRENGTH_CHECK_TIME   1500  // Not used
-#define RDS_CHECK_TIME         250  // Increased from 90
-#define SEEK_TIMEOUT        600000  // Max seek timeout (ms)
-#define NTP_CHECK_TIME       60000  // NTP time refresh period (ms)
-#define SCHEDULE_CHECK_TIME   2000  // How often to identify the same frequency (ms)
+#define MIN_ELAPSED_TIME          5   // 300
+#define MIN_ELAPSED_RSSI_TIME   200   // RSSI check uses IN_ELAPSED_RSSI_TIME * 6 = 1.2s
+#define ELAPSED_COMMAND       10000   // time to turn off the last command controlled by encoder. Time to goes back to the VFO control // G8PTN: Increased time and corrected comment
+#define DEFAULT_VOLUME          35   // change it for your favorite sound volume
+#define DEFAULT_SLEEP            0   // Default sleep interval, range = 0 (off) to 255 in steps of 5
+#define STRENGTH_CHECK_TIME   1500   // Not used
+#define RDS_CHECK_TIME          250   // Increased from 90
+#define SEEK_TIMEOUT         600000   // Max seek timeout (ms)
+#define NTP_CHECK_TIME        60000   // NTP time refresh period (ms)
+#define SCHEDULE_CHECK_TIME   2000   // How often to identify the same frequency (ms)
 #define BACKGROUND_REFRESH_TIME 5000    // Background screen refresh time. Covers the situation where there are no other events causing a refresh
-#define TUNE_HOLDOFF_TIME       90  // Timer to hold off display whilst tuning
+#define TUNE_HOLDOFF_TIME         90   // Timer to hold off display whilst tuning
+
+// Дублирование для SEEK_2
+#define SEEK_TIMEOUT_2       600000   // Max seek timeout (ms) для SEEK_2
 
 // =================================
 // CONSTANTS AND VARIABLES
@@ -38,6 +41,9 @@ int8_t softMuteMaxAttIdx = 4;
 
 bool seekStop = false;        // G8PTN: Added flag to abort seeking on rotary encoder detection
 bool pushAndRotate = false;   // Push and rotate is active, ignore the long press
+
+// Дублирование для SEEK_2
+bool seekStop_2 = false;
 
 long elapsedRSSI = millis();
 long elapsedButton = millis();
@@ -52,29 +58,29 @@ volatile int encoderCount = 0;
 uint16_t currentFrequency;
 
 // AGC/ATTN index per mode (FM/AM/SSB)
-int8_t FmAgcIdx = 0;                    // Default FM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 27 = ATTN 0 to 26
-int8_t AmAgcIdx = 0;                    // Default AM  AGCON  : Range = 0 to 37, 0 = AGCON, 1 - 37 = ATTN 0 to 36
-int8_t SsbAgcIdx = 0;                   // Default SSB AGCON  : Range = 0 to 1,  0 = AGCON,      1 = ATTN 0
+int8_t FmAgcIdx = 0;                  // Default FM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 27 = ATTN 0 to 26
+int8_t AmAgcIdx = 0;                  // Default AM  AGGON  : Range = 0 to 37, 0 = AGCON, 1 - 37 = ATTN 0 to 36
+int8_t SsbAgcIdx = 0;                 // Default SSB AGCON  : Range = 0 to 1,  0 = AGCON,     1 = ATTN 0
 
 // AVC index per mode (AM/SSB)
-int8_t AmAvcIdx = 48;                   // Default AM  = 48 (as per AN332), range = 12 to 90 in steps of 2
-int8_t SsbAvcIdx = 48;                  // Default SSB = 48, range = 12 to 90 in steps of 2
+int8_t AmAvcIdx = 48;                 // Default AM  = 48 (as per AN332), range = 12 to 90 in steps of 2
+int8_t SsbAvcIdx = 48;                // Default SSB = 48, range = 12 to 90 in steps of 2
 
 // SoftMute index per mode (AM/SSB)
-int8_t AmSoftMuteIdx = 4;               // Default AM  = 4, range = 0 to 32
-int8_t SsbSoftMuteIdx = 4;              // Default SSB = 4, range = 0 to 32
+int8_t AmSoftMuteIdx = 4;             // Default AM  = 4, range = 0 to 32
+int8_t SsbSoftMuteIdx = 4;            // Default SSB = 4, range = 0 to 32
 
 // Menu options
-uint8_t volume = DEFAULT_VOLUME;        // Volume, range = 0 (muted) - 63
-uint8_t currentSquelch = 0;             // Squelch, range = 0 (disabled) - 127
-bool squelchCutoff = false;             // True if the Squelch cutoff is in effect
-uint8_t FmRegionIdx = 0;                // FM Region
+uint8_t volume = DEFAULT_VOLUME;      // Volume, range = 0 (muted) - 63
+uint8_t currentSquelch = 0;            // Squelch, range = 0 (disabled) - 127
+bool squelchCutoff = false;            // True if the Squelch cutoff is in effect
+uint8_t FmRegionIdx = 0;               // FM Region
 
-uint16_t currentBrt = 130;              // Display brightness, range = 10 to 255 in steps of 5
-uint16_t currentSleep = DEFAULT_SLEEP;  // Display sleep timeout, range = 0 to 255 in steps of 5
-long elapsedSleep = millis();           // Display sleep timer
-bool zoomMenu = false;                  // Display zoomed menu item
-int8_t scrollDirection = 1;             // Menu scroll direction
+uint16_t currentBrt = 130;             // Display brightness, range = 10 to 255 in steps of 5
+uint16_t currentSleep = DEFAULT_SLEEP; // Display sleep timeout, range = 0 to 255 in steps of 5
+long elapsedSleep = millis();         // Display sleep timer
+bool zoomMenu = false;                 // Display zoomed menu item
+int8_t scrollDirection = 1;            // Menu scroll direction
 
 // Background screen refresh
 uint32_t background_timer = millis();   // Background screen refresh timer.
@@ -161,7 +167,7 @@ void setup()
     eepromInvalidate();
     diskInit(true);
 
-    ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
+    ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%
     tft.setTextSize(2);
     tft.setTextColor(TH.text, TH.bg);
     tft.println(getVersion(true));
@@ -179,7 +185,7 @@ void setup()
   int16_t si4735Addr = rx.getDeviceI2CAddress(RESET_PIN);
   if(!si4735Addr)
   {
-    ledcWrite(PIN_LCD_BL, 255);       // Default value 255 = 100%
+    ledcWrite(PIN_LCD_BL, 255);        // Default value 255 = 100%
     tft.setTextSize(2);
     tft.setTextColor(TH.text_warn, TH.bg);
     tft.println("Si4732 not detected");
@@ -189,7 +195,7 @@ void setup()
   rx.setup(RESET_PIN, MW_BAND_TYPE);
   // Comment the line above and uncomment the three lines below if you are using external ref clock (active crystal or signal generator)
   // rx.setRefClock(32768);
-  // rx.setRefClockPrescaler(1);   // will work with 32768
+  // rx.setRefClockPrescaler(1);    // will work with 32768
   // rx.setup(RESET_PIN, 0, MW_BAND_TYPE, SI473X_ANALOG_AUDIO, XOSCEN_RCLK);
 
   // Attached pin to allows SI4732 library to mute audio as required to minimise loud clicks
@@ -219,6 +225,8 @@ void setup()
   delay(50);
   rx.setVolume(volume);
   rx.setMaxSeekTime(SEEK_TIMEOUT);
+  // Дублирование для SEEK_2
+  rx.setMaxSeekTime_2(SEEK_TIMEOUT_2); // Предполагаем, что такая функция будет создана
 
   // Show help screen on first run
   if(eepromFirstRun())
@@ -260,6 +268,8 @@ ICACHE_RAM_ATTR void rotaryEncoder()
   {
     encoderCount = encoderStatus==DIR_CW? 1 : -1;
     seekStop = true;
+    // Дублирование для SEEK_2
+    seekStop_2 = true;
   }
 }
 
@@ -280,15 +290,15 @@ void useBand(const Band *band)
     rx.setSeekFmLimits(band->minimumFreq, band->maximumFreq);
 
     // More sensitive seek thresholds
-    // https://github.com/pu2clr/SI4735/issues/7#issuecomment-810963604
+    // https://github.com/pu2crc/SI4735/issues/7#issuecomment-810963604
     rx.setSeekFmRssiThreshold(5); // default is 20
     rx.setSeekFmSNRThreshold(3); // default is 3
 
     rx.setFMDeEmphasis(fmRegions[FmRegionIdx].value);
     rx.RdsInit();
     rx.setRdsConfig(1, 2, 2, 2, 2);
-    rx.setGpioCtl(1, 0, 0);   // G8PTN: Enable GPIO1 as output
-    rx.setGpio(0, 0, 0);      // G8PTN: Set GPIO1 = 0
+    rx.setGpioCtl(1, 0, 0);    // G8PTN: Enable GPIO1 as output
+    rx.setGpio(0, 0, 0);       // G8PTN: Set GPIO1 = 0
   }
   else
   {
@@ -296,7 +306,7 @@ void useBand(const Band *band)
     {
       rx.setAM(band->minimumFreq, band->maximumFreq, band->currentFreq, getCurrentStep()->step);
       // More sensitive seek thresholds
-      // https://github.com/pu2clr/SI4735/issues/7#issuecomment-810963604
+      // https://github.com/pu2crc/SI4735/issues/7#issuecomment-810963604
       rx.setSeekAmRssiThreshold(15); // default is 25
       rx.setSeekAmSNRThreshold(5); // default is 5
     }
@@ -355,12 +365,37 @@ bool checkStopSeeking()
   return false;
 }
 
+// Дублирование для SEEK_2
+bool checkStopSeeking_2()
+{
+  // Returns true if the user rotates the encoder
+  if(seekStop_2) return true;
+
+  // Checking isPressed without debouncing because this callback
+  // is not invoked often enough to register a click
+  if(pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW, 0).isPressed)
+  {
+    // Wait till the button is released, otherwise the main loop will register a click
+    while (pb1.update(digitalRead(ENCODER_PUSH_BUTTON) == LOW).isPressed) delay(100);
+    return true;
+  };
+  return false;
+}
+
 // This function is called by the seek function process.
 void showFrequencySeek(uint16_t freq)
 {
   currentFrequency = freq;
   drawScreen();
 }
+
+// Дублирование для SEEK_2
+void showFrequencySeek_2(uint16_t freq)
+{
+  currentFrequency = freq;
+  drawScreen();
+}
+
 
 //
 // Tune using BFO, using algorithm from Goshante's ATS-20_EX firmware
@@ -494,18 +529,6 @@ bool doSeek(int8_t dir)
       eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
 
     if(schedule) updateFrequency(schedule->freq, false);
-  else if(seekMode() == SEEK_RUS)
-  {
-    uint8_t hour, minute;
-    // Clock is valid because the above seekMode() call checks that
-    clockGetHM(&hour, &minute);
-
-    size_t offset = -1;
-    const StationSchedule *schedule = dir > 0 ?
-      eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
-      eibiPrevRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
-
-    if(schedule) updateFrequency(schedule->freq, false);
   }
 
   // Clear current station name and information
@@ -516,13 +539,48 @@ bool doSeek(int8_t dir)
   return(true);
 }
 
-  // Clear current station name and information
+// Дублирование для SEEK_2
+bool doSeek_2(int8_t dir)
+{
+  if(seekMode_2() == SEEK_DEFAULT_2) // Используем seekMode_2 и SEEK_DEFAULT_2
+  {
+    if(isSSB()) // isSSB остается без изменений, т.к. это общая характеристика радио
+    {
+#ifdef ENABLE_HOLDOFF
+      tuning_flag = true;
+      tuning_timer = millis();
+#endif
+
+      updateBFO(currentBFO + dir * getCurrentStep(true)->step, true);
+    }
+    else
+    {
+      clearStationInfo();
+      rssi = snr = 0;
+
+      seekStop_2 = false; // Используем seekStop_2
+      rx.seekStationProgress(showFrequencySeek_2, checkStopSeeking_2, dir>0? 1 : 0); // showFrequencySeek_2, checkStopSeeking_2
+      updateFrequency(rx.getFrequency(), true);
+    }
+  }
+  else if(seekMode_2() == SEEK_SCHEDULE_2 && dir) // Используем seekMode_2 и SEEK_SCHEDULE_2
+  {
+    uint8_t hour, minute;
+    clockGetHM(&hour, &minute);
+
+    size_t offset = -1;
+    const StationSchedule *schedule = dir > 0 ?
+      eibiNext(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
+      eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+
+    if(schedule) updateFrequency(schedule->freq, false);
+  }
+
   clearStationInfo();
-  // Check for named frequencies
   identifyFrequency(currentFrequency + currentBFO / 1000);
-  // Will need a redraw
   return(true);
 }
+
 
 //
 // Handle tuning
@@ -626,21 +684,21 @@ bool clickFreq(bool shortPress)
   if (shortPress) {
     bool updated = false;
 
-     // SSB tuning
-     if(isSSB()) {
-       updated = updateBFO(currentBFO - (currentFrequency * 1000 + currentBFO) % getFreqInputStep(), false);
-     } else {
-       // Normal tuning
-       updated = updateFrequency(currentFrequency - currentFrequency % getFreqInputStep(), false);
-     }
+      // SSB tuning
+      if(isSSB()) {
+        updated = updateBFO(currentBFO - (currentFrequency * 1000 + currentBFO) % getFreqInputStep(), false);
+      } else {
+        // Normal tuning
+        updated = updateFrequency(currentFrequency - currentFrequency % getFreqInputStep(), false);
+      }
 
-     if (updated) {
-       // Clear current station name and information
-       clearStationInfo();
-       // Check for named frequencies
-       identifyFrequency(currentFrequency + currentBFO / 1000);
-     }
-     return true;
+      if (updated) {
+        // Clear current station name and information
+        clearStationInfo();
+        // Check for named frequencies
+        identifyFrequency(currentFrequency + currentBBO / 1000);
+      }
+      return true;
   }
   return false;
 }
@@ -748,6 +806,11 @@ void loop()
           needRedraw |= doTune(encoderCount);
           eepromRequestSave();
           break;
+        // Дублирование для SEEK_2
+        case CMD_SEEK_2: // Добавлена новая команда
+          needRedraw |= doTune(encoderCount); // Функционал такой же, как у SEEK
+          eepromRequestSave();
+          break;
       }
 
       // Clear encoder rotation
@@ -775,6 +838,11 @@ void loop()
           // Seek mode
           needRedraw |= doSeek(encoderCount);
           // Seek can take long time, renew the timestamp
+          currentTime = millis();
+          break;
+        // Дублирование для SEEK_2
+        case CMD_SEEK_2: // Добавлена новая команда
+          needRedraw |= doSeek_2(encoderCount); // Используем doSeek_2
           currentTime = millis();
           break;
         default:
@@ -864,7 +932,7 @@ void loop()
   // Disable commands control
   if((currentTime - elapsedCommand) > ELAPSED_COMMAND)
   {
-    if(currentCmd != CMD_NONE && currentCmd != CMD_SEEK)
+    if(currentCmd != CMD_NONE && currentCmd != CMD_SEEK && currentCmd != CMD_SEEK_2) // Добавлено CMD_SEEK_2
     {
       currentCmd = CMD_NONE;
       needRedraw = true;
@@ -888,9 +956,9 @@ void loop()
   }
 
   // Periodically check received RDS information
-  if((currentTime - lastRDSCheck) > RDS_CHECK_TIME)
+  if(currentMode == FM && (currentTime - lastRDSCheck) > RDS_CHECK_TIME)
   {
-    needRedraw |= (currentMode == FM) && (snr >= 12) && checkRds();
+    needRedraw |= (snr >= 12) && checkRds();
     lastRDSCheck = currentTime;
   }
 
