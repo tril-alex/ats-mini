@@ -494,7 +494,7 @@ bool doSeek(int8_t dir)
       eibiPrev(currentFrequency + currentBFO / 1000, hour, minute, &offset);
 
     if(schedule) updateFrequency(schedule->freq, false);
-  else if(seekMode() == SEEK_RUS && dir)
+  else if(seekMode() == SEEK_RUS)
   {
     uint8_t hour, minute;
     // Clock is valid because the above seekMode() call checks that
@@ -503,7 +503,7 @@ bool doSeek(int8_t dir)
     size_t offset = -1;
     const StationSchedule *schedule = dir > 0 ?
       eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset) :
-      eibiNextRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
+      eibiPrevRus(currentFrequency + currentBFO / 1000, hour, minute, &offset);
 
     if(schedule) updateFrequency(schedule->freq, false);
   }
