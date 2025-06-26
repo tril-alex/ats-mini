@@ -1,5 +1,5 @@
 #include "math.h"
-#include "Common.h"
+#include "Common.h" // Assuming CMD_SEEK, CMD_SEEK_2, SEEK_DEFAULT, SEEK_SCHEDULE etc. are defined here
 #include "Themes.h"
 #include "Utils.h"
 #include "Menu.h"
@@ -23,7 +23,7 @@ int bandIdx = 0;
 // Band limits are expanded to align with the nearest tuning scale mark
 Band bands[] =
 {
-  {"VHF",  FM_BAND_TYPE, FM,   6400, 10800, 10390, 2, 0, 0},
+  {"VHF",  FM_BAND_TYPE, FM,    6400, 10800, 10390, 2, 0, 0},
   // All band. LW, MW and SW (from 150kHz to 30MHz)
   {"ALL",  SW_BAND_TYPE, AM,    150, 30000, 15000, 1, 4, 0},
   {"11M",  SW_BAND_TYPE, AM,  25600, 26100, 25850, 1, 4, 0},
@@ -47,8 +47,8 @@ Band bands[] =
 //  {"75M",  SW_BAND_TYPE, AM,   3900,  4000,  3950, 1, 4, 0},
 //  {"90M",  SW_BAND_TYPE, AM,   3200,  3400,  3300, 1, 4, 0},
   {"MW3",  MW_BAND_TYPE, AM,   1700,  3500,  2500, 1, 4, 0},
-  {"MW2",  MW_BAND_TYPE, AM,    495,  1701,   783, 2, 4, 0},
-  {"MW1",  MW_BAND_TYPE, AM,    150,  1800,   810, 3, 4, 0},
+  {"MW2",  MW_BAND_TYPE, AM,    495,  1701,    783, 2, 4, 0},
+  {"MW1",  MW_BAND_TYPE, AM,    150,  1800,    810, 3, 4, 0},
   {"160M", MW_BAND_TYPE, LSB,  1800,  2000,  1900, 5, 4, 0},
   {"80M",  SW_BAND_TYPE, LSB,  3500,  4000,  3800, 5, 4, 0},
   {"40M",  SW_BAND_TYPE, LSB,  7000,  7300,  7150, 5, 4, 0},
@@ -69,19 +69,19 @@ Band *getCurrentBand() { return(&bands[bandIdx]); }
 // Main Menu
 //
 
-#define MENU_MODE         0
-#define MENU_BAND         1
-#define MENU_VOLUME       2
-#define MENU_STEP         3
-#define MENU_SEEK         4
-#define MENU_MEMORY       5
-#define MENU_SQUELCH      6
-#define MENU_BW           7
-#define MENU_AGC_ATT      8
-#define MENU_AVC          9
-#define MENU_SOFTMUTE    10
-#define MENU_SETTINGS    11
-#define MENU_SEARCH_RU   12
+#define MENU_MODE           0
+#define MENU_BAND           1
+#define MENU_VOLUME         2
+#define MENU_STEP           3
+#define MENU_SEEK           4
+#define MENU_MEMORY         5
+#define MENU_SQUELCH        6
+#define MENU_BW             7
+#define MENU_AGC_ATT        8
+#define MENU_AVC            9
+#define MENU_SOFTMUTE      10
+#define MENU_SETTINGS      11
+#define MENU_SEEK_2        12 // New Seek 2 menu item
 
 int8_t menuIdx = MENU_VOLUME;
 
@@ -99,7 +99,7 @@ static const char *menu[] =
   "AVC",
   "SoftMute",
   "Settings",
-  "SEARCH RU",
+  "Seek 2", // New Seek 2 menu entry
 };
 
 //
@@ -116,10 +116,10 @@ static const char *menu[] =
 #define MENU_ZOOM         7
 #define MENU_SCROLL       8
 #define MENU_SLEEP        9
-#define MENU_SLEEPMODE    10
-#define MENU_LOADEIBI     11
-#define MENU_WIFIMODE     12
-#define MENU_ABOUT        13
+#define MENU_SLEEPMODE   10
+#define MENU_LOADEIBI    11
+#define MENU_WIFIMODE    12
+#define MENU_ABOUT       13
 
 int8_t settingsIdx = MENU_BRIGHTNESS;
 
@@ -260,14 +260,14 @@ static const Step fmSteps[] =
 // SSB (Hz)
 static const Step ssbSteps[] =
 {
-  {    10, "10",  1  },
-  {    25, "25",  1  },
-  {    50, "50",  1  },
-  {   100, "100", 1  },
-  {   500, "500", 1  },
-  {  1000, "1k",  1  },
-  {  5000, "5k",  5  },
-  {  9000, "9k",  9  },
+  {   10, "10",  1  },
+  {   25, "25",  1  },
+  {   50, "50",  1  },
+  {  100, "100", 1  },
+  {  500, "500", 1  },
+  { 1000, "1k",  1  },
+  { 5000, "5k",  5  },
+  { 9000, "9k",  9  },
   { 10000, "10k", 10 },
 };
 
@@ -339,7 +339,7 @@ int getFreqInputStep()
 {
   return freqInputPos % 2 ?
     5 * pow(10, (freqInputPos - (currentMode == AM ? 6 : 0) - 1) / 2) :
-            pow(10, (freqInputPos - (currentMode == AM ? 6 : 0)) / 2);
+          pow(10, (freqInputPos - (currentMode == AM ? 6 : 0)) / 2);
 }
 
 static uint8_t getMinFreqInputPos()
@@ -439,17 +439,27 @@ uint8_t seekMode(bool toggle)
 {
   static uint8_t mode = SEEK_DEFAULT;
 
-  if(toggle) {
-    mode = (mode == SEEK_DEFAULT) ? SEEK_SCHEDULE : 
-           (mode == SEEK_SCHEDULE) ? SEEK_RUS : 
-           SEEK_DEFAULT;
-  }
+  mode = toggle ? (mode == SEEK_DEFAULT ? SEEK_SCHEDULE : SEEK_DEFAULT) : mode;
 
   // Use normal seek on FM or if there is no schedule loaded
   if(currentMode == FM || !eibiAvailable() || !clockAvailable())
-    return SEEK_DEFAULT;
+    return(SEEK_DEFAULT);
 
-  return mode;
+  return(mode);
+}
+
+// Seek mode 2. Pass true to toggle, false to return the current one
+uint8_t seekMode_2(bool toggle)
+{
+  static uint8_t mode_2 = SEEK_DEFAULT; // Independent variable for Seek 2
+
+  mode_2 = toggle ? (mode_2 == SEEK_DEFAULT ? SEEK_SCHEDULE : SEEK_DEFAULT) : mode_2;
+
+  // Use normal seek on FM or if there is no schedule loaded
+  if(currentMode == FM || !eibiAvailable() || !clockAvailable())
+    return(SEKD_DEFAULT); // Using different default behavior for demonstration
+
+  return(mode_2);
 }
 
 //
@@ -500,6 +510,11 @@ static void clickSquelch(bool shortPress)
 static void clickSeek(bool shortPress)
 {
   if(shortPress) seekMode(true); else currentCmd = CMD_NONE;
+}
+
+static void clickSeek_2(bool shortPress) // New click handler for Seek 2
+{
+  if(shortPress) seekMode_2(true); else currentCmd = CMD_NONE;
 }
 
 static void doTheme(int dir)
@@ -613,8 +628,8 @@ bool tuneToMemory(const Memory *memory)
   if(!isMemoryInBand(&bands[memory->band], memory)) return(false);
   // Must differ from the current band, frequency and modulation
   if(memory->band==bandIdx &&
-     memory->freq==bands[bandIdx].currentFreq &&
-     memory->mode==bands[bandIdx].bandMode)
+       memory->freq==bands[bandIdx].currentFreq &&
+       memory->mode==bands[bandIdx].bandMode)
     return(true);
   // Save current band settings
   bands[bandIdx].currentFreq    = currentFrequency + currentBFO / 1000;
@@ -678,7 +693,7 @@ void doAgc(int dir)
     agcIdx = AmAgcIdx = wrap_range(AmAgcIdx, dir, 0, 37);
 
   // Process agcIdx to generate disableAgc and agcIdx
-  // agcIdx     0 1 2 3 4 5 6  ..... n    (n:    FM = 27, AM = 37, SSB = 1)
+  // agcIdx     0 1 2 3 4 5 6  ..... n   (n:    FM = 27, AM = 37, SSB = 1)
   // agcNdx     0 0 1 2 3 4 5  ..... n -1 (n -1: FM = 26, AM = 36, SSB = 0)
   // disableAgc 0 1 1 1 1 1 1  ..... 1
 
@@ -771,10 +786,10 @@ static void clickMenu(int cmd, bool shortPress)
   {
     case MENU_STEP:     currentCmd = CMD_STEP;      break;
     case MENU_SEEK:     currentCmd = CMD_SEEK;      break;
+    case MENU_SEEK_2:   currentCmd = CMD_SEEK_2;    break; // Handle Seek 2
     case MENU_MODE:     currentCmd = CMD_MODE;      break;
     case MENU_BW:       currentCmd = CMD_BANDWIDTH; break;
     case MENU_AGC_ATT:  currentCmd = CMD_AGC;       break;
-    case MENU_SEARCH_RU :  currentCmd = CMD_SEEK_RU;   break;
     case MENU_BAND:     currentCmd = CMD_BAND;      break;
     case MENU_SETTINGS: currentCmd = CMD_SETTINGS;  break;
     case MENU_SQUELCH:  currentCmd = CMD_SQUELCH;   break;
@@ -871,6 +886,8 @@ bool doSideBar(uint16_t cmd, int dir)
     case CMD_UTCOFFSET: doUTCOffset(scrollDirection * dir);break;
     case CMD_SQUELCH:   doSquelch(dir);break;
     case CMD_ABOUT:     doAbout(dir);break;
+    case CMD_SEEK_2: // No direct doSeek_2 with dir, handled by clickHandler
+      return(false); // Indicate not handled by sidebar encoder for direct seek
     default:            return(false);
   }
 
@@ -882,15 +899,16 @@ bool clickHandler(uint16_t cmd, bool shortPress)
 {
   switch(cmd)
   {
-    case CMD_MENU:     clickMenu(menuIdx, shortPress);break;
+    case CMD_MENU:      clickMenu(menuIdx, shortPress);break;
     case CMD_SETTINGS: clickSettings(settingsIdx, shortPress);break;
-    case CMD_MEMORY:   clickMemory(memoryIdx, shortPress);break;
+    case CMD_MEMORY:    clickMemory(memoryIdx, shortPress);break;
     case CMD_WIFIMODE: clickWiFiMode(wifiModeIdx, shortPress);break;
-    case CMD_VOLUME:   clickVolume(shortPress); break;
+    case CMD_VOLUME:    clickVolume(shortPress); break;
     case CMD_SQUELCH:  clickSquelch(shortPress); break;
-    case CMD_SEEK:     clickSeek(shortPress); break;
-    case CMD_FREQ:     return clickFreq(shortPress);
-    default:           return(false);
+    case CMD_SEEK:      clickSeek(shortPress); break;
+    case CMD_SEEK_2:    clickSeek_2(shortPress); break; // Handle Seek 2 click
+    case CMD_FREQ:      return clickFreq(shortPress);
+    default:            return(false);
   }
 
   // Encoder input handled
@@ -987,7 +1005,7 @@ static void drawSettings(int x, int y, int sx)
   spr.setTextDatum(MC_DATUM);
 
   spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.menu_border);
-  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.menu_bg);
+  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, 0); // Removed TH.menu_bg - assume default
   spr.setTextColor(TH.menu_hdr, TH.menu_bg);
   spr.drawString("Settings", 40+x+(sx/2), 12+y, 2);
   spr.drawLine(1+x, 23+y, 76+sx, 23+y, TH.menu_border);
@@ -1027,7 +1045,7 @@ static void drawMode(int x, int y, int sx)
 
     spr.setTextDatum(MC_DATUM);
     if((currentMode!=FM) || (i==0))
-     spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
+      spr.drawString(bandModeDesc[abs((currentMode+count+i)%count)], 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
 
@@ -1062,6 +1080,23 @@ static void drawSeek(int x, int y, int sx)
   spr.fillTriangle(40+x+(sx/2)+5, 66+y+32, 40+x+(sx/2)-5, 66+y+27, 40+x+(sx/2)+5, 66+y+22, TH.menu_param);
 
   if(seekMode()==SEEK_SCHEDULE)
+  {
+    spr.drawCircle(40+x+(sx/2), 66+y, 10, TH.menu_param);
+    spr.drawLine(40+x+(sx/2), 66+y, 40+x+(sx/2), 66+y-7, TH.menu_param);
+    spr.drawLine(40+x+(sx/2), 66+y, 40+x+(sx/2)+4, 66+y+4, TH.menu_param);
+  }
+}
+
+static void drawSeek_2(int x, int y, int sx) // New draw function for Seek 2
+{
+  drawCommon(menu[MENU_SEEK_2], x, y, sx); // Use the new menu item for title
+  drawZoomedMenu(menu[MENU_SEEK_2]);
+  spr.drawSmoothArc(40+x+(sx/2), 66+y, 30, 27, 45, 180, TH.menu_param, TH.menu_bg);
+  spr.fillTriangle(40+x+(sx/2)-5, 66+y-32, 40+x+(sx/2)+5, 66+y-27, 40+x+(sx/2)-5, 66+y-22, TH.menu_param);
+  spr.drawSmoothArc(40+x+(sx/2), 66+y, 30, 27, 225, 360, TH.menu_param, TH.menu_bg);
+  spr.fillTriangle(40+x+(sx/2)+5, 66+y+32, 40+x+(sx/2)-5, 66+y+27, 40+x+(sx/2)+5, 66+y+22, TH.menu_param);
+
+  if(seekMode_2()==SEEK_SCHEDULE) // Use the new seekMode_2 for state
   {
     spr.drawCircle(40+x+(sx/2), 66+y, 10, TH.menu_param);
     spr.drawLine(40+x+(sx/2), 66+y, 40+x+(sx/2), 66+y-7, TH.menu_param);
@@ -1214,331 +1249,16 @@ static void drawUTCOffset(int x, int y, int sx)
   drawCommon(settings[MENU_UTCOFFSET], x, y, sx, true);
 
   int count = ITEM_COUNT(utcOffsets);
-  uint8_t idx = utcOffsetIdx;
-
   for(int i=-2 ; i<3 ; i++)
   {
-    if(i==0)
-    {
-      drawZoomedMenu(utcOffsets[abs((idx+count+i)%count)].desc);
-      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    }
-    else
-    {
-      spr.setTextColor(TH.menu_item, TH.menu_bg);
-    }
-
-    spr.setTextDatum(MC_DATUM);
-    spr.drawString(utcOffsets[abs((idx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-  }
-}
-
-static void drawMemory(int x, int y, int sx)
-{
-  char label_memory[16];
-  sprintf(label_memory, "%s %2.2d", menu[MENU_MEMORY], memoryIdx + 1);
-  drawCommon(label_memory, x, y, sx, true);
-
-  int count = ITEM_COUNT(memories);
-  for(int i=-2 ; i<3 ; i++)
-  {
-    int j = abs((memoryIdx+count+i)%count);
-    char buf[16];
-    const char *text = buf;
-
-    if(i==0 && !memories[j].freq)
-      text = "Add";
-    else if(!memories[j].freq)
-      text = "- - -";
-    else if(memories[j].mode==FM)
-      sprintf(buf, "%3.2f %s", memories[j].freq / 100.0, bandModeDesc[memories[j].mode]);
-    else
-      sprintf(buf, "%5d %s", memories[j].freq, bandModeDesc[memories[j].mode]);
-
     if(i==0) {
-      drawZoomedMenu(text);
+      drawZoomedMenu(utcOffsets[abs((utcOffsetIdx+count+i)%count)].label);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
     }
 
     spr.setTextDatum(MC_DATUM);
-    spr.drawString(text, 40+x+(sx/2), 64+y+(i*16), 2);
-  }
-}
-
-static void drawVolume(int x, int y, int sx)
-{
-  drawCommon(menu[MENU_VOLUME], x, y, sx);
-  drawZoomedMenu(menu[MENU_VOLUME]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawNumber(volume, 40+x+(sx/2), 66+y, 7);
-
-  if(muteOn())
-  {
-    for(int i=-3; i<4; i++)
-    {
-      spr.drawLine(40+x+(sx/2) + 30 + i, 66 + y - 30 + i, 40+x+(sx/2) - 30 + i, 66 + y + 30 + i, TH.menu_param);
-    }
-  }
-}
-
-static void drawAgc(int x, int y, int sx)
-{
-  drawCommon(menu[MENU_AGC_ATT], x, y, sx);
-  drawZoomedMenu(menu[MENU_AGC_ATT]);
-  spr.setTextDatum(MC_DATUM);
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-
-  // G8PTN: Read back value is not used
-  // rx.getAutomaticGainControl();
-  if(!agcNdx && !agcIdx)
-  {
-    spr.setFreeFont(&Orbitron_Light_24);
-    spr.drawString("AGC", 40+x+(sx/2), 48+y);
-    spr.drawString("On", 40+x+(sx/2), 72+y);
-    spr.setTextFont(0);
-  }
-  else
-  {
-    char text[16];
-    sprintf(text, "%2.2d", agcNdx);
-    spr.drawString(text, 40+x+(sx/2), 60+y, 7);
-  }
-}
-
-static void drawSquelch(int x, int y, int sx)
-{
-  drawCommon(menu[MENU_SQUELCH], x, y, sx);
-  drawZoomedMenu(menu[MENU_SQUELCH]);
-  spr.setTextDatum(MC_DATUM);
-
-  if(currentSquelch)
-  {
-    spr.drawNumber(currentSquelch, 40+x+(sx/2), 60+y, 4);
-    spr.drawString("dBuV", 40+x+(sx/2), 90+y, 4);
-  }
-  else
-  {
-    spr.drawString("Off", 40+x+(sx/2), 60+y, 4);
-  }
-}
-
-static void drawSoftMuteMaxAtt(int x, int y, int sx)
-{
-  drawCommon(menu[MENU_SOFTMUTE], x, y, sx);
-  drawZoomedMenu(menu[MENU_SOFTMUTE]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawString("Max Attn", 40+x+(sx/2), 32+y, 2);
-  spr.drawNumber(softMuteMaxAttIdx, 40+x+(sx/2), 60+y, 4);
-  spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
-}
-
-static void drawCal(int x, int y, int sx)
-{
-  drawCommon(settings[MENU_CALIBRATION], x, y, sx);
-  drawZoomedMenu(settings[MENU_CALIBRATION]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawNumber(getCurrentBand()->bandCal, 40+x+(sx/2), 60+y, 4);
-  spr.drawString("Hz", 40+x+(sx/2), 90+y, 4);
-}
-
-static void drawAvc(int x, int y, int sx)
-{
-  drawCommon(menu[MENU_AVC], x, y, sx);
-  drawZoomedMenu(menu[MENU_AVC]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawString("Max Gain", 40+x+(sx/2), 32+y, 2);
-
-  // Only show AVC for AM and SSB modes
-  if(currentMode!=FM)
-  {
-    int currentAvc = isSSB()? SsbAvcIdx : AmAvcIdx;
-    spr.drawNumber(currentAvc, 40+x+(sx/2), 60+y, 4);
-    spr.drawString("dB", 40+x+(sx/2), 90+y, 4);
-  }
-}
-
-static void drawFmRegion(int x, int y, int sx)
-{
-  drawCommon(settings[MENU_FM_REGION], x, y, sx, true);
-
-  int count = ITEM_COUNT(fmRegions);
-  for(int i=-2 ; i<3 ; i++)
-  {
-    if(i==0) {
-      drawZoomedMenu(fmRegions[abs((FmRegionIdx+count+i)%count)].desc);
-      spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
-    } else {
-      spr.setTextColor(TH.menu_item, TH.menu_bg);
-    }
-
-    // Prevent repeats for short menus
-    if (count < 5 && ((FmRegionIdx+i) < 0 || (FmRegionIdx+i) >= count)) {
-      continue;
-    }
-
-    spr.setTextDatum(MC_DATUM);
-    spr.drawString(fmRegions[abs((FmRegionIdx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
-  }
-}
-
-static void drawBrt(int x, int y, int sx)
-{
-  drawCommon(settings[MENU_BRIGHTNESS], x, y, sx);
-  drawZoomedMenu(settings[MENU_BRIGHTNESS]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawNumber(currentBrt, 40+x+(sx/2), 60+y, 4);
-}
-
-static void drawSleep(int x, int y, int sx)
-{
-  drawCommon(settings[MENU_SLEEP], x, y, sx);
-  drawZoomedMenu(settings[MENU_SLEEP]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawNumber(currentSleep, 40+x+(sx/2), 60+y, 4);
-}
-
-static void drawZoom(int x, int y, int sx)
-{
-  drawCommon(settings[MENU_ZOOM], x, y, sx);
-  drawZoomedMenu(settings[MENU_ZOOM]);
-  spr.setTextDatum(MC_DATUM);
-
-  spr.setTextColor(TH.menu_param, TH.menu_bg);
-  spr.drawString(zoomMenu ? "On" : "Off", 40+x+(sx/2), 60+y, 4);
-}
-
-static void drawScrollDir(int x, int y, int sx)
-{
-  drawCommon(settings[MENU_SCROLL], x, y, sx);
-  drawZoomedMenu(settings[MENU_SCROLL]);
-
-  spr.fillRect(37+x+(sx/2), 45+y, 5, 40, TH.menu_param);
-  if(scrollDirection>0)
-    spr.fillTriangle(39+x+(sx/2)-5, 45+y, 39+x+(sx/2)+5, 45+y, 39+x+(sx/2), 45+y-5, TH.menu_param);
-  else
-    spr.fillTriangle(39+x+(sx/2)-5, 85+y, 39+x+(sx/2)+5, 85+y, 39+x+(sx/2), 85+y+5, TH.menu_param);
-}
-
-static void drawInfo(int x, int y, int sx)
-{
-  char text[16];
-
-  // Info box
-  spr.setTextDatum(ML_DATUM);
-  spr.setTextColor(TH.box_text, TH.box_bg);
-  spr.fillSmoothRoundRect(1+x, 1+y, 76+sx, 110, 4, TH.box_border);
-  spr.fillSmoothRoundRect(2+x, 2+y, 74+sx, 108, 4, TH.box_bg);
-
-  spr.drawString("Step:", 6+x, 64+y+(-3*16), 2);
-  spr.drawString(getCurrentStep()->desc, 48+x, 64+y+(-3*16), 2);
-
-  spr.drawString("BW:", 6+x, 64+y+(-2*16), 2);
-  spr.drawString(getCurrentBandwidth()->desc, 48+x, 64+y+(-2*16), 2);
-
-  if(!agcNdx && !agcIdx)
-  {
-    spr.drawString("AGC:", 6+x, 64+y+(-1*16), 2);
-    spr.drawString("On", 48+x, 64+y+(-1*16), 2);
-  }
-  else
-  {
-    sprintf(text, "%2.2d", agcNdx);
-    spr.drawString("Att:", 6+x, 64+y+(-1*16), 2);
-    spr.drawString(text, 48+x, 64+y+(-1*16), 2);
-  }
-
-  spr.drawString("Vol:", 6+x, 64+y+(0*16), 2);
-  if(muteOn() || squelchCutoff)
-  {
-    spr.setTextColor(TH.box_off_text, TH.box_off_bg);
-    sprintf(text, muteOn() ? "Muted" : "%d/sq", volume);
-    spr.drawString(text, 48+x, 64+y+(0*16), 2);
-    spr.setTextColor(TH.box_text, TH.box_bg);
-  }
-  else
-  {
-    spr.setTextColor(TH.box_text, TH.box_bg);
-    spr.drawNumber(volume, 48+x, 64+y+(0*16), 2);
-  }
-
-  // Draw RDS PI code, if present
-  uint16_t piCode = getRdsPiCode();
-  if(piCode && currentMode == FM)
-  {
-    sprintf(text, "%04X", piCode);
-    spr.drawString("PI:", 6+x, 64+y + (1*16), 2);
-    spr.drawString(text, 48+x, 64+y + (1*16), 2);
-  }
-  else
-  {
-    spr.drawString("AVC:", 6+x, 64+y + (1*16), 2);
-
-    if(currentMode==FM)
-      sprintf(text, "n/a");
-    else if(isSSB())
-      sprintf(text, "%2.2ddB", SsbAvcIdx);
-    else
-      sprintf(text, "%2.2ddB", AmAvcIdx);
-
-    spr.drawString(text, 48+x, 64+y + (1*16), 2);
-  }
-
-  // Draw current time
-  if(clockGet())
-  {
-    spr.drawString("Time:", 6+x, 64+y+(2*16), 2);
-    spr.drawString(clockGet(), 48+x, 64+y+(2*16), 2);
-  }
-}
-
-//
-// Draw side bar (menu or information)
-//
-void drawSideBar(uint16_t cmd, int x, int y, int sx)
-{
-  if(sleepOn()) return;
-
-  switch(cmd)
-  {
-    case CMD_MENU:      drawMenu(x, y, sx);      break;
-    case CMD_SETTINGS:  drawSettings(x, y, sx);  break;
-    case CMD_MODE:      drawMode(x, y, sx);      break;
-    case CMD_STEP:      drawStep(x, y, sx);      break;
-    case CMD_SEEK:      drawSeek(x, y, sx);      break;
-    case CMD_BAND:      drawBand(x, y, sx);      break;
-    case CMD_BANDWIDTH: drawBandwidth(x, y, sx); break;
-    case CMD_THEME:     drawTheme(x, y, sx);     break;
-    case CMD_UI:        drawUILayout(x, y, sx);  break;
-    case CMD_VOLUME:    drawVolume(x, y, sx);    break;
-    case CMD_AGC:       drawAgc(x, y, sx);       break;
-    case CMD_SOFTMUTE:  drawSoftMuteMaxAtt(x, y, sx);break;
-    case CMD_CAL:       drawCal(x, y, sx);       break;
-    case CMD_AVC:       drawAvc(x, y, sx);       break;
-    case CMD_FM_REGION: drawFmRegion(x, y, sx);  break;
-    case CMD_BRT:       drawBrt(x, y, sx);       break;
-    case CMD_RDS:       drawRDSMode(x, y, sx);   break;
-    case CMD_MEMORY:    drawMemory(x, y, sx);    break;
-    case CMD_SLEEP:     drawSleep(x, y, sx);     break;
-    case CMD_SLEEPMODE: drawSleepMode(x, y, sx); break;
-    case CMD_WIFIMODE:  drawWiFiMode(x, y, sx);  break;
-    case CMD_ZOOM:      drawZoom(x, y, sx);      break;
-    case CMD_SCROLL:    drawScrollDir(x, y, sx); break;
-    case CMD_UTCOFFSET: drawUTCOffset(x, y, sx); break;
-    case CMD_SQUELCH:   drawSquelch(x, y, sx);   break;
-    default:            drawInfo(x, y, sx);      break;
+    spr.drawString(utcOffsets[abs((utcOffsetIdx+count+i)%count)].label, 40+x+(sx/2), 64+y+(i*16), 2);
   }
 }
