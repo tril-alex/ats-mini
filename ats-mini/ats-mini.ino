@@ -226,7 +226,7 @@ void setup()
   rx.setVolume(volume);
   rx.setMaxSeekTime(SEEK_TIMEOUT);
   // Дублирование для SEEK_2
-  rx.setMaxSeekTime_2(SEEK_TIMEOUT_2); // Предполагаем, что такая функция будет создана
+   //rx.setMaxSeekTime_2(SEEK_TIMEOUT_2); // Предполагаем, что такая функция будет создана
 
   // Show help screen on first run
   if(eepromFirstRun())
