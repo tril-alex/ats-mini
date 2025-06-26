@@ -12,7 +12,6 @@
 #define SW_BAND_TYPE  2
 #define LW_BAND_TYPE  3
 
-#define CMD_SEEK_RU   0x1B00
 
 // Commands
 #define CMD_NONE      0x0000
@@ -43,8 +42,9 @@
 #define CMD_SLEEPMODE 0x2B00 // |
 #define CMD_LOADEIBI  0x2C00 // |
 #define CMD_WIFIMODE  0x2D00 // |
+#define CMD_SEEK_RU   0x2F00 // |
 #define CMD_ABOUT     0x2E00 //-+
-#define CMD_SEEK_RU   0x2F00
+
 
 
 // UI Layouts
