@@ -1244,6 +1244,33 @@ static void drawRDSMode(int x, int y, int sx)
   }
 }
 
+// Реализация функции drawSideBar
+void drawSideBar(uint16_t cmd, int x, int y, int sx)
+{
+    // Здесь должен быть код, который отрисовывает боковую панель меню.
+    // Вы можете взять его из оригинального проекта, если он был где-то ещё.
+    // Пример (это не полный код, а только шаблон):
+
+    spr.setTextDatum(MC_DATUM);
+
+    spr.fillSmoothRoundRect(1 + x, 1 + y, 76 + sx, 110, 4, TH.menu_border);
+    spr.fillSmoothRoundRect(2 + x, 2 + y, 74 + sx, 108, 4, TH.menu_bg);
+
+    // В зависимости от 'cmd', отрисовываем разные части боковой панели
+    if (isMenuMode(cmd)) {
+        // Отрисовка элементов меню
+        // Например: spr.drawString("Menu", ...);
+    } else if (isSettingsMode(cmd)) {
+        // Отрисовка элементов настроек
+        // Например: spr.drawString("Settings", ...);
+    } else {
+        // Отрисовка других элементов или пустого состояния
+    }
+
+    // Пример: если у вас был старый код, который вы удалили или перенесли
+    // Вам нужно восстановить логику отрисовки здесь
+}
+
 static void drawUTCOffset(int x, int y, int sx)
 {
   drawCommon(settings[MENU_UTCOFFSET], x, y, sx, true);
