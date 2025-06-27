@@ -451,13 +451,13 @@ uint8_t seekMode(bool toggle)
 // Seek mode 2. Pass true to toggle, false to return the current one
 uint8_t seekMode_2(bool toggle)
 {
-  static uint8_t mode_2 = SEEK_DEFAULT; // Independent variable for Seek 2
+  static uint8_t mode_2 = SEEK_DEFAULT_2; // Independent variable for Seek 2
 
-  mode_2 = toggle ? (mode_2 == SEEK_DEFAULT ? SEEK_SCHEDULE : SEEK_DEFAULT) : mode_2;
+  mode_2 = toggle ? (mode_2 == SEEK_DEFAULT_2 ? SEEK_SCHEDULE : SEEK_DEFAULT_2) : mode_2;
 
   // Use normal seek on FM or if there is no schedule loaded
   if(currentMode == FM || !eibiAvailable() || !clockAvailable())
-    return(SEKD_DEFAULT); // Using different default behavior for demonstration
+    return(SEEK_DEFAULT_2); // Using different default behavior for demonstration
 
   return(mode_2);
 }
