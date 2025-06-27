@@ -696,7 +696,7 @@ bool clickFreq(bool shortPress)
         // Clear current station name and information
         clearStationInfo();
         // Check for named frequencies
-        identifyFrequency(currentFrequency + currentBBO / 1000);
+        identifyFrequency(currentFrequency + currentBFO / 1000);
       }
       return true;
   }
