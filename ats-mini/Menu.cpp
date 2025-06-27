@@ -1252,13 +1252,16 @@ static void drawUTCOffset(int x, int y, int sx)
   for(int i=-2 ; i<3 ; i++)
   {
     if(i==0) {
-      drawZoomedMenu(utcOffsets[abs((utcOffsetIdx+count+i)%count)].label);
+     // drawZoomedMenu(utcOffsets[abs((utcOffsetIdx+count+i)%count)].label);
+      drawZoomedMenu(utcOffsets[abs((utcOffsetIdx+count+i)%count)].desc);
       spr.setTextColor(TH.menu_hl_text, TH.menu_hl_bg);
     } else {
       spr.setTextColor(TH.menu_item, TH.menu_bg);
     }
 
     spr.setTextDatum(MC_DATUM);
-    spr.drawString(utcOffsets[abs((utcOffsetIdx+count+i)%count)].label, 40+x+(sx/2), 64+y+(i*16), 2);
+    //spr.drawString(utcOffsets[abs((utcOffsetIdx+count+i)%count)].label, 40+x+(sx/2), 64+y+(i*16), 2);
+    spr.drawString(utcOffsets[abs((utcOffsetIdx+count+i)%count)].desc, 40+x+(sx/2), 64+y+(i*16), 2);
+
   }
 }
